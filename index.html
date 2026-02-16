@@ -21,72 +21,36 @@
             --text-secondary: #a8b2d1;
             --border: #233554;
             --gradient-1: linear-gradient(135deg, #0f4c75 0%, #3282b8 100%);
-            --gradient-2: linear-gradient(135deg, #1b262c 0%, #0f4c75 100%);
             --shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
             --shadow-glow: 0 0 30px rgba(50, 130, 184, 0.3);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Tajawal', sans-serif;
             background: var(--bg-dark);
             color: var(--text-primary);
             min-height: 100vh;
-            overflow-x: hidden;
         }
 
         body::before {
             content: '';
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: 
                 radial-gradient(circle at 20% 80%, rgba(50, 130, 184, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(15, 76, 117, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 50% 50%, rgba(27, 38, 44, 0.8) 0%, transparent 100%);
+                radial-gradient(circle at 80% 20%, rgba(15, 76, 117, 0.15) 0%, transparent 50%);
             pointer-events: none;
             z-index: -1;
         }
 
-        body::after {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(rgba(50, 130, 184, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(50, 130, 184, 0.03) 1px, transparent 1px);
-            background-size: 50px 50px;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        .page {
-            display: none;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .page.active {
-            display: block;
-        }
+        .page { display: none; animation: fadeIn 0.5s ease; }
+        .page.active { display: block; }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(-30px); }
-            to { opacity: 1; transform: translateX(0); }
         }
 
         @keyframes float {
@@ -111,27 +75,20 @@
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
             position: relative;
-            overflow: hidden;
         }
 
         .login-card::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
+            top: 0; left: 0; right: 0;
             height: 4px;
             background: var(--gradient-1);
         }
 
-        .logo-section {
-            text-align: center;
-            margin-bottom: 40px;
-        }
+        .logo-section { text-align: center; margin-bottom: 40px; }
 
         .logo-icon {
-            width: 80px;
-            height: 80px;
+            width: 80px; height: 80px;
             background: var(--gradient-1);
             border-radius: 20px;
             display: flex;
@@ -141,11 +98,7 @@
             animation: float 3s ease-in-out infinite;
         }
 
-        .logo-icon svg {
-            width: 45px;
-            height: 45px;
-            fill: white;
-        }
+        .logo-icon svg { width: 45px; height: 45px; fill: white; }
 
         .logo-section h1 {
             font-family: 'Cairo', sans-serif;
@@ -155,18 +108,11 @@
             background: var(--gradient-1);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
         }
 
-        .logo-section p {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-        }
+        .logo-section p { color: var(--text-secondary); font-size: 0.95rem; }
 
-        .form-group {
-            margin-bottom: 24px;
-        }
-
+        .form-group { margin-bottom: 24px; }
         .form-group label {
             display: block;
             margin-bottom: 10px;
@@ -175,19 +121,14 @@
             font-size: 0.9rem;
         }
 
-        .input-wrapper {
-            position: relative;
-        }
-
+        .input-wrapper { position: relative; }
         .input-wrapper svg {
             position: absolute;
             right: 16px;
             top: 50%;
             transform: translateY(-50%);
-            width: 20px;
-            height: 20px;
+            width: 20px; height: 20px;
             fill: var(--text-secondary);
-            transition: fill 0.3s ease;
         }
 
         .form-group input,
@@ -212,10 +153,7 @@
             box-shadow: 0 0 0 4px rgba(50, 130, 184, 0.2);
         }
 
-        .form-group input::placeholder {
-            color: var(--text-secondary);
-            opacity: 0.6;
-        }
+        .form-group input::placeholder { color: var(--text-secondary); opacity: 0.6; }
 
         .btn {
             width: 100%;
@@ -233,69 +171,20 @@
             gap: 10px;
         }
 
-        .btn-primary {
-            background: var(--gradient-1);
-            color: white;
-        }
+        .btn-primary { background: var(--gradient-1); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-glow); }
+        .btn-secondary { background: transparent; border: 2px solid var(--accent); color: var(--accent); }
+        .btn-secondary:hover { background: var(--accent); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn svg { width: 20px; height: 20px; fill: currentColor; }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-glow);
-        }
+        .admin-link { text-align: center; margin-top: 24px; }
+        .admin-link a { color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; }
+        .admin-link a:hover { color: var(--accent); }
 
-        .btn-secondary {
-            background: transparent;
-            border: 2px solid var(--accent);
-            color: var(--accent);
-        }
-
-        .btn-secondary:hover {
-            background: var(--accent);
-            color: white;
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-
-        .btn svg {
-            width: 20px;
-            height: 20px;
-            fill: currentColor;
-        }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
-        .admin-link {
-            text-align: center;
-            margin-top: 24px;
-        }
-
-        .admin-link a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: color 0.3s ease;
-        }
-
-        .admin-link a:hover {
-            color: var(--accent);
-        }
-
-        .dashboard-container {
-            min-height: 100vh;
-            padding: 20px;
-        }
+        .dashboard-container { min-height: 100vh; padding: 20px; }
 
         .header {
             background: var(--bg-card);
@@ -311,15 +200,10 @@
             gap: 15px;
         }
 
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+        .header-right { display: flex; align-items: center; gap: 15px; }
 
         .header-logo {
-            width: 45px;
-            height: 45px;
+            width: 45px; height: 45px;
             background: var(--gradient-1);
             border-radius: 12px;
             display: flex;
@@ -327,24 +211,10 @@
             justify-content: center;
         }
 
-        .header-logo svg {
-            width: 25px;
-            height: 25px;
-            fill: white;
-        }
+        .header-logo svg { width: 25px; height: 25px; fill: white; }
+        .header-title { font-family: 'Cairo', sans-serif; font-size: 1.3rem; font-weight: 700; }
 
-        .header-title {
-            font-family: 'Cairo', sans-serif;
-            font-size: 1.3rem;
-            font-weight: 700;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
+        .header-left { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
 
         .user-info {
             display: flex;
@@ -356,8 +226,7 @@
         }
 
         .user-avatar {
-            width: 40px;
-            height: 40px;
+            width: 40px; height: 40px;
             background: var(--accent);
             border-radius: 50%;
             display: flex;
@@ -365,10 +234,6 @@
             justify-content: center;
             font-weight: 700;
             font-size: 1.1rem;
-        }
-
-        .user-name {
-            font-weight: 500;
         }
 
         .logout-btn {
@@ -386,16 +251,8 @@
             gap: 8px;
         }
 
-        .logout-btn:hover {
-            background: var(--danger);
-            color: white;
-        }
-
-        .logout-btn svg {
-            width: 18px;
-            height: 18px;
-            fill: currentColor;
-        }
+        .logout-btn:hover { background: var(--danger); color: white; }
+        .logout-btn svg { width: 18px; height: 18px; fill: currentColor; }
 
         .search-section {
             background: var(--bg-card);
@@ -406,45 +263,13 @@
             border: 1px solid var(--border);
         }
 
-        .search-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
+        .search-header { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; }
+        .search-header svg { width: 28px; height: 28px; fill: var(--accent); }
+        .search-header h2 { font-family: 'Cairo', sans-serif; font-size: 1.4rem; }
 
-        .search-header svg {
-            width: 28px;
-            height: 28px;
-            fill: var(--accent);
-        }
+        .search-box { display: flex; gap: 15px; flex-wrap: wrap; }
 
-        .search-header h2 {
-            font-family: 'Cairo', sans-serif;
-            font-size: 1.4rem;
-        }
-
-        .search-note {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            margin-bottom: 15px;
-            padding: 10px 15px;
-            background: rgba(50, 130, 184, 0.1);
-            border-radius: 8px;
-            border-right: 3px solid var(--accent);
-        }
-
-        .search-box {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .search-input-wrapper {
-            flex: 1;
-            min-width: 250px;
-            position: relative;
-        }
+        .search-input-wrapper { flex: 1; min-width: 250px; position: relative; }
 
         .search-input-wrapper input {
             width: 100%;
@@ -455,7 +280,6 @@
             color: var(--text-primary);
             font-family: 'Tajawal', sans-serif;
             font-size: 1.1rem;
-            transition: all 0.3s ease;
         }
 
         .search-input-wrapper input:focus {
@@ -469,15 +293,11 @@
             right: 16px;
             top: 50%;
             transform: translateY(-50%);
-            width: 22px;
-            height: 22px;
+            width: 22px; height: 22px;
             fill: var(--text-secondary);
         }
 
-        .action-buttons {
-            display: flex;
-            gap: 12px;
-        }
+        .action-buttons { display: flex; gap: 12px; }
 
         .action-btn {
             padding: 16px 24px;
@@ -494,31 +314,11 @@
             white-space: nowrap;
         }
 
-        .action-btn svg {
-            width: 20px;
-            height: 20px;
-            fill: currentColor;
-        }
-
-        .btn-search {
-            background: var(--gradient-1);
-            color: white;
-        }
-
-        .btn-add {
-            background: var(--success);
-            color: white;
-        }
-
-        .btn-edit {
-            background: var(--warning);
-            color: #1a1a1a;
-        }
-
-        .action-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-        }
+        .action-btn svg { width: 20px; height: 20px; fill: currentColor; }
+        .btn-search { background: var(--gradient-1); color: white; }
+        .btn-add { background: var(--success); color: white; }
+        .btn-edit { background: var(--warning); color: #1a1a1a; }
+        .action-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3); }
 
         .results-section {
             background: var(--bg-card);
@@ -538,22 +338,9 @@
             border-bottom: 1px solid var(--border);
         }
 
-        .results-title {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .results-title svg {
-            width: 24px;
-            height: 24px;
-            fill: var(--accent);
-        }
-
-        .results-title h3 {
-            font-family: 'Cairo', sans-serif;
-            font-size: 1.2rem;
-        }
+        .results-title { display: flex; align-items: center; gap: 12px; }
+        .results-title svg { width: 24px; height: 24px; fill: var(--accent); }
+        .results-title h3 { font-family: 'Cairo', sans-serif; font-size: 1.2rem; }
 
         .results-count {
             background: var(--accent);
@@ -563,14 +350,9 @@
             font-weight: 600;
         }
 
-        .results-table-wrapper {
-            overflow-x: auto;
-        }
+        .results-table-wrapper { overflow-x: auto; }
 
-        .results-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+        .results-table { width: 100%; border-collapse: collapse; }
 
         .results-table th,
         .results-table td {
@@ -586,21 +368,9 @@
             font-size: 0.95rem;
         }
 
-        .results-table th:first-child {
-            border-radius: 0 10px 10px 0;
-        }
-
-        .results-table th:last-child {
-            border-radius: 10px 0 0 10px;
-        }
-
-        .results-table tr:hover td {
-            background: rgba(50, 130, 184, 0.1);
-        }
-
-        .results-table td {
-            font-size: 1rem;
-        }
+        .results-table th:first-child { border-radius: 0 10px 10px 0; }
+        .results-table th:last-child { border-radius: 10px 0 0 10px; }
+        .results-table tr:hover td { background: rgba(50, 130, 184, 0.1); }
 
         .map-link {
             display: inline-flex;
@@ -616,40 +386,12 @@
             transition: all 0.3s ease;
         }
 
-        .map-link:hover {
-            transform: scale(1.05);
-            box-shadow: var(--shadow-glow);
-        }
+        .map-link:hover { transform: scale(1.05); box-shadow: var(--shadow-glow); }
+        .map-link svg { width: 16px; height: 16px; fill: currentColor; }
 
-        .map-link svg {
-            width: 16px;
-            height: 16px;
-            fill: currentColor;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-        }
-
-        .empty-state svg {
-            width: 100px;
-            height: 100px;
-            fill: var(--text-secondary);
-            opacity: 0.5;
-            margin-bottom: 20px;
-        }
-
-        .empty-state h4 {
-            font-size: 1.3rem;
-            margin-bottom: 10px;
-            color: var(--text-secondary);
-        }
-
-        .empty-state p {
-            color: var(--text-secondary);
-            opacity: 0.7;
-        }
+        .empty-state { text-align: center; padding: 60px 20px; }
+        .empty-state svg { width: 100px; height: 100px; fill: var(--text-secondary); opacity: 0.5; margin-bottom: 20px; }
+        .empty-state h4 { font-size: 1.3rem; margin-bottom: 10px; color: var(--text-secondary); }
 
         .not-found-card {
             background: rgba(255, 107, 107, 0.1);
@@ -657,39 +399,15 @@
             border-radius: 16px;
             padding: 40px;
             text-align: center;
-            animation: fadeIn 0.5s ease;
         }
 
-        .not-found-card svg {
-            width: 70px;
-            height: 70px;
-            fill: var(--danger);
-            margin-bottom: 20px;
-        }
-
-        .not-found-card h4 {
-            font-size: 1.4rem;
-            color: var(--danger);
-            margin-bottom: 10px;
-        }
-
-        .not-found-card p {
-            color: var(--text-secondary);
-        }
-
-        .not-found-card .searched-number {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--danger);
-            margin: 15px 0;
-        }
+        .not-found-card svg { width: 70px; height: 70px; fill: var(--danger); margin-bottom: 20px; }
+        .not-found-card h4 { font-size: 1.4rem; color: var(--danger); margin-bottom: 10px; }
+        .not-found-card .searched-number { font-size: 1.8rem; font-weight: 700; color: var(--danger); margin: 15px 0; }
 
         .modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(10, 22, 40, 0.9);
             backdrop-filter: blur(5px);
             display: none;
@@ -699,9 +417,7 @@
             padding: 20px;
         }
 
-        .modal-overlay.active {
-            display: flex;
-        }
+        .modal-overlay.active { display: flex; }
 
         .modal {
             background: var(--bg-card);
@@ -712,7 +428,6 @@
             overflow-y: auto;
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
-            animation: slideIn 0.3s ease;
         }
 
         .modal-header {
@@ -735,15 +450,10 @@
             gap: 12px;
         }
 
-        .modal-header h3 svg {
-            width: 24px;
-            height: 24px;
-            fill: var(--accent);
-        }
+        .modal-header h3 svg { width: 24px; height: 24px; fill: var(--accent); }
 
         .modal-close {
-            width: 40px;
-            height: 40px;
+            width: 40px; height: 40px;
             background: var(--bg-input);
             border: none;
             border-radius: 10px;
@@ -751,26 +461,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
         }
 
-        .modal-close svg {
-            width: 20px;
-            height: 20px;
-            fill: var(--text-secondary);
-        }
+        .modal-close svg { width: 20px; height: 20px; fill: var(--text-secondary); }
+        .modal-close:hover { background: var(--danger); }
+        .modal-close:hover svg { fill: white; }
 
-        .modal-close:hover {
-            background: var(--danger);
-        }
-
-        .modal-close:hover svg {
-            fill: white;
-        }
-
-        .modal-body {
-            padding: 30px;
-        }
+        .modal-body { padding: 30px; }
 
         .modal-footer {
             padding: 20px 30px;
@@ -780,31 +477,12 @@
             justify-content: flex-end;
         }
 
-        .modal-footer .btn {
-            width: auto;
-            min-width: 120px;
-        }
+        .modal-footer .btn { width: auto; min-width: 120px; }
 
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-        }
-
-        .form-grid .form-group.full-width {
-            grid-column: span 2;
-        }
-
-        .form-group.required label::after {
-            content: ' *';
-            color: var(--danger);
-        }
-
-        .form-group textarea {
-            min-height: 100px;
-            resize: vertical;
-            padding: 16px;
-        }
+        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .form-grid .form-group.full-width { grid-column: span 2; }
+        .form-group.required label::after { content: ' *'; color: var(--danger); }
+        .form-group textarea { min-height: 100px; resize: vertical; padding: 16px; }
 
         .location-btn {
             width: 100%;
@@ -818,40 +496,23 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
-            transition: all 0.3s ease;
             font-family: 'Tajawal', sans-serif;
             font-size: 1rem;
         }
 
-        .location-btn:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-
-        .location-btn.active {
-            border-color: var(--success);
-            color: var(--success);
-            background: rgba(0, 200, 151, 0.1);
-        }
-
-        .location-btn svg {
-            width: 24px;
-            height: 24px;
-            fill: currentColor;
-        }
+        .location-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .location-btn.active { border-color: var(--success); color: var(--success); background: rgba(0, 200, 151, 0.1); }
+        .location-btn svg { width: 24px; height: 24px; fill: currentColor; }
 
         .spinner {
-            width: 20px;
-            height: 20px;
+            width: 20px; height: 20px;
             border: 3px solid transparent;
             border-top-color: currentColor;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         .toast-container {
             position: fixed;
@@ -869,35 +530,13 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            animation: slideIn 0.3s ease;
             box-shadow: var(--shadow);
         }
 
-        .toast svg {
-            width: 24px;
-            height: 24px;
-            fill: currentColor;
-        }
-
-        .toast-success {
-            background: var(--success);
-            color: white;
-        }
-
-        .toast-error {
-            background: var(--danger);
-            color: white;
-        }
-
-        .toast-warning {
-            background: var(--warning);
-            color: #1a1a1a;
-        }
-
-        .toast-info {
-            background: var(--accent);
-            color: white;
-        }
+        .toast svg { width: 24px; height: 24px; fill: currentColor; }
+        .toast-success { background: var(--success); color: white; }
+        .toast-error { background: var(--danger); color: white; }
+        .toast-warning { background: var(--warning); color: #1a1a1a; }
 
         .admin-section {
             background: var(--bg-card);
@@ -916,11 +555,7 @@
             gap: 12px;
         }
 
-        .admin-section h3 svg {
-            width: 24px;
-            height: 24px;
-            fill: var(--accent);
-        }
+        .admin-section h3 svg { width: 24px; height: 24px; fill: var(--accent); }
 
         .stats-grid {
             display: grid;
@@ -937,24 +572,12 @@
             border: 1px solid var(--border);
         }
 
-        .stat-card .number {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--accent);
-            margin-bottom: 5px;
-        }
-
-        .stat-card .label {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-        }
+        .stat-card .number { font-size: 2.5rem; font-weight: 700; color: var(--accent); margin-bottom: 5px; }
+        .stat-card .label { color: var(--text-secondary); font-size: 0.95rem; }
 
         .loading-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(10, 22, 40, 0.8);
             display: none;
             align-items: center;
@@ -964,86 +587,37 @@
             gap: 20px;
         }
 
-        .loading-overlay.active {
-            display: flex;
-        }
+        .loading-overlay.active { display: flex; }
 
         .loading-spinner {
-            width: 50px;
-            height: 50px;
+            width: 50px; height: 50px;
             border: 4px solid var(--border);
             border-top-color: var(--accent);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
 
-        .loading-text {
-            color: var(--text-primary);
-            font-size: 1.1rem;
-        }
+        .loading-text { color: var(--text-primary); font-size: 1.1rem; }
 
         @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                gap: 20px;
-                text-align: center;
-            }
-
-            .header-left {
-                flex-direction: column;
-                width: 100%;
-            }
-
-            .user-info {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .logout-btn {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .search-box {
-                flex-direction: column;
-            }
-
-            .action-buttons {
-                flex-direction: column;
-                width: 100%;
-            }
-
-            .action-btn {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .form-grid .form-group.full-width {
-                grid-column: span 1;
-            }
-
-            .modal-footer {
-                flex-direction: column;
-            }
-
-            .modal-footer .btn {
-                width: 100%;
-            }
+            .header { flex-direction: column; gap: 20px; text-align: center; }
+            .header-left { flex-direction: column; width: 100%; }
+            .user-info, .logout-btn { width: 100%; justify-content: center; }
+            .search-box, .action-buttons { flex-direction: column; width: 100%; }
+            .action-btn { width: 100%; justify-content: center; }
+            .form-grid { grid-template-columns: 1fr; }
+            .form-grid .form-group.full-width { grid-column: span 1; }
+            .modal-footer { flex-direction: column; }
+            .modal-footer .btn { width: 100%; }
         }
     </style>
 </head>
 <body>
-    <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner"></div>
         <div class="loading-text">جاري التحميل...</div>
     </div>
 
-    <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- Login Page -->
@@ -1055,7 +629,7 @@
                         <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
                     </div>
                     <h1>نظام إدارة محطات التوزيع</h1>
-                    <p>قم بتسجيل الدخول للوصول إلى النظام</p>
+                    <p>تسجيل الدخول</p>
                 </div>
                 <form id="loginForm">
                     <div class="form-group">
@@ -1073,7 +647,7 @@
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary">
-                        <span>تسجيل الدخول</span>
+                        <span>دخول</span>
                         <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
                     </button>
                 </form>
@@ -1089,7 +663,7 @@
         <div class="modal">
             <div class="modal-header">
                 <h3>
-                    <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+                    <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
                     دخول المدير
                 </h3>
                 <button class="modal-close" onclick="closeModal('adminLoginModal')">
@@ -1139,12 +713,9 @@
                     <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
                     <h2>البحث عن محطة</h2>
                 </div>
-                <div class="search-note">
-                    ⚡ البحث بالمطابقة التامة - أدخل رقم المحطة كاملاً كما هو في الجدول (مثال: RS243 أو 22)
-                </div>
                 <div class="search-box">
                     <div class="search-input-wrapper">
-                        <input type="text" id="searchInput" placeholder="أدخل رقم المحطة بالضبط..." onkeypress="handleSearchKeypress(event)">
+                        <input type="text" id="searchInput" placeholder="أدخل رقم المحطة..." onkeypress="handleSearchKeypress(event)">
                         <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
                     </div>
                     <div class="action-buttons">
@@ -1175,8 +746,7 @@
                 <div id="resultsContent">
                     <div class="empty-state">
                         <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-                        <h4>ابدأ البحث</h4>
-                        <p>أدخل رقم المحطة بالضبط للبحث عنها</p>
+                        <h4>أدخل رقم المحطة للبحث</h4>
                     </div>
                 </div>
             </section>
@@ -1202,21 +772,21 @@
                             <label>رقم المحطة</label>
                             <input type="text" id="addStationNumber" placeholder="مثال: RS243" required>
                         </div>
+                        <div class="form-group">
+                            <label>المغذي</label>
+                            <input type="text" id="addFeeder" placeholder="اختياري">
+                        </div>
                         <div class="form-group required">
                             <label>المنطقة</label>
                             <input type="text" id="addRegion" placeholder="أدخل المنطقة" required>
                         </div>
                         <div class="form-group">
-                            <label>المغذي</label>
-                            <input type="text" id="addFeeder" placeholder="أدخل المغذي (اختياري)">
+                            <label>خط العرض</label>
+                            <input type="text" id="addLatitude" placeholder="تلقائي" readonly>
                         </div>
                         <div class="form-group">
                             <label>خط الطول</label>
-                            <input type="text" id="addLongitude" placeholder="سيتم تحديده تلقائياً" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label>خط العرض</label>
-                            <input type="text" id="addLatitude" placeholder="سيتم تحديده تلقائياً" readonly>
+                            <input type="text" id="addLongitude" placeholder="تلقائي" readonly>
                         </div>
                         <div class="form-group full-width">
                             <label>تحديد الموقع</label>
@@ -1227,17 +797,14 @@
                         </div>
                         <div class="form-group full-width">
                             <label>سبب الإضافة</label>
-                            <textarea id="addReason" placeholder="أدخل سبب إضافة هذه المحطة..."></textarea>
+                            <textarea id="addReason" placeholder="اختياري"></textarea>
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal('addModal')">إلغاء</button>
-                <button class="btn btn-success" onclick="submitAdd()">
-                    <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
-                    حفظ
-                </button>
+                <button class="btn btn-success" onclick="submitAdd()">حفظ</button>
             </div>
         </div>
     </div>
@@ -1258,24 +825,25 @@
                 <form id="editForm">
                     <div class="form-grid">
                         <div class="form-group required full-width">
-                            <label>رقم المحطة المراد تعديلها</label>
-                            <input type="text" id="editStationNumber" placeholder="أدخل رقم المحطة بالضبط" required>
-                            <button type="button" class="btn btn-secondary" style="margin-top: 10px;" onclick="loadStationData()">
-                                <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:currentColor;"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-                                جلب البيانات
-                            </button>
+                            <label>رقم المحطة</label>
+                            <input type="text" id="editStationNumber" placeholder="أدخل رقم المحطة" required>
+                            <button type="button" class="btn btn-secondary" style="margin-top: 10px;" onclick="loadStationData()">جلب البيانات</button>
                         </div>
                         <div class="form-group">
                             <label>المغذي</label>
-                            <input type="text" id="editFeeder" placeholder="المغذي الحالي">
+                            <input type="text" id="editFeeder" placeholder="المغذي">
                         </div>
                         <div class="form-group">
-                            <label>خط الطول</label>
-                            <input type="text" id="editLongitude" placeholder="خط الطول" readonly>
+                            <label>المنطقة</label>
+                            <input type="text" id="editRegion" placeholder="المنطقة">
                         </div>
                         <div class="form-group">
                             <label>خط العرض</label>
                             <input type="text" id="editLatitude" placeholder="خط العرض" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>خط الطول</label>
+                            <input type="text" id="editLongitude" placeholder="خط الطول" readonly>
                         </div>
                         <div class="form-group full-width">
                             <label>تحديث الموقع</label>
@@ -1286,17 +854,14 @@
                         </div>
                         <div class="form-group full-width">
                             <label>سبب التعديل</label>
-                            <textarea id="editReason" placeholder="أدخل سبب التعديل..."></textarea>
+                            <textarea id="editReason" placeholder="اختياري"></textarea>
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal('editModal')">إلغاء</button>
-                <button class="btn btn-warning" onclick="submitEdit()">
-                    <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
-                    حفظ التعديلات
-                </button>
+                <button class="btn btn-warning" onclick="submitEdit()">حفظ التعديلات</button>
             </div>
         </div>
     </div>
@@ -1326,7 +891,7 @@
                 </div>
                 <div class="stat-card">
                     <div class="number" id="totalUsers">0</div>
-                    <div class="label">المستخدمين المسجلين</div>
+                    <div class="label">المستخدمين</div>
                 </div>
                 <div class="stat-card">
                     <div class="number" id="totalAdditions">0</div>
@@ -1344,18 +909,18 @@
                     جميع المحطات
                 </h3>
                 <div class="results-table-wrapper">
-                    <table class="results-table" id="adminStationsTable">
+                    <table class="results-table">
                         <thead>
                             <tr>
                                 <th>رقم المحطة</th>
                                 <th>المغذي</th>
+                                <th>المنطقة</th>
                                 <th>خط العرض</th>
                                 <th>خط الطول</th>
-                                <th>رابط الخريطة</th>
+                                <th>الخريطة</th>
                             </tr>
                         </thead>
-                        <tbody id="adminStationsBody">
-                        </tbody>
+                        <tbody id="adminStationsBody"></tbody>
                     </table>
                 </div>
             </section>
@@ -1363,7 +928,7 @@
             <section class="admin-section">
                 <h3>
                     <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                    المستخدمين المسجلين
+                    المستخدمين
                 </h3>
                 <div class="results-table-wrapper">
                     <table class="results-table">
@@ -1374,8 +939,7 @@
                                 <th>تاريخ التسجيل</th>
                             </tr>
                         </thead>
-                        <tbody id="adminUsersBody">
-                        </tbody>
+                        <tbody id="adminUsersBody"></tbody>
                     </table>
                 </div>
             </section>
@@ -1383,7 +947,7 @@
             <section class="admin-section">
                 <h3>
                     <svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
-                    سجل التعديلات والإضافات
+                    السجلات
                 </h3>
                 <div class="results-table-wrapper">
                     <table class="results-table">
@@ -1396,8 +960,7 @@
                                 <th>السبب</th>
                             </tr>
                         </thead>
-                        <tbody id="adminLogsBody">
-                        </tbody>
+                        <tbody id="adminLogsBody"></tbody>
                     </table>
                 </div>
             </section>
@@ -1405,20 +968,11 @@
     </div>
 
     <script>
-        // ============================================
-        // ⚠️ مهم جداً: ضع رابط Google Apps Script هنا
-        // ============================================
-        const API_URL = 'https://script.google.com/macros/s/AKfycbxtgbyuJrK5CKnKtvF6hEyDEztr2E-YX0-EpnTN-pQR5g6XqCjcjobbeYp1fBa4kDyvSQ/exec';
+        // ⚠️ ضع رابط Google Apps Script هنا
+        const API_URL = 'https://script.google.com/macros/s/AKfycby-USG2tbQCr0BGKMantRKD2msbRSay_n69angdpdE5nh-gfMjy7Shh-ixHpFiP2O5PmA/exec';
         
-        // ============================================
-        // State Management
-        // ============================================
         let currentUser = null;
-        let adminCode = '';
 
-        // ============================================
-        // Loading Functions
-        // ============================================
         function showLoading(text = 'جاري التحميل...') {
             document.getElementById('loadingOverlay').classList.add('active');
             document.querySelector('.loading-text').textContent = text;
@@ -1428,9 +982,6 @@
             document.getElementById('loadingOverlay').classList.remove('active');
         }
 
-        // ============================================
-        // API Functions - الاتصال بـ Google Sheets
-        // ============================================
         async function apiGet(action, params = {}) {
             const url = new URL(API_URL);
             url.searchParams.append('action', action);
@@ -1441,7 +992,7 @@
                 return await response.json();
             } catch (error) {
                 console.error('API Error:', error);
-                showToast('خطأ في الاتصال بقاعدة البيانات', 'error');
+                showToast('خطأ في الاتصال', 'error');
                 return { error: error.message };
             }
         }
@@ -1450,30 +1001,22 @@
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'text/plain;charset=utf-8',
-                    },
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(data)
                 });
                 return await response.json();
             } catch (error) {
                 console.error('API Error:', error);
-                showToast('خطأ في الاتصال بقاعدة البيانات', 'error');
+                showToast('خطأ في الاتصال', 'error');
                 return { error: error.message };
             }
         }
 
-        // ============================================
-        // Page Navigation
-        // ============================================
         function showPage(pageId) {
             document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
         }
 
-        // ============================================
-        // Modal Functions
-        // ============================================
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('active');
         }
@@ -1496,9 +1039,6 @@
             document.getElementById('editLocationBtn').querySelector('span').textContent = 'تحديد موقعي الحالي';
         }
 
-        // ============================================
-        // Toast Notifications
-        // ============================================
         function showToast(message, type = 'success') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
@@ -1507,40 +1047,31 @@
             const icons = {
                 success: '<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>',
                 error: '<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>',
-                warning: '<svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>',
-                info: '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>'
+                warning: '<svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>'
             };
             
             toast.innerHTML = `${icons[type]}<span>${message}</span>`;
             container.appendChild(toast);
             
             setTimeout(() => {
-                toast.style.animation = 'fadeIn 0.3s ease reverse';
+                toast.style.opacity = '0';
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
         }
 
-        // ============================================
-        // Authentication
-        // ============================================
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const name = document.getElementById('loginName').value.trim();
             const phone = document.getElementById('loginPhone').value.trim();
             
             if (!name || !phone) {
-                showToast('يرجى إدخال الاسم ورقم الجوال', 'error');
+                showToast('أدخل الاسم ورقم الجوال', 'error');
                 return;
             }
             
             showLoading('جاري تسجيل الدخول...');
             
-            // تسجيل المستخدم في Google Sheets
-            const result = await apiPost({
-                action: 'registerUser',
-                name: name,
-                phone: phone
-            });
+            const result = await apiPost({ action: 'registerUser', name: name, phone: phone });
             
             hideLoading();
             
@@ -1549,16 +1080,14 @@
                 return;
             }
             
-            // Save user session
             currentUser = { name, phone };
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
             
-            // Update UI
             document.getElementById('userName').textContent = name;
             document.getElementById('userAvatar').textContent = name.charAt(0);
             
             showPage('dashboardPage');
-            showToast('تم تسجيل الدخول بنجاح');
+            showToast('تم تسجيل الدخول');
         });
 
         async function adminLogin() {
@@ -1566,7 +1095,6 @@
             
             showLoading('جاري التحقق...');
             
-            // جلب رمز المدير من Google Sheets
             const result = await apiGet('getAdminCode');
             
             hideLoading();
@@ -1575,9 +1103,9 @@
                 closeModal('adminLoginModal');
                 showPage('adminPage');
                 loadAdminData();
-                showToast('مرحباً بك في لوحة التحكم');
+                showToast('مرحباً بك');
             } else {
-                showToast('رمز الدخول غير صحيح', 'error');
+                showToast('رمز غير صحيح', 'error');
             }
         }
 
@@ -1598,9 +1126,6 @@
             }
         }
 
-        // ============================================
-        // Search Function - بحث دقيق بالمطابقة التامة
-        // ============================================
         function handleSearchKeypress(event) {
             if (event.key === 'Enter') {
                 searchStation();
@@ -1613,13 +1138,12 @@
             const resultsCount = document.getElementById('resultsCount');
             
             if (!searchValue) {
-                showToast('يرجى إدخال رقم المحطة', 'warning');
+                showToast('أدخل رقم المحطة', 'warning');
                 return;
             }
             
             showLoading('جاري البحث...');
             
-            // البحث في Google Sheets - مطابقة تامة
             const result = await apiGet('searchStation', { number: searchValue });
             
             hideLoading();
@@ -1630,20 +1154,17 @@
             }
             
             if (!result.found) {
-                // Not found
                 resultsContent.innerHTML = `
                     <div class="not-found-card">
                         <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
                         <h4>الرقم المدخل غير موجود</h4>
                         <div class="searched-number">${searchValue}</div>
-                        <p>لم يتم العثور على محطة بهذا الرقم في قاعدة البيانات</p>
                     </div>
                 `;
                 resultsCount.textContent = '0 نتيجة';
             } else {
-                // Found - show table
                 const s = result.station;
-                const googleMapUrl = s.lat && s.lng ? `https://www.google.com/maps?q=${s.lat},${s.lng}` : (s.googleMap || '#');
+                const googleMapUrl = s.googleMap || (s.lat && s.lng ? `https://www.google.com/maps?q=${s.lat},${s.lng}` : '');
                 
                 resultsContent.innerHTML = `
                     <div class="results-table-wrapper">
@@ -1651,18 +1172,18 @@
                             <thead>
                                 <tr>
                                     <th>رقم المحطة</th>
-                                    <th>الموقع</th>
                                     <th>المغذي</th>
+                                    <th>المنطقة</th>
                                     <th>رابط Google Map</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
                                     <td><strong>${s.number}</strong></td>
-                                    <td>${s.lat && s.lng ? s.lat + ', ' + s.lng : '-'}</td>
                                     <td>${s.feeder || '-'}</td>
+                                    <td>${s.region || '-'}</td>
                                     <td>
-                                        ${googleMapUrl !== '#' ? `
+                                        ${googleMapUrl ? `
                                         <a href="${googleMapUrl}" target="_blank" class="map-link">
                                             <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
                                             فتح الخريطة
@@ -1678,9 +1199,6 @@
             }
         }
 
-        // ============================================
-        // Geolocation
-        // ============================================
         function getCurrentLocation(mode) {
             const btn = document.getElementById(mode + 'LocationBtn');
             const latInput = document.getElementById(mode + 'Latitude');
@@ -1696,16 +1214,16 @@
                         btn.classList.add('active');
                         btn.innerHTML = `
                             <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
-                            <span>تم تحديد الموقع بنجاح</span>
+                            <span>تم تحديد الموقع</span>
                         `;
-                        showToast('تم تحديد موقعك بنجاح');
+                        showToast('تم تحديد الموقع');
                     },
                     (error) => {
                         btn.innerHTML = `
                             <svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
                             <span>تحديد موقعي الحالي</span>
                         `;
-                        showToast('فشل في تحديد الموقع: ' + error.message, 'error');
+                        showToast('فشل تحديد الموقع', 'error');
                     },
                     { enableHighAccuracy: true }
                 );
@@ -1714,9 +1232,6 @@
             }
         }
 
-        // ============================================
-        // Add Station
-        // ============================================
         async function submitAdd() {
             const stationNumber = document.getElementById('addStationNumber').value.trim();
             const region = document.getElementById('addRegion').value.trim();
@@ -1726,68 +1241,61 @@
             const reason = document.getElementById('addReason').value.trim();
             
             if (!stationNumber) {
-                showToast('يرجى إدخال رقم المحطة', 'error');
+                showToast('أدخل رقم المحطة', 'error');
                 return;
             }
             
             if (!region) {
-                showToast('يرجى إدخال المنطقة', 'error');
+                showToast('أدخل المنطقة', 'error');
                 return;
             }
             
-            showLoading('جاري التحقق من رقم المحطة...');
+            showLoading('جاري التحقق...');
             
-            // التحقق من عدم وجود المحطة
             const checkResult = await apiGet('searchStation', { number: stationNumber });
             
             if (checkResult.found) {
                 hideLoading();
-                showToast('رقم المحطة موجود مسبقاً - يجب أن يكون الرقم فريد', 'error');
+                showToast('رقم المحطة موجود مسبقاً', 'error');
                 return;
             }
             
-            showLoading('جاري إضافة المحطة...');
+            showLoading('جاري الإضافة...');
             
-            // إضافة المحطة
             const result = await apiPost({
                 action: 'addStation',
                 number: stationNumber,
                 region: region,
-                feeder: feeder || stationNumber,
+                feeder: feeder,
                 lat: lat,
                 lng: lng,
                 reason: reason,
-                userName: currentUser ? currentUser.name : 'غير معروف',
-                userPhone: currentUser ? currentUser.phone : ''
+                userName: currentUser ? currentUser.name : 'غير معروف'
             });
             
             hideLoading();
             
             if (result.error) {
-                showToast('خطأ في إضافة المحطة: ' + result.error, 'error');
+                showToast(result.error, 'error');
                 return;
             }
             
             closeModal('addModal');
-            showToast('تمت إضافة المحطة بنجاح');
+            showToast('تمت الإضافة بنجاح');
             
-            // البحث عن المحطة الجديدة
             document.getElementById('searchInput').value = stationNumber;
             searchStation();
         }
 
-        // ============================================
-        // Load Station Data for Edit
-        // ============================================
         async function loadStationData() {
             const stationNumber = document.getElementById('editStationNumber').value.trim();
             
             if (!stationNumber) {
-                showToast('يرجى إدخال رقم المحطة', 'error');
+                showToast('أدخل رقم المحطة', 'error');
                 return;
             }
             
-            showLoading('جاري جلب بيانات المحطة...');
+            showLoading('جاري جلب البيانات...');
             
             const result = await apiGet('searchStation', { number: stationNumber });
             
@@ -1800,62 +1308,56 @@
             
             const station = result.station;
             document.getElementById('editFeeder').value = station.feeder || '';
+            document.getElementById('editRegion').value = station.region || '';
             document.getElementById('editLatitude').value = station.lat || '';
             document.getElementById('editLongitude').value = station.lng || '';
             
-            showToast('تم جلب بيانات المحطة');
+            showToast('تم جلب البيانات');
         }
 
-        // ============================================
-        // Edit Station
-        // ============================================
         async function submitEdit() {
             const stationNumber = document.getElementById('editStationNumber').value.trim();
             const feeder = document.getElementById('editFeeder').value.trim();
+            const region = document.getElementById('editRegion').value.trim();
             const lat = document.getElementById('editLatitude').value;
             const lng = document.getElementById('editLongitude').value;
             const reason = document.getElementById('editReason').value.trim();
             
             if (!stationNumber) {
-                showToast('يرجى إدخال رقم المحطة', 'error');
+                showToast('أدخل رقم المحطة', 'error');
                 return;
             }
             
-            showLoading('جاري تعديل المحطة...');
+            showLoading('جاري التعديل...');
             
             const result = await apiPost({
                 action: 'editStation',
                 number: stationNumber,
                 feeder: feeder,
+                region: region,
                 lat: lat,
                 lng: lng,
                 reason: reason,
-                userName: currentUser ? currentUser.name : 'غير معروف',
-                userPhone: currentUser ? currentUser.phone : ''
+                userName: currentUser ? currentUser.name : 'غير معروف'
             });
             
             hideLoading();
             
             if (result.error) {
-                showToast('خطأ: ' + result.error, 'error');
+                showToast(result.error, 'error');
                 return;
             }
             
             closeModal('editModal');
-            showToast('تم تعديل بيانات المحطة بنجاح');
+            showToast('تم التعديل بنجاح');
             
-            // البحث عن المحطة المعدلة
             document.getElementById('searchInput').value = stationNumber;
             searchStation();
         }
 
-        // ============================================
-        // Admin Functions
-        // ============================================
         async function loadAdminData() {
             showLoading('جاري تحميل البيانات...');
             
-            // جلب الإحصائيات
             const stats = await apiGet('getStats');
             if (stats.stats) {
                 document.getElementById('totalStations').textContent = stats.stats.totalStations || 0;
@@ -1864,23 +1366,23 @@
                 document.getElementById('totalEdits').textContent = stats.stats.totalEdits || 0;
             }
             
-            // جلب المحطات
             const stationsResult = await apiGet('getStations');
             if (stationsResult.stations) {
                 const stationsBody = document.getElementById('adminStationsBody');
                 stationsBody.innerHTML = stationsResult.stations.map(s => {
-                    const googleMapUrl = s.lat && s.lng ? `https://www.google.com/maps?q=${s.lat},${s.lng}` : (s.googleMap || '#');
+                    const googleMapUrl = s.googleMap || (s.lat && s.lng ? `https://www.google.com/maps?q=${s.lat},${s.lng}` : '');
                     return `
                     <tr>
                         <td>${s.number}</td>
                         <td>${s.feeder || '-'}</td>
+                        <td>${s.region || '-'}</td>
                         <td>${s.lat || '-'}</td>
                         <td>${s.lng || '-'}</td>
                         <td>
-                            ${googleMapUrl !== '#' ? `
+                            ${googleMapUrl ? `
                             <a href="${googleMapUrl}" target="_blank" class="map-link">
                                 <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
-                                فتح الخريطة
+                                فتح
                             </a>
                             ` : '-'}
                         </td>
@@ -1888,7 +1390,6 @@
                 `}).join('');
             }
             
-            // جلب المستخدمين
             const usersResult = await apiGet('getUsers');
             if (usersResult.users) {
                 const usersBody = document.getElementById('adminUsersBody');
@@ -1901,7 +1402,6 @@
                 `).join('');
             }
             
-            // جلب السجلات
             const logsResult = await apiGet('getLogs');
             if (logsResult.logs) {
                 const logsBody = document.getElementById('adminLogsBody');
@@ -1919,14 +1419,10 @@
             hideLoading();
         }
 
-        // ============================================
-        // Initialize
-        // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             checkSession();
         });
 
-        // Close modals on outside click
         document.querySelectorAll('.modal-overlay').forEach(modal => {
             modal.addEventListener('click', function(e) {
                 if (e.target === this) {
