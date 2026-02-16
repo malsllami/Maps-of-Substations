@@ -40,7 +40,6 @@
             overflow-x: hidden;
         }
 
-        /* Background Pattern */
         body::before {
             content: '';
             position: fixed;
@@ -56,7 +55,6 @@
             z-index: -1;
         }
 
-        /* Grid Pattern Overlay */
         body::after {
             content: '';
             position: fixed;
@@ -72,7 +70,6 @@
             z-index: -1;
         }
 
-        /* Page Container */
         .page {
             display: none;
             animation: fadeIn 0.5s ease;
@@ -92,17 +89,11 @@
             to { opacity: 1; transform: translateX(0); }
         }
 
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(50, 130, 184, 0.4); }
-            50% { box-shadow: 0 0 0 15px rgba(50, 130, 184, 0); }
-        }
-
         @keyframes float {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
         }
 
-        /* Login Page */
         .login-container {
             min-height: 100vh;
             display: flex;
@@ -221,11 +212,6 @@
             box-shadow: 0 0 0 4px rgba(50, 130, 184, 0.2);
         }
 
-        .form-group input:focus + svg,
-        .form-group input:focus ~ svg {
-            fill: var(--accent);
-        }
-
         .form-group input::placeholder {
             color: var(--text-secondary);
             opacity: 0.6;
@@ -290,7 +276,6 @@
             transform: none !important;
         }
 
-        /* Admin Link */
         .admin-link {
             text-align: center;
             margin-top: 24px;
@@ -307,13 +292,11 @@
             color: var(--accent);
         }
 
-        /* Dashboard Page */
         .dashboard-container {
             min-height: 100vh;
             padding: 20px;
         }
 
-        /* Header */
         .header {
             background: var(--bg-card);
             border-radius: 16px;
@@ -324,6 +307,8 @@
             justify-content: space-between;
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         .header-right {
@@ -358,6 +343,7 @@
             display: flex;
             align-items: center;
             gap: 20px;
+            flex-wrap: wrap;
         }
 
         .user-info {
@@ -411,7 +397,6 @@
             fill: currentColor;
         }
 
-        /* Search Section */
         .search-section {
             background: var(--bg-card);
             border-radius: 16px;
@@ -437,6 +422,16 @@
         .search-header h2 {
             font-family: 'Cairo', sans-serif;
             font-size: 1.4rem;
+        }
+
+        .search-note {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            background: rgba(50, 130, 184, 0.1);
+            border-radius: 8px;
+            border-right: 3px solid var(--accent);
         }
 
         .search-box {
@@ -525,7 +520,6 @@
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
         }
 
-        /* Results Section */
         .results-section {
             background: var(--bg-card);
             border-radius: 16px;
@@ -569,7 +563,6 @@
             font-weight: 600;
         }
 
-        /* Results Table */
         .results-table-wrapper {
             overflow-x: auto;
         }
@@ -634,7 +627,6 @@
             fill: currentColor;
         }
 
-        /* Empty State */
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -659,7 +651,6 @@
             opacity: 0.7;
         }
 
-        /* Not Found Card */
         .not-found-card {
             background: rgba(255, 107, 107, 0.1);
             border: 2px solid var(--danger);
@@ -693,7 +684,6 @@
             margin: 15px 0;
         }
 
-        /* Modal */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -795,7 +785,6 @@
             min-width: 120px;
         }
 
-        /* Form Grid */
         .form-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -817,7 +806,6 @@
             padding: 16px;
         }
 
-        /* Location Button */
         .location-btn {
             width: 100%;
             padding: 16px;
@@ -852,7 +840,6 @@
             fill: currentColor;
         }
 
-        /* Loading Spinner */
         .spinner {
             width: 20px;
             height: 20px;
@@ -866,7 +853,6 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Toast Notifications */
         .toast-container {
             position: fixed;
             bottom: 30px;
@@ -908,7 +894,11 @@
             color: #1a1a1a;
         }
 
-        /* Admin Page */
+        .toast-info {
+            background: var(--accent);
+            color: white;
+        }
+
         .admin-section {
             background: var(--bg-card);
             border-radius: 16px;
@@ -959,7 +949,39 @@
             font-size: 0.95rem;
         }
 
-        /* Responsive */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 22, 40, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-text {
+            color: var(--text-primary);
+            font-size: 1.1rem;
+        }
+
         @media (max-width: 768px) {
             .header {
                 flex-direction: column;
@@ -1015,6 +1037,12 @@
     </style>
 </head>
 <body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">جاري التحميل...</div>
+    </div>
+
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
@@ -1040,7 +1068,7 @@
                     <div class="form-group">
                         <label>رقم الجوال</label>
                         <div class="input-wrapper">
-                            <input type="tel" id="loginPhone" placeholder="05xxxxxxxx" required pattern="[0-9]{10}">
+                            <input type="tel" id="loginPhone" placeholder="05xxxxxxxx" required>
                             <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
                         </div>
                     </div>
@@ -1111,9 +1139,12 @@
                     <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
                     <h2>البحث عن محطة</h2>
                 </div>
+                <div class="search-note">
+                    ⚡ البحث بالمطابقة التامة - أدخل رقم المحطة كاملاً كما هو في الجدول (مثال: RS243 أو 22)
+                </div>
                 <div class="search-box">
                     <div class="search-input-wrapper">
-                        <input type="text" id="searchInput" placeholder="أدخل رقم المحطة..." onkeypress="handleSearchKeypress(event)">
+                        <input type="text" id="searchInput" placeholder="أدخل رقم المحطة بالضبط..." onkeypress="handleSearchKeypress(event)">
                         <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
                     </div>
                     <div class="action-buttons">
@@ -1145,7 +1176,7 @@
                     <div class="empty-state">
                         <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
                         <h4>ابدأ البحث</h4>
-                        <p>أدخل رقم المحطة للبحث عنها</p>
+                        <p>أدخل رقم المحطة بالضبط للبحث عنها</p>
                     </div>
                 </div>
             </section>
@@ -1228,7 +1259,7 @@
                     <div class="form-grid">
                         <div class="form-group required full-width">
                             <label>رقم المحطة المراد تعديلها</label>
-                            <input type="text" id="editStationNumber" placeholder="أدخل رقم المحطة" required>
+                            <input type="text" id="editStationNumber" placeholder="أدخل رقم المحطة بالضبط" required>
                             <button type="button" class="btn btn-secondary" style="margin-top: 10px;" onclick="loadStationData()">
                                 <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:currentColor;"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
                                 جلب البيانات
@@ -1375,20 +1406,62 @@
 
     <script>
         // ============================================
-        // Configuration - Update these with your Google Apps Script URL
+        // ⚠️ مهم جداً: ضع رابط Google Apps Script هنا
         // ============================================
-        const CONFIG = {
-            API_URL: 'https://script.google.com/macros/s/AKfycbwMLhLSG4qeMJGlyGwilbKRIZm0QCi3Ja5XZ7_-2X-agHTEQFwGYrk-S5Cttb8k7td8dQ/exec',
-            ADMIN_CODE: 'admin123' // This should be stored in Settings sheet
-        };
-
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxtgbyuJrK5CKnKtvF6hEyDEztr2E-YX0-EpnTN-pQR5g6XqCjcjobbeYp1fBa4kDyvSQ/exec';
+        
         // ============================================
         // State Management
         // ============================================
         let currentUser = null;
-        let stationsData = [];
-        let usersData = [];
-        let logsData = [];
+        let adminCode = '';
+
+        // ============================================
+        // Loading Functions
+        // ============================================
+        function showLoading(text = 'جاري التحميل...') {
+            document.getElementById('loadingOverlay').classList.add('active');
+            document.querySelector('.loading-text').textContent = text;
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('active');
+        }
+
+        // ============================================
+        // API Functions - الاتصال بـ Google Sheets
+        // ============================================
+        async function apiGet(action, params = {}) {
+            const url = new URL(API_URL);
+            url.searchParams.append('action', action);
+            Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+            
+            try {
+                const response = await fetch(url.toString());
+                return await response.json();
+            } catch (error) {
+                console.error('API Error:', error);
+                showToast('خطأ في الاتصال بقاعدة البيانات', 'error');
+                return { error: error.message };
+            }
+        }
+
+        async function apiPost(data) {
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8',
+                    },
+                    body: JSON.stringify(data)
+                });
+                return await response.json();
+            } catch (error) {
+                console.error('API Error:', error);
+                showToast('خطأ في الاتصال بقاعدة البيانات', 'error');
+                return { error: error.message };
+            }
+        }
 
         // ============================================
         // Page Navigation
@@ -1411,7 +1484,6 @@
 
         function openAddModal() {
             document.getElementById('addModal').classList.add('active');
-            // Reset form
             document.getElementById('addForm').reset();
             document.getElementById('addLocationBtn').classList.remove('active');
             document.getElementById('addLocationBtn').querySelector('span').textContent = 'تحديد موقعي الحالي';
@@ -1419,7 +1491,6 @@
 
         function openEditModal() {
             document.getElementById('editModal').classList.add('active');
-            // Reset form
             document.getElementById('editForm').reset();
             document.getElementById('editLocationBtn').classList.remove('active');
             document.getElementById('editLocationBtn').querySelector('span').textContent = 'تحديد موقعي الحالي';
@@ -1436,7 +1507,8 @@
             const icons = {
                 success: '<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>',
                 error: '<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>',
-                warning: '<svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>'
+                warning: '<svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>',
+                info: '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>'
             };
             
             toast.innerHTML = `${icons[type]}<span>${message}</span>`;
@@ -1451,7 +1523,7 @@
         // ============================================
         // Authentication
         // ============================================
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const name = document.getElementById('loginName').value.trim();
             const phone = document.getElementById('loginPhone').value.trim();
@@ -1461,12 +1533,25 @@
                 return;
             }
             
+            showLoading('جاري تسجيل الدخول...');
+            
+            // تسجيل المستخدم في Google Sheets
+            const result = await apiPost({
+                action: 'registerUser',
+                name: name,
+                phone: phone
+            });
+            
+            hideLoading();
+            
+            if (result.error) {
+                showToast('خطأ في تسجيل الدخول', 'error');
+                return;
+            }
+            
             // Save user session
             currentUser = { name, phone };
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            
-            // Register user (will be sent to sheet)
-            registerUser(name, phone);
             
             // Update UI
             document.getElementById('userName').textContent = name;
@@ -1474,14 +1559,19 @@
             
             showPage('dashboardPage');
             showToast('تم تسجيل الدخول بنجاح');
-            
-            // Load stations data
-            loadStations();
         });
 
-        function adminLogin() {
+        async function adminLogin() {
             const code = document.getElementById('adminCode').value;
-            if (code === CONFIG.ADMIN_CODE) {
+            
+            showLoading('جاري التحقق...');
+            
+            // جلب رمز المدير من Google Sheets
+            const result = await apiGet('getAdminCode');
+            
+            hideLoading();
+            
+            if (result.code && code === result.code) {
                 closeModal('adminLoginModal');
                 showPage('adminPage');
                 loadAdminData();
@@ -1498,7 +1588,6 @@
             showToast('تم تسجيل الخروج');
         }
 
-        // Check for existing session
         function checkSession() {
             const saved = localStorage.getItem('currentUser');
             if (saved) {
@@ -1506,108 +1595,11 @@
                 document.getElementById('userName').textContent = currentUser.name;
                 document.getElementById('userAvatar').textContent = currentUser.name.charAt(0);
                 showPage('dashboardPage');
-                loadStations();
             }
         }
 
         // ============================================
-        // Demo Data (Replace with actual API calls)
-        // ============================================
-        const DEMO_STATIONS = [
-            { number: 'UMS239', feeder: 'UMS239', lat: '21.43617244', lng: '39.35122565', region: 'منطقة 1' },
-            { number: '0', feeder: '0', lat: '21.50300808', lng: '39.19044266', region: 'منطقة 2' },
-            { number: 'BHR34', feeder: 'BHR34', lat: '21.50310282', lng: '39.18900676', region: 'منطقة 3' },
-            { number: 'BLD247', feeder: 'BLD247', lat: '21.50469562', lng: '39.18480513', region: 'منطقة 4' },
-            { number: 'BHR22', feeder: 'BHR22', lat: '21.51178377', lng: '39.18328528', region: 'منطقة 5' },
-            { number: 'KBW16', feeder: 'KBW16', lat: '21.51508343', lng: '39.18389491', region: 'منطقة 6' },
-            { number: 'RS243', feeder: 'RS243', lat: '21.51815896', lng: '39.18331568', region: 'منطقة 7' },
-            { number: 'HNDW48', feeder: 'HNDW48', lat: '21.52236979', lng: '39.18221033', region: 'منطقة 8' },
-            { number: 'RWS05', feeder: 'RWS05', lat: '21.52586888', lng: '39.1723514', region: 'منطقة 9' },
-            { number: 'RWS14', feeder: 'RWS14', lat: '21.52247894', lng: '39.16906747', region: 'منطقة 10' },
-            { number: 'RS221', feeder: 'RS221', lat: '21.5209756', lng: '39.17614443', region: 'منطقة 11' },
-            { number: 'HNDW41', feeder: 'HNDW41', lat: '21.52551555', lng: '39.18515557', region: 'منطقة 12' },
-            { number: 'ANS04A', feeder: 'ANS04A', lat: '21.53759312', lng: '39.16318564', region: 'منطقة 13' },
-            { number: 'RS239', feeder: 'RS239', lat: '21.52869532', lng: '39.17564195', region: 'منطقة 14' },
-            { number: 'BHR21', feeder: 'BHR21', lat: '21.51142718', lng: '39.178343', region: 'منطقة 15' }
-        ];
-
-        const DEMO_USERS = [
-            { name: 'أحمد محمد', phone: '0512345678', date: '2024-01-15' },
-            { name: 'سعد العلي', phone: '0598765432', date: '2024-01-16' }
-        ];
-
-        const DEMO_LOGS = [
-            { type: 'إضافة', station: 'RS244', user: 'أحمد محمد', date: '2024-01-15', reason: 'محطة جديدة' },
-            { type: 'تعديل', station: 'BHR34', user: 'سعد العلي', date: '2024-01-16', reason: 'تحديث الموقع' }
-        ];
-
-        // ============================================
-        // Data Loading Functions
-        // ============================================
-        function loadStations() {
-            // In production, this would call your Google Apps Script API
-            stationsData = DEMO_STATIONS;
-        }
-
-        function loadAdminData() {
-            // Load all data for admin panel
-            stationsData = DEMO_STATIONS;
-            usersData = DEMO_USERS;
-            logsData = DEMO_LOGS;
-            
-            // Update stats
-            document.getElementById('totalStations').textContent = stationsData.length;
-            document.getElementById('totalUsers').textContent = usersData.length;
-            document.getElementById('totalAdditions').textContent = logsData.filter(l => l.type === 'إضافة').length;
-            document.getElementById('totalEdits').textContent = logsData.filter(l => l.type === 'تعديل').length;
-            
-            // Populate tables
-            populateAdminTables();
-        }
-
-        function populateAdminTables() {
-            // Stations table
-            const stationsBody = document.getElementById('adminStationsBody');
-            stationsBody.innerHTML = stationsData.map(s => `
-                <tr>
-                    <td>${s.number}</td>
-                    <td>${s.feeder || '-'}</td>
-                    <td>${s.lat}</td>
-                    <td>${s.lng}</td>
-                    <td>
-                        <a href="https://www.google.com/maps?q=${s.lat},${s.lng}" target="_blank" class="map-link">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
-                            فتح الخريطة
-                        </a>
-                    </td>
-                </tr>
-            `).join('');
-            
-            // Users table
-            const usersBody = document.getElementById('adminUsersBody');
-            usersBody.innerHTML = usersData.map(u => `
-                <tr>
-                    <td>${u.name}</td>
-                    <td>${u.phone}</td>
-                    <td>${u.date}</td>
-                </tr>
-            `).join('');
-            
-            // Logs table
-            const logsBody = document.getElementById('adminLogsBody');
-            logsBody.innerHTML = logsData.map(l => `
-                <tr>
-                    <td><span style="color: ${l.type === 'إضافة' ? 'var(--success)' : 'var(--warning)'}">${l.type}</span></td>
-                    <td>${l.station}</td>
-                    <td>${l.user}</td>
-                    <td>${l.date}</td>
-                    <td>${l.reason}</td>
-                </tr>
-            `).join('');
-        }
-
-        // ============================================
-        // Search Function
+        // Search Function - بحث دقيق بالمطابقة التامة
         // ============================================
         function handleSearchKeypress(event) {
             if (event.key === 'Enter') {
@@ -1615,8 +1607,8 @@
             }
         }
 
-        function searchStation() {
-            const searchValue = document.getElementById('searchInput').value.trim().toUpperCase();
+        async function searchStation() {
+            const searchValue = document.getElementById('searchInput').value.trim();
             const resultsContent = document.getElementById('resultsContent');
             const resultsCount = document.getElementById('resultsCount');
             
@@ -1625,17 +1617,24 @@
                 return;
             }
             
-            // Search in data
-            const results = stationsData.filter(s => 
-                s.number.toUpperCase().includes(searchValue)
-            );
+            showLoading('جاري البحث...');
             
-            if (results.length === 0) {
+            // البحث في Google Sheets - مطابقة تامة
+            const result = await apiGet('searchStation', { number: searchValue });
+            
+            hideLoading();
+            
+            if (result.error) {
+                showToast('خطأ في البحث', 'error');
+                return;
+            }
+            
+            if (!result.found) {
                 // Not found
                 resultsContent.innerHTML = `
                     <div class="not-found-card">
                         <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-                        <h4>المحطة غير موجودة</h4>
+                        <h4>الرقم المدخل غير موجود</h4>
                         <div class="searched-number">${searchValue}</div>
                         <p>لم يتم العثور على محطة بهذا الرقم في قاعدة البيانات</p>
                     </div>
@@ -1643,6 +1642,9 @@
                 resultsCount.textContent = '0 نتيجة';
             } else {
                 // Found - show table
+                const s = result.station;
+                const googleMapUrl = s.lat && s.lng ? `https://www.google.com/maps?q=${s.lat},${s.lng}` : (s.googleMap || '#');
+                
                 resultsContent.innerHTML = `
                     <div class="results-table-wrapper">
                         <table class="results-table">
@@ -1655,24 +1657,24 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                ${results.map(r => `
-                                    <tr>
-                                        <td><strong>${r.number}</strong></td>
-                                        <td>${r.lat}, ${r.lng}</td>
-                                        <td>${r.feeder || '-'}</td>
-                                        <td>
-                                            <a href="https://www.google.com/maps?q=${r.lat},${r.lng}" target="_blank" class="map-link">
-                                                <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
-                                                فتح الخريطة
-                                            </a>
-                                        </td>
-                                    </tr>
-                                `).join('')}
+                                <tr>
+                                    <td><strong>${s.number}</strong></td>
+                                    <td>${s.lat && s.lng ? s.lat + ', ' + s.lng : '-'}</td>
+                                    <td>${s.feeder || '-'}</td>
+                                    <td>
+                                        ${googleMapUrl !== '#' ? `
+                                        <a href="${googleMapUrl}" target="_blank" class="map-link">
+                                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+                                            فتح الخريطة
+                                        </a>
+                                        ` : '-'}
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
                 `;
-                resultsCount.textContent = `${results.length} نتيجة`;
+                resultsCount.textContent = '1 نتيجة';
             }
         }
 
@@ -1715,15 +1717,14 @@
         // ============================================
         // Add Station
         // ============================================
-        function submitAdd() {
-            const stationNumber = document.getElementById('addStationNumber').value.trim().toUpperCase();
+        async function submitAdd() {
+            const stationNumber = document.getElementById('addStationNumber').value.trim();
             const region = document.getElementById('addRegion').value.trim();
             const feeder = document.getElementById('addFeeder').value.trim();
             const lat = document.getElementById('addLatitude').value;
             const lng = document.getElementById('addLongitude').value;
             const reason = document.getElementById('addReason').value.trim();
             
-            // Validation
             if (!stationNumber) {
                 showToast('يرجى إدخال رقم المحطة', 'error');
                 return;
@@ -1734,58 +1735,70 @@
                 return;
             }
             
-            // Check if station exists
-            if (stationsData.some(s => s.number.toUpperCase() === stationNumber)) {
-                showToast('رقم المحطة موجود مسبقاً', 'error');
+            showLoading('جاري التحقق من رقم المحطة...');
+            
+            // التحقق من عدم وجود المحطة
+            const checkResult = await apiGet('searchStation', { number: stationNumber });
+            
+            if (checkResult.found) {
+                hideLoading();
+                showToast('رقم المحطة موجود مسبقاً - يجب أن يكون الرقم فريد', 'error');
                 return;
             }
             
-            // Add to demo data (in production, send to API)
-            const newStation = {
+            showLoading('جاري إضافة المحطة...');
+            
+            // إضافة المحطة
+            const result = await apiPost({
+                action: 'addStation',
                 number: stationNumber,
+                region: region,
                 feeder: feeder || stationNumber,
-                lat: lat || '',
-                lng: lng || '',
-                region: region
-            };
-            
-            stationsData.push(newStation);
-            
-            // Add to logs
-            logsData.push({
-                type: 'إضافة',
-                station: stationNumber,
-                user: currentUser.name,
-                date: new Date().toISOString().split('T')[0],
-                reason: reason || 'لم يحدد'
+                lat: lat,
+                lng: lng,
+                reason: reason,
+                userName: currentUser ? currentUser.name : 'غير معروف',
+                userPhone: currentUser ? currentUser.phone : ''
             });
+            
+            hideLoading();
+            
+            if (result.error) {
+                showToast('خطأ في إضافة المحطة: ' + result.error, 'error');
+                return;
+            }
             
             closeModal('addModal');
             showToast('تمت إضافة المحطة بنجاح');
             
-            // Search for the new station
+            // البحث عن المحطة الجديدة
             document.getElementById('searchInput').value = stationNumber;
             searchStation();
         }
 
         // ============================================
-        // Edit Station
+        // Load Station Data for Edit
         // ============================================
-        function loadStationData() {
-            const stationNumber = document.getElementById('editStationNumber').value.trim().toUpperCase();
+        async function loadStationData() {
+            const stationNumber = document.getElementById('editStationNumber').value.trim();
             
             if (!stationNumber) {
                 showToast('يرجى إدخال رقم المحطة', 'error');
                 return;
             }
             
-            const station = stationsData.find(s => s.number.toUpperCase() === stationNumber);
+            showLoading('جاري جلب بيانات المحطة...');
             
-            if (!station) {
+            const result = await apiGet('searchStation', { number: stationNumber });
+            
+            hideLoading();
+            
+            if (!result.found) {
                 showToast('المحطة غير موجودة', 'error');
                 return;
             }
             
+            const station = result.station;
             document.getElementById('editFeeder').value = station.feeder || '';
             document.getElementById('editLatitude').value = station.lat || '';
             document.getElementById('editLongitude').value = station.lng || '';
@@ -1793,8 +1806,11 @@
             showToast('تم جلب بيانات المحطة');
         }
 
-        function submitEdit() {
-            const stationNumber = document.getElementById('editStationNumber').value.trim().toUpperCase();
+        // ============================================
+        // Edit Station
+        // ============================================
+        async function submitEdit() {
+            const stationNumber = document.getElementById('editStationNumber').value.trim();
             const feeder = document.getElementById('editFeeder').value.trim();
             const lat = document.getElementById('editLatitude').value;
             const lng = document.getElementById('editLongitude').value;
@@ -1805,48 +1821,102 @@
                 return;
             }
             
-            const stationIndex = stationsData.findIndex(s => s.number.toUpperCase() === stationNumber);
+            showLoading('جاري تعديل المحطة...');
             
-            if (stationIndex === -1) {
-                showToast('المحطة غير موجودة', 'error');
+            const result = await apiPost({
+                action: 'editStation',
+                number: stationNumber,
+                feeder: feeder,
+                lat: lat,
+                lng: lng,
+                reason: reason,
+                userName: currentUser ? currentUser.name : 'غير معروف',
+                userPhone: currentUser ? currentUser.phone : ''
+            });
+            
+            hideLoading();
+            
+            if (result.error) {
+                showToast('خطأ: ' + result.error, 'error');
                 return;
             }
-            
-            // Update station
-            if (feeder) stationsData[stationIndex].feeder = feeder;
-            if (lat) stationsData[stationIndex].lat = lat;
-            if (lng) stationsData[stationIndex].lng = lng;
-            
-            // Add to logs
-            logsData.push({
-                type: 'تعديل',
-                station: stationNumber,
-                user: currentUser.name,
-                date: new Date().toISOString().split('T')[0],
-                reason: reason || 'لم يحدد'
-            });
             
             closeModal('editModal');
             showToast('تم تعديل بيانات المحطة بنجاح');
             
-            // Search for the updated station
+            // البحث عن المحطة المعدلة
             document.getElementById('searchInput').value = stationNumber;
             searchStation();
         }
 
         // ============================================
-        // User Registration (for Google Sheets)
+        // Admin Functions
         // ============================================
-        function registerUser(name, phone) {
-            // In production, this would send data to Google Apps Script
-            const existingUser = usersData.find(u => u.phone === phone);
-            if (!existingUser) {
-                usersData.push({
-                    name: name,
-                    phone: phone,
-                    date: new Date().toISOString().split('T')[0]
-                });
+        async function loadAdminData() {
+            showLoading('جاري تحميل البيانات...');
+            
+            // جلب الإحصائيات
+            const stats = await apiGet('getStats');
+            if (stats.stats) {
+                document.getElementById('totalStations').textContent = stats.stats.totalStations || 0;
+                document.getElementById('totalUsers').textContent = stats.stats.totalUsers || 0;
+                document.getElementById('totalAdditions').textContent = stats.stats.totalAdditions || 0;
+                document.getElementById('totalEdits').textContent = stats.stats.totalEdits || 0;
             }
+            
+            // جلب المحطات
+            const stationsResult = await apiGet('getStations');
+            if (stationsResult.stations) {
+                const stationsBody = document.getElementById('adminStationsBody');
+                stationsBody.innerHTML = stationsResult.stations.map(s => {
+                    const googleMapUrl = s.lat && s.lng ? `https://www.google.com/maps?q=${s.lat},${s.lng}` : (s.googleMap || '#');
+                    return `
+                    <tr>
+                        <td>${s.number}</td>
+                        <td>${s.feeder || '-'}</td>
+                        <td>${s.lat || '-'}</td>
+                        <td>${s.lng || '-'}</td>
+                        <td>
+                            ${googleMapUrl !== '#' ? `
+                            <a href="${googleMapUrl}" target="_blank" class="map-link">
+                                <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+                                فتح الخريطة
+                            </a>
+                            ` : '-'}
+                        </td>
+                    </tr>
+                `}).join('');
+            }
+            
+            // جلب المستخدمين
+            const usersResult = await apiGet('getUsers');
+            if (usersResult.users) {
+                const usersBody = document.getElementById('adminUsersBody');
+                usersBody.innerHTML = usersResult.users.map(u => `
+                    <tr>
+                        <td>${u.name}</td>
+                        <td>${u.phone}</td>
+                        <td>${u.registerDate || '-'}</td>
+                    </tr>
+                `).join('');
+            }
+            
+            // جلب السجلات
+            const logsResult = await apiGet('getLogs');
+            if (logsResult.logs) {
+                const logsBody = document.getElementById('adminLogsBody');
+                logsBody.innerHTML = logsResult.logs.map(l => `
+                    <tr>
+                        <td><span style="color: ${l.type === 'إضافة' ? 'var(--success)' : 'var(--warning)'}">${l.type}</span></td>
+                        <td>${l.station}</td>
+                        <td>${l.user}</td>
+                        <td>${l.date}</td>
+                        <td>${l.reason || '-'}</td>
+                    </tr>
+                `).join('');
+            }
+            
+            hideLoading();
         }
 
         // ============================================
@@ -1854,7 +1924,6 @@
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             checkSession();
-            loadStations();
         });
 
         // Close modals on outside click
