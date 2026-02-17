@@ -85,6 +85,14 @@
         .logout-btn:hover { background: var(--danger); color: white; }
         .logout-btn svg { width: 16px; height: 16px; fill: currentColor; }
         
+        .cache-status { display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--bg-input); border-radius: 8px; font-size: 0.8rem; cursor: pointer; }
+        .cache-status:hover { background: var(--accent); }
+        .cache-icon { font-size: 1rem; }
+        .cache-text { color: var(--text-secondary); }
+        .cache-status.loaded .cache-text { color: var(--success); }
+        .cache-status.loading .cache-icon { animation: pulse 1s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        
         .search-section { background: var(--bg-card); border-radius: 14px; padding: 20px; margin-bottom: 20px; border: 1px solid var(--border); }
         .search-header { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
         .search-header svg { width: 24px; height: 24px; fill: var(--accent); }
@@ -310,6 +318,10 @@
                     <span class="header-title">نظام إدارة محطات التوزيع</span>
                 </div>
                 <div class="header-left">
+                    <div class="cache-status" id="cacheStatus" title="اضغط للتحديث" onclick="manualRefreshCache()">
+                        <span class="cache-icon">📦</span>
+                        <span class="cache-text" id="cacheText">جاري التحميل...</span>
+                    </div>
                     <div class="user-info">
                         <div class="user-avatar" id="userAvatar">م</div>
                         <div>
@@ -538,6 +550,136 @@
         
         let currentUser = null;
         let nearbyMap = null;
+        
+        // ============================================
+        // نظام Cache للمحطات - تسريع البحث
+        // ============================================
+        const CACHE_KEY = 'stations_cache';
+        const CACHE_TIME_KEY = 'stations_cache_time';
+        const CACHE_DURATION = 5 * 60 * 1000; // 5 دقائق
+        
+        let allStations = []; // كل المحطات في الذاكرة
+        let isStationsLoaded = false;
+        
+        // تحميل المحطات من Cache أو من السيرفر
+        async function loadStationsCache() {
+            updateCacheStatus('loading', 'جاري التحميل...');
+            
+            // محاولة قراءة من LocalStorage
+            const cached = localStorage.getItem(CACHE_KEY);
+            const cacheTime = localStorage.getItem(CACHE_TIME_KEY);
+            
+            if (cached && cacheTime) {
+                const age = Date.now() - parseInt(cacheTime);
+                if (age < CACHE_DURATION) {
+                    // Cache صالح
+                    allStations = JSON.parse(cached);
+                    isStationsLoaded = true;
+                    updateCacheStatus('loaded', allStations.length + ' محطة ⚡');
+                    console.log('✅ تم تحميل ' + allStations.length + ' محطة من Cache');
+                    return;
+                }
+            }
+            
+            // Cache غير موجود أو منتهي - حمّل من السيرفر
+            await refreshStationsCache();
+        }
+        
+        // تحديث Cache من السيرفر
+        async function refreshStationsCache() {
+            try {
+                updateCacheStatus('loading', 'جاري التحديث...');
+                console.log('🔄 جاري تحميل المحطات...');
+                const result = await apiGet('getStations');
+                
+                if (result.stations && result.stations.length > 0) {
+                    allStations = result.stations;
+                    isStationsLoaded = true;
+                    
+                    // حفظ في LocalStorage
+                    localStorage.setItem(CACHE_KEY, JSON.stringify(allStations));
+                    localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
+                    
+                    updateCacheStatus('loaded', allStations.length + ' محطة ✓');
+                    console.log('✅ تم تحميل ' + allStations.length + ' محطة من السيرفر');
+                } else {
+                    updateCacheStatus('error', 'خطأ في التحميل');
+                }
+            } catch (error) {
+                console.error('❌ خطأ في تحميل المحطات:', error);
+                updateCacheStatus('error', 'خطأ في الاتصال');
+            }
+        }
+        
+        // تحديث مؤشر حالة Cache
+        function updateCacheStatus(status, text) {
+            const statusEl = document.getElementById('cacheStatus');
+            const textEl = document.getElementById('cacheText');
+            
+            if (!statusEl || !textEl) return;
+            
+            statusEl.className = 'cache-status ' + status;
+            textEl.textContent = text;
+        }
+        
+        // البحث المحلي (فوري)
+        function searchStationLocal(number) {
+            if (!number) return { found: false };
+            
+            const searchValue = String(number).trim();
+            const station = allStations.find(s => s.number === searchValue);
+            
+            if (station) {
+                return { success: true, found: true, station: station };
+            }
+            return { success: true, found: false };
+        }
+        
+        // جلب المحطات القريبة محلياً
+        function getNearbyStationsLocal(lat, lng, radius = 3.5) {
+            if (!lat || !lng) return [];
+            
+            const centerLat = parseFloat(lat);
+            const centerLng = parseFloat(lng);
+            
+            const nearby = allStations.filter(s => {
+                if (!s.lat || !s.lng) return false;
+                
+                const dist = calcDistance(centerLat, centerLng, parseFloat(s.lat), parseFloat(s.lng));
+                s.distance = dist.toFixed(2);
+                
+                return dist <= radius;
+            });
+            
+            nearby.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
+            return nearby;
+        }
+        
+        // حساب المسافة
+        function calcDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        }
+        
+        // مسح Cache (يُستدعى بعد الإضافة أو التعديل)
+        function clearStationsCache() {
+            localStorage.removeItem(CACHE_KEY);
+            localStorage.removeItem(CACHE_TIME_KEY);
+            isStationsLoaded = false;
+            allStations = [];
+        }
+        
+        // تحديث يدوي للـ Cache
+        async function manualRefreshCache() {
+            clearStationsCache();
+            await refreshStationsCache();
+            showToast('تم تحديث البيانات');
+        }
 
         // ============================================
         // تنسيق والتحقق من رقم الجوال - صارم جداً
@@ -746,6 +888,9 @@
             updateUserUI();
             showPage('dashboardPage');
             showToast('مرحباً ' + currentUser.name);
+            
+            // تحميل المحطات في الخلفية
+            loadStationsCache();
             return false;
         }
 
@@ -799,6 +944,9 @@
             } else {
                 showToast('تم التسجيل بنجاح');
             }
+            
+            // تحميل المحطات في الخلفية
+            loadStationsCache();
             return false;
         }
 
@@ -842,19 +990,27 @@
                 currentUser = JSON.parse(saved);
                 updateUserUI();
                 showPage('dashboardPage');
+                // تحميل المحطات في الخلفية
+                loadStationsCache();
             }
         }
 
         // ============================================
-        // Search
+        // Search - البحث المحلي السريع
         // ============================================
         async function searchStation() {
             const searchValue = document.getElementById('searchInput').value.trim();
             if (!searchValue) { showToast('أدخل رقم المحطة', 'warning'); return; }
             
-            showLoading('جاري البحث...');
-            const result = await apiGet('searchStation', { number: searchValue });
-            hideLoading();
+            // التأكد من تحميل المحطات
+            if (!isStationsLoaded) {
+                showLoading('جاري تحميل البيانات...');
+                await loadStationsCache();
+                hideLoading();
+            }
+            
+            // البحث المحلي (فوري ⚡)
+            const result = searchStationLocal(searchValue);
             
             const resultsContent = document.getElementById('resultsContent');
             const resultsCount = document.getElementById('resultsCount');
@@ -868,18 +1024,25 @@
                 const mapUrl = s.googleMap || (s.lat && s.lng ? `https://www.google.com/maps?q=${s.lat},${s.lng}` : '');
                 resultsContent.innerHTML = `<div class="results-table-wrapper"><table class="results-table"><thead><tr><th>رقم المحطة</th><th>المغذي</th><th>المنطقة</th><th>الخريطة</th></tr></thead><tbody><tr><td><strong>${s.number}</strong></td><td>${s.feeder||'-'}</td><td>${s.region||'-'}</td><td>${mapUrl?`<a href="${mapUrl}" target="_blank" class="map-link"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>فتح</a>`:'-'}</td></tr></tbody></table></div>`;
                 resultsCount.textContent = '1 نتيجة';
-                if (s.lat && s.lng) loadNearbyStations(s.lat, s.lng, s.number);
-                else document.getElementById('mapSection').style.display = 'none';
+                
+                if (s.lat && s.lng) {
+                    loadNearbyStationsLocal(s.lat, s.lng, s.number);
+                } else {
+                    document.getElementById('mapSection').style.display = 'none';
+                }
             }
         }
-
-        async function loadNearbyStations(lat, lng, currentNumber) {
-            const result = await apiGet('getNearbyStations', { lat, lng, radius: 3.5 });
+        
+        // تحميل المحطات القريبة محلياً
+        function loadNearbyStationsLocal(lat, lng, currentNumber) {
             const mapSection = document.getElementById('mapSection');
-            if (!result.stations) { mapSection.style.display = 'none'; return; }
             
-            const nearby = result.stations.filter(s => s.number !== currentNumber);
-            if (nearby.length === 0) { mapSection.style.display = 'none'; return; }
+            const nearby = getNearbyStationsLocal(lat, lng, 3.5).filter(s => s.number !== currentNumber);
+            
+            if (nearby.length === 0) {
+                mapSection.style.display = 'none';
+                return;
+            }
             
             mapSection.style.display = 'block';
             document.getElementById('nearbyCount').textContent = nearby.length + ' محطة';
@@ -977,6 +1140,11 @@
             hideLoading();
             
             if (result.error) { showToast(result.error, 'error'); return; }
+            
+            // مسح Cache وتحديثه
+            clearStationsCache();
+            await refreshStationsCache();
+            
             closeModal('addModal');
             showToast('تمت الإضافة');
             document.getElementById('searchInput').value = num;
@@ -1018,6 +1186,11 @@
             hideLoading();
             
             if (result.error) { showToast(result.error, 'error'); return; }
+            
+            // مسح Cache وتحديثه
+            clearStationsCache();
+            await refreshStationsCache();
+            
             closeModal('editModal');
             showToast('تم التعديل');
             document.getElementById('searchInput').value = num;
@@ -1120,7 +1293,12 @@
                 return;
             }
             
-            showLoading('جاري البحث...');
+            // التأكد من تحميل المحطات
+            if (!isStationsLoaded) {
+                showLoading('جاري تحميل البيانات...');
+                await loadStationsCache();
+                hideLoading();
+            }
             
             faultStations = [];
             const tableBody = document.getElementById('faultTableBody');
@@ -1129,12 +1307,12 @@
             const labels = ['A', 'B', 'C', 'D', 'E', 'F'];
             let foundCount = 0;
             
-            // البحث عن كل محطة
+            // البحث المحلي (فوري ⚡)
             for (let i = 0; i < stationNumbers.length; i++) {
                 const item = stationNumbers[i];
                 const input = document.getElementById('fault' + item.index);
                 
-                const result = await apiGet('searchStation', { number: item.number });
+                const result = searchStationLocal(item.number);
                 
                 if (result.found) {
                     input.classList.remove('not-found');
@@ -1169,8 +1347,6 @@
                     `;
                 }
             }
-            
-            hideLoading();
             
             document.getElementById('faultCount').textContent = foundCount + ' محطة';
             document.getElementById('faultResults').style.display = 'block';
