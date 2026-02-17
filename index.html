@@ -1176,11 +1176,11 @@
             document.getElementById('faultResults').style.display = 'block';
             
             // عرض الخريطة وإنشاء رابط التنقل
-            if (foundCount >= 2) {
+            if (foundCount >= 1) {
                 renderFaultMap();
                 generateNavigationLink();
             } else {
-                showToast('يجب العثور على محطتين على الأقل', 'warning');
+                showToast('لم يتم العثور على أي محطة', 'warning');
             }
         }
 
@@ -1207,8 +1207,11 @@
             const centerLat = sumLat / validStations.length;
             const centerLng = sumLng / validStations.length;
             
+            // تحديد مستوى التكبير
+            const zoomLevel = validStations.length === 1 ? 15 : 13;
+            
             // إنشاء الخريطة
-            faultMap = L.map('faultMap').setView([centerLat, centerLng], 13);
+            faultMap = L.map('faultMap').setView([centerLat, centerLng], zoomLevel);
             
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap'
@@ -1241,7 +1244,7 @@
                 markers.push([parseFloat(station.lat), parseFloat(station.lng)]);
             });
             
-            // رسم خط بين النقاط
+            // رسم خط بين النقاط (فقط إذا كان أكثر من محطة)
             if (markers.length >= 2) {
                 L.polyline(markers, {
                     color: '#ff6b6b',
@@ -1249,10 +1252,8 @@
                     opacity: 0.8,
                     dashArray: '10, 10'
                 }).addTo(faultMap);
-            }
-            
-            // ضبط حدود الخريطة لتشمل جميع النقاط
-            if (markers.length > 0) {
+                
+                // ضبط حدود الخريطة لتشمل جميع النقاط
                 faultMap.fitBounds(markers, { padding: [30, 30] });
             }
         }
@@ -1260,26 +1261,37 @@
         function generateNavigationLink() {
             const validStations = faultStations.filter(s => s.lat && s.lng);
             
-            if (validStations.length < 2) {
+            if (validStations.length === 0) {
                 document.getElementById('faultNavigationLink').style.display = 'none';
                 return;
             }
             
-            // إنشاء رابط Google Maps للتنقل
-            // الصيغة: https://www.google.com/maps/dir/origin/destination/waypoint1/waypoint2
+            let url;
             
-            let url = 'https://www.google.com/maps/dir/';
-            
-            validStations.forEach((station, index) => {
-                url += `${station.lat},${station.lng}`;
-                if (index < validStations.length - 1) {
-                    url += '/';
-                }
-            });
+            if (validStations.length === 1) {
+                // محطة واحدة - فتح موقعها مباشرة
+                url = `https://www.google.com/maps/search/?api=1&query=${validStations[0].lat},${validStations[0].lng}`;
+            } else {
+                // أكثر من محطة - إنشاء مسار تنقل
+                url = 'https://www.google.com/maps/dir/';
+                validStations.forEach((station, index) => {
+                    url += `${station.lat},${station.lng}`;
+                    if (index < validStations.length - 1) {
+                        url += '/';
+                    }
+                });
+            }
             
             const link = document.getElementById('faultNavigationLink');
             link.href = url;
             link.style.display = 'flex';
+            
+            // تغيير نص الزر حسب عدد المحطات
+            if (validStations.length === 1) {
+                link.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>فتح الموقع في Google Maps`;
+            } else {
+                link.innerHTML = `<svg viewBox="0 0 24 24"><path d="M21.71 11.29l-9-9c-.39-.39-1.02-.39-1.41 0l-9 9c-.39.39-.39 1.02 0 1.41l9 9c.39.39 1.02.39 1.41 0l9-9c.39-.38.39-1.01 0-1.41zM14 14.5V12h-4v3H8v-4c0-.55.45-1 1-1h5V7.5l3.5 3.5-3.5 3.5z"/></svg>فتح التنقل في Google Maps`;
+            }
         }
     </script>
 </body>
