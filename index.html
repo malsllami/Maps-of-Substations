@@ -107,10 +107,14 @@
         .admin-link { text-align: center; margin-top: 1rem; }
         .admin-link a { color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; }
 
-        .install-btn { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: var(--gradient-sec); color: white; border: none; border-radius: 2rem; padding: 0.85rem 1.5rem; font-family: 'Tajawal', sans-serif; font-weight: 600; cursor: pointer; display: none; align-items: center; gap: 0.5rem; box-shadow: 0 4px 20px rgba(232, 165, 75, 0.4); z-index: 1000; font-size: 0.9rem; }
-        .install-btn.show { display: flex; animation: bounce 2s infinite; }
+        .install-btn { position: fixed; top: 0; left: 0; right: 0; background: linear-gradient(135deg, #e8a54b 0%, #d4923a 100%); color: white; border: none; padding: 0.75rem 1rem; font-family: 'Tajawal', sans-serif; font-weight: 600; cursor: pointer; display: none; align-items: center; justify-content: center; gap: 0.5rem; z-index: 1000; font-size: 0.9rem; }
+        .install-btn.show { display: flex; }
         .install-btn svg { width: 1.25rem; height: 1.25rem; fill: currentColor; }
-        @keyframes bounce { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-5px); } }
+        .install-btn .close-install { position: absolute; left: 1rem; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; opacity: 0.7; }
+        .install-btn .close-install:hover { opacity: 1; }
+        
+        /* إزاحة المحتوى عند ظهور زر التثبيت */
+        body.install-visible .page { padding-top: 3rem; }
 
         .dashboard-container { min-height: 100vh; padding: 1rem; max-width: 1200px; margin: 0 auto; }
         .header { background: var(--bg-card); border-radius: 1rem; padding: 1rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; border: 1px solid var(--border); }
@@ -120,9 +124,33 @@
         .header-subtitle { font-size: 0.75rem; color: var(--text-secondary); }
         .header-left { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
         
-        .cache-status { display: flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.75rem; background: var(--bg-input); border-radius: 0.5rem; font-size: 0.75rem; cursor: pointer; }
+        .cache-status { display: flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.75rem; background: var(--bg-input); border-radius: 0.5rem; font-size: 0.75rem; cursor: pointer; transition: 0.3s; }
         .cache-status:hover { background: var(--sec-orange); }
         .cache-status.loaded .cache-text { color: var(--success); }
+        .cache-status.loading .cache-text { color: var(--warning); }
+        .cache-status.error .cache-text { color: var(--danger); }
+        
+        /* شريط التحميل الأولي */
+        .first-load-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(30, 58, 95, 0.95);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            gap: 1.5rem;
+        }
+        .first-load-overlay.active { display: flex; }
+        .first-load-logo { font-size: 4rem; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        .first-load-text { font-size: 1.1rem; color: var(--text-primary); }
+        .first-load-progress { width: 80%; max-width: 300px; height: 8px; background: var(--bg-input); border-radius: 4px; overflow: hidden; }
+        .first-load-bar { height: 100%; background: var(--gradient-sec); width: 0%; transition: width 0.3s; border-radius: 4px; }
+        .first-load-count { font-size: 0.9rem; color: var(--text-secondary); }
+        .first-load-done { color: var(--success); font-size: 1.2rem; display: none; }
+        .first-load-done.show { display: block; animation: fadeIn 0.5s; }
         
         .user-info { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.75rem; background: var(--bg-input); border-radius: 0.5rem; }
         .user-avatar { width: 2rem; height: 2rem; background: var(--sec-orange); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
@@ -279,7 +307,22 @@
 <body>
     <div class="loading-overlay" id="loadingOverlay"><div class="loading-spinner"></div><div>جاري التحميل...</div></div>
     <div class="toast-container" id="toastContainer"></div>
-    <button class="install-btn" id="installBtn" onclick="installApp()"><svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg><span>تثبيت التطبيق</span></button>
+    
+    <!-- شاشة التحميل الأولي -->
+    <div class="first-load-overlay" id="firstLoadOverlay">
+        <div class="first-load-logo">⚡</div>
+        <div class="first-load-text">جاري تحميل بيانات المحطات...</div>
+        <div class="first-load-progress"><div class="first-load-bar" id="firstLoadBar"></div></div>
+        <div class="first-load-count" id="firstLoadCount">0%</div>
+        <div class="first-load-done" id="firstLoadDone">✓ تم التحميل بنجاح!</div>
+    </div>
+    
+    <!-- شريط التثبيت الثابت -->
+    <div class="install-btn" id="installBtn">
+        <button class="close-install" onclick="hideInstallBanner(event)">×</button>
+        <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+        <span onclick="installApp()">تثبيت التطبيق على جهازك</span>
+    </div>
     
     <!-- iOS Install Prompt -->
     <div class="ios-install-prompt" id="iosInstallPrompt" style="display:none;">
@@ -515,11 +558,104 @@
         function startVersionCheck() { if (versionCheckTimer) clearInterval(versionCheckTimer); versionCheckTimer = setInterval(checkForUpdates, 30000); }
         function stopVersionCheck() { if (versionCheckTimer) { clearInterval(versionCheckTimer); versionCheckTimer = null; } }
         async function checkForUpdates() { try { const r = await apiGet('getVersion'); if (r.version && r.version !== currentVersion) { await silentRefreshCache(); currentVersion = r.version; localStorage.setItem(CACHE_VERSION_KEY, currentVersion); showToast('تم التحديث 🔄'); } } catch (e) {} }
-        async function silentRefreshCache() { try { const r = await apiGet('getAllStations'); if (r.stations?.length) { allStations = r.stations; isStationsLoaded = true; localStorage.setItem(CACHE_KEY, JSON.stringify(allStations)); updateCacheStatus('loaded', allStations.length + ' ✓'); } } catch (e) {} }
-        async function loadStationsCache() { updateCacheStatus('loading', '...'); currentVersion = localStorage.getItem(CACHE_VERSION_KEY); const c = localStorage.getItem(CACHE_KEY); if (c && currentVersion) { allStations = JSON.parse(c); isStationsLoaded = true; updateCacheStatus('loaded', allStations.length + ' ⚡'); startVersionCheck(); checkForUpdates(); return; } await refreshStationsCache(); }
-        async function refreshStationsCache() { try { updateCacheStatus('loading', '...'); const [v, s] = await Promise.all([apiGet('getVersion'), apiGet('getAllStations')]); if (s.stations?.length) { allStations = s.stations; isStationsLoaded = true; currentVersion = v.version || Date.now().toString(); localStorage.setItem(CACHE_KEY, JSON.stringify(allStations)); localStorage.setItem(CACHE_VERSION_KEY, currentVersion); updateCacheStatus('loaded', allStations.length + ' ✓'); startVersionCheck(); } } catch (e) { updateCacheStatus('error', 'خطأ'); } }
+        async function silentRefreshCache() { try { const r = await apiGet('getAllStations'); if (r.stations?.length) { allStations = r.stations; isStationsLoaded = true; localStorage.setItem(CACHE_KEY, JSON.stringify(allStations)); updateCacheStatus('loaded', allStations.length.toLocaleString('ar-SA') + ' محطة ✓'); } } catch (e) {} }
+        async function loadStationsCache() { 
+            updateCacheStatus('loading', 'جاري التحميل...'); 
+            currentVersion = localStorage.getItem(CACHE_VERSION_KEY); 
+            const c = localStorage.getItem(CACHE_KEY); 
+            if (c && currentVersion) { 
+                allStations = JSON.parse(c); 
+                isStationsLoaded = true; 
+                updateCacheStatus('loaded', allStations.length.toLocaleString('ar-SA') + ' محطة ✓'); 
+                startVersionCheck(); 
+                checkForUpdates(); 
+                return; 
+            } 
+            await refreshStationsCacheWithProgress(); 
+        }
+        
+        async function refreshStationsCacheWithProgress() {
+            const overlay = document.getElementById('firstLoadOverlay');
+            const bar = document.getElementById('firstLoadBar');
+            const countEl = document.getElementById('firstLoadCount');
+            const doneEl = document.getElementById('firstLoadDone');
+            
+            overlay.classList.add('active');
+            bar.style.width = '10%';
+            countEl.textContent = 'جاري الاتصال...';
+            
+            try {
+                bar.style.width = '30%';
+                countEl.textContent = 'جاري جلب البيانات...';
+                
+                const [versionResult, stationsResult] = await Promise.all([
+                    apiGet('getVersion'), 
+                    apiGet('getAllStations')
+                ]);
+                
+                bar.style.width = '70%';
+                countEl.textContent = 'جاري معالجة البيانات...';
+                
+                if (stationsResult.stations && stationsResult.stations.length > 0) {
+                    allStations = stationsResult.stations;
+                    isStationsLoaded = true;
+                    currentVersion = versionResult.version || Date.now().toString();
+                    
+                    bar.style.width = '90%';
+                    countEl.textContent = 'جاري الحفظ...';
+                    
+                    localStorage.setItem(CACHE_KEY, JSON.stringify(allStations));
+                    localStorage.setItem(CACHE_VERSION_KEY, currentVersion);
+                    
+                    bar.style.width = '100%';
+                    countEl.textContent = allStations.length.toLocaleString('ar-SA') + ' محطة';
+                    doneEl.classList.add('show');
+                    
+                    updateCacheStatus('loaded', allStations.length.toLocaleString('ar-SA') + ' محطة ✓');
+                    
+                    setTimeout(() => {
+                        overlay.classList.remove('active');
+                        showToast('تم تحميل ' + allStations.length.toLocaleString('ar-SA') + ' محطة ✓', 'success');
+                    }, 1500);
+                    
+                    startVersionCheck();
+                } else {
+                    throw new Error('لا توجد بيانات');
+                }
+            } catch (e) {
+                bar.style.width = '100%';
+                bar.style.background = 'var(--danger)';
+                countEl.textContent = 'خطأ في التحميل - تحقق من الاتصال';
+                updateCacheStatus('error', 'خطأ في الاتصال ❌');
+                
+                setTimeout(() => {
+                    overlay.classList.remove('active');
+                    showToast('خطأ في تحميل البيانات', 'error');
+                }, 2000);
+            }
+        }
+        
+        async function refreshStationsCache() { 
+            try { 
+                updateCacheStatus('loading', 'جاري التحديث...'); 
+                const [v, s] = await Promise.all([apiGet('getVersion'), apiGet('getAllStations')]); 
+                if (s.stations?.length) { 
+                    allStations = s.stations; 
+                    isStationsLoaded = true; 
+                    currentVersion = v.version || Date.now().toString(); 
+                    localStorage.setItem(CACHE_KEY, JSON.stringify(allStations)); 
+                    localStorage.setItem(CACHE_VERSION_KEY, currentVersion); 
+                    updateCacheStatus('loaded', allStations.length.toLocaleString('ar-SA') + ' محطة ✓'); 
+                    startVersionCheck(); 
+                } else {
+                    updateCacheStatus('error', 'خطأ في الاتصال ❌');
+                }
+            } catch (e) { 
+                updateCacheStatus('error', 'خطأ في الاتصال ❌'); 
+            } 
+        }
         function clearStationsCache() { localStorage.removeItem(CACHE_KEY); localStorage.removeItem(CACHE_VERSION_KEY); isStationsLoaded = false; allStations = []; currentVersion = null; }
-        async function manualRefreshCache() { clearStationsCache(); await refreshStationsCache(); showToast('تم التحديث'); }
+        async function manualRefreshCache() { clearStationsCache(); await refreshStationsCache(); showToast('تم تحديث البيانات ✓'); }
         function updateCacheStatus(s, t) { const el = document.getElementById('cacheStatus'), txt = document.getElementById('cacheText'); if (el && txt) { el.className = 'cache-status ' + s; txt.textContent = t; } }
         function searchStationLocal(n) { if (!n) return { found: false }; const v = String(n).trim().toUpperCase(), s = allStations.find(x => String(x.number).toUpperCase() === v); return s ? { found: true, station: s } : { found: false }; }
         function getNearbyStationsLocal(lat, lng, r = 3.5) { if (!lat || !lng) return []; const cLat = parseFloat(lat), cLng = parseFloat(lng); return allStations.filter(s => { if (!s.lat || !s.lng) return false; const d = calcDistance(cLat, cLng, parseFloat(s.lat), parseFloat(s.lng)); s.distance = d.toFixed(2); return d <= r; }).sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance)); }
@@ -536,16 +672,39 @@
         function togglePassword() { const i = document.getElementById('adminCode'); i.type = i.type === 'password' ? 'text' : 'password'; }
 
         // PWA
-        window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; document.getElementById('installBtn').classList.add('show'); });
+        window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; showInstallBanner(); });
+        
+        function showInstallBanner() {
+            const btn = document.getElementById('installBtn');
+            if (!localStorage.getItem('installBannerClosed')) {
+                btn.classList.add('show');
+                document.body.classList.add('install-visible');
+            }
+        }
+        
+        function hideInstallBanner(e) {
+            if (e) e.stopPropagation();
+            const btn = document.getElementById('installBtn');
+            btn.classList.remove('show');
+            document.body.classList.remove('install-visible');
+            localStorage.setItem('installBannerClosed', 'true');
+        }
         
         function installApp() { 
             if (deferredPrompt) { 
                 deferredPrompt.prompt(); 
                 deferredPrompt.userChoice.then(c => { 
-                    if (c.outcome === 'accepted') document.getElementById('installBtn').classList.remove('show'); 
+                    if (c.outcome === 'accepted') hideInstallBanner(); 
                     deferredPrompt = null; 
                 }); 
-            } 
+            } else {
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                if (isIOS) {
+                    document.getElementById('iosInstallPrompt').style.display = 'block';
+                } else {
+                    showToast('اضغط على ⋮ ثم "تثبيت التطبيق"', 'warning');
+                }
+            }
         }
         
         function checkIOSInstall() {
@@ -564,22 +723,10 @@
             localStorage.setItem('iosPromptShown', 'true');
         }
         
-        // Show install button for browsers that don't support beforeinstallprompt
+        // إظهار زر التثبيت
         setTimeout(() => {
-            const btn = document.getElementById('installBtn');
-            if (!deferredPrompt && !btn.classList.contains('show')) {
-                // Check if not already installed
-                if (!window.matchMedia('(display-mode: standalone)').matches) {
-                    btn.classList.add('show');
-                    btn.onclick = () => {
-                        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-                        if (isIOS) {
-                            document.getElementById('iosInstallPrompt').style.display = 'block';
-                        } else {
-                            showToast('اضغط على قائمة المتصفح ثم "تثبيت التطبيق"', 'warning');
-                        }
-                    };
-                }
+            if (!window.matchMedia('(display-mode: standalone)').matches && !localStorage.getItem('installBannerClosed')) {
+                showInstallBanner();
             }
         }, 2000);
 
@@ -591,7 +738,7 @@
 
         // Auth
         function switchTab(t) { document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active')); if (t === 'login') { document.querySelector('.tab:first-child').classList.add('active'); document.getElementById('loginTab').classList.add('active'); } else { document.querySelector('.tab:last-child').classList.add('active'); document.getElementById('registerTab').classList.add('active'); } }
-        async function handleLogin(e) { e.preventDefault(); if (!isValidPhone(document.getElementById('loginPhone').value)) { showToast('رقم خاطئ', 'error'); return false; } const p = normalizePhone(document.getElementById('loginPhone').value); showLoading(); const r = await apiPost({ action: 'loginUser', phone: p }); hideLoading(); if (r.notFound) { showToast('غير مسجل', 'warning'); switchTab('register'); document.getElementById('regPhone').value = p; validateRegPhone(); return false; } if (r.error) { showToast(r.error, 'error'); return false; } currentUser = r.user; localStorage.setItem('currentUser', JSON.stringify(currentUser)); updateUserUI(); showPage('dashboardPage'); showToast('مرحباً ' + currentUser.name); loadStationsCache(); return false; }
+        async function handleLogin(e) { e.preventDefault(); if (!isValidPhone(document.getElementById('loginPhone').value)) { showToast('رقم خاطئ', 'error'); return false; } const p = normalizePhone(document.getElementById('loginPhone').value); showLoading(); const r = await apiPost({ action: 'loginUser', phone: p }); hideLoading(); if (r.notFound) { showToast('غير مسجل', 'warning'); switchTab('register'); document.getElementById('regPhone').value = p; validateRegPhone(); return false; } if (r.error) { showToast(r.error, 'error'); return false; } currentUser = r.user; localStorage.setItem('currentUser', JSON.stringify(currentUser)); updateUserUI(); showPage('dashboardPage'); showToast('مرحباً ' + currentUser.name + ' 👋'); loadStationsCache(); return false; }
         async function handleRegister(e) { e.preventDefault(); const name = document.getElementById('regName').value.trim(); if (!name || !isValidPhone(document.getElementById('regPhone').value)) { showToast('تحقق من البيانات', 'error'); return false; } const p = normalizePhone(document.getElementById('regPhone').value); showLoading(); const r = await apiPost({ action: 'registerUser', name, phone: p, email: document.getElementById('regEmail').value.trim(), userType: document.getElementById('regType').value }); hideLoading(); if (r.error && !r.alreadyExists) { showToast(r.error, 'error'); return false; } currentUser = r.user; localStorage.setItem('currentUser', JSON.stringify(currentUser)); updateUserUI(); showPage('dashboardPage'); showToast(r.alreadyExists ? 'مرحباً بعودتك' : 'تم التسجيل'); loadStationsCache(); return false; }
         function updateUserUI() { document.getElementById('userName').textContent = currentUser.name; document.getElementById('userAvatar').textContent = currentUser.name.charAt(0); document.getElementById('userType').textContent = currentUser.type || 'موظف'; }
         function showAdminLogin() { document.getElementById('adminLoginModal').classList.add('active'); }
