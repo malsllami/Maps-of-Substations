@@ -9,28 +9,52 @@
     <meta name="apple-mobile-web-app-title" content="محطات SEC">
     <link rel="manifest" id="manifest-placeholder">
     <title>نظام محطات SEC - جدة</title>
+    <script>
+        // إنشاء manifest ديناميكياً
+        const manifest = {
+            "name": "نظام محطات SEC - جدة",
+            "short_name": "SEC محطات",
+            "description": "نظام إدارة محطات التوزيع والتحويل",
+            "start_url": "./",
+            "display": "standalone",
+            "background_color": "#1e3a5f",
+            "theme_color": "#e8a54b",
+            "orientation": "portrait-primary",
+            "icons": [
+                {
+                    "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23e8a54b' width='100' height='100' rx='20'/><text x='50' y='65' text-anchor='middle' fill='white' font-size='50'>⚡</text></svg>",
+                    "sizes": "192x192",
+                    "type": "image/svg+xml",
+                    "purpose": "any maskable"
+                }
+            ]
+        };
+        const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+        document.getElementById('manifest-placeholder').setAttribute('href', URL.createObjectURL(blob));
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&family=Cairo:wght@600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         :root {
-            --sec-orange: #f77f00;
-            --sec-orange-light: #ffb347;
-            --sec-blue: #1a365d;
-            --sec-blue-light: #2c5282;
-            --sec-blue-lighter: #4299e1;
-            --sec-blue-pale: #bee3f8;
-            --success: #48bb78;
-            --warning: #ecc94b;
-            --danger: #fc8181;
-            --bg-dark: #1a365d;
-            --bg-card: #234876;
-            --bg-input: #2c5282;
+            --sec-orange: #e8a54b;
+            --sec-orange-light: #f5c77e;
+            --sec-orange-dark: #d4923a;
+            --sec-blue: #1e3a5f;
+            --sec-blue-light: #2d4a6f;
+            --sec-blue-lighter: #5b8fb9;
+            --sec-blue-pale: #c5ddf0;
+            --success: #5cb85c;
+            --warning: #f0c36d;
+            --danger: #e57373;
+            --bg-dark: #1e3a5f;
+            --bg-card: #274a6f;
+            --bg-input: #2d5a7f;
             --text-primary: #ffffff;
-            --text-secondary: #bee3f8;
-            --border: #4299e1;
-            --gradient-sec: linear-gradient(135deg, #f77f00 0%, #ffb347 100%);
+            --text-secondary: #c5ddf0;
+            --border: #5b8fb9;
+            --gradient-sec: linear-gradient(135deg, #e8a54b 0%, #f5c77e 100%);
             --shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -83,9 +107,10 @@
         .admin-link { text-align: center; margin-top: 1rem; }
         .admin-link a { color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; }
 
-        .install-btn { position: fixed; bottom: 1rem; left: 1rem; background: var(--gradient-sec); color: white; border: none; border-radius: 2rem; padding: 0.75rem 1.25rem; font-family: 'Tajawal', sans-serif; font-weight: 600; cursor: pointer; display: none; align-items: center; gap: 0.5rem; box-shadow: var(--shadow); z-index: 1000; }
-        .install-btn.show { display: flex; }
+        .install-btn { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: var(--gradient-sec); color: white; border: none; border-radius: 2rem; padding: 0.85rem 1.5rem; font-family: 'Tajawal', sans-serif; font-weight: 600; cursor: pointer; display: none; align-items: center; gap: 0.5rem; box-shadow: 0 4px 20px rgba(232, 165, 75, 0.4); z-index: 1000; font-size: 0.9rem; }
+        .install-btn.show { display: flex; animation: bounce 2s infinite; }
         .install-btn svg { width: 1.25rem; height: 1.25rem; fill: currentColor; }
+        @keyframes bounce { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-5px); } }
 
         .dashboard-container { min-height: 100vh; padding: 1rem; max-width: 1200px; margin: 0 auto; }
         .header { background: var(--bg-card); border-radius: 1rem; padding: 1rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; border: 1px solid var(--border); }
@@ -161,6 +186,12 @@
         .nearby-item { display: flex; align-items: center; justify-content: space-between; padding: 0.625rem 0.75rem; background: var(--bg-input); border-radius: 0.5rem; margin-bottom: 0.4rem; font-size: 0.85rem; }
         .nearby-number { font-weight: 700; color: var(--sec-orange-light); }
         .nearby-distance { font-size: 0.75rem; color: var(--text-secondary); }
+        
+        .feeder-toggle { display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; }
+        .feeder-btn { padding: 0.5rem 1rem; border: 2px solid var(--border); background: transparent; color: var(--text-secondary); border-radius: 2rem; cursor: pointer; font-family: 'Tajawal', sans-serif; font-size: 0.8rem; transition: 0.3s; display: flex; align-items: center; gap: 0.4rem; }
+        .feeder-btn:hover { border-color: var(--sec-orange); color: var(--sec-orange); }
+        .feeder-btn.active { background: var(--gradient-sec); border-color: var(--sec-orange); color: white; }
+        .feeder-btn svg { width: 1rem; height: 1rem; fill: currentColor; }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26, 54, 93, 0.9); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
         .modal-overlay.active { display: flex; }
@@ -239,7 +270,9 @@
             .fault-input-group { min-width: calc(50% - 0.375rem); }
         }
         @media (max-width: 480px) {
-            .action-btn span { display: none; }
+            .action-btn { font-size: 0.75rem; padding: 0.5rem 0.6rem; }
+            .action-btn svg { width: 1rem; height: 1rem; }
+            .action-btn span { font-size: 0.7rem; }
         }
     </style>
 </head>
@@ -247,6 +280,25 @@
     <div class="loading-overlay" id="loadingOverlay"><div class="loading-spinner"></div><div>جاري التحميل...</div></div>
     <div class="toast-container" id="toastContainer"></div>
     <button class="install-btn" id="installBtn" onclick="installApp()"><svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg><span>تثبيت التطبيق</span></button>
+    
+    <!-- iOS Install Prompt -->
+    <div class="ios-install-prompt" id="iosInstallPrompt" style="display:none;">
+        <div class="ios-prompt-content">
+            <button class="ios-close" onclick="closeIOSPrompt()">×</button>
+            <div style="font-size:2rem;margin-bottom:0.5rem;">⚡</div>
+            <h4>تثبيت التطبيق</h4>
+            <p>اضغط على <svg viewBox="0 0 24 24" style="width:1.2rem;height:1.2rem;vertical-align:middle;fill:#5b8fb9;"><path d="M16 5l-1.42 1.42-1.59-1.59V16h-1.98V4.83L9.42 6.42 8 5l4-4 4 4zm4 5v11c0 1.1-.9 2-2 2H6c-1.11 0-2-.9-2-2V10c0-1.11.89-2 2-2h3v2H6v11h12V10h-3V8h3c1.1 0 2 .89 2 2z"/></svg> ثم <strong>"إضافة للشاشة الرئيسية"</strong></p>
+        </div>
+    </div>
+    
+    <style>
+        .ios-install-prompt { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-card); padding: 1.25rem; border-top-left-radius: 1rem; border-top-right-radius: 1rem; box-shadow: 0 -5px 20px rgba(0,0,0,0.3); z-index: 2000; animation: slideUp 0.3s ease; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .ios-prompt-content { text-align: center; position: relative; }
+        .ios-prompt-content h4 { margin: 0.5rem 0; color: var(--sec-orange); }
+        .ios-prompt-content p { font-size: 0.85rem; color: var(--text-secondary); margin: 0; }
+        .ios-close { position: absolute; top: -0.5rem; left: 0; background: none; border: none; font-size: 1.5rem; color: var(--text-secondary); cursor: pointer; }
+    </style>
 
     <!-- Login -->
     <div class="page active" id="loginPage">
@@ -454,7 +506,7 @@
     </div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbwX3aOPjhUidUzKxWlME9wIOGgMEuU7YJtsY232sZpbeJvD2rx5OuowElDTeDfdAhsdAw/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzR3jmjcMYCpEVRIVQCFsRAO_myWViBiLBLty6tmL_28wg4RGG7iDtMb2KYa9jQpzyGnQ/exec';
         let currentUser = null, nearbyMap = null, faultMap = null, faultStations = [], editingStationType = null, deferredPrompt = null;
         const CACHE_KEY = 'sec_stations_v7', CACHE_VERSION_KEY = 'sec_version_v7';
         let allStations = [], isStationsLoaded = false, versionCheckTimer = null, currentVersion = null;
@@ -485,7 +537,51 @@
 
         // PWA
         window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; document.getElementById('installBtn').classList.add('show'); });
-        function installApp() { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.userChoice.then(c => { if (c.outcome === 'accepted') document.getElementById('installBtn').classList.remove('show'); deferredPrompt = null; }); } }
+        
+        function installApp() { 
+            if (deferredPrompt) { 
+                deferredPrompt.prompt(); 
+                deferredPrompt.userChoice.then(c => { 
+                    if (c.outcome === 'accepted') document.getElementById('installBtn').classList.remove('show'); 
+                    deferredPrompt = null; 
+                }); 
+            } 
+        }
+        
+        function checkIOSInstall() {
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            const isStandalone = window.navigator.standalone === true;
+            
+            if (isIOS && !isStandalone && !localStorage.getItem('iosPromptShown')) {
+                setTimeout(() => {
+                    document.getElementById('iosInstallPrompt').style.display = 'block';
+                }, 3000);
+            }
+        }
+        
+        function closeIOSPrompt() {
+            document.getElementById('iosInstallPrompt').style.display = 'none';
+            localStorage.setItem('iosPromptShown', 'true');
+        }
+        
+        // Show install button for browsers that don't support beforeinstallprompt
+        setTimeout(() => {
+            const btn = document.getElementById('installBtn');
+            if (!deferredPrompt && !btn.classList.contains('show')) {
+                // Check if not already installed
+                if (!window.matchMedia('(display-mode: standalone)').matches) {
+                    btn.classList.add('show');
+                    btn.onclick = () => {
+                        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                        if (isIOS) {
+                            document.getElementById('iosInstallPrompt').style.display = 'block';
+                        } else {
+                            showToast('اضغط على قائمة المتصفح ثم "تثبيت التطبيق"', 'warning');
+                        }
+                    };
+                }
+            }
+        }, 2000);
 
         // Phone
         function normalizePhone(p) { if (!p) return ''; let c = String(p).replace(/\D/g, ''); if (c.startsWith('966') && c.length === 12) c = '0' + c.substring(3); if (c.startsWith('5') && c.length === 9) c = '0' + c; return c; }
@@ -504,8 +600,89 @@
         function checkSession() { const s = localStorage.getItem('currentUser'); if (s) { currentUser = JSON.parse(s); updateUserUI(); showPage('dashboardPage'); loadStationsCache(); } }
 
         // Search
-        async function searchStation() { const v = document.getElementById('searchInput').value.trim(); if (!v) { showToast('أدخل الرقم', 'warning'); return; } if (!isStationsLoaded) { showLoading(); await loadStationsCache(); hideLoading(); } const r = searchStationLocal(v), rc = document.getElementById('resultsContent'), rn = document.getElementById('resultsCount'); if (!r.found) { rc.innerHTML = `<div class="not-found-card"><h4>غير موجود</h4><div class="searched-number">${v}</div></div>`; rn.textContent = '0'; document.getElementById('mapSection').style.display = 'none'; } else { const s = r.station, url = s.googleMap || (s.lat && s.lng ? `https://www.google.com/maps?q=${s.lat},${s.lng}` : ''), tb = s.type === 'distribution' ? '<span class="type-badge type-distribution">توزيع</span>' : '<span class="type-badge type-substation">تحويل</span>'; let ex = s.type === 'distribution' ? `<tr><td colspan="3"><strong>المغذي:</strong> ${s.feeder||'-'} | <strong>الحي:</strong> ${s.region||'-'}</td></tr>` : ''; rc.innerHTML = `<div class="results-table-wrapper"><table class="results-table"><thead><tr><th>المحطة</th><th>النوع</th><th>الخريطة</th></tr></thead><tbody><tr><td><strong>${s.number}</strong></td><td>${tb}</td><td>${url ? `<a href="${url}" target="_blank" class="map-link"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>فتح</a>` : '-'}</td></tr>${ex}</tbody></table></div>`; rn.textContent = '1'; if (s.lat && s.lng) loadNearbyStationsLocal(s.lat, s.lng, s.number); else document.getElementById('mapSection').style.display = 'none'; } }
-        function loadNearbyStationsLocal(lat, lng, cur) { const ms = document.getElementById('mapSection'), nb = getNearbyStationsLocal(lat, lng, 3.5).filter(s => s.number !== cur); if (!nb.length) { ms.style.display = 'none'; return; } ms.style.display = 'block'; document.getElementById('nearbyCount').textContent = nb.length; if (nearbyMap) nearbyMap.remove(); nearbyMap = L.map('nearbyMap').setView([parseFloat(lat), parseFloat(lng)], 14); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(nearbyMap); L.marker([parseFloat(lat), parseFloat(lng)], { icon: L.divIcon({ html: '<div style="background:#f77f00;width:18px;height:18px;border-radius:50%;border:3px solid white;"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }) }).addTo(nearbyMap); nb.forEach(s => { if (s.lat && s.lng) { const c = s.type === 'substation' ? '#4299e1' : '#48bb78'; L.marker([parseFloat(s.lat), parseFloat(s.lng)], { icon: L.divIcon({ html: `<div style="background:${c};width:14px;height:14px;border-radius:50%;border:2px solid white;"></div>`, iconSize: [14, 14], iconAnchor: [7, 7] }) }).addTo(nearbyMap).bindPopup(`<b>${s.number}</b><br>${s.distance} كم`); } }); document.getElementById('nearbyList').innerHTML = nb.map(s => { const u = s.googleMap || `https://www.google.com/maps?q=${s.lat},${s.lng}`, ico = s.type === 'substation' ? '🔷' : '🟠'; return `<div class="nearby-item"><div>${ico} <span class="nearby-number">${s.number}</span> <span class="nearby-distance">${s.distance} كم</span></div><a href="${u}" target="_blank" class="map-link"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg></a></div>`; }).join(''); }
+        let currentSearchedStation = null;
+        let showFeederMode = false;
+        
+        async function searchStation() { const v = document.getElementById('searchInput').value.trim(); if (!v) { showToast('أدخل الرقم', 'warning'); return; } if (!isStationsLoaded) { showLoading(); await loadStationsCache(); hideLoading(); } const r = searchStationLocal(v), rc = document.getElementById('resultsContent'), rn = document.getElementById('resultsCount'); showFeederMode = false; if (!r.found) { rc.innerHTML = `<div class="not-found-card"><h4>غير موجود</h4><div class="searched-number">${v}</div></div>`; rn.textContent = '0'; document.getElementById('mapSection').style.display = 'none'; currentSearchedStation = null; } else { currentSearchedStation = r.station; const s = r.station, url = s.googleMap || (s.lat && s.lng ? `https://www.google.com/maps?q=${s.lat},${s.lng}` : ''), tb = s.type === 'distribution' ? '<span class="type-badge type-distribution">توزيع</span>' : '<span class="type-badge type-substation">تحويل</span>'; let feederBtn = ''; if (s.type === 'distribution' && s.feeder) { feederBtn = `<div class="feeder-toggle"><button class="feeder-btn" id="nearbyBtn" onclick="toggleMapMode('nearby')"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>القريبة (3.5 كم)</button><button class="feeder-btn" id="feederBtn" onclick="toggleMapMode('feeder')"><svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>محطات المغذي (${s.feeder})</button></div>`; } let ex = s.type === 'distribution' ? `<tr><td colspan="3"><strong>المغذي:</strong> ${s.feeder||'-'} | <strong>الحي:</strong> ${s.region||'-'}</td></tr>` : ''; rc.innerHTML = `<div class="results-table-wrapper"><table class="results-table"><thead><tr><th>المحطة</th><th>النوع</th><th>الخريطة</th></tr></thead><tbody><tr><td><strong>${s.number}</strong></td><td>${tb}</td><td>${url ? `<a href="${url}" target="_blank" class="map-link"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>فتح</a>` : '-'}</td></tr>${ex}</tbody></table></div>${feederBtn}`; rn.textContent = '1'; if (s.lat && s.lng) { toggleMapMode('nearby'); } else { document.getElementById('mapSection').style.display = 'none'; } } }
+        
+        function toggleMapMode(mode) {
+            showFeederMode = (mode === 'feeder');
+            const nearbyBtn = document.getElementById('nearbyBtn');
+            const feederBtn = document.getElementById('feederBtn');
+            
+            if (nearbyBtn && feederBtn) {
+                nearbyBtn.classList.toggle('active', !showFeederMode);
+                feederBtn.classList.toggle('active', showFeederMode);
+            }
+            
+            if (currentSearchedStation && currentSearchedStation.lat && currentSearchedStation.lng) {
+                if (showFeederMode) {
+                    loadFeederStations(currentSearchedStation);
+                } else {
+                    loadNearbyStationsLocal(currentSearchedStation.lat, currentSearchedStation.lng, currentSearchedStation.number);
+                }
+            }
+        }
+        
+        function loadFeederStations(station) {
+            const ms = document.getElementById('mapSection');
+            if (!station.feeder) { ms.style.display = 'none'; return; }
+            
+            const feederStations = allStations.filter(s => 
+                s.type === 'distribution' && 
+                s.feeder === station.feeder && 
+                s.number !== station.number &&
+                s.lat && s.lng
+            );
+            
+            if (!feederStations.length) { 
+                ms.style.display = 'none'; 
+                showToast('لا توجد محطات أخرى لهذا المغذي', 'warning');
+                return; 
+            }
+            
+            // حساب المسافات
+            feederStations.forEach(s => {
+                s.distance = calcDistance(
+                    parseFloat(station.lat), parseFloat(station.lng),
+                    parseFloat(s.lat), parseFloat(s.lng)
+                ).toFixed(2);
+            });
+            feederStations.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
+            
+            ms.style.display = 'block';
+            document.getElementById('nearbyCount').textContent = feederStations.length + ' محطة';
+            document.querySelector('#mapSection .results-title h3').textContent = `محطات المغذي (${station.feeder})`;
+            
+            if (nearbyMap) nearbyMap.remove();
+            nearbyMap = L.map('nearbyMap').setView([parseFloat(station.lat), parseFloat(station.lng)], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(nearbyMap);
+            
+            // المحطة المطلوبة (برتقالي)
+            L.marker([parseFloat(station.lat), parseFloat(station.lng)], {
+                icon: L.divIcon({ html: '<div style="background:#e8a54b;width:20px;height:20px;border-radius:50%;border:3px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);"></div>', iconSize: [20,20], iconAnchor: [10,10] })
+            }).addTo(nearbyMap).bindPopup(`<b>${station.number}</b><br>المحطة المطلوبة`);
+            
+            const markers = [[parseFloat(station.lat), parseFloat(station.lng)]];
+            
+            feederStations.forEach(s => {
+                L.marker([parseFloat(s.lat), parseFloat(s.lng)], {
+                    icon: L.divIcon({ html: '<div style="background:#5b8fb9;width:14px;height:14px;border-radius:50%;border:2px solid white;"></div>', iconSize: [14,14], iconAnchor: [7,7] })
+                }).addTo(nearbyMap).bindPopup(`<b>${s.number}</b><br>${s.region || ''}<br>المسافة: ${s.distance} كم`);
+                markers.push([parseFloat(s.lat), parseFloat(s.lng)]);
+            });
+            
+            // ضبط حدود الخريطة
+            if (markers.length > 1) {
+                nearbyMap.fitBounds(markers, { padding: [30, 30] });
+            }
+            
+            document.getElementById('nearbyList').innerHTML = feederStations.map(s => {
+                const u = s.googleMap || `https://www.google.com/maps?q=${s.lat},${s.lng}`;
+                return `<div class="nearby-item"><div>🔷 <span class="nearby-number">${s.number}</span> <span class="nearby-distance">${s.distance} كم</span><br><small style="color:var(--text-secondary)">${s.region || ''}</small></div><a href="${u}" target="_blank" class="map-link"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg></a></div>`;
+            }).join('');
+        }
+        function loadNearbyStationsLocal(lat, lng, cur) { const ms = document.getElementById('mapSection'), nb = getNearbyStationsLocal(lat, lng, 3.5).filter(s => s.number !== cur); if (!nb.length) { ms.style.display = 'none'; return; } ms.style.display = 'block'; document.getElementById('nearbyCount').textContent = nb.length; document.querySelector('#mapSection .results-title h3').textContent = 'المحطات القريبة (3.5 كم)'; if (nearbyMap) nearbyMap.remove(); nearbyMap = L.map('nearbyMap').setView([parseFloat(lat), parseFloat(lng)], 14); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(nearbyMap); L.marker([parseFloat(lat), parseFloat(lng)], { icon: L.divIcon({ html: '<div style="background:#e8a54b;width:18px;height:18px;border-radius:50%;border:3px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }) }).addTo(nearbyMap).bindPopup('<b>المحطة المطلوبة</b>'); nb.forEach(s => { if (s.lat && s.lng) { const c = s.type === 'substation' ? '#5b8fb9' : '#5cb85c'; L.marker([parseFloat(s.lat), parseFloat(s.lng)], { icon: L.divIcon({ html: `<div style="background:${c};width:14px;height:14px;border-radius:50%;border:2px solid white;"></div>`, iconSize: [14, 14], iconAnchor: [7, 7] }) }).addTo(nearbyMap).bindPopup(`<b>${s.number}</b><br>${s.typeLabel||''}<br>${s.distance} كم`); } }); document.getElementById('nearbyList').innerHTML = nb.map(s => { const u = s.googleMap || `https://www.google.com/maps?q=${s.lat},${s.lng}`, ico = s.type === 'substation' ? '🔷' : '🟢'; return `<div class="nearby-item"><div>${ico} <span class="nearby-number">${s.number}</span> <span class="nearby-distance">${s.distance} كم</span></div><a href="${u}" target="_blank" class="map-link"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg></a></div>`; }).join(''); }
 
         // Add
         function openAddModal(t) { if (t === 'distribution') { document.getElementById('addDistributionModal').classList.add('active'); ['addDistNumber', 'addDistFeeder', 'addDistRegion', 'addDistLat', 'addDistLng', 'addDistReason'].forEach(id => document.getElementById(id).value = ''); document.getElementById('addDistLocationBtn').classList.remove('active'); } else { document.getElementById('addSubstationModal').classList.add('active'); ['addSubShortName', 'addSubLat', 'addSubLng', 'addSubReason'].forEach(id => document.getElementById(id).value = ''); document.getElementById('addSubLocationBtn').classList.remove('active'); } }
@@ -520,15 +697,18 @@
         function openFaultModal() { document.getElementById('faultModal').classList.add('active'); for (let i = 1; i <= 6; i++) { const inp = document.getElementById('fault' + i); inp.value = ''; inp.classList.remove('found', 'not-found'); } document.getElementById('faultResults').style.display = 'none'; faultStations = []; }
         async function searchFaultStations() { const nums = []; for (let i = 1; i <= 6; i++) { const v = document.getElementById('fault' + i).value.trim(); if (v) nums.push({ i, v }); } if (nums.length < 2) { showToast('أدخل 2 على الأقل', 'warning'); return; } if (!isStationsLoaded) { showLoading(); await loadStationsCache(); hideLoading(); } faultStations = []; const tb = document.getElementById('faultTableBody'); tb.innerHTML = ''; const lbl = ['A', 'B', 'C', 'D', 'E', 'F']; let fc = 0; for (const item of nums) { const inp = document.getElementById('fault' + item.i), r = searchStationLocal(item.v); if (r.found) { inp.classList.remove('not-found'); inp.classList.add('found'); r.station.label = lbl[fc]; faultStations.push(r.station); fc++; const tl = r.station.type === 'substation' ? '<span class="type-badge type-substation">تحويل</span>' : '<span class="type-badge type-distribution">توزيع</span>'; tb.innerHTML += `<tr><td><span class="point-label">${r.station.label}</span></td><td><strong>${r.station.number}</strong></td><td>${tl}</td><td><span class="status-found">✓</span></td></tr>`; } else { inp.classList.remove('found'); inp.classList.add('not-found'); tb.innerHTML += `<tr><td>-</td><td><strong>${item.v}</strong></td><td>-</td><td><span class="status-not-found">✕</span></td></tr>`; } } document.getElementById('faultCount').textContent = fc; document.getElementById('faultResults').style.display = 'block'; if (fc >= 1) { renderFaultMap(); generateNavigationLink(); calculateTotalDistance(); } else { showToast('لا توجد نتائج', 'warning'); } }
         function calculateTotalDistance() { const vs = faultStations.filter(s => s.lat && s.lng); if (vs.length < 2) { document.getElementById('totalDistance').innerHTML = ''; return; } let td = 0; for (let i = 0; i < vs.length - 1; i++) td += calcDistance(parseFloat(vs[i].lat), parseFloat(vs[i].lng), parseFloat(vs[i+1].lat), parseFloat(vs[i+1].lng)); document.getElementById('totalDistance').innerHTML = `<span class="distance-badge">📏 المسافة: ${td.toFixed(2)} كم</span>`; }
-        function renderFaultMap() { const vs = faultStations.filter(s => s.lat && s.lng); if (!vs.length) { showToast('لا إحداثيات', 'warning'); return; } if (faultMap) faultMap.remove(); let sLat = 0, sLng = 0; vs.forEach(s => { sLat += parseFloat(s.lat); sLng += parseFloat(s.lng); }); const cLat = sLat / vs.length, cLng = sLng / vs.length, zm = vs.length === 1 ? 15 : 13; faultMap = L.map('faultMap').setView([cLat, cLng], zm); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(faultMap); const cols = { distribution: '#f77f00', substation: '#4299e1' }, mks = []; vs.forEach(s => { const c = cols[s.type] || '#f77f00'; L.marker([parseFloat(s.lat), parseFloat(s.lng)], { icon: L.divIcon({ html: `<div style="background:${c};width:30px;height:30px;border-radius:50%;border:3px solid white;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;">${s.label}</div>`, iconSize: [30, 30], iconAnchor: [15, 15] }) }).addTo(faultMap).bindPopup(`<b>${s.label} - ${s.number}</b>`); mks.push([parseFloat(s.lat), parseFloat(s.lng)]); }); if (mks.length >= 2) { L.polyline(mks, { color: '#f77f00', weight: 3, dashArray: '10, 10' }).addTo(faultMap); faultMap.fitBounds(mks, { padding: [30, 30] }); } }
+        function renderFaultMap() { const vs = faultStations.filter(s => s.lat && s.lng); if (!vs.length) { showToast('لا إحداثيات', 'warning'); return; } if (faultMap) faultMap.remove(); let sLat = 0, sLng = 0; vs.forEach(s => { sLat += parseFloat(s.lat); sLng += parseFloat(s.lng); }); const cLat = sLat / vs.length, cLng = sLng / vs.length, zm = vs.length === 1 ? 15 : 13; faultMap = L.map('faultMap').setView([cLat, cLng], zm); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(faultMap); const cols = { distribution: '#e8a54b', substation: '#5b8fb9' }, mks = []; vs.forEach(s => { const c = cols[s.type] || '#e8a54b'; L.marker([parseFloat(s.lat), parseFloat(s.lng)], { icon: L.divIcon({ html: `<div style="background:${c};width:30px;height:30px;border-radius:50%;border:3px solid white;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;box-shadow:0 2px 8px rgba(0,0,0,0.3);">${s.label}</div>`, iconSize: [30, 30], iconAnchor: [15, 15] }) }).addTo(faultMap).bindPopup(`<b>${s.label} - ${s.number}</b><br>${s.typeLabel||''}`); mks.push([parseFloat(s.lat), parseFloat(s.lng)]); }); if (mks.length >= 2) { L.polyline(mks, { color: '#e8a54b', weight: 3, dashArray: '10, 10' }).addTo(faultMap); faultMap.fitBounds(mks, { padding: [30, 30] }); } }
         function generateNavigationLink() { const vs = faultStations.filter(s => s.lat && s.lng); if (!vs.length) { document.getElementById('faultNavigationLink').style.display = 'none'; return; } let url; if (vs.length === 1) { url = `https://www.google.com/maps/search/?api=1&query=${vs[0].lat},${vs[0].lng}`; } else { url = 'https://www.google.com/maps/dir/'; vs.forEach((s, i) => { url += `${s.lat},${s.lng}`; if (i < vs.length - 1) url += '/'; }); } const lnk = document.getElementById('faultNavigationLink'); lnk.href = url; lnk.style.display = 'flex'; lnk.innerHTML = vs.length === 1 ? '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>فتح الموقع' : '<svg viewBox="0 0 24 24"><path d="M21.71 11.29l-9-9c-.39-.39-1.02-.39-1.41 0l-9 9c-.39.39-.39 1.02 0 1.41l9 9c.39.39 1.02.39 1.41 0l9-9c.39-.38.39-1.01 0-1.41z"/></svg>فتح التنقل'; }
 
         // Admin
         async function loadAdminData() { showLoading(); const st = await apiGet('getStats'); if (st.stats) { document.getElementById('totalDistribution').textContent = st.stats.totalDistribution || 0; document.getElementById('totalSubstations').textContent = st.stats.totalSubstations || 0; document.getElementById('totalUsers').textContent = st.stats.totalUsers || 0; document.getElementById('totalAdditions').textContent = st.stats.totalAdditions || 0; document.getElementById('totalEdits').textContent = st.stats.totalEdits || 0; } const dy = await apiGet('getDailyStats'); if (dy.success) renderCharts(dy); const us = await apiGet('getUsers'); if (us.users) document.getElementById('adminUsersBody').innerHTML = us.users.map(u => `<tr><td>${u.name}</td><td>${u.phone}</td><td>${u.type||'موظف'}</td><td>${u.registerDate||'-'}</td></tr>`).join(''); const lg = await apiGet('getLogs'); if (lg.logs) document.getElementById('adminLogsBody').innerHTML = lg.logs.slice(-30).reverse().map(l => `<tr><td style="color:${l.type.includes('إضافة') ? 'var(--success)' : 'var(--warning)'}">${l.type}</td><td>${l.station}</td><td>${l.user}</td><td>${l.date}</td></tr>`).join(''); hideLoading(); }
-        function renderCharts(d) { new Chart(document.getElementById('visitsChart'), { type: 'line', data: { labels: d.dailyVisits.map(x => x.date.slice(5)), datasets: [{ label: 'زيارات', data: d.dailyVisits.map(x => x.count), borderColor: '#f77f00', backgroundColor: 'rgba(247,127,0,0.2)', fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { color: '#bee3f8' }, grid: { color: '#4299e1' } }, x: { ticks: { color: '#bee3f8' }, grid: { color: '#4299e1' } } } } }); new Chart(document.getElementById('activityChart'), { type: 'bar', data: { labels: d.dailyActivity.map(x => x.date.slice(5)), datasets: [{ label: 'إضافات', data: d.dailyActivity.map(x => x.additions), backgroundColor: '#48bb78' }, { label: 'تعديلات', data: d.dailyActivity.map(x => x.edits), backgroundColor: '#f77f00' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#bee3f8' } } }, scales: { y: { beginAtZero: true, ticks: { color: '#bee3f8' }, grid: { color: '#4299e1' } }, x: { ticks: { color: '#bee3f8' }, grid: { color: '#4299e1' } } } } }); }
+        function renderCharts(d) { new Chart(document.getElementById('visitsChart'), { type: 'line', data: { labels: d.dailyVisits.map(x => x.date.slice(5)), datasets: [{ label: 'زيارات', data: d.dailyVisits.map(x => x.count), borderColor: '#e8a54b', backgroundColor: 'rgba(232,165,75,0.2)', fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { color: '#c5ddf0' }, grid: { color: '#5b8fb9' } }, x: { ticks: { color: '#c5ddf0' }, grid: { color: '#5b8fb9' } } } } }); new Chart(document.getElementById('activityChart'), { type: 'bar', data: { labels: d.dailyActivity.map(x => x.date.slice(5)), datasets: [{ label: 'إضافات', data: d.dailyActivity.map(x => x.additions), backgroundColor: '#5cb85c' }, { label: 'تعديلات', data: d.dailyActivity.map(x => x.edits), backgroundColor: '#e8a54b' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#c5ddf0' } } }, scales: { y: { beginAtZero: true, ticks: { color: '#c5ddf0' }, grid: { color: '#5b8fb9' } }, x: { ticks: { color: '#c5ddf0' }, grid: { color: '#5b8fb9' } } } } }); }
 
         // Init
-        document.addEventListener('DOMContentLoaded', checkSession);
+        document.addEventListener('DOMContentLoaded', () => {
+            checkSession();
+            checkIOSInstall();
+        });
         document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); }));
     </script>
 </body>
