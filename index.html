@@ -99,6 +99,7 @@
         .btn-search { background: var(--gradient-1); color: white; }
         .btn-add { background: var(--success); color: white; }
         .btn-edit { background: var(--warning); color: #1a1a1a; }
+        .btn-fault { background: var(--danger); color: white; }
         .action-btn:hover { transform: translateY(-2px); }
         
         .results-section { background: var(--bg-card); border-radius: 14px; padding: 20px; margin-bottom: 20px; border: 1px solid var(--border); }
@@ -165,6 +166,19 @@
         .chart-card { background: var(--bg-input); border-radius: 10px; padding: 15px; border: 1px solid var(--border); }
         .chart-card h4 { margin-bottom: 12px; color: var(--accent-light); font-size: 0.9rem; }
         .chart-container { height: 220px; position: relative; }
+        
+        /* Fault Inputs */
+        .fault-inputs { display: flex; flex-direction: column; gap: 12px; }
+        .fault-input-row { display: flex; gap: 10px; }
+        .fault-input-group { flex: 1; }
+        .fault-input-group label { display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px; }
+        .fault-input-group input { width: 100%; padding: 10px; background: var(--bg-input); border: 2px solid var(--border); border-radius: 8px; color: var(--text-primary); font-family: 'Tajawal', sans-serif; text-align: center; font-size: 1rem; }
+        .fault-input-group input:focus { border-color: var(--accent); outline: none; }
+        .fault-input-group input.found { border-color: var(--success); background: rgba(0, 200, 151, 0.1); }
+        .fault-input-group input.not-found { border-color: var(--danger); background: rgba(255, 107, 107, 0.1); }
+        .status-found { color: var(--success); font-weight: 600; }
+        .status-not-found { color: var(--danger); font-weight: 600; }
+        .point-label { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; background: var(--accent); color: white; border-radius: 50%; font-weight: 700; font-size: 0.8rem; margin-left: 8px; }
         
         /* Toast */
         .toast-container { position: fixed; bottom: 20px; left: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 8px; }
@@ -320,6 +334,7 @@
                         <button class="action-btn btn-search" onclick="searchStation()"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>بحث</button>
                         <button class="action-btn btn-add" onclick="openAddModal()"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>إضافة</button>
                         <button class="action-btn btn-edit" onclick="openEditModal()"><svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>تعديل</button>
+                        <button class="action-btn btn-fault" onclick="openFaultModal()"><svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>أعطال</button>
                     </div>
                 </div>
             </section>
@@ -394,6 +409,92 @@
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal('editModal')">إلغاء</button>
                 <button class="btn btn-warning" onclick="submitEdit()">حفظ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fault Modal - نافذة الأعطال -->
+    <div class="modal-overlay" id="faultModal">
+        <div class="modal" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3><svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>تتبع الأعطال</h3>
+                <button class="modal-close" onclick="closeModal('faultModal')"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg></button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 15px; color: var(--text-secondary); font-size: 0.9rem;">أدخل أرقام المحطات المتأثرة بالعطل (من 2 إلى 6 محطات)</p>
+                
+                <div class="fault-inputs">
+                    <div class="fault-input-row">
+                        <div class="fault-input-group">
+                            <label>محطة 1</label>
+                            <input type="text" id="fault1" placeholder="رقم المحطة">
+                        </div>
+                        <div class="fault-input-group">
+                            <label>محطة 2</label>
+                            <input type="text" id="fault2" placeholder="رقم المحطة">
+                        </div>
+                        <div class="fault-input-group">
+                            <label>محطة 3</label>
+                            <input type="text" id="fault3" placeholder="اختياري">
+                        </div>
+                    </div>
+                    <div class="fault-input-row">
+                        <div class="fault-input-group">
+                            <label>محطة 4</label>
+                            <input type="text" id="fault4" placeholder="اختياري">
+                        </div>
+                        <div class="fault-input-group">
+                            <label>محطة 5</label>
+                            <input type="text" id="fault5" placeholder="اختياري">
+                        </div>
+                        <div class="fault-input-group">
+                            <label>محطة 6</label>
+                            <input type="text" id="fault6" placeholder="اختياري">
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary" style="margin-top: 15px;" onclick="searchFaultStations()">
+                    <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                    بحث
+                </button>
+                
+                <!-- نتائج البحث -->
+                <div id="faultResults" style="display: none; margin-top: 20px;">
+                    <div class="results-header" style="margin-bottom: 10px;">
+                        <div class="results-title">
+                            <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+                            <h3>محطات العطل</h3>
+                        </div>
+                        <div class="results-count" id="faultCount">0 محطة</div>
+                    </div>
+                    
+                    <div class="results-table-wrapper" style="max-height: 200px; overflow-y: auto;">
+                        <table class="results-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>رقم المحطة</th>
+                                    <th>المغذي</th>
+                                    <th>المنطقة</th>
+                                    <th>الحالة</th>
+                                </tr>
+                            </thead>
+                            <tbody id="faultTableBody"></tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- خريطة الأعطال -->
+                    <div class="map-container" style="height: 250px; margin-top: 15px;">
+                        <div id="faultMap" style="height: 100%; width: 100%; border-radius: 10px;"></div>
+                    </div>
+                    
+                    <!-- رابط التنقل -->
+                    <a id="faultNavigationLink" href="#" target="_blank" class="btn btn-success" style="margin-top: 15px; text-decoration: none;">
+                        <svg viewBox="0 0 24 24"><path d="M21.71 11.29l-9-9c-.39-.39-1.02-.39-1.41 0l-9 9c-.39.39-.39 1.02 0 1.41l9 9c.39.39 1.02.39 1.41 0l9-9c.39-.38.39-1.01 0-1.41zM14 14.5V12h-4v3H8v-4c0-.55.45-1 1-1h5V7.5l3.5 3.5-3.5 3.5z"/></svg>
+                        فتح التنقل في Google Maps
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -985,6 +1086,201 @@
         // ============================================
         document.addEventListener('DOMContentLoaded', checkSession);
         document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); }));
+
+        // ============================================
+        // Fault Tracking - تتبع الأعطال
+        // ============================================
+        let faultMap = null;
+        let faultStations = [];
+
+        function openFaultModal() {
+            document.getElementById('faultModal').classList.add('active');
+            // مسح الحقول
+            for (let i = 1; i <= 6; i++) {
+                const input = document.getElementById('fault' + i);
+                input.value = '';
+                input.classList.remove('found', 'not-found');
+            }
+            document.getElementById('faultResults').style.display = 'none';
+            faultStations = [];
+        }
+
+        async function searchFaultStations() {
+            // جمع أرقام المحطات المدخلة
+            const stationNumbers = [];
+            for (let i = 1; i <= 6; i++) {
+                const value = document.getElementById('fault' + i).value.trim();
+                if (value) {
+                    stationNumbers.push({ index: i, number: value });
+                }
+            }
+            
+            if (stationNumbers.length < 2) {
+                showToast('أدخل رقمين على الأقل', 'warning');
+                return;
+            }
+            
+            showLoading('جاري البحث...');
+            
+            faultStations = [];
+            const tableBody = document.getElementById('faultTableBody');
+            tableBody.innerHTML = '';
+            
+            const labels = ['A', 'B', 'C', 'D', 'E', 'F'];
+            let foundCount = 0;
+            
+            // البحث عن كل محطة
+            for (let i = 0; i < stationNumbers.length; i++) {
+                const item = stationNumbers[i];
+                const input = document.getElementById('fault' + item.index);
+                
+                const result = await apiGet('searchStation', { number: item.number });
+                
+                if (result.found) {
+                    input.classList.remove('not-found');
+                    input.classList.add('found');
+                    
+                    const station = result.station;
+                    station.label = labels[foundCount];
+                    faultStations.push(station);
+                    foundCount++;
+                    
+                    tableBody.innerHTML += `
+                        <tr>
+                            <td><span class="point-label">${station.label}</span></td>
+                            <td><strong>${station.number}</strong></td>
+                            <td>${station.feeder || '-'}</td>
+                            <td>${station.region || '-'}</td>
+                            <td><span class="status-found">✓ موجود</span></td>
+                        </tr>
+                    `;
+                } else {
+                    input.classList.remove('found');
+                    input.classList.add('not-found');
+                    
+                    tableBody.innerHTML += `
+                        <tr>
+                            <td>-</td>
+                            <td><strong>${item.number}</strong></td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td><span class="status-not-found">✕ غير موجود</span></td>
+                        </tr>
+                    `;
+                }
+            }
+            
+            hideLoading();
+            
+            document.getElementById('faultCount').textContent = foundCount + ' محطة';
+            document.getElementById('faultResults').style.display = 'block';
+            
+            // عرض الخريطة وإنشاء رابط التنقل
+            if (foundCount >= 2) {
+                renderFaultMap();
+                generateNavigationLink();
+            } else {
+                showToast('يجب العثور على محطتين على الأقل', 'warning');
+            }
+        }
+
+        function renderFaultMap() {
+            // تصفية المحطات التي لها إحداثيات
+            const validStations = faultStations.filter(s => s.lat && s.lng);
+            
+            if (validStations.length === 0) {
+                showToast('المحطات لا تحتوي على إحداثيات', 'warning');
+                return;
+            }
+            
+            // إزالة الخريطة القديمة
+            if (faultMap) {
+                faultMap.remove();
+            }
+            
+            // حساب مركز الخريطة
+            let sumLat = 0, sumLng = 0;
+            validStations.forEach(s => {
+                sumLat += parseFloat(s.lat);
+                sumLng += parseFloat(s.lng);
+            });
+            const centerLat = sumLat / validStations.length;
+            const centerLng = sumLng / validStations.length;
+            
+            // إنشاء الخريطة
+            faultMap = L.map('faultMap').setView([centerLat, centerLng], 13);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(faultMap);
+            
+            // ألوان النقاط
+            const colors = ['#ff6b6b', '#ffc107', '#00c897', '#3282b8', '#9c27b0', '#ff9800'];
+            
+            // إضافة النقاط
+            const markers = [];
+            validStations.forEach((station, index) => {
+                const color = colors[index % colors.length];
+                
+                const marker = L.marker([parseFloat(station.lat), parseFloat(station.lng)], {
+                    icon: L.divIcon({
+                        className: 'custom-fault-marker',
+                        html: `<div style="background:${color};width:30px;height:30px;border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:14px;">${station.label}</div>`,
+                        iconSize: [30, 30],
+                        iconAnchor: [15, 15]
+                    })
+                }).addTo(faultMap);
+                
+                marker.bindPopup(`
+                    <div style="text-align:center;font-family:Tajawal,sans-serif;">
+                        <strong style="font-size:16px;">${station.label} - ${station.number}</strong><br>
+                        <span style="color:#666;">${station.feeder || ''} ${station.region || ''}</span>
+                    </div>
+                `);
+                
+                markers.push([parseFloat(station.lat), parseFloat(station.lng)]);
+            });
+            
+            // رسم خط بين النقاط
+            if (markers.length >= 2) {
+                L.polyline(markers, {
+                    color: '#ff6b6b',
+                    weight: 3,
+                    opacity: 0.8,
+                    dashArray: '10, 10'
+                }).addTo(faultMap);
+            }
+            
+            // ضبط حدود الخريطة لتشمل جميع النقاط
+            if (markers.length > 0) {
+                faultMap.fitBounds(markers, { padding: [30, 30] });
+            }
+        }
+
+        function generateNavigationLink() {
+            const validStations = faultStations.filter(s => s.lat && s.lng);
+            
+            if (validStations.length < 2) {
+                document.getElementById('faultNavigationLink').style.display = 'none';
+                return;
+            }
+            
+            // إنشاء رابط Google Maps للتنقل
+            // الصيغة: https://www.google.com/maps/dir/origin/destination/waypoint1/waypoint2
+            
+            let url = 'https://www.google.com/maps/dir/';
+            
+            validStations.forEach((station, index) => {
+                url += `${station.lat},${station.lng}`;
+                if (index < validStations.length - 1) {
+                    url += '/';
+                }
+            });
+            
+            const link = document.getElementById('faultNavigationLink');
+            link.href = url;
+            link.style.display = 'flex';
+        }
     </script>
 </body>
 </html>
