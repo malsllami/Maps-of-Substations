@@ -1229,28 +1229,59 @@
             const region = document.getElementById('addRegion').value.trim();
             if (!num || !region) { showToast('أدخل رقم المحطة والمنطقة', 'error'); return; }
             
-            showLoading('جاري الإضافة...');
+            // التحقق المحلي أولاً - هل المحطة موجودة؟
+            const localCheck = searchStationLocal(num);
+            if (localCheck.found) {
+                showToast('رقم المحطة موجود مسبقاً', 'error');
+                return;
+            }
+            
+            const feeder = document.getElementById('addFeeder').value.trim();
+            const lat = document.getElementById('addLatitude').value;
+            const lng = document.getElementById('addLongitude').value;
+            const reason = document.getElementById('addReason').value.trim();
+            
+            // إغلاق النافذة فوراً
+            closeModal('addModal');
+            showToast('جاري الإضافة...', 'warning');
+            
+            // إضافة المحطة محلياً فوراً (تحديث متفائل)
+            const newStation = {
+                number: num,
+                feeder: feeder,
+                region: region,
+                lat: lat,
+                lng: lng,
+                googleMap: (lat && lng) ? `https://www.google.com/maps?q=${lat},${lng}` : ''
+            };
+            allStations.push(newStation);
+            updateCacheStatus('loaded', allStations.length + ' محطة ✓');
+            
+            // إرسال للسيرفر في الخلفية
             const result = await apiPost({
                 action: 'addStation',
                 number: num,
                 region: region,
-                feeder: document.getElementById('addFeeder').value.trim(),
-                lat: document.getElementById('addLatitude').value,
-                lng: document.getElementById('addLongitude').value,
-                reason: document.getElementById('addReason').value.trim(),
+                feeder: feeder,
+                lat: lat,
+                lng: lng,
+                reason: reason,
                 userName: currentUser?.name || '',
                 userPhone: currentUser?.phone || ''
             });
-            hideLoading();
             
-            if (result.error) { showToast(result.error, 'error'); return; }
+            if (result.error) {
+                // إذا فشل، أزل المحطة من المحلي
+                allStations = allStations.filter(s => s.number !== num);
+                updateCacheStatus('loaded', allStations.length + ' محطة ✓');
+                showToast(result.error, 'error');
+                return;
+            }
             
-            // مسح Cache وتحديثه
-            clearStationsCache();
-            await refreshStationsCache();
+            // حفظ Cache المحدث
+            localStorage.setItem(CACHE_KEY, JSON.stringify(allStations));
             
-            closeModal('addModal');
-            showToast('تمت الإضافة');
+            showToast('تمت الإضافة ✓', 'success');
             document.getElementById('searchInput').value = num;
             searchStation();
         }
@@ -1259,44 +1290,89 @@
             const num = document.getElementById('editStationNumber').value.trim();
             if (!num) { showToast('أدخل رقم المحطة', 'error'); return; }
             
-            showLoading('جاري الجلب...');
-            const result = await apiGet('searchStation', { number: num });
-            hideLoading();
+            // التأكد من تحميل المحطات
+            if (!isStationsLoaded) {
+                showLoading('جاري التحميل...');
+                await loadStationsCache();
+                hideLoading();
+            }
             
-            if (!result.found) { showToast('المحطة غير موجودة', 'error'); return; }
+            // البحث المحلي (فوري)
+            const result = searchStationLocal(num);
+            
+            if (!result.found) { 
+                showToast('المحطة غير موجودة', 'error'); 
+                return; 
+            }
+            
             document.getElementById('editFeeder').value = result.station.feeder || '';
             document.getElementById('editRegion').value = result.station.region || '';
             document.getElementById('editLatitude').value = result.station.lat || '';
             document.getElementById('editLongitude').value = result.station.lng || '';
-            showToast('تم جلب البيانات');
+            showToast('تم جلب البيانات ⚡');
         }
 
         async function submitEdit() {
             const num = document.getElementById('editStationNumber').value.trim();
             if (!num) { showToast('أدخل رقم المحطة', 'error'); return; }
             
-            showLoading('جاري التعديل...');
+            // التحقق المحلي - هل المحطة موجودة؟
+            const localCheck = searchStationLocal(num);
+            if (!localCheck.found) {
+                showToast('المحطة غير موجودة', 'error');
+                return;
+            }
+            
+            const feeder = document.getElementById('editFeeder').value.trim();
+            const region = document.getElementById('editRegion').value.trim();
+            const lat = document.getElementById('editLatitude').value;
+            const lng = document.getElementById('editLongitude').value;
+            const reason = document.getElementById('editReason').value.trim();
+            
+            // إغلاق النافذة فوراً
+            closeModal('editModal');
+            showToast('جاري التعديل...', 'warning');
+            
+            // تحديث المحطة محلياً فوراً
+            const stationIndex = allStations.findIndex(s => s.number === num);
+            const oldStation = { ...allStations[stationIndex] };
+            
+            if (stationIndex !== -1) {
+                if (feeder) allStations[stationIndex].feeder = feeder;
+                if (region) allStations[stationIndex].region = region;
+                if (lat && lng) {
+                    allStations[stationIndex].lat = lat;
+                    allStations[stationIndex].lng = lng;
+                    allStations[stationIndex].googleMap = `https://www.google.com/maps?q=${lat},${lng}`;
+                }
+            }
+            
+            // إرسال للسيرفر في الخلفية
             const result = await apiPost({
                 action: 'editStation',
                 number: num,
-                feeder: document.getElementById('editFeeder').value.trim(),
-                region: document.getElementById('editRegion').value.trim(),
-                lat: document.getElementById('editLatitude').value,
-                lng: document.getElementById('editLongitude').value,
-                reason: document.getElementById('editReason').value.trim(),
+                feeder: feeder,
+                region: region,
+                lat: lat,
+                lng: lng,
+                reason: reason,
                 userName: currentUser?.name || '',
                 userPhone: currentUser?.phone || ''
             });
-            hideLoading();
             
-            if (result.error) { showToast(result.error, 'error'); return; }
+            if (result.error) {
+                // إذا فشل، استرجع البيانات القديمة
+                if (stationIndex !== -1) {
+                    allStations[stationIndex] = oldStation;
+                }
+                showToast(result.error, 'error');
+                return;
+            }
             
-            // مسح Cache وتحديثه
-            clearStationsCache();
-            await refreshStationsCache();
+            // حفظ Cache المحدث
+            localStorage.setItem(CACHE_KEY, JSON.stringify(allStations));
             
-            closeModal('editModal');
-            showToast('تم التعديل');
+            showToast('تم التعديل ✓', 'success');
             document.getElementById('searchInput').value = num;
             searchStation();
         }
