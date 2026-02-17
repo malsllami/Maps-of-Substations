@@ -89,6 +89,7 @@
         .cache-status:hover { background: var(--accent); }
         .cache-icon { font-size: 1rem; }
         .cache-text { color: var(--text-secondary); }
+        .cache-time { color: var(--text-secondary); font-size: 0.7rem; opacity: 0.7; }
         .cache-status.loaded .cache-text { color: var(--success); }
         .cache-status.loading .cache-icon { animation: pulse 1s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
@@ -321,6 +322,7 @@
                     <div class="cache-status" id="cacheStatus" title="اضغط للتحديث" onclick="manualRefreshCache()">
                         <span class="cache-icon">📦</span>
                         <span class="cache-text" id="cacheText">جاري التحميل...</span>
+                        <span class="cache-time" id="cacheTime"></span>
                     </div>
                     <div class="user-info">
                         <div class="user-avatar" id="userAvatar">م</div>
@@ -546,7 +548,7 @@
 
     <script>
         // ⚠️⚠️⚠️ ضع رابط Google Apps Script الجديد هنا ⚠️⚠️⚠️
-        const API_URL = 'https://script.google.com/macros/s/AKfycbwJtDBHMaa55OPz5BQp-t0yddS3oerDqNsur92uWfm5J8i0eQbL2I-abDd1iYXIY60FUg/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwonuT4L5XS3PUsqOt7K4Y3jdzXQM_nSy2o-7E2BowBbGvBaxLozMKz81YsmCLzl4AmqQ/exec';
         
         let currentUser = null;
         let nearbyMap = null;
@@ -556,32 +558,107 @@
         // ============================================
         const CACHE_KEY = 'stations_cache';
         const CACHE_TIME_KEY = 'stations_cache_time';
-        const CACHE_DURATION = 5 * 60 * 1000; // 5 دقائق
+        const CACHE_VERSION_KEY = 'stations_cache_version';
+        const CHECK_INTERVAL = 30 * 1000; // فحص الإصدار كل 30 ثانية
         
         let allStations = []; // كل المحطات في الذاكرة
         let isStationsLoaded = false;
+        let versionCheckTimer = null;
+        let currentVersion = null;
+        
+        // بدء فحص الإصدار التلقائي
+        function startVersionCheck() {
+            if (versionCheckTimer) clearInterval(versionCheckTimer);
+            
+            versionCheckTimer = setInterval(async () => {
+                await checkForUpdates();
+            }, CHECK_INTERVAL);
+        }
+        
+        // إيقاف فحص الإصدار
+        function stopVersionCheck() {
+            if (versionCheckTimer) {
+                clearInterval(versionCheckTimer);
+                versionCheckTimer = null;
+            }
+        }
+        
+        // فحص إذا في تحديثات (طلب خفيف جداً)
+        async function checkForUpdates() {
+            try {
+                const result = await apiGet('getVersion');
+                
+                if (result.version && result.version !== currentVersion) {
+                    console.log('🔔 يوجد تحديث جديد! الإصدار:', result.version);
+                    
+                    // تحديث البيانات
+                    await silentRefreshCache();
+                    currentVersion = result.version;
+                    localStorage.setItem(CACHE_VERSION_KEY, currentVersion);
+                    
+                    showToast('تم تحديث البيانات 🔄', 'success');
+                }
+            } catch (error) {
+                console.error('خطأ في فحص الإصدار:', error);
+            }
+        }
+        
+        // تحديث صامت (بدون إظهار loading)
+        async function silentRefreshCache() {
+            try {
+                const result = await apiGet('getStations');
+                
+                if (result.stations && result.stations.length > 0) {
+                    const oldCount = allStations.length;
+                    allStations = result.stations;
+                    isStationsLoaded = true;
+                    
+                    localStorage.setItem(CACHE_KEY, JSON.stringify(allStations));
+                    localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
+                    
+                    // إذا تغير عدد المحطات
+                    if (oldCount > 0 && allStations.length !== oldCount) {
+                        const diff = allStations.length - oldCount;
+                        if (diff > 0) {
+                            updateCacheStatus('loaded', allStations.length + ' محطة (+' + diff + ')');
+                        } else {
+                            updateCacheStatus('loaded', allStations.length + ' محطة ✓');
+                        }
+                    } else {
+                        updateCacheStatus('loaded', allStations.length + ' محطة ✓');
+                    }
+                }
+            } catch (error) {
+                console.error('خطأ في التحديث:', error);
+            }
+        }
         
         // تحميل المحطات من Cache أو من السيرفر
         async function loadStationsCache() {
             updateCacheStatus('loading', 'جاري التحميل...');
             
+            // قراءة الإصدار المخزن
+            currentVersion = localStorage.getItem(CACHE_VERSION_KEY);
+            
             // محاولة قراءة من LocalStorage
             const cached = localStorage.getItem(CACHE_KEY);
-            const cacheTime = localStorage.getItem(CACHE_TIME_KEY);
             
-            if (cached && cacheTime) {
-                const age = Date.now() - parseInt(cacheTime);
-                if (age < CACHE_DURATION) {
-                    // Cache صالح
-                    allStations = JSON.parse(cached);
-                    isStationsLoaded = true;
-                    updateCacheStatus('loaded', allStations.length + ' محطة ⚡');
-                    console.log('✅ تم تحميل ' + allStations.length + ' محطة من Cache');
-                    return;
-                }
+            if (cached && currentVersion) {
+                // Cache موجود - استخدمه وافحص التحديثات
+                allStations = JSON.parse(cached);
+                isStationsLoaded = true;
+                updateCacheStatus('loaded', allStations.length + ' محطة ⚡');
+                console.log('✅ تم تحميل ' + allStations.length + ' محطة من Cache');
+                
+                // بدء فحص التحديثات
+                startVersionCheck();
+                
+                // فحص فوري للتحديثات
+                checkForUpdates();
+                return;
             }
             
-            // Cache غير موجود أو منتهي - حمّل من السيرفر
+            // Cache غير موجود - حمّل من السيرفر
             await refreshStationsCache();
         }
         
@@ -590,18 +667,28 @@
             try {
                 updateCacheStatus('loading', 'جاري التحديث...');
                 console.log('🔄 جاري تحميل المحطات...');
-                const result = await apiGet('getStations');
                 
-                if (result.stations && result.stations.length > 0) {
-                    allStations = result.stations;
+                // جلب الإصدار والبيانات
+                const [versionResult, stationsResult] = await Promise.all([
+                    apiGet('getVersion'),
+                    apiGet('getStations')
+                ]);
+                
+                if (stationsResult.stations && stationsResult.stations.length > 0) {
+                    allStations = stationsResult.stations;
                     isStationsLoaded = true;
+                    currentVersion = versionResult.version || Date.now().toString();
                     
                     // حفظ في LocalStorage
                     localStorage.setItem(CACHE_KEY, JSON.stringify(allStations));
                     localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
+                    localStorage.setItem(CACHE_VERSION_KEY, currentVersion);
                     
                     updateCacheStatus('loaded', allStations.length + ' محطة ✓');
                     console.log('✅ تم تحميل ' + allStations.length + ' محطة من السيرفر');
+                    
+                    // بدء فحص التحديثات
+                    startVersionCheck();
                 } else {
                     updateCacheStatus('error', 'خطأ في التحميل');
                 }
@@ -615,11 +702,22 @@
         function updateCacheStatus(status, text) {
             const statusEl = document.getElementById('cacheStatus');
             const textEl = document.getElementById('cacheText');
+            const timeEl = document.getElementById('cacheTime');
             
             if (!statusEl || !textEl) return;
             
             statusEl.className = 'cache-status ' + status;
             textEl.textContent = text;
+            
+            // إظهار وقت آخر تحديث
+            if (timeEl && status === 'loaded') {
+                const now = new Date();
+                const hours = now.getHours().toString().padStart(2, '0');
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                timeEl.textContent = hours + ':' + minutes;
+            } else if (timeEl) {
+                timeEl.textContent = '';
+            }
         }
         
         // البحث المحلي (فوري)
@@ -670,8 +768,10 @@
         function clearStationsCache() {
             localStorage.removeItem(CACHE_KEY);
             localStorage.removeItem(CACHE_TIME_KEY);
+            localStorage.removeItem(CACHE_VERSION_KEY);
             isStationsLoaded = false;
             allStations = [];
+            currentVersion = null;
         }
         
         // تحديث يدوي للـ Cache
@@ -975,6 +1075,10 @@
         function logout() {
             currentUser = null;
             localStorage.removeItem('currentUser');
+            
+            // إيقاف فحص التحديثات
+            stopVersionCheck();
+            
             showPage('loginPage');
             // مسح الحقول
             document.getElementById('loginPhone').value = '';
