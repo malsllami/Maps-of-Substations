@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -67,1038 +66,1257 @@
         .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-```
-    .login-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
-    .login-card { background: var(--bg-card); border-radius: 1.5rem; padding: 2rem; width: 100%; max-width: 26rem; box-shadow: var(--shadow); border: 1px solid var(--border); }
-    .logo-section { text-align: center; margin-bottom: 1.5rem; }
-    .logo-icon { width: 4rem; height: 4rem; background: var(--gradient-sec); border-radius: 1rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem; font-size: 2rem; }
-    .logo-section h1 { font-family: 'Cairo', sans-serif; font-size: 1.3rem; background: var(--gradient-sec); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .logo-section p { font-size: 0.85rem; color: var(--text-secondary); }
+        .login-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+        .login-card { background: var(--bg-card); border-radius: 1.5rem; padding: 2rem; width: 100%; max-width: 26rem; box-shadow: var(--shadow); border: 1px solid var(--border); }
+        .logo-section { text-align: center; margin-bottom: 1.5rem; }
+        .logo-icon { width: 4rem; height: 4rem; background: var(--gradient-sec); border-radius: 1rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem; font-size: 2rem; }
+        .logo-section h1 { font-family: 'Cairo', sans-serif; font-size: 1.3rem; background: var(--gradient-sec); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logo-section p { font-size: 0.85rem; color: var(--text-secondary); }
 
-    .tabs { display: flex; margin-bottom: 1.25rem; background: var(--bg-input); border-radius: 0.75rem; padding: 0.25rem; }
-    .tab { flex: 1; padding: 0.75rem; text-align: center; cursor: pointer; border-radius: 0.5rem; font-weight: 600; color: var(--text-secondary); transition: 0.3s; }
-    .tab.active { background: var(--gradient-sec); color: white; }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
+        .tabs { display: flex; margin-bottom: 1.25rem; background: var(--bg-input); border-radius: 0.75rem; padding: 0.25rem; }
+        .tab { flex: 1; padding: 0.75rem; text-align: center; cursor: pointer; border-radius: 0.5rem; font-weight: 600; color: var(--text-secondary); transition: 0.3s; }
+        .tab.active { background: var(--gradient-sec); color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
 
-    .form-group { margin-bottom: 1rem; }
-    .form-group label { display: block; margin-bottom: 0.4rem; font-weight: 500; color: var(--text-secondary); font-size: 0.85rem; }
-    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.75rem 1rem; background: var(--bg-input); border: 2px solid var(--border); border-radius: 0.625rem; color: var(--text-primary); font-family: 'Tajawal', sans-serif; font-size: 1rem; }
-    .form-group input:focus { outline: none; border-color: var(--sec-orange); }
-    .form-group input.error { border-color: var(--danger); }
-    .form-group input.valid { border-color: var(--success); }
-    .input-hint { font-size: 0.75rem; margin-top: 0.25rem; color: var(--text-secondary); }
-    .input-hint.error { color: var(--danger); }
-    .input-hint.success { color: var(--success); }
-    .form-row { display: flex; gap: 0.75rem; }
-    .form-row .form-group { flex: 1; }
-    
-    .password-wrapper { position: relative; }
-    .password-wrapper input { padding-left: 2.5rem; }
-    .password-toggle { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-secondary); cursor: pointer; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.4rem; font-weight: 500; color: var(--text-secondary); font-size: 0.85rem; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.75rem 1rem; background: var(--bg-input); border: 2px solid var(--border); border-radius: 0.625rem; color: var(--text-primary); font-family: 'Tajawal', sans-serif; font-size: 1rem; }
+        .form-group input:focus { outline: none; border-color: var(--sec-orange); }
+        .form-group input.error { border-color: var(--danger); }
+        .form-group input.valid { border-color: var(--success); }
+        .input-hint { font-size: 0.75rem; margin-top: 0.25rem; color: var(--text-secondary); }
+        .input-hint.error { color: var(--danger); }
+        .input-hint.success { color: var(--success); }
+        .form-row { display: flex; gap: 0.75rem; }
+        .form-row .form-group { flex: 1; }
+        
+        .password-wrapper { position: relative; }
+        .password-wrapper input { padding-left: 2.5rem; }
+        .password-toggle { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-secondary); cursor: pointer; }
 
-    .btn { width: 100%; padding: 0.75rem; border: none; border-radius: 0.625rem; font-family: 'Tajawal', sans-serif; font-size: 1rem; font-weight: 600; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
-    .btn-primary { background: var(--gradient-sec); color: white; }
-    .btn-primary:hover:not(:disabled) { transform: translateY(-2px); }
-    .btn-secondary { background: transparent; border: 2px solid var(--sec-orange); color: var(--sec-orange); }
-    .btn-success { background: var(--success); color: white; }
-    .btn-warning { background: var(--warning); color: #1a1a1a; }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn svg { width: 1.125rem; height: 1.125rem; fill: currentColor; }
+        .btn { width: 100%; padding: 0.75rem; border: none; border-radius: 0.625rem; font-family: 'Tajawal', sans-serif; font-size: 1rem; font-weight: 600; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        .btn-primary { background: var(--gradient-sec); color: white; }
+        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); }
+        .btn-secondary { background: transparent; border: 2px solid var(--sec-orange); color: var(--sec-orange); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-warning { background: var(--warning); color: #1a1a1a; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn svg { width: 1.125rem; height: 1.125rem; fill: currentColor; }
 
-    .admin-link { text-align: center; margin-top: 1rem; }
-    .admin-link a { color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; }
+        .admin-link { text-align: center; margin-top: 1rem; }
+        .admin-link a { color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; }
 
-    .install-btn { position: fixed; top: 0; left: 0; right: 0; background: linear-gradient(135deg, #e8a54b 0%, #d4923a 100%); color: white; border: none; padding: 0.75rem 1rem; font-family: 'Tajawal', sans-serif; font-weight: 600; cursor: pointer; display: none; align-items: center; justify-content: center; gap: 0.5rem; z-index: 1000; font-size: 0.9rem; }
-    .install-btn.show { display: flex; }
-    .install-btn svg { width: 1.25rem; height: 1.25rem; fill: currentColor; }
-    .install-btn .close-install { position: absolute; left: 1rem; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; opacity: 0.7; }
-    .install-btn .close-install:hover { opacity: 1; }
-    
-    /* إزاحة المحتوى عند ظهور زر التثبيت */
-    body.install-visible .page { padding-top: 3rem; }
+        .install-btn { position: fixed; top: 0; left: 0; right: 0; background: linear-gradient(135deg, #e8a54b 0%, #d4923a 100%); color: white; border: none; padding: 0.75rem 1rem; font-family: 'Tajawal', sans-serif; font-weight: 600; cursor: pointer; display: none; align-items: center; justify-content: center; gap: 0.5rem; z-index: 1000; font-size: 0.9rem; }
+        .install-btn.show { display: flex; }
+        .install-btn svg { width: 1.25rem; height: 1.25rem; fill: currentColor; }
+        .install-btn .close-install { position: absolute; left: 1rem; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; opacity: 0.7; }
+        .install-btn .close-install:hover { opacity: 1; }
+        
+        /* إزاحة المحتوى عند ظهور زر التثبيت */
+        body.install-visible .page { padding-top: 3rem; }
 
-    .dashboard-container { min-height: 100vh; padding: 1rem; max-width: 1200px; margin: 0 auto; }
-    .header { background: var(--bg-card); border-radius: 1rem; padding: 1rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; border: 1px solid var(--border); }
-    .header-right { display: flex; align-items: center; gap: 0.75rem; }
-    .header-logo { width: 2.5rem; height: 2.5rem; background: var(--gradient-sec); border-radius: 0.625rem; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; }
-    .header-title { font-family: 'Cairo', sans-serif; font-size: 1rem; font-weight: 700; }
-    .header-subtitle { font-size: 0.75rem; color: var(--text-secondary); }
-    .header-left { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
-    
-    .cache-status { display: flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.75rem; background: var(--bg-input); border-radius: 0.5rem; font-size: 0.75rem; cursor: pointer; transition: 0.3s; }
-    .cache-status:hover { background: var(--sec-orange); }
-    .cache-status.loaded .cache-text { color: var(--success); }
-    .cache-status.loading .cache-text { color: var(--warning); }
-    .cache-status.error .cache-text { color: var(--danger); }
-    
-    /* شريط التحميل الأولي */
-    .first-load-overlay {
-        position: fixed;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(30, 58, 95, 0.95);
-        display: none;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        z-index: 3000;
-        gap: 1.5rem;
-    }
-    .first-load-overlay.active { display: flex; }
-    .first-load-logo { font-size: 4rem; animation: pulse 1.5s infinite; }
-    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-    .first-load-text { font-size: 1.1rem; color: var(--text-primary); }
-    .first-load-progress { width: 80%; max-width: 300px; height: 8px; background: var(--bg-input); border-radius: 4px; overflow: hidden; }
-    .first-load-bar { height: 100%; background: var(--gradient-sec); width: 0%; transition: width 0.3s; border-radius: 4px; }
-    .first-load-count { font-size: 0.9rem; color: var(--text-secondary); }
-    .first-load-done { color: var(--success); font-size: 1.2rem; display: none; }
-    .first-load-done.show { display: block; animation: fadeIn 0.5s; }
-    
-    .user-info { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.75rem; background: var(--bg-input); border-radius: 0.5rem; }
-    .user-avatar { width: 2rem; height: 2rem; background: var(--sec-orange); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
-    .user-name { font-weight: 600; font-size: 0.85rem; }
-    .user-type { font-size: 0.7rem; color: var(--text-secondary); }
-    
-    .logout-btn { padding: 0.4rem 0.75rem; background: transparent; border: 2px solid var(--danger); color: var(--danger); border-radius: 0.5rem; cursor: pointer; font-family: 'Tajawal', sans-serif; font-weight: 500; font-size: 0.8rem; display: flex; align-items: center; gap: 0.3rem; }
-    .logout-btn:hover { background: var(--danger); color: white; }
-    .logout-btn svg { width: 1rem; height: 1rem; fill: currentColor; }
+        .dashboard-container { min-height: 100vh; padding: 1rem; max-width: 1200px; margin: 0 auto; }
+        .header { background: var(--bg-card); border-radius: 1rem; padding: 1rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; border: 1px solid var(--border); }
+        .header-right { display: flex; align-items: center; gap: 0.75rem; }
+        .header-logo { width: 2.5rem; height: 2.5rem; background: var(--gradient-sec); border-radius: 0.625rem; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; }
+        .header-title { font-family: 'Cairo', sans-serif; font-size: 1rem; font-weight: 700; }
+        .header-subtitle { font-size: 0.75rem; color: var(--text-secondary); }
+        .header-left { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+        
+        .cache-status { display: flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.75rem; background: var(--bg-input); border-radius: 0.5rem; font-size: 0.75rem; cursor: pointer; transition: 0.3s; }
+        .cache-status:hover { background: var(--sec-orange); }
+        .cache-status.loaded .cache-text { color: var(--success); }
+        .cache-status.loading .cache-text { color: var(--warning); }
+        .cache-status.error .cache-text { color: var(--danger); }
+        
+        /* شريط التحميل الأولي */
+        .first-load-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(30, 58, 95, 0.95);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            gap: 1.5rem;
+        }
+        .first-load-overlay.active { display: flex; }
+        .first-load-logo { font-size: 4rem; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        .first-load-text { font-size: 1.1rem; color: var(--text-primary); }
+        .first-load-progress { width: 80%; max-width: 300px; height: 8px; background: var(--bg-input); border-radius: 4px; overflow: hidden; }
+        .first-load-bar { height: 100%; background: var(--gradient-sec); width: 0%; transition: width 0.3s; border-radius: 4px; }
+        .first-load-count { font-size: 0.9rem; color: var(--text-secondary); }
+        .first-load-done { color: var(--success); font-size: 1.2rem; display: none; }
+        .first-load-done.show { display: block; animation: fadeIn 0.5s; }
+        
+        .user-info { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.75rem; background: var(--bg-input); border-radius: 0.5rem; }
+        .user-avatar { width: 2rem; height: 2rem; background: var(--sec-orange); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+        .user-name { font-weight: 600; font-size: 0.85rem; }
+        .user-type { font-size: 0.7rem; color: var(--text-secondary); }
+        
+        .logout-btn { padding: 0.4rem 0.75rem; background: transparent; border: 2px solid var(--danger); color: var(--danger); border-radius: 0.5rem; cursor: pointer; font-family: 'Tajawal', sans-serif; font-weight: 500; font-size: 0.8rem; display: flex; align-items: center; gap: 0.3rem; }
+        .logout-btn:hover { background: var(--danger); color: white; }
+        .logout-btn svg { width: 1rem; height: 1rem; fill: currentColor; }
 
-    .search-section { background: var(--bg-card); border-radius: 1rem; padding: 1.25rem; margin-bottom: 1.25rem; border: 1px solid var(--border); }
-    .search-header { display: flex; align-items: center; gap: 0.625rem; margin-bottom: 1rem; }
-    .search-header svg { width: 1.5rem; height: 1.5rem; fill: var(--sec-orange); }
-    .search-header h2 { font-family: 'Cairo', sans-serif; font-size: 1.1rem; }
-    .search-box { display: flex; gap: 0.625rem; flex-wrap: wrap; }
-    .search-input-wrapper { flex: 1; min-width: 12rem; }
-    .search-input-wrapper input { width: 100%; padding: 0.75rem 1rem; background: var(--bg-input); border: 2px solid var(--border); border-radius: 0.625rem; color: var(--text-primary); font-size: 1rem; }
-    .search-input-wrapper input:focus { border-color: var(--sec-orange); outline: none; }
-    
-    .action-buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-    .action-btn { padding: 0.75rem 1rem; border: none; border-radius: 0.625rem; font-family: 'Tajawal', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; white-space: nowrap; transition: 0.3s; }
-    .action-btn svg { width: 1.125rem; height: 1.125rem; fill: currentColor; }
-    .btn-search { background: var(--gradient-sec); color: white; }
-    .btn-add { background: var(--success); color: white; }
-    .btn-add-sub { background: var(--sec-blue-lighter); color: white; }
-    .btn-edit { background: var(--warning); color: #1a1a1a; }
-    .btn-fault { background: var(--danger); color: white; }
-    .action-btn:hover { transform: translateY(-2px); }
+        .search-section { background: var(--bg-card); border-radius: 1rem; padding: 1.25rem; margin-bottom: 1.25rem; border: 1px solid var(--border); }
+        .search-header { display: flex; align-items: center; gap: 0.625rem; margin-bottom: 1rem; }
+        .search-header svg { width: 1.5rem; height: 1.5rem; fill: var(--sec-orange); }
+        .search-header h2 { font-family: 'Cairo', sans-serif; font-size: 1.1rem; }
+        .search-box { display: flex; gap: 0.625rem; flex-wrap: wrap; }
+        .search-input-wrapper { flex: 1; min-width: 12rem; }
+        .search-input-wrapper input { width: 100%; padding: 0.75rem 1rem; background: var(--bg-input); border: 2px solid var(--border); border-radius: 0.625rem; color: var(--text-primary); font-size: 1rem; }
+        .search-input-wrapper input:focus { border-color: var(--sec-orange); outline: none; }
+        
+        .action-buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .action-btn { padding: 0.75rem 1rem; border: none; border-radius: 0.625rem; font-family: 'Tajawal', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; white-space: nowrap; transition: 0.3s; }
+        .action-btn svg { width: 1.125rem; height: 1.125rem; fill: currentColor; }
+        .btn-search { background: var(--gradient-sec); color: white; }
+        .btn-add { background: var(--success); color: white; }
+        .btn-add-sub { background: var(--sec-blue-lighter); color: white; }
+        .btn-edit { background: var(--warning); color: #1a1a1a; }
+        .btn-fault { background: var(--danger); color: white; }
+        .action-btn:hover { transform: translateY(-2px); }
 
-    .results-section { background: var(--bg-card); border-radius: 1rem; padding: 1.25rem; margin-bottom: 1.25rem; border: 1px solid var(--border); }
-    .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 0.5rem; }
-    .results-title { display: flex; align-items: center; gap: 0.5rem; }
-    .results-title svg { width: 1.25rem; height: 1.25rem; fill: var(--sec-orange); }
-    .results-title h3 { font-family: 'Cairo', sans-serif; font-size: 1rem; }
-    .results-count { background: var(--sec-orange); padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 600; }
-    
-    .results-table-wrapper { overflow-x: auto; }
-    .results-table { width: 100%; border-collapse: collapse; min-width: 400px; }
-    .results-table th, .results-table td { padding: 0.75rem; text-align: right; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
-    .results-table th { background: var(--bg-input); font-weight: 600; color: var(--sec-blue-pale); }
-    
-    .type-badge { display: inline-block; padding: 0.2rem 0.5rem; border-radius: 0.25rem; font-size: 0.7rem; font-weight: 600; }
-    .type-distribution { background: var(--sec-orange); color: white; }
-    .type-substation { background: var(--sec-blue-lighter); color: white; }
-    
-    .results-table .btn-edit { 
-        background: var(--warning); 
-        color: #1a1a1a; 
-        border: none;
-        transition: 0.3s;
-    }
-    .results-table .btn-edit:hover { 
-        background: #d4a84a; 
-        transform: scale(1.05);
-    }
-    
-    .map-link { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.3rem 0.6rem; background: var(--gradient-sec); color: white; text-decoration: none; border-radius: 0.375rem; font-size: 0.75rem; }
-    .map-link svg { width: 0.875rem; height: 0.875rem; fill: currentColor; }
-    
-    .empty-state { text-align: center; padding: 2.5rem 1rem; }
-    .empty-state svg { width: 4rem; height: 4rem; fill: var(--text-secondary); opacity: 0.5; margin-bottom: 0.75rem; }
-    .empty-state h4 { font-size: 1rem; color: var(--text-secondary); }
-    
-    .not-found-card { background: rgba(252, 129, 129, 0.1); border: 2px solid var(--danger); border-radius: 0.875rem; padding: 2rem; text-align: center; }
-    .not-found-card h4 { font-size: 1.1rem; color: var(--danger); }
-    .not-found-card .searched-number { font-size: 1.5rem; font-weight: 700; color: var(--danger); margin: 0.75rem 0; }
+        .results-section { background: var(--bg-card); border-radius: 1rem; padding: 1.25rem; margin-bottom: 1.25rem; border: 1px solid var(--border); }
+        .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 0.5rem; }
+        .results-title { display: flex; align-items: center; gap: 0.5rem; }
+        .results-title svg { width: 1.25rem; height: 1.25rem; fill: var(--sec-orange); }
+        .results-title h3 { font-family: 'Cairo', sans-serif; font-size: 1rem; }
+        .results-count { background: var(--sec-orange); padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 600; }
+        
+        .results-table-wrapper { overflow-x: auto; }
+        .results-table { width: 100%; border-collapse: collapse; min-width: 400px; }
+        .results-table th, .results-table td { padding: 0.75rem; text-align: right; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+        .results-table th { background: var(--bg-input); font-weight: 600; color: var(--sec-blue-pale); }
+        
+        .type-badge { display: inline-block; padding: 0.2rem 0.5rem; border-radius: 0.25rem; font-size: 0.7rem; font-weight: 600; }
+        .type-distribution { background: var(--sec-orange); color: white; }
+        .type-substation { background: var(--sec-blue-lighter); color: white; }
+        
+        .results-table .btn-edit { 
+            background: var(--warning); 
+            color: #1a1a1a; 
+            border: none;
+            transition: 0.3s;
+        }
+        .results-table .btn-edit:hover { 
+            background: #d4a84a; 
+            transform: scale(1.05);
+        }
+        
+        .map-link { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.3rem 0.6rem; background: var(--gradient-sec); color: white; text-decoration: none; border-radius: 0.375rem; font-size: 0.75rem; }
+        .map-link svg { width: 0.875rem; height: 0.875rem; fill: currentColor; }
+        
+        .empty-state { text-align: center; padding: 2.5rem 1rem; }
+        .empty-state svg { width: 4rem; height: 4rem; fill: var(--text-secondary); opacity: 0.5; margin-bottom: 0.75rem; }
+        .empty-state h4 { font-size: 1rem; color: var(--text-secondary); }
+        
+        .not-found-card { background: rgba(252, 129, 129, 0.1); border: 2px solid var(--danger); border-radius: 0.875rem; padding: 2rem; text-align: center; }
+        .not-found-card h4 { font-size: 1.1rem; color: var(--danger); }
+        .not-found-card .searched-number { font-size: 1.5rem; font-weight: 700; color: var(--danger); margin: 0.75rem 0; }
 
-    .map-section { background: var(--bg-card); border-radius: 1rem; padding: 1.25rem; margin-bottom: 1.25rem; border: 1px solid var(--border); }
-    .map-container { height: 280px; border-radius: 0.625rem; overflow: hidden; margin-top: 0.75rem; }
-    #nearbyMap, #faultMap { height: 100%; width: 100%; }
-    .nearby-list { margin-top: 0.75rem; max-height: 10rem; overflow-y: auto; }
-    .nearby-item { display: flex; align-items: center; justify-content: space-between; padding: 0.625rem 0.75rem; background: var(--bg-input); border-radius: 0.5rem; margin-bottom: 0.4rem; font-size: 0.85rem; }
-    .nearby-number { font-weight: 700; color: var(--sec-orange-light); }
-    .nearby-distance { font-size: 0.75rem; color: var(--text-secondary); }
-    
-    .feeder-toggle { display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; }
-    .feeder-btn { padding: 0.5rem 1rem; border: 2px solid var(--border); background: transparent; color: var(--text-secondary); border-radius: 2rem; cursor: pointer; font-family: 'Tajawal', sans-serif; font-size: 0.8rem; transition: 0.3s; display: flex; align-items: center; gap: 0.4rem; }
-    .feeder-btn:hover { border-color: var(--sec-orange); color: var(--sec-orange); }
-    .feeder-btn.active { background: var(--gradient-sec); border-color: var(--sec-orange); color: white; }
-    .feeder-btn svg { width: 1rem; height: 1rem; fill: currentColor; }
+        .map-section { background: var(--bg-card); border-radius: 1rem; padding: 1.25rem; margin-bottom: 1.25rem; border: 1px solid var(--border); }
+        .map-container { height: 280px; border-radius: 0.625rem; overflow: hidden; margin-top: 0.75rem; }
+        #nearbyMap, #faultMap { height: 100%; width: 100%; }
+        .nearby-list { margin-top: 0.75rem; max-height: 10rem; overflow-y: auto; }
+        .nearby-item { display: flex; align-items: center; justify-content: space-between; padding: 0.625rem 0.75rem; background: var(--bg-input); border-radius: 0.5rem; margin-bottom: 0.4rem; font-size: 0.85rem; }
+        .nearby-number { font-weight: 700; color: var(--sec-orange-light); }
+        .nearby-distance { font-size: 0.75rem; color: var(--text-secondary); }
+        
+        .feeder-toggle { display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; }
+        .feeder-btn { padding: 0.5rem 1rem; border: 2px solid var(--border); background: transparent; color: var(--text-secondary); border-radius: 2rem; cursor: pointer; font-family: 'Tajawal', sans-serif; font-size: 0.8rem; transition: 0.3s; display: flex; align-items: center; gap: 0.4rem; }
+        .feeder-btn:hover { border-color: var(--sec-orange); color: var(--sec-orange); }
+        .feeder-btn.active { background: var(--gradient-sec); border-color: var(--sec-orange); color: white; }
+        .feeder-btn svg { width: 1rem; height: 1rem; fill: currentColor; }
 
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26, 54, 93, 0.9); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
-    .modal-overlay.active { display: flex; }
-    .modal { background: var(--bg-card); border-radius: 1rem; width: 100%; max-width: 30rem; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); }
-    .modal-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: var(--bg-card); }
-    .modal-header h3 { font-family: 'Cairo', sans-serif; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem; }
-    .modal-header h3 svg { width: 1.25rem; height: 1.25rem; fill: var(--sec-orange); }
-    .modal-close { width: 2rem; height: 2rem; background: var(--bg-input); border: none; border-radius: 0.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-    .modal-close svg { width: 1rem; height: 1rem; fill: var(--text-secondary); }
-    .modal-close:hover { background: var(--danger); }
-    .modal-close:hover svg { fill: white; }
-    .modal-body { padding: 1.25rem; }
-    .modal-footer { padding: 1rem 1.25rem; border-top: 1px solid var(--border); display: flex; gap: 0.625rem; justify-content: flex-end; flex-wrap: wrap; }
-    .modal-footer .btn { width: auto; min-width: 6rem; }
-    
-    .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
-    .form-grid .form-group.full-width { grid-column: span 2; }
-    .form-group textarea { min-height: 5rem; resize: vertical; }
-    
-    .location-btn { width: 100%; padding: 0.75rem; background: var(--bg-input); border: 2px dashed var(--border); border-radius: 0.625rem; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-family: 'Tajawal', sans-serif; }
-    .location-btn:hover { border-color: var(--sec-orange); color: var(--sec-orange); }
-    .location-btn.active { border-color: var(--success); color: var(--success); background: rgba(72, 187, 120, 0.1); }
-    .location-btn svg { width: 1.25rem; height: 1.25rem; fill: currentColor; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26, 54, 93, 0.9); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: var(--bg-card); border-radius: 1rem; width: 100%; max-width: 30rem; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); }
+        .modal-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: var(--bg-card); }
+        .modal-header h3 { font-family: 'Cairo', sans-serif; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .modal-header h3 svg { width: 1.25rem; height: 1.25rem; fill: var(--sec-orange); }
+        .modal-close { width: 2rem; height: 2rem; background: var(--bg-input); border: none; border-radius: 0.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .modal-close svg { width: 1rem; height: 1rem; fill: var(--text-secondary); }
+        .modal-close:hover { background: var(--danger); }
+        .modal-close:hover svg { fill: white; }
+        .modal-body { padding: 1.25rem; }
+        .modal-footer { padding: 1rem 1.25rem; border-top: 1px solid var(--border); display: flex; gap: 0.625rem; justify-content: flex-end; flex-wrap: wrap; }
+        .modal-footer .btn { width: auto; min-width: 6rem; }
+        
+        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+        .form-grid .form-group.full-width { grid-column: span 2; }
+        .form-group textarea { min-height: 5rem; resize: vertical; }
+        
+        .location-btn { width: 100%; padding: 0.75rem; background: var(--bg-input); border: 2px dashed var(--border); border-radius: 0.625rem; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-family: 'Tajawal', sans-serif; }
+        .location-btn:hover { border-color: var(--sec-orange); color: var(--sec-orange); }
+        .location-btn.active { border-color: var(--success); color: var(--success); background: rgba(72, 187, 120, 0.1); }
+        .location-btn svg { width: 1.25rem; height: 1.25rem; fill: currentColor; }
 
-    .fault-inputs { display: flex; flex-direction: column; gap: 0.75rem; }
-    .fault-input-row { display: flex; gap: 0.625rem; flex-wrap: wrap; }
-    .fault-input-group { flex: 1; min-width: 5rem; }
-    .fault-input-group label { display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem; }
-    .fault-input-group input { width: 100%; padding: 0.625rem; background: var(--bg-input); border: 2px solid var(--border); border-radius: 0.5rem; color: var(--text-primary); text-align: center; }
-    .fault-input-group input:focus { border-color: var(--sec-orange); outline: none; }
-    .fault-input-group input.found { border-color: var(--success); background: rgba(72, 187, 120, 0.1); }
-    .fault-input-group input.not-found { border-color: var(--danger); background: rgba(252, 129, 129, 0.1); }
-    .status-found { color: var(--success); font-weight: 600; }
-    .status-not-found { color: var(--danger); font-weight: 600; }
-    .point-label { display: inline-flex; align-items: center; justify-content: center; width: 1.5rem; height: 1.5rem; background: var(--sec-orange); color: white; border-radius: 50%; font-weight: 700; font-size: 0.75rem; }
-    .distance-badge { display: inline-block; padding: 0.25rem 0.75rem; background: var(--sec-blue-lighter); color: white; border-radius: 1rem; font-size: 0.85rem; font-weight: 600; }
+        .fault-inputs { display: flex; flex-direction: column; gap: 0.75rem; }
+        .fault-input-row { display: flex; gap: 0.625rem; flex-wrap: wrap; }
+        .fault-input-group { flex: 1; min-width: 5rem; }
+        .fault-input-group label { display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem; }
+        .fault-input-group input { width: 100%; padding: 0.625rem; background: var(--bg-input); border: 2px solid var(--border); border-radius: 0.5rem; color: var(--text-primary); text-align: center; }
+        .fault-input-group input:focus { border-color: var(--sec-orange); outline: none; }
+        .fault-input-group input.found { border-color: var(--success); background: rgba(72, 187, 120, 0.1); }
+        .fault-input-group input.not-found { border-color: var(--danger); background: rgba(252, 129, 129, 0.1); }
+        .status-found { color: var(--success); font-weight: 600; }
+        .status-not-found { color: var(--danger); font-weight: 600; }
+        .point-label { display: inline-flex; align-items: center; justify-content: center; width: 1.5rem; height: 1.5rem; background: var(--sec-orange); color: white; border-radius: 50%; font-weight: 700; font-size: 0.75rem; }
+        .distance-badge { display: inline-block; padding: 0.25rem 0.75rem; background: var(--sec-blue-lighter); color: white; border-radius: 1rem; font-size: 0.85rem; font-weight: 600; }
 
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr)); gap: 0.875rem; margin-bottom: 1.25rem; }
-    .stat-card { background: var(--bg-input); border-radius: 0.75rem; padding: 1rem; text-align: center; border: 1px solid var(--border); }
-    .stat-card .number { font-size: 1.75rem; font-weight: 700; color: var(--sec-orange); }
-    .stat-card .label { color: var(--text-secondary); font-size: 0.8rem; }
-    
-    .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: 0.875rem; margin-bottom: 1.25rem; }
-    .chart-card { background: var(--bg-input); border-radius: 0.75rem; padding: 1rem; border: 1px solid var(--border); }
-    .chart-card h4 { margin-bottom: 0.75rem; color: var(--sec-blue-pale); font-size: 0.9rem; }
-    .chart-container { height: 12rem; position: relative; }
-    
-    .admin-section { background: var(--bg-card); border-radius: 1rem; padding: 1.25rem; margin-bottom: 1.25rem; border: 1px solid var(--border); }
-    .admin-section h3 { font-family: 'Cairo', sans-serif; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; }
-    .admin-section h3 svg { width: 1.25rem; height: 1.25rem; fill: var(--sec-orange); }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr)); gap: 0.875rem; margin-bottom: 1.25rem; }
+        .stat-card { background: var(--bg-input); border-radius: 0.75rem; padding: 1rem; text-align: center; border: 1px solid var(--border); }
+        .stat-card .number { font-size: 1.75rem; font-weight: 700; color: var(--sec-orange); }
+        .stat-card .label { color: var(--text-secondary); font-size: 0.8rem; }
+        .stat-card.online-card { border: 2px solid var(--success); background: rgba(92, 184, 92, 0.1); }
+        .stat-card.online-card .number { color: var(--success); }
+        
+        /* المتواجدون حالياً */
+        .online-section { border: 2px solid var(--success) !important; background: rgba(92, 184, 92, 0.05) !important; }
+        .online-section h3 { color: var(--success); }
+        .online-section h3 svg { fill: none; stroke: var(--success); }
+        .online-badge { background: var(--success); color: white; padding: 0.2rem 0.6rem; border-radius: 1rem; font-size: 0.8rem; margin-right: 0.5rem; animation: pulse 2s infinite; }
+        .online-users-grid { display: flex; flex-wrap: wrap; gap: 0.75rem; min-height: 50px; }
+        .online-user-card { display: flex; align-items: center; gap: 0.5rem; background: rgba(92, 184, 92, 0.15); border: 1px solid var(--success); padding: 0.6rem 0.9rem; border-radius: 0.75rem; min-width: 140px; }
+        .online-user-avatar { width: 36px; height: 36px; background: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1rem; }
+        .online-indicator { width: 10px; height: 10px; background: var(--success); border-radius: 50%; animation: pulse-dot 1.5s infinite; margin-right: auto; }
+        @keyframes pulse-dot { 0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(92, 184, 92, 0.4); } 50% { opacity: 0.8; box-shadow: 0 0 0 8px rgba(92, 184, 92, 0); } }
+        .online-user-info { display: flex; flex-direction: column; }
+        .online-user-name { font-weight: 600; font-size: 0.85rem; color: var(--text-primary); }
+        .online-user-time { font-size: 0.7rem; color: var(--text-secondary); }
+        .empty-online { color: var(--text-secondary); font-size: 0.85rem; width: 100%; text-align: center; padding: 1rem; }
+        
+        /* المتواجدون حالياً */
+        .online-section { background: var(--bg-card); border-radius: 1rem; padding: 1.25rem; margin-bottom: 1.25rem; border: 1px solid var(--border); }
+        .online-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+        .online-title { display: flex; align-items: center; gap: 0.5rem; font-family: 'Cairo', sans-serif; font-size: 1rem; }
+        .online-count { background: var(--success); padding: 0.3rem 0.8rem; border-radius: 1rem; font-size: 0.85rem; font-weight: 600; animation: pulse 2s infinite; }
+        .online-list { display: flex; flex-wrap: wrap; gap: 0.5rem; max-height: 200px; overflow-y: auto; }
+        .online-user { display: flex; align-items: center; gap: 0.5rem; background: var(--bg-input); padding: 0.5rem 0.75rem; border-radius: 0.5rem; font-size: 0.85rem; }
+        .online-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; animation: blink 1.5s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .online-user-name { font-weight: 600; }
+        .online-user-time { font-size: 0.7rem; color: var(--text-secondary); }
+        .stat-card.online-card { background: linear-gradient(135deg, rgba(92, 184, 92, 0.2), rgba(92, 184, 92, 0.1)); border: 1px solid rgba(92, 184, 92, 0.5); }
+        .stat-card.online-card .number { color: #5cb85c; }
+        
+        .online-section { border: 1px solid rgba(92, 184, 92, 0.3); background: linear-gradient(135deg, rgba(92, 184, 92, 0.05), transparent); }
+        .online-section h3 { color: #5cb85c; }
+        .online-section h3 svg { width: 1.25rem; height: 1.25rem; margin-left: 0.5rem; }
+        .online-badge { background: #5cb85c; color: white; padding: 0.2rem 0.6rem; border-radius: 1rem; font-size: 0.8rem; margin-right: 0.5rem; }
+        .online-users-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.75rem; }
+        .online-user-card { background: var(--bg-input); border-radius: 0.5rem; padding: 0.75rem; display: flex; align-items: center; gap: 0.75rem; border-right: 3px solid #5cb85c; }
+        .online-user-avatar { width: 2.5rem; height: 2.5rem; background: var(--sec-orange); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; }
+        .online-user-info { flex: 1; }
+        .online-user-name { font-weight: 600; font-size: 0.9rem; }
+        .online-user-time { font-size: 0.7rem; color: var(--text-secondary); }
+        .online-indicator { width: 10px; height: 10px; background: #5cb85c; border-radius: 50%; animation: pulse-online 2s infinite; }
+        @keyframes pulse-online { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.2); } }
+        .empty-online { text-align: center; padding: 2rem; color: var(--text-secondary); font-size: 0.9rem; }
+        
+        .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: 0.875rem; margin-bottom: 1.25rem; }
+        .chart-card { background: var(--bg-input); border-radius: 0.75rem; padding: 1rem; border: 1px solid var(--border); }
+        .chart-card h4 { margin-bottom: 0.75rem; color: var(--sec-blue-pale); font-size: 0.9rem; }
+        .chart-container { height: 12rem; position: relative; }
+        
+        .admin-section { background: var(--bg-card); border-radius: 1rem; padding: 1.25rem; margin-bottom: 1.25rem; border: 1px solid var(--border); }
+        .admin-section h3 { font-family: 'Cairo', sans-serif; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; }
+        .admin-section h3 svg { width: 1.25rem; height: 1.25rem; fill: var(--sec-orange); }
 
-    .toast-container { position: fixed; bottom: 1.25rem; left: 1.25rem; z-index: 2000; display: flex; flex-direction: column; gap: 0.5rem; }
-    .toast { padding: 0.75rem 1rem; border-radius: 0.625rem; display: flex; align-items: center; gap: 0.625rem; box-shadow: var(--shadow); animation: fadeIn 0.3s; }
-    .toast-success { background: var(--success); color: white; }
-    .toast-error { background: var(--danger); color: white; }
-    .toast-warning { background: var(--warning); color: #1a1a1a; }
+        .toast-container { position: fixed; bottom: 1.25rem; left: 1.25rem; z-index: 2000; display: flex; flex-direction: column; gap: 0.5rem; }
+        .toast { padding: 0.75rem 1rem; border-radius: 0.625rem; display: flex; align-items: center; gap: 0.625rem; box-shadow: var(--shadow); animation: fadeIn 0.3s; }
+        .toast-success { background: var(--success); color: white; }
+        .toast-error { background: var(--danger); color: white; }
+        .toast-warning { background: var(--warning); color: #1a1a1a; }
 
-    .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26, 54, 93, 0.8); display: none; align-items: center; justify-content: center; z-index: 3000; flex-direction: column; gap: 1rem; }
-    .loading-overlay.active { display: flex; }
-    .loading-spinner { width: 2.5rem; height: 2.5rem; border: 4px solid var(--border); border-top-color: var(--sec-orange); border-radius: 50%; animation: spin 1s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .spinner { width: 1.125rem; height: 1.125rem; border: 3px solid transparent; border-top-color: currentColor; border-radius: 50%; animation: spin 1s linear infinite; }
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26, 54, 93, 0.8); display: none; align-items: center; justify-content: center; z-index: 3000; flex-direction: column; gap: 1rem; }
+        .loading-overlay.active { display: flex; }
+        .loading-spinner { width: 2.5rem; height: 2.5rem; border: 4px solid var(--border); border-top-color: var(--sec-orange); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner { width: 1.125rem; height: 1.125rem; border: 3px solid transparent; border-top-color: currentColor; border-radius: 50%; animation: spin 1s linear infinite; }
 
-    @media (max-width: 768px) {
-        .header { flex-direction: column; text-align: center; }
-        .header-left { flex-direction: column; width: 100%; }
-        .user-info, .logout-btn, .cache-status { width: 100%; justify-content: center; }
-        .search-box { flex-direction: column; }
-        .action-buttons { width: 100%; }
-        .action-btn { flex: 1; justify-content: center; }
-        .form-grid { grid-template-columns: 1fr; }
-        .form-grid .form-group.full-width { grid-column: span 1; }
-        .form-row { flex-direction: column; }
-        .modal-footer { flex-direction: column; }
-        .modal-footer .btn { width: 100%; }
-        .fault-input-group { min-width: calc(50% - 0.375rem); }
-    }
-    @media (max-width: 480px) {
-        .action-btn { font-size: 0.75rem; padding: 0.5rem 0.6rem; }
-        .action-btn svg { width: 1rem; height: 1rem; }
-        .action-btn span { font-size: 0.7rem; }
-    }
-</style>
-```
-
+        @media (max-width: 768px) {
+            .header { flex-direction: column; text-align: center; }
+            .header-left { flex-direction: column; width: 100%; }
+            .user-info, .logout-btn, .cache-status { width: 100%; justify-content: center; }
+            .search-box { flex-direction: column; }
+            .action-buttons { width: 100%; }
+            .action-btn { flex: 1; justify-content: center; }
+            .form-grid { grid-template-columns: 1fr; }
+            .form-grid .form-group.full-width { grid-column: span 1; }
+            .form-row { flex-direction: column; }
+            .modal-footer { flex-direction: column; }
+            .modal-footer .btn { width: 100%; }
+            .fault-input-group { min-width: calc(50% - 0.375rem); }
+        }
+        @media (max-width: 480px) {
+            .action-btn { font-size: 0.75rem; padding: 0.5rem 0.6rem; }
+            .action-btn svg { width: 1rem; height: 1rem; }
+            .action-btn span { font-size: 0.7rem; }
+        }
+    </style>
 </head>
 <body>
     <div class="loading-overlay" id="loadingOverlay"><div class="loading-spinner"></div><div>جاري التحميل...</div></div>
     <div class="toast-container" id="toastContainer"></div>
-
-```
-<!-- شاشة التحميل الأولي -->
-<div class="first-load-overlay" id="firstLoadOverlay">
-    <div class="first-load-logo">⚡</div>
-    <div class="first-load-text">جاري تحميل بيانات المحطات...</div>
-    <div class="first-load-progress"><div class="first-load-bar" id="firstLoadBar"></div></div>
-    <div class="first-load-count" id="firstLoadCount">0%</div>
-    <div class="first-load-done" id="firstLoadDone">✓ تم التحميل بنجاح!</div>
-</div>
-
-<!-- شريط التثبيت الثابت -->
-<div class="install-btn" id="installBtn">
-    <button class="close-install" onclick="hideInstallBanner(event)">×</button>
-    <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-    <span onclick="installApp()">تثبيت التطبيق على جهازك</span>
-</div>
-
-<!-- iOS Install Prompt -->
-<div class="ios-install-prompt" id="iosInstallPrompt" style="display:none;">
-    <div class="ios-prompt-content">
-        <button class="ios-close" onclick="closeIOSPrompt()">×</button>
-        <div style="font-size:2rem;margin-bottom:0.5rem;">⚡</div>
-        <h4>تثبيت التطبيق</h4>
-        <p>اضغط على <svg viewBox="0 0 24 24" style="width:1.2rem;height:1.2rem;vertical-align:middle;fill:#5b8fb9;"><path d="M16 5l-1.42 1.42-1.59-1.59V16h-1.98V4.83L9.42 6.42 8 5l4-4 4 4zm4 5v11c0 1.1-.9 2-2 2H6c-1.11 0-2-.9-2-2V10c0-1.11.89-2 2-2h3v2H6v11h12V10h-3V8h3c1.1 0 2 .89 2 2z"/></svg> ثم <strong>"إضافة للشاشة الرئيسية"</strong></p>
-    </div>
-</div>
-
-<style>
-    .ios-install-prompt { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-card); padding: 1.25rem; border-top-left-radius: 1rem; border-top-right-radius: 1rem; box-shadow: 0 -5px 20px rgba(0,0,0,0.3); z-index: 2000; animation: slideUp 0.3s ease; }
-    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-    .ios-prompt-content { text-align: center; position: relative; }
-    .ios-prompt-content h4 { margin: 0.5rem 0; color: var(--sec-orange); }
-    .ios-prompt-content p { font-size: 0.85rem; color: var(--text-secondary); margin: 0; }
-    .ios-close { position: absolute; top: -0.5rem; left: 0; background: none; border: none; font-size: 1.5rem; color: var(--text-secondary); cursor: pointer; }
-</style>
-
-<!-- Login -->
-<div class="page active" id="loginPage">
-    <div class="login-container">
-        <div class="login-card">
-            <div class="logo-section">
-                <div class="logo-icon">⚡</div>
-                <h1>نظام محطات SEC</h1>
-                <p>الشركة السعودية للكهرباء - جدة</p>
-            </div>
-            <div class="tabs">
-                <div class="tab active" onclick="switchTab('login')">تسجيل دخول</div>
-                <div class="tab" onclick="switchTab('register')">مشترك جديد</div>
-            </div>
-            <div class="tab-content active" id="loginTab">
-                <form onsubmit="return handleLogin(event)">
-                    <div class="form-group">
-                        <label>رقم الجوال</label>
-                        <input type="tel" id="loginPhone" placeholder="05xxxxxxxx" maxlength="10" oninput="validateLoginPhone()" required>
-                        <div class="input-hint" id="loginPhoneHint">أدخل 10 أرقام تبدأ بـ 05</div>
-                    </div>
-                    <button type="submit" class="btn btn-primary" id="loginBtn" disabled>دخول</button>
-                </form>
-            </div>
-            <div class="tab-content" id="registerTab">
-                <form onsubmit="return handleRegister(event)">
-                    <div class="form-group"><label>الاسم الكامل *</label><input type="text" id="regName" placeholder="أدخل اسمك" oninput="validateRegPhone()" required></div>
-                    <div class="form-row">
-                        <div class="form-group"><label>رقم الجوال *</label><input type="tel" id="regPhone" placeholder="05xxxxxxxx" maxlength="10" oninput="validateRegPhone()" required><div class="input-hint" id="regPhoneHint">10 أرقام</div></div>
-                        <div class="form-group"><label>النوع</label><select id="regType"><option value="موظف">موظف</option><option value="مقاول">مقاول</option></select></div>
-                    </div>
-                    <div class="form-group"><label>البريد الإلكتروني</label><input type="email" id="regEmail" placeholder="example@email.com"></div>
-                    <button type="submit" class="btn btn-success" id="regBtn" disabled>تسجيل</button>
-                </form>
-            </div>
-            <div class="admin-link"><a href="#" onclick="showAdminLogin()">🔐 دخول المدير</a></div>
-        </div>
-    </div>
-</div>
-
-<!-- Admin Login Modal -->
-<div class="modal-overlay" id="adminLoginModal">
-    <div class="modal">
-        <div class="modal-header"><h3>🔐 دخول المدير</h3><button class="modal-close" onclick="closeModal('adminLoginModal')"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg></button></div>
-        <div class="modal-body">
-            <div class="form-group"><label>رمز الدخول</label>
-                <div class="password-wrapper">
-                    <input type="password" id="adminCode" placeholder="أدخل رمز المدير">
-                    <button type="button" class="password-toggle" onclick="togglePassword()"><svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></button>
-                </div>
-            </div>
-        </div>
-        <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('adminLoginModal')">إلغاء</button><button class="btn btn-primary" onclick="adminLogin()">دخول</button></div>
-    </div>
-</div>
-
-<!-- Dashboard -->
-<div class="page" id="dashboardPage">
-    <div class="dashboard-container">
-        <header class="header">
-            <div class="header-right">
-                <div class="header-logo">⚡</div>
-                <div><div class="header-title">نظام محطات SEC</div><div class="header-subtitle">جدة</div></div>
-            </div>
-            <div class="header-left">
-                <div class="cache-status" id="cacheStatus" onclick="manualRefreshCache()"><span>📦</span><span class="cache-text" id="cacheText">تحميل...</span></div>
-                <div class="user-info"><div class="user-avatar" id="userAvatar">م</div><div><div class="user-name" id="userName">المستخدم</div><div class="user-type" id="userType">موظف</div></div></div>
-                <button class="logout-btn" onclick="logout()"><svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg><span>خروج</span></button>
-            </div>
-        </header>
-
-        <section class="search-section">
-            <div class="search-header"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg><h2>البحث عن محطة</h2></div>
-            <div class="search-box">
-                <div class="search-input-wrapper"><input type="text" id="searchInput" placeholder="رقم المحطة أو اختصار التحويل..." onkeypress="if(event.key==='Enter')searchStation()"></div>
-                <div class="action-buttons">
-                    <button class="action-btn btn-search" onclick="searchStation()"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg><span>بحث</span></button>
-                    <button class="action-btn btn-add" onclick="openAddModal('distribution')"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg><span>توزيع</span></button>
-                    <button class="action-btn btn-add-sub" onclick="openAddModal('substation')"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg><span>تحويل</span></button>
-                    <button class="action-btn btn-fault" onclick="openFaultModal()"><svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg><span>أعطال</span></button>
-                </div>
-            </div>
-        </section>
-
-        <section class="results-section">
-            <div class="results-header"><div class="results-title"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg><h3>النتائج</h3></div><div class="results-count" id="resultsCount">0</div></div>
-            <div id="resultsContent"><div class="empty-state"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5z"/></svg><h4>أدخل رقم المحطة للبحث</h4></div></div>
-        </section>
-
-        <section class="map-section" id="mapSection" style="display:none;">
-            <div class="results-header"><div class="results-title"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg><h3>المحطات القريبة (3.5 كم)</h3></div><div class="results-count" id="nearbyCount">0</div></div>
-            <div class="map-container"><div id="nearbyMap"></div></div>
-            <div class="nearby-list" id="nearbyList"></div>
-        </section>
-    </div>
-</div>
-
-<!-- Add Distribution Modal -->
-<div class="modal-overlay" id="addDistributionModal">
-    <div class="modal">
-        <div class="modal-header"><h3><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>إضافة محطة توزيع</h3><button class="modal-close" onclick="closeModal('addDistributionModal')"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg></button></div>
-        <div class="modal-body">
-            <div class="form-grid">
-                <div class="form-group"><label>رقم المحطة *</label><input type="text" id="addDistNumber" placeholder="41475" required></div>
-                <div class="form-group"><label>المغذي</label><input type="text" id="addDistFeeder" placeholder="MDN2-17"></div>
-                <div class="form-group full-width"><label>الحي *</label><input type="text" id="addDistRegion" required></div>
-                <div class="form-group"><label>خط العرض</label><input type="text" id="addDistLat" readonly></div>
-                <div class="form-group"><label>خط الطول</label><input type="text" id="addDistLng" readonly></div>
-                <div class="form-group full-width"><button type="button" class="location-btn" id="addDistLocationBtn" onclick="getCurrentLocation('addDist')"><svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06z"/></svg><span>تحديد موقعي</span></button></div>
-                <div class="form-group full-width"><label>السبب</label><textarea id="addDistReason"></textarea></div>
-            </div>
-        </div>
-        <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('addDistributionModal')">إلغاء</button><button class="btn btn-success" onclick="submitAddDistribution()">حفظ</button></div>
-    </div>
-</div>
-
-<!-- Add Substation Modal -->
-<div class="modal-overlay" id="addSubstationModal">
-    <div class="modal">
-        <div class="modal-header"><h3><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>إضافة محطة تحويل</h3><button class="modal-close" onclick="closeModal('addSubstationModal')"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg></button></div>
-        <div class="modal-body">
-            <div class="form-grid">
-                <div class="form-group full-width"><label>اختصار المحطة *</label><input type="text" id="addSubShortName" placeholder="MDN أو IC5" required></div>
-                <div class="form-group"><label>خط العرض</label><input type="text" id="addSubLat" readonly></div>
-                <div class="form-group"><label>خط الطول</label><input type="text" id="addSubLng" readonly></div>
-                <div class="form-group full-width"><button type="button" class="location-btn" id="addSubLocationBtn" onclick="getCurrentLocation('addSub')"><svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06z"/></svg><span>تحديد موقعي</span></button></div>
-                <div class="form-group full-width"><label>السبب</label><textarea id="addSubReason"></textarea></div>
-            </div>
-        </div>
-        <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('addSubstationModal')">إلغاء</button><button class="btn btn-success" onclick="submitAddSubstation()">حفظ</button></div>
-    </div>
-</div>
-
-<!-- Edit Modal -->
-<div class="modal-overlay" id="editModal">
-    <div class="modal">
-        <div class="modal-header"><h3><svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z"/></svg>تعديل محطة</h3><button class="modal-close" onclick="closeModal('editModal')"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg></button></div>
-        <div class="modal-body">
-            <div class="form-grid">
-                <div class="form-group full-width">
-                    <label>رقم المحطة</label>
-                    <input type="text" id="editStationNumber" readonly style="background: var(--bg-dark); cursor: not-allowed; opacity: 0.7;">
-                    <div class="input-hint">🔒 لا يمكن تعديل رقم المحطة</div>
-                </div>
-                <div class="form-group" id="editFeederGroup"><label>المغذي</label><input type="text" id="editFeeder"></div>
-                <div class="form-group" id="editRegionGroup"><label>الحي</label><input type="text" id="editRegion"></div>
-                <div class="form-group"><label>خط العرض</label><input type="text" id="editLatitude" placeholder="يدوي أو تلقائي"></div>
-                <div class="form-group"><label>خط الطول</label><input type="text" id="editLongitude" placeholder="يدوي أو تلقائي"></div>
-                <div class="form-group full-width"><button type="button" class="location-btn" id="editLocationBtn" onclick="getCurrentLocation('edit')"><svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/></svg><span>تحديد موقعي الحالي</span></button></div>
-                <div class="form-group full-width"><label>السبب</label><textarea id="editReason" placeholder="سبب التعديل (اختياري)"></textarea></div>
-            </div>
-        </div>
-        <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('editModal')">إلغاء</button><button class="btn btn-warning" onclick="submitEdit()">حفظ التعديلات</button></div>
-    </div>
-</div>
-
-<!-- Fault Modal -->
-<div class="modal-overlay" id="faultModal">
-    <div class="modal" style="max-width:42rem;">
-        <div class="modal-header"><h3><svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>تتبع الأعطال</h3><button class="modal-close" onclick="closeModal('faultModal')"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg></button></div>
-        <div class="modal-body">
-            <p style="margin-bottom:1rem;color:var(--text-secondary);font-size:0.85rem;">أدخل أرقام المحطات (2-6)</p>
-            <div class="fault-inputs">
-                <div class="fault-input-row">
-                    <div class="fault-input-group"><label>1</label><input type="text" id="fault1"></div>
-                    <div class="fault-input-group"><label>2</label><input type="text" id="fault2"></div>
-                    <div class="fault-input-group"><label>3</label><input type="text" id="fault3"></div>
-                </div>
-                <div class="fault-input-row">
-                    <div class="fault-input-group"><label>4</label><input type="text" id="fault4"></div>
-                    <div class="fault-input-group"><label>5</label><input type="text" id="fault5"></div>
-                    <div class="fault-input-group"><label>6</label><input type="text" id="fault6"></div>
-                </div>
-            </div>
-            <button class="btn btn-primary" style="margin-top:1rem;" onclick="searchFaultStations()"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5z"/></svg>بحث</button>
-            <div id="faultResults" style="display:none;margin-top:1.25rem;">
-                <div class="results-header"><div class="results-title"><h3>محطات العطل</h3></div><div class="results-count" id="faultCount">0</div></div>
-                <div id="totalDistance" style="text-align:center;margin:0.75rem 0;"></div>
-                <div class="results-table-wrapper" style="max-height:10rem;overflow-y:auto;"><table class="results-table"><thead><tr><th>#</th><th>المحطة</th><th>النوع</th><th>الحالة</th></tr></thead><tbody id="faultTableBody"></tbody></table></div>
-                <div class="map-container" style="height:14rem;margin-top:1rem;"><div id="faultMap"></div></div>
-                <a id="faultNavigationLink" href="#" target="_blank" class="btn btn-success" style="margin-top:1rem;text-decoration:none;"><svg viewBox="0 0 24 24"><path d="M21.71 11.29l-9-9c-.39-.39-1.02-.39-1.41 0l-9 9c-.39.39-.39 1.02 0 1.41l9 9c.39.39 1.02.39 1.41 0l9-9c.39-.38.39-1.01 0-1.41z"/></svg>فتح التنقل</a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Admin Page -->
-<div class="page" id="adminPage">
-    <div class="dashboard-container">
-        <header class="header">
-            <div class="header-right"><div class="header-logo">⚡</div><div><div class="header-title">لوحة المدير</div><div class="header-subtitle">SEC جدة</div></div></div>
-            <div class="header-left"><button class="logout-btn" onclick="logout()"><svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5z"/></svg><span>خروج</span></button></div>
-        </header>
-        <div class="stats-grid">
-            <div class="stat-card"><div class="number" id="totalDistribution">0</div><div class="label">توزيع</div></div>
-            <div class="stat-card"><div class="number" id="totalSubstations">0</div><div class="label">تحويل</div></div>
-            <div class="stat-card"><div class="number" id="totalUsers">0</div><div class="label">مشتركين</div></div>
-            <div class="stat-card"><div class="number" id="totalAdditions">0</div><div class="label">إضافات</div></div>
-            <div class="stat-card"><div class="number" id="totalEdits">0</div><div class="label">تعديلات</div></div>
-        </div>
-        <div class="charts-grid">
-            <div class="chart-card"><h4>📊 الزيارات</h4><div class="chart-container"><canvas id="visitsChart"></canvas></div></div>
-            <div class="chart-card"><h4>📈 النشاط</h4><div class="chart-container"><canvas id="activityChart"></canvas></div></div>
-        </div>
-        <section class="admin-section"><h3>👥 المشتركين</h3><div class="results-table-wrapper"><table class="results-table"><thead><tr><th>الاسم</th><th>الجوال</th><th>النوع</th><th>التسجيل</th></tr></thead><tbody id="adminUsersBody"></tbody></table></div></section>
-        <section class="admin-section"><h3>📋 السجلات</h3><div class="results-table-wrapper"><table class="results-table"><thead><tr><th>النوع</th><th>المحطة</th><th>المستخدم</th><th>التاريخ</th></tr></thead><tbody id="adminLogsBody"></tbody></table></div></section>
-    </div>
-</div>
-
-<script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbzR3jmjcMYCpEVRIVQCFsRAO_myWViBiLBLty6tmL_28wg4RGG7iDtMb2KYa9jQpzyGnQ/exec';
-    let currentUser = null, nearbyMap = null, faultMap = null, faultStations = [], editingStationType = null, deferredPrompt = null;
-    const CACHE_KEY = 'sec_stations_v7', CACHE_VERSION_KEY = 'sec_version_v7';
-    let allStations = [], isStationsLoaded = false, versionCheckTimer = null, currentVersion = null;
-
-    // Cache
-    function startVersionCheck() { if (versionCheckTimer) clearInterval(versionCheckTimer); versionCheckTimer = setInterval(checkForUpdates, 30000); }
-    function stopVersionCheck() { if (versionCheckTimer) { clearInterval(versionCheckTimer); versionCheckTimer = null; } }
-    async function checkForUpdates() { try { const r = await apiGet('getVersion'); if (r.version && r.version !== currentVersion) { await silentRefreshCache(); currentVersion = r.version; localStorage.setItem(CACHE_VERSION_KEY, currentVersion); showToast('تم التحديث 🔄'); } } catch (e) {} }
-    async function silentRefreshCache() { try { const r = await apiGet('getAllStations'); if (r.stations?.length) { allStations = r.stations; isStationsLoaded = true; localStorage.setItem(CACHE_KEY, JSON.stringify(allStations)); updateCacheStatus('loaded', allStations.length.toLocaleString('ar-SA') + ' محطة ✓'); } } catch (e) {} }
-    async function loadStationsCache() { 
-        updateCacheStatus('loading', 'جاري التحميل...'); 
-        currentVersion = localStorage.getItem(CACHE_VERSION_KEY); 
-        const c = localStorage.getItem(CACHE_KEY); 
-        if (c && currentVersion) { 
-            allStations = JSON.parse(c); 
-            isStationsLoaded = true; 
-            updateCacheStatus('loaded', allStations.length.toLocaleString('ar-SA') + ' محطة ✓'); 
-            startVersionCheck(); 
-            checkForUpdates(); 
-            return; 
-        } 
-        await refreshStationsCacheWithProgress(); 
-    }
     
-    async function refreshStationsCacheWithProgress() {
-        const overlay = document.getElementById('firstLoadOverlay');
-        const bar = document.getElementById('firstLoadBar');
-        const countEl = document.getElementById('firstLoadCount');
-        const doneEl = document.getElementById('firstLoadDone');
+    <!-- شاشة التحميل الأولي -->
+    <div class="first-load-overlay" id="firstLoadOverlay">
+        <div class="first-load-logo">⚡</div>
+        <div class="first-load-text">جاري تحميل بيانات المحطات...</div>
+        <div class="first-load-progress"><div class="first-load-bar" id="firstLoadBar"></div></div>
+        <div class="first-load-count" id="firstLoadCount">0%</div>
+        <div class="first-load-done" id="firstLoadDone">✓ تم التحميل بنجاح!</div>
+    </div>
+    
+    <!-- شريط التثبيت الثابت -->
+    <div class="install-btn" id="installBtn">
+        <button class="close-install" onclick="hideInstallBanner(event)">×</button>
+        <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+        <span onclick="installApp()">تثبيت التطبيق على جهازك</span>
+    </div>
+    
+    <!-- iOS Install Prompt -->
+    <div class="ios-install-prompt" id="iosInstallPrompt" style="display:none;">
+        <div class="ios-prompt-content">
+            <button class="ios-close" onclick="closeIOSPrompt()">×</button>
+            <div style="font-size:2rem;margin-bottom:0.5rem;">⚡</div>
+            <h4>تثبيت التطبيق</h4>
+            <p>اضغط على <svg viewBox="0 0 24 24" style="width:1.2rem;height:1.2rem;vertical-align:middle;fill:#5b8fb9;"><path d="M16 5l-1.42 1.42-1.59-1.59V16h-1.98V4.83L9.42 6.42 8 5l4-4 4 4zm4 5v11c0 1.1-.9 2-2 2H6c-1.11 0-2-.9-2-2V10c0-1.11.89-2 2-2h3v2H6v11h12V10h-3V8h3c1.1 0 2 .89 2 2z"/></svg> ثم <strong>"إضافة للشاشة الرئيسية"</strong></p>
+        </div>
+    </div>
+    
+    <style>
+        .ios-install-prompt { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-card); padding: 1.25rem; border-top-left-radius: 1rem; border-top-right-radius: 1rem; box-shadow: 0 -5px 20px rgba(0,0,0,0.3); z-index: 2000; animation: slideUp 0.3s ease; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .ios-prompt-content { text-align: center; position: relative; }
+        .ios-prompt-content h4 { margin: 0.5rem 0; color: var(--sec-orange); }
+        .ios-prompt-content p { font-size: 0.85rem; color: var(--text-secondary); margin: 0; }
+        .ios-close { position: absolute; top: -0.5rem; left: 0; background: none; border: none; font-size: 1.5rem; color: var(--text-secondary); cursor: pointer; }
+    </style>
+
+    <!-- Login -->
+    <div class="page active" id="loginPage">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="logo-section">
+                    <div class="logo-icon">⚡</div>
+                    <h1>نظام محطات SEC</h1>
+                    <p>الشركة السعودية للكهرباء - جدة</p>
+                </div>
+                <div class="tabs">
+                    <div class="tab active" onclick="switchTab('login')">تسجيل دخول</div>
+                    <div class="tab" onclick="switchTab('register')">مشترك جديد</div>
+                </div>
+                <div class="tab-content active" id="loginTab">
+                    <form onsubmit="return handleLogin(event)">
+                        <div class="form-group">
+                            <label>رقم الجوال</label>
+                            <input type="tel" id="loginPhone" placeholder="05xxxxxxxx" maxlength="10" oninput="validateLoginPhone()" required>
+                            <div class="input-hint" id="loginPhoneHint">أدخل 10 أرقام تبدأ بـ 05</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="loginBtn" disabled>دخول</button>
+                    </form>
+                </div>
+                <div class="tab-content" id="registerTab">
+                    <form onsubmit="return handleRegister(event)">
+                        <div class="form-group"><label>الاسم الكامل *</label><input type="text" id="regName" placeholder="أدخل اسمك" oninput="validateRegPhone()" required></div>
+                        <div class="form-row">
+                            <div class="form-group"><label>رقم الجوال *</label><input type="tel" id="regPhone" placeholder="05xxxxxxxx" maxlength="10" oninput="validateRegPhone()" required><div class="input-hint" id="regPhoneHint">10 أرقام</div></div>
+                            <div class="form-group"><label>النوع</label><select id="regType"><option value="موظف">موظف</option><option value="مقاول">مقاول</option></select></div>
+                        </div>
+                        <div class="form-group"><label>البريد الإلكتروني</label><input type="email" id="regEmail" placeholder="example@email.com"></div>
+                        <button type="submit" class="btn btn-success" id="regBtn" disabled>تسجيل</button>
+                    </form>
+                </div>
+                <div class="admin-link"><a href="#" onclick="showAdminLogin()">🔐 دخول المدير</a></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div class="modal-overlay" id="adminLoginModal">
+        <div class="modal">
+            <div class="modal-header"><h3>🔐 دخول المدير</h3><button class="modal-close" onclick="closeModal('adminLoginModal')"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg></button></div>
+            <div class="modal-body">
+                <div class="form-group"><label>رمز الدخول</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="adminCode" placeholder="أدخل رمز المدير">
+                        <button type="button" class="password-toggle" onclick="togglePassword()"><svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('adminLoginModal')">إلغاء</button><button class="btn btn-primary" onclick="adminLogin()">دخول</button></div>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="page" id="dashboardPage">
+        <div class="dashboard-container">
+            <header class="header">
+                <div class="header-right">
+                    <div class="header-logo">⚡</div>
+                    <div><div class="header-title">نظام محطات SEC</div><div class="header-subtitle">جدة</div></div>
+                </div>
+                <div class="header-left">
+                    <div class="cache-status" id="cacheStatus" onclick="manualRefreshCache()"><span>📦</span><span class="cache-text" id="cacheText">تحميل...</span></div>
+                    <div class="user-info"><div class="user-avatar" id="userAvatar">م</div><div><div class="user-name" id="userName">المستخدم</div><div class="user-type" id="userType">موظف</div></div></div>
+                    <button class="logout-btn" onclick="logout()"><svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg><span>خروج</span></button>
+                </div>
+            </header>
+
+            <section class="search-section">
+                <div class="search-header"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg><h2>البحث عن محطة</h2></div>
+                <div class="search-box">
+                    <div class="search-input-wrapper"><input type="text" id="searchInput" placeholder="رقم المحطة أو اختصار التحويل..." onkeypress="if(event.key==='Enter')searchStation()"></div>
+                    <div class="action-buttons">
+                        <button class="action-btn btn-search" onclick="searchStation()"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg><span>بحث</span></button>
+                        <button class="action-btn btn-add" onclick="openAddModal('distribution')"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg><span>توزيع</span></button>
+                        <button class="action-btn btn-add-sub" onclick="openAddModal('substation')"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg><span>تحويل</span></button>
+                        <button class="action-btn btn-fault" onclick="openFaultModal()"><svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg><span>أعطال</span></button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="results-section">
+                <div class="results-header"><div class="results-title"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg><h3>النتائج</h3></div><div class="results-count" id="resultsCount">0</div></div>
+                <div id="resultsContent"><div class="empty-state"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5z"/></svg><h4>أدخل رقم المحطة للبحث</h4></div></div>
+            </section>
+
+            <section class="map-section" id="mapSection" style="display:none;">
+                <div class="results-header"><div class="results-title"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg><h3>المحطات القريبة (3.5 كم)</h3></div><div class="results-count" id="nearbyCount">0</div></div>
+                <div class="map-container"><div id="nearbyMap"></div></div>
+                <div class="nearby-list" id="nearbyList"></div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Add Distribution Modal -->
+    <div class="modal-overlay" id="addDistributionModal">
+        <div class="modal">
+            <div class="modal-header"><h3><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>إضافة محطة توزيع</h3><button class="modal-close" onclick="closeModal('addDistributionModal')"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg></button></div>
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-group"><label>رقم المحطة *</label><input type="text" id="addDistNumber" placeholder="41475" required></div>
+                    <div class="form-group"><label>المغذي</label><input type="text" id="addDistFeeder" placeholder="MDN2-17"></div>
+                    <div class="form-group full-width"><label>الحي *</label><input type="text" id="addDistRegion" required></div>
+                    <div class="form-group"><label>خط العرض</label><input type="text" id="addDistLat" readonly></div>
+                    <div class="form-group"><label>خط الطول</label><input type="text" id="addDistLng" readonly></div>
+                    <div class="form-group full-width"><button type="button" class="location-btn" id="addDistLocationBtn" onclick="getCurrentLocation('addDist')"><svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06z"/></svg><span>تحديد موقعي</span></button></div>
+                    <div class="form-group full-width"><label>السبب</label><textarea id="addDistReason"></textarea></div>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('addDistributionModal')">إلغاء</button><button class="btn btn-success" onclick="submitAddDistribution()">حفظ</button></div>
+        </div>
+    </div>
+
+    <!-- Add Substation Modal -->
+    <div class="modal-overlay" id="addSubstationModal">
+        <div class="modal">
+            <div class="modal-header"><h3><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>إضافة محطة تحويل</h3><button class="modal-close" onclick="closeModal('addSubstationModal')"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg></button></div>
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-group full-width"><label>اختصار المحطة *</label><input type="text" id="addSubShortName" placeholder="MDN أو IC5" required></div>
+                    <div class="form-group"><label>خط العرض</label><input type="text" id="addSubLat" readonly></div>
+                    <div class="form-group"><label>خط الطول</label><input type="text" id="addSubLng" readonly></div>
+                    <div class="form-group full-width"><button type="button" class="location-btn" id="addSubLocationBtn" onclick="getCurrentLocation('addSub')"><svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06z"/></svg><span>تحديد موقعي</span></button></div>
+                    <div class="form-group full-width"><label>السبب</label><textarea id="addSubReason"></textarea></div>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('addSubstationModal')">إلغاء</button><button class="btn btn-success" onclick="submitAddSubstation()">حفظ</button></div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal">
+            <div class="modal-header"><h3><svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z"/></svg>تعديل محطة</h3><button class="modal-close" onclick="closeModal('editModal')"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg></button></div>
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label>رقم المحطة</label>
+                        <input type="text" id="editStationNumber" readonly style="background: var(--bg-dark); cursor: not-allowed; opacity: 0.7;">
+                        <div class="input-hint">🔒 لا يمكن تعديل رقم المحطة</div>
+                    </div>
+                    <div class="form-group" id="editFeederGroup"><label>المغذي</label><input type="text" id="editFeeder"></div>
+                    <div class="form-group" id="editRegionGroup"><label>الحي</label><input type="text" id="editRegion"></div>
+                    <div class="form-group"><label>خط العرض</label><input type="text" id="editLatitude" placeholder="يدوي أو تلقائي"></div>
+                    <div class="form-group"><label>خط الطول</label><input type="text" id="editLongitude" placeholder="يدوي أو تلقائي"></div>
+                    <div class="form-group full-width"><button type="button" class="location-btn" id="editLocationBtn" onclick="getCurrentLocation('edit')"><svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/></svg><span>تحديد موقعي الحالي</span></button></div>
+                    <div class="form-group full-width"><label>السبب</label><textarea id="editReason" placeholder="سبب التعديل (اختياري)"></textarea></div>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('editModal')">إلغاء</button><button class="btn btn-warning" onclick="submitEdit()">حفظ التعديلات</button></div>
+        </div>
+    </div>
+
+    <!-- Fault Modal -->
+    <div class="modal-overlay" id="faultModal">
+        <div class="modal" style="max-width:42rem;">
+            <div class="modal-header"><h3><svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>تتبع الأعطال</h3><button class="modal-close" onclick="closeModal('faultModal')"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg></button></div>
+            <div class="modal-body">
+                <p style="margin-bottom:1rem;color:var(--text-secondary);font-size:0.85rem;">أدخل أرقام المحطات (2-6)</p>
+                <div class="fault-inputs">
+                    <div class="fault-input-row">
+                        <div class="fault-input-group"><label>1</label><input type="text" id="fault1"></div>
+                        <div class="fault-input-group"><label>2</label><input type="text" id="fault2"></div>
+                        <div class="fault-input-group"><label>3</label><input type="text" id="fault3"></div>
+                    </div>
+                    <div class="fault-input-row">
+                        <div class="fault-input-group"><label>4</label><input type="text" id="fault4"></div>
+                        <div class="fault-input-group"><label>5</label><input type="text" id="fault5"></div>
+                        <div class="fault-input-group"><label>6</label><input type="text" id="fault6"></div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top:1rem;" onclick="searchFaultStations()"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5z"/></svg>بحث</button>
+                <div id="faultResults" style="display:none;margin-top:1.25rem;">
+                    <div class="results-header"><div class="results-title"><h3>محطات العطل</h3></div><div class="results-count" id="faultCount">0</div></div>
+                    <div id="totalDistance" style="text-align:center;margin:0.75rem 0;"></div>
+                    <div class="results-table-wrapper" style="max-height:10rem;overflow-y:auto;"><table class="results-table"><thead><tr><th>#</th><th>المحطة</th><th>النوع</th><th>الحالة</th></tr></thead><tbody id="faultTableBody"></tbody></table></div>
+                    <div class="map-container" style="height:14rem;margin-top:1rem;"><div id="faultMap"></div></div>
+                    <a id="faultNavigationLink" href="#" target="_blank" class="btn btn-success" style="margin-top:1rem;text-decoration:none;"><svg viewBox="0 0 24 24"><path d="M21.71 11.29l-9-9c-.39-.39-1.02-.39-1.41 0l-9 9c-.39.39-.39 1.02 0 1.41l9 9c.39.39 1.02.39 1.41 0l9-9c.39-.38.39-1.01 0-1.41z"/></svg>فتح التنقل</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Page -->
+    <div class="page" id="adminPage">
+        <div class="dashboard-container">
+            <header class="header">
+                <div class="header-right"><div class="header-logo">⚡</div><div><div class="header-title">لوحة المدير</div><div class="header-subtitle">SEC جدة</div></div></div>
+                <div class="header-left"><button class="logout-btn" onclick="logout()"><svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5z"/></svg><span>خروج</span></button></div>
+            </header>
+            <div class="stats-grid">
+                <div class="stat-card"><div class="number" id="totalDistribution">0</div><div class="label">توزيع</div></div>
+                <div class="stat-card"><div class="number" id="totalSubstations">0</div><div class="label">تحويل</div></div>
+                <div class="stat-card"><div class="number" id="totalUsers">0</div><div class="label">مشتركين</div></div>
+                <div class="stat-card"><div class="number" id="totalAdditions">0</div><div class="label">إضافات</div></div>
+                <div class="stat-card"><div class="number" id="totalEdits">0</div><div class="label">تعديلات</div></div>
+                <div class="stat-card online-card"><div class="number" id="onlineCount">0</div><div class="label">🟢 متواجدون الآن</div></div>
+            </div>
+            
+            <!-- قسم المتواجدين حالياً -->
+            <section class="admin-section online-section">
+                <h3><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="#5cb85c"/></svg>المتواجدون الآن <span class="online-badge" id="onlineBadge">0</span></h3>
+                <div class="online-users-grid" id="onlineUsersList">
+                    <div class="empty-online">لا يوجد متواجدون حالياً</div>
+                </div>
+            </section>
+            <div class="charts-grid">
+                <div class="chart-card"><h4>📊 الزيارات</h4><div class="chart-container"><canvas id="visitsChart"></canvas></div></div>
+                <div class="chart-card"><h4>📈 النشاط</h4><div class="chart-container"><canvas id="activityChart"></canvas></div></div>
+            </div>
+            <section class="admin-section"><h3>👥 المشتركين</h3><div class="results-table-wrapper"><table class="results-table"><thead><tr><th>الاسم</th><th>الجوال</th><th>النوع</th><th>التسجيل</th></tr></thead><tbody id="adminUsersBody"></tbody></table></div></section>
+            <section class="admin-section"><h3>📋 السجلات</h3><div class="results-table-wrapper"><table class="results-table"><thead><tr><th>النوع</th><th>المحطة</th><th>المستخدم</th><th>التاريخ</th></tr></thead><tbody id="adminLogsBody"></tbody></table></div></section>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzlR4lm3pUpFzHjYjt-_TvJZEx2gbbCb5qHDWeVFmble5eZcRhGKDg_dzc06otZ0lY73w/exec';
+        let currentUser = null, nearbyMap = null, faultMap = null, faultStations = [], editingStationType = null, deferredPrompt = null;
+        const CACHE_KEY = 'sec_stations_v7', CACHE_VERSION_KEY = 'sec_version_v7';
+        let allStations = [], isStationsLoaded = false, versionCheckTimer = null, currentVersion = null;
+        let onlineUpdateTimer = null; // مؤقت تحديث حالة المتواجدين
+
+        // Cache
+        function startVersionCheck() { if (versionCheckTimer) clearInterval(versionCheckTimer); versionCheckTimer = setInterval(checkForUpdates, 30000); }
+        function stopVersionCheck() { if (versionCheckTimer) { clearInterval(versionCheckTimer); versionCheckTimer = null; } }
         
-        overlay.classList.add('active');
-        bar.style.width = '10%';
-        countEl.textContent = 'جاري الاتصال...';
+        async function checkForUpdates() { try { const r = await apiGet('getVersion'); if (r.version && r.version !== currentVersion) { await silentRefreshCache(); currentVersion = r.version; localStorage.setItem(CACHE_VERSION_KEY, currentVersion); showToast('تم التحديث 🔄'); } } catch (e) {} }
+        async function silentRefreshCache() { try { const r = await apiGet('getAllStations'); if (r.stations?.length) { allStations = r.stations; isStationsLoaded = true; localStorage.setItem(CACHE_KEY, JSON.stringify(allStations)); updateCacheStatus('loaded', allStations.length.toLocaleString('ar-SA') + ' محطة ✓'); } } catch (e) {} }
+        async function loadStationsCache() { 
+            updateCacheStatus('loading', 'جاري التحميل...'); 
+            currentVersion = localStorage.getItem(CACHE_VERSION_KEY); 
+            const c = localStorage.getItem(CACHE_KEY); 
+            if (c && currentVersion) { 
+                allStations = JSON.parse(c); 
+                isStationsLoaded = true; 
+                updateCacheStatus('loaded', allStations.length.toLocaleString('ar-SA') + ' محطة ✓'); 
+                startVersionCheck(); 
+                checkForUpdates(); 
+                return; 
+            } 
+            await refreshStationsCacheWithProgress(); 
+        }
         
-        try {
-            bar.style.width = '30%';
-            countEl.textContent = 'جاري جلب البيانات...';
+        async function refreshStationsCacheWithProgress() {
+            const overlay = document.getElementById('firstLoadOverlay');
+            const bar = document.getElementById('firstLoadBar');
+            const countEl = document.getElementById('firstLoadCount');
+            const doneEl = document.getElementById('firstLoadDone');
             
-            const [versionResult, stationsResult] = await Promise.all([
-                apiGet('getVersion'), 
-                apiGet('getAllStations')
-            ]);
+            overlay.classList.add('active');
+            bar.style.width = '10%';
+            countEl.textContent = 'جاري الاتصال...';
             
-            bar.style.width = '70%';
-            countEl.textContent = 'جاري معالجة البيانات...';
-            
-            if (stationsResult.stations && stationsResult.stations.length > 0) {
-                allStations = stationsResult.stations;
-                isStationsLoaded = true;
-                currentVersion = versionResult.version || Date.now().toString();
+            try {
+                bar.style.width = '30%';
+                countEl.textContent = 'جاري جلب البيانات...';
                 
-                bar.style.width = '90%';
-                countEl.textContent = 'جاري الحفظ...';
+                const [versionResult, stationsResult] = await Promise.all([
+                    apiGet('getVersion'), 
+                    apiGet('getAllStations')
+                ]);
                 
-                localStorage.setItem(CACHE_KEY, JSON.stringify(allStations));
-                localStorage.setItem(CACHE_VERSION_KEY, currentVersion);
+                bar.style.width = '70%';
+                countEl.textContent = 'جاري معالجة البيانات...';
                 
+                if (stationsResult.stations && stationsResult.stations.length > 0) {
+                    allStations = stationsResult.stations;
+                    isStationsLoaded = true;
+                    currentVersion = versionResult.version || Date.now().toString();
+                    
+                    bar.style.width = '90%';
+                    countEl.textContent = 'جاري الحفظ...';
+                    
+                    localStorage.setItem(CACHE_KEY, JSON.stringify(allStations));
+                    localStorage.setItem(CACHE_VERSION_KEY, currentVersion);
+                    
+                    bar.style.width = '100%';
+                    countEl.textContent = allStations.length.toLocaleString('ar-SA') + ' محطة';
+                    doneEl.classList.add('show');
+                    
+                    updateCacheStatus('loaded', allStations.length.toLocaleString('ar-SA') + ' محطة ✓');
+                    
+                    setTimeout(() => {
+                        overlay.classList.remove('active');
+                        showToast('تم تحميل ' + allStations.length.toLocaleString('ar-SA') + ' محطة ✓', 'success');
+                    }, 1500);
+                    
+                    startVersionCheck();
+                } else {
+                    throw new Error('لا توجد بيانات');
+                }
+            } catch (e) {
                 bar.style.width = '100%';
-                countEl.textContent = allStations.length.toLocaleString('ar-SA') + ' محطة';
-                doneEl.classList.add('show');
-                
-                updateCacheStatus('loaded', allStations.length.toLocaleString('ar-SA') + ' محطة ✓');
+                bar.style.background = 'var(--danger)';
+                countEl.textContent = 'خطأ في التحميل - تحقق من الاتصال';
+                updateCacheStatus('error', 'خطأ في الاتصال ❌');
                 
                 setTimeout(() => {
                     overlay.classList.remove('active');
-                    showToast('تم تحميل ' + allStations.length.toLocaleString('ar-SA') + ' محطة ✓', 'success');
-                }, 1500);
-                
-                startVersionCheck();
-            } else {
-                throw new Error('لا توجد بيانات');
+                    showToast('خطأ في تحميل البيانات', 'error');
+                }, 2000);
             }
-        } catch (e) {
-            bar.style.width = '100%';
-            bar.style.background = 'var(--danger)';
-            countEl.textContent = 'خطأ في التحميل - تحقق من الاتصال';
-            updateCacheStatus('error', 'خطأ في الاتصال ❌');
-            
-            setTimeout(() => {
-                overlay.classList.remove('active');
-                showToast('خطأ في تحميل البيانات', 'error');
-            }, 2000);
         }
-    }
-    
-    async function refreshStationsCache() { 
-        try { 
-            updateCacheStatus('loading', 'جاري التحديث...'); 
-            const [v, s] = await Promise.all([apiGet('getVersion'), apiGet('getAllStations')]); 
-            if (s.stations?.length) { 
-                allStations = s.stations; 
-                isStationsLoaded = true; 
-                currentVersion = v.version || Date.now().toString(); 
-                localStorage.setItem(CACHE_KEY, JSON.stringify(allStations)); 
-                localStorage.setItem(CACHE_VERSION_KEY, currentVersion); 
-                updateCacheStatus('loaded', allStations.length.toLocaleString('ar-SA') + ' محطة ✓'); 
-                startVersionCheck(); 
-            } else {
-                updateCacheStatus('error', 'خطأ في الاتصال ❌');
-            }
-        } catch (e) { 
-            updateCacheStatus('error', 'خطأ في الاتصال ❌'); 
-        } 
-    }
-    function clearStationsCache() { localStorage.removeItem(CACHE_KEY); localStorage.removeItem(CACHE_VERSION_KEY); isStationsLoaded = false; allStations = []; currentVersion = null; }
-    async function manualRefreshCache() { clearStationsCache(); await refreshStationsCache(); showToast('تم تحديث البيانات ✓'); }
-    function updateCacheStatus(s, t) { const el = document.getElementById('cacheStatus'), txt = document.getElementById('cacheText'); if (el && txt) { el.className = 'cache-status ' + s; txt.textContent = t; } }
-    // تنظيف اسم محطة التحويل - استخراج الأحرف الإنجليزية والأرقام فقط
-    function cleanSubstationName(name) {
-        if (!name) return '';
-        // استخراج الجزء الأول فقط (قبل أي - أو . أو رموز أخرى)
-        let cleaned = String(name).split(/[-.]/).shift() || '';
-        // إزالة كل شيء ما عدا الأحرف الإنجليزية والأرقام
-        cleaned = cleaned.replace(/[^a-zA-Z0-9]/g, '');
-        // تحويل للأحرف الكبيرة
-        return cleaned.toUpperCase();
-    }
-    
-    // تطبيع اسم المحطة للمقارنة (إزالة المسافات)
-    function normalizeStationName(name) {
-        if (!name) return '';
-        return String(name).replace(/\s+/g, '').toUpperCase();
-    }
-    
-    // البحث المحلي المحسّن
-    function searchStationLocal(n) { 
-        if (!n) return { found: false }; 
-        let searchValue = String(n).trim();
         
-        // 1. البحث أولاً بالقيمة الأصلية (للتوزيع - أرقام)
-        let station = allStations.find(x => 
-            String(x.number).toUpperCase() === searchValue.toUpperCase()
-        );
-        
-        if (station) return { found: true, station: station };
-        
-        // 2. البحث بعد التنظيف (لمحطات التحويل)
-        const cleanedSearch = cleanSubstationName(searchValue);
-        
-        if (cleanedSearch) {
-            // البحث في محطات التحويل
-            station = allStations.find(x => {
-                if (x.type === 'substation') {
-                    // مقارنة بدون مسافات
-                    const cleanedNumber = normalizeStationName(x.number);
-                    const normalizedSearch = normalizeStationName(cleanedSearch);
-                    
-                    // MDN2 = MDN 2 = MDN2
-                    if (cleanedNumber === normalizedSearch) return true;
-                    
-                    // البحث الجزئي: MDN2-06 يجد MDN2
-                    const cleanedStationName = cleanSubstationName(x.number);
-                    if (cleanedStationName === cleanedSearch) return true;
+        async function refreshStationsCache() { 
+            try { 
+                updateCacheStatus('loading', 'جاري التحديث...'); 
+                const [v, s] = await Promise.all([apiGet('getVersion'), apiGet('getAllStations')]); 
+                if (s.stations?.length) { 
+                    allStations = s.stations; 
+                    isStationsLoaded = true; 
+                    currentVersion = v.version || Date.now().toString(); 
+                    localStorage.setItem(CACHE_KEY, JSON.stringify(allStations)); 
+                    localStorage.setItem(CACHE_VERSION_KEY, currentVersion); 
+                    updateCacheStatus('loaded', allStations.length.toLocaleString('ar-SA') + ' محطة ✓'); 
+                    startVersionCheck(); 
+                } else {
+                    updateCacheStatus('error', 'خطأ في الاتصال ❌');
                 }
-                return false;
-            });
+            } catch (e) { 
+                updateCacheStatus('error', 'خطأ في الاتصال ❌'); 
+            } 
+        }
+        function clearStationsCache() { localStorage.removeItem(CACHE_KEY); localStorage.removeItem(CACHE_VERSION_KEY); isStationsLoaded = false; allStations = []; currentVersion = null; }
+        async function manualRefreshCache() { clearStationsCache(); await refreshStationsCache(); showToast('تم تحديث البيانات ✓'); }
+        function updateCacheStatus(s, t) { const el = document.getElementById('cacheStatus'), txt = document.getElementById('cacheText'); if (el && txt) { el.className = 'cache-status ' + s; txt.textContent = t; } }
+        // تنظيف اسم محطة التحويل - استخراج الأحرف الإنجليزية والأرقام فقط
+        function cleanSubstationName(name) {
+            if (!name) return '';
+            // استخراج الجزء الأول فقط (قبل أي - أو . أو رموز أخرى)
+            let cleaned = String(name).split(/[-.]/).shift() || '';
+            // إزالة كل شيء ما عدا الأحرف الإنجليزية والأرقام
+            cleaned = cleaned.replace(/[^a-zA-Z0-9]/g, '');
+            // تحويل للأحرف الكبيرة
+            return cleaned.toUpperCase();
+        }
+        
+        // تطبيع اسم المحطة للمقارنة (إزالة المسافات)
+        function normalizeStationName(name) {
+            if (!name) return '';
+            return String(name).replace(/\s+/g, '').toUpperCase();
+        }
+        
+        // البحث المحلي المحسّن
+        function searchStationLocal(n) { 
+            if (!n) return { found: false }; 
+            let searchValue = String(n).trim();
+            
+            // 1. البحث أولاً بالقيمة الأصلية (للتوزيع - أرقام)
+            let station = allStations.find(x => 
+                String(x.number).toUpperCase() === searchValue.toUpperCase()
+            );
             
             if (station) return { found: true, station: station };
             
-            // 3. محاولة إضافة مسافة بين الحروف والأرقام
-            // MDN2 -> MDN 2
-            const withSpace = cleanedSearch.replace(/([A-Z]+)(\d+)/i, '$1 $2');
-            station = allStations.find(x => {
-                if (x.type === 'substation') {
-                    return String(x.number).toUpperCase() === withSpace ||
-                           normalizeStationName(x.number) === normalizeStationName(withSpace);
+            // 2. البحث بعد التنظيف (لمحطات التحويل)
+            const cleanedSearch = cleanSubstationName(searchValue);
+            
+            if (cleanedSearch) {
+                // البحث في محطات التحويل
+                station = allStations.find(x => {
+                    if (x.type === 'substation') {
+                        // مقارنة بدون مسافات
+                        const cleanedNumber = normalizeStationName(x.number);
+                        const normalizedSearch = normalizeStationName(cleanedSearch);
+                        
+                        // MDN2 = MDN 2 = MDN2
+                        if (cleanedNumber === normalizedSearch) return true;
+                        
+                        // البحث الجزئي: MDN2-06 يجد MDN2
+                        const cleanedStationName = cleanSubstationName(x.number);
+                        if (cleanedStationName === cleanedSearch) return true;
+                    }
+                    return false;
+                });
+                
+                if (station) return { found: true, station: station };
+                
+                // 3. محاولة إضافة مسافة بين الحروف والأرقام
+                // MDN2 -> MDN 2
+                const withSpace = cleanedSearch.replace(/([A-Z]+)(\d+)/i, '$1 $2');
+                station = allStations.find(x => {
+                    if (x.type === 'substation') {
+                        return String(x.number).toUpperCase() === withSpace ||
+                               normalizeStationName(x.number) === normalizeStationName(withSpace);
+                    }
+                    return false;
+                });
+            }
+            
+            return station ? { found: true, station: station } : { found: false }; 
+        }
+        function getNearbyStationsLocal(lat, lng, r = 3.5) { if (!lat || !lng) return []; const cLat = parseFloat(lat), cLng = parseFloat(lng); return allStations.filter(s => { if (!s.lat || !s.lng) return false; const d = calcDistance(cLat, cLng, parseFloat(s.lat), parseFloat(s.lng)); s.distance = d.toFixed(2); return d <= r; }).sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance)); }
+        function calcDistance(lat1, lon1, lat2, lon2) { const R = 6371, dLat = (lat2 - lat1) * Math.PI / 180, dLon = (lon2 - lon1) * Math.PI / 180, a = Math.sin(dLat/2)**2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2)**2; return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); }
+
+        // Helpers
+        function showLoading(t = 'جاري التحميل...') { document.getElementById('loadingOverlay').classList.add('active'); }
+        function hideLoading() { document.getElementById('loadingOverlay').classList.remove('active'); }
+        async function apiGet(action, params = {}) { const url = new URL(API_URL); url.searchParams.append('action', action); Object.keys(params).forEach(k => url.searchParams.append(k, params[k])); return (await fetch(url)).json(); }
+        async function apiPost(data) { return (await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(data) })).json(); }
+        function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        function showToast(msg, type = 'success') { const c = document.getElementById('toastContainer'), t = document.createElement('div'); t.className = `toast toast-${type}`; t.innerHTML = msg; c.appendChild(t); setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000); }
+        function togglePassword() { const i = document.getElementById('adminCode'); i.type = i.type === 'password' ? 'text' : 'password'; }
+
+        // ============================================
+        // نظام تتبع المتواجدين
+        // ============================================
+        function startOnlineTracking() {
+            if (!currentUser) return;
+            
+            // تحديث فوري
+            updateMyOnlineStatus();
+            
+            // تحديث كل 30 ثانية
+            if (onlineUpdateTimer) clearInterval(onlineUpdateTimer);
+            onlineUpdateTimer = setInterval(updateMyOnlineStatus, 30000);
+            
+            // عند مغادرة الصفحة
+            window.addEventListener('beforeunload', setMeOffline);
+        }
+        
+        function stopOnlineTracking() {
+            if (onlineUpdateTimer) {
+                clearInterval(onlineUpdateTimer);
+                onlineUpdateTimer = null;
+            }
+            setMeOffline();
+        }
+        
+        async function updateMyOnlineStatus() {
+            if (!currentUser) return;
+            try {
+                await apiPost({ 
+                    action: 'updateOnline', 
+                    phone: currentUser.phone, 
+                    name: currentUser.name 
+                });
+            } catch (e) {
+                console.log('تعذر تحديث حالة الاتصال');
+            }
+        }
+        
+        function setMeOffline() {
+            if (!currentUser) return;
+            // استخدام sendBeacon للتأكد من الإرسال عند الإغلاق
+            const data = JSON.stringify({ action: 'userOffline', phone: currentUser.phone });
+            if (navigator.sendBeacon) {
+                navigator.sendBeacon(API_URL, data);
+            }
+        }
+        
+        async function loadOnlineUsers() {
+            try {
+                const result = await apiGet('getOnlineUsers');
+                if (result.success) {
+                    // تحديث العداد
+                    const countEl = document.getElementById('onlineCount');
+                    const badgeEl = document.getElementById('onlineBadge');
+                    if (countEl) countEl.textContent = result.count || 0;
+                    if (badgeEl) badgeEl.textContent = result.count || 0;
+                    
+                    // تحديث قائمة المتواجدين
+                    const listEl = document.getElementById('onlineUsersList');
+                    if (listEl) {
+                        if (result.users && result.users.length > 0) {
+                            listEl.innerHTML = result.users.map(u => {
+                                const timeParts = u.lastActive ? u.lastActive.split(' ')[1] : '';
+                                return `<div class="online-user-card">
+                                    <div class="online-dot"></div>
+                                    <div class="online-user-info">
+                                        <span class="online-user-name">${u.name || 'مستخدم'}</span>
+                                        <span class="online-user-time">آخر نشاط: ${timeParts || 'الآن'}</span>
+                                    </div>
+                                </div>`;
+                            }).join('');
+                        } else {
+                            listEl.innerHTML = '<div class="empty-online">لا يوجد متواجدون حالياً</div>';
+                        }
+                    }
                 }
-                return false;
-            });
+            } catch (e) {
+                console.log('تعذر تحميل المتواجدين');
+            }
+        }
+
+        // PWA
+        window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; showInstallBanner(); });
+        
+        function showInstallBanner() {
+            const btn = document.getElementById('installBtn');
+            if (!localStorage.getItem('installBannerClosed')) {
+                btn.classList.add('show');
+                document.body.classList.add('install-visible');
+            }
         }
         
-        return station ? { found: true, station: station } : { found: false }; 
-    }
-    function getNearbyStationsLocal(lat, lng, r = 3.5) { if (!lat || !lng) return []; const cLat = parseFloat(lat), cLng = parseFloat(lng); return allStations.filter(s => { if (!s.lat || !s.lng) return false; const d = calcDistance(cLat, cLng, parseFloat(s.lat), parseFloat(s.lng)); s.distance = d.toFixed(2); return d <= r; }).sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance)); }
-    function calcDistance(lat1, lon1, lat2, lon2) { const R = 6371, dLat = (lat2 - lat1) * Math.PI / 180, dLon = (lon2 - lon1) * Math.PI / 180, a = Math.sin(dLat/2)**2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2)**2; return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); }
-
-    // Helpers
-    function showLoading(t = 'جاري التحميل...') { document.getElementById('loadingOverlay').classList.add('active'); }
-    function hideLoading() { document.getElementById('loadingOverlay').classList.remove('active'); }
-    async function apiGet(action, params = {}) { const url = new URL(API_URL); url.searchParams.append('action', action); Object.keys(params).forEach(k => url.searchParams.append(k, params[k])); return (await fetch(url)).json(); }
-    async function apiPost(data) { return (await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(data) })).json(); }
-    function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-    function showToast(msg, type = 'success') { const c = document.getElementById('toastContainer'), t = document.createElement('div'); t.className = `toast toast-${type}`; t.innerHTML = msg; c.appendChild(t); setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000); }
-    function togglePassword() { const i = document.getElementById('adminCode'); i.type = i.type === 'password' ? 'text' : 'password'; }
-
-    // PWA
-    window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; showInstallBanner(); });
-    
-    function showInstallBanner() {
-        const btn = document.getElementById('installBtn');
-        if (!localStorage.getItem('installBannerClosed')) {
-            btn.classList.add('show');
-            document.body.classList.add('install-visible');
+        function hideInstallBanner(e) {
+            if (e) e.stopPropagation();
+            const btn = document.getElementById('installBtn');
+            btn.classList.remove('show');
+            document.body.classList.remove('install-visible');
+            localStorage.setItem('installBannerClosed', 'true');
         }
-    }
-    
-    function hideInstallBanner(e) {
-        if (e) e.stopPropagation();
-        const btn = document.getElementById('installBtn');
-        btn.classList.remove('show');
-        document.body.classList.remove('install-visible');
-        localStorage.setItem('installBannerClosed', 'true');
-    }
-    
-    function installApp() { 
-        if (deferredPrompt) { 
-            deferredPrompt.prompt(); 
-            deferredPrompt.userChoice.then(c => { 
-                if (c.outcome === 'accepted') hideInstallBanner(); 
-                deferredPrompt = null; 
-            }); 
-        } else {
+        
+        function installApp() { 
+            if (deferredPrompt) { 
+                deferredPrompt.prompt(); 
+                deferredPrompt.userChoice.then(c => { 
+                    if (c.outcome === 'accepted') hideInstallBanner(); 
+                    deferredPrompt = null; 
+                }); 
+            } else {
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                if (isIOS) {
+                    document.getElementById('iosInstallPrompt').style.display = 'block';
+                } else {
+                    showToast('اضغط على ⋮ ثم "تثبيت التطبيق"', 'warning');
+                }
+            }
+        }
+        
+        function checkIOSInstall() {
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-            if (isIOS) {
-                document.getElementById('iosInstallPrompt').style.display = 'block';
-            } else {
-                showToast('اضغط على ⋮ ثم "تثبيت التطبيق"', 'warning');
+            const isStandalone = window.navigator.standalone === true;
+            
+            if (isIOS && !isStandalone && !localStorage.getItem('iosPromptShown')) {
+                setTimeout(() => {
+                    document.getElementById('iosInstallPrompt').style.display = 'block';
+                }, 3000);
             }
         }
-    }
-    
-    function checkIOSInstall() {
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-        const isStandalone = window.navigator.standalone === true;
         
-        if (isIOS && !isStandalone && !localStorage.getItem('iosPromptShown')) {
-            setTimeout(() => {
-                document.getElementById('iosInstallPrompt').style.display = 'block';
-            }, 3000);
+        function closeIOSPrompt() {
+            document.getElementById('iosInstallPrompt').style.display = 'none';
+            localStorage.setItem('iosPromptShown', 'true');
         }
-    }
-    
-    function closeIOSPrompt() {
-        document.getElementById('iosInstallPrompt').style.display = 'none';
-        localStorage.setItem('iosPromptShown', 'true');
-    }
-    
-    // إظهار زر التثبيت
-    setTimeout(() => {
-        if (!window.matchMedia('(display-mode: standalone)').matches && !localStorage.getItem('installBannerClosed')) {
-            showInstallBanner();
-        }
-    }, 2000);
-
-    // Phone
-    function normalizePhone(p) { if (!p) return ''; let c = String(p).replace(/\D/g, ''); if (c.startsWith('966') && c.length === 12) c = '0' + c.substring(3); if (c.startsWith('5') && c.length === 9) c = '0' + c; return c; }
-    function isValidPhone(p) { const n = normalizePhone(p); return n.length === 10 && n.startsWith('05'); }
-    function validateLoginPhone() { const i = document.getElementById('loginPhone'), h = document.getElementById('loginPhoneHint'), b = document.getElementById('loginBtn'); i.value = i.value.replace(/\D/g, ''); const n = normalizePhone(i.value); if (!i.value.length) { i.className = ''; h.textContent = '10 أرقام تبدأ بـ 05'; h.className = 'input-hint'; b.disabled = true; } else if (isValidPhone(i.value)) { i.className = 'valid'; h.textContent = '✓'; h.className = 'input-hint success'; b.disabled = false; } else { i.className = 'error'; h.textContent = n.length < 10 ? `${10-n.length} أرقام` : 'يجب 05'; h.className = 'input-hint error'; b.disabled = true; } }
-    function validateRegPhone() { const i = document.getElementById('regPhone'), h = document.getElementById('regPhoneHint'), b = document.getElementById('regBtn'), name = document.getElementById('regName').value.trim(); i.value = i.value.replace(/\D/g, ''); const n = normalizePhone(i.value), valid = isValidPhone(i.value) && name.length > 0; if (!i.value.length) { i.className = ''; h.textContent = '10 أرقام'; h.className = 'input-hint'; } else if (isValidPhone(i.value)) { i.className = 'valid'; h.textContent = '✓'; h.className = 'input-hint success'; } else { i.className = 'error'; h.textContent = n.length < 10 ? `${10-n.length}` : '05'; h.className = 'input-hint error'; } b.disabled = !valid; }
-
-    // Auth
-    function switchTab(t) { document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active')); if (t === 'login') { document.querySelector('.tab:first-child').classList.add('active'); document.getElementById('loginTab').classList.add('active'); } else { document.querySelector('.tab:last-child').classList.add('active'); document.getElementById('registerTab').classList.add('active'); } }
-    async function handleLogin(e) { e.preventDefault(); if (!isValidPhone(document.getElementById('loginPhone').value)) { showToast('رقم خاطئ', 'error'); return false; } const p = normalizePhone(document.getElementById('loginPhone').value); showLoading(); const r = await apiPost({ action: 'loginUser', phone: p }); hideLoading(); if (r.notFound) { showToast('غير مسجل', 'warning'); switchTab('register'); document.getElementById('regPhone').value = p; validateRegPhone(); return false; } if (r.error) { showToast(r.error, 'error'); return false; } currentUser = r.user; localStorage.setItem('currentUser', JSON.stringify(currentUser)); updateUserUI(); showPage('dashboardPage'); showToast('مرحباً ' + currentUser.name + ' 👋'); loadStationsCache(); return false; }
-    async function handleRegister(e) { e.preventDefault(); const name = document.getElementById('regName').value.trim(); if (!name || !isValidPhone(document.getElementById('regPhone').value)) { showToast('تحقق من البيانات', 'error'); return false; } const p = normalizePhone(document.getElementById('regPhone').value); showLoading(); const r = await apiPost({ action: 'registerUser', name, phone: p, email: document.getElementById('regEmail').value.trim(), userType: document.getElementById('regType').value }); hideLoading(); if (r.error && !r.alreadyExists) { showToast(r.error, 'error'); return false; } currentUser = r.user; localStorage.setItem('currentUser', JSON.stringify(currentUser)); updateUserUI(); showPage('dashboardPage'); showToast(r.alreadyExists ? 'مرحباً بعودتك' : 'تم التسجيل'); loadStationsCache(); return false; }
-    function updateUserUI() { document.getElementById('userName').textContent = currentUser.name; document.getElementById('userAvatar').textContent = currentUser.name.charAt(0); document.getElementById('userType').textContent = currentUser.type || 'موظف'; }
-    function showAdminLogin() { document.getElementById('adminLoginModal').classList.add('active'); }
-    async function adminLogin() { const c = document.getElementById('adminCode').value; showLoading(); const r = await apiGet('getAdminCode'); hideLoading(); if (r.code && c === r.code) { closeModal('adminLoginModal'); showPage('adminPage'); loadAdminData(); } else { showToast('رمز خاطئ', 'error'); } }
-    function logout() { currentUser = null; localStorage.removeItem('currentUser'); stopVersionCheck(); showPage('loginPage'); document.getElementById('loginPhone').value = ''; document.getElementById('loginBtn').disabled = true; }
-    function checkSession() { const s = localStorage.getItem('currentUser'); if (s) { currentUser = JSON.parse(s); updateUserUI(); showPage('dashboardPage'); loadStationsCache(); } }
-
-    // Search
-    let currentSearchedStation = null;
-    let showFeederMode = false;
-    
-    async function searchStation() { 
-        const v = document.getElementById('searchInput').value.trim(); 
-        if (!v) { showToast('أدخل الرقم', 'warning'); return; } 
-        if (!isStationsLoaded) { showLoading(); await loadStationsCache(); hideLoading(); } 
         
-        const r = searchStationLocal(v), rc = document.getElementById('resultsContent'), rn = document.getElementById('resultsCount'); 
-        showFeederMode = false; 
-        
-        if (!r.found) { 
-            rc.innerHTML = `<div class="not-found-card"><h4>غير موجود</h4><div class="searched-number">${v}</div></div>`; 
-            rn.textContent = '0'; 
-            document.getElementById('mapSection').style.display = 'none'; 
-            currentSearchedStation = null; 
-        } else { 
-            currentSearchedStation = r.station; 
-            const s = r.station;
-            const url = s.googleMap || (s.lat && s.lng ? `https://www.google.com/maps?q=${s.lat},${s.lng}` : '');
-            const tb = s.type === 'distribution' ? '<span class="type-badge type-distribution">توزيع</span>' : '<span class="type-badge type-substation">تحويل</span>'; 
-            
-            // زر التعديل
-            const editBtn = `<button class="action-btn btn-edit" style="padding:0.4rem 0.8rem;font-size:0.8rem;" onclick="openEditFromSearch()"><svg viewBox="0 0 24 24" style="width:1rem;height:1rem;"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg><span>تعديل</span></button>`;
-            
-            let feederBtn = ''; 
-            if (s.type === 'distribution' && s.feeder) { 
-                feederBtn = `<div class="feeder-toggle"><button class="feeder-btn active" id="nearbyBtn" onclick="toggleMapMode('nearby')"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>القريبة (3.5 كم)</button><button class="feeder-btn" id="feederBtn" onclick="toggleMapMode('feeder')"><svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>محطات المغذي (${s.feeder})</button></div>`; 
+        // إظهار زر التثبيت
+        setTimeout(() => {
+            if (!window.matchMedia('(display-mode: standalone)').matches && !localStorage.getItem('installBannerClosed')) {
+                showInstallBanner();
+            }
+        }, 2000);
+
+        // Phone
+        function normalizePhone(p) { if (!p) return ''; let c = String(p).replace(/\D/g, ''); if (c.startsWith('966') && c.length === 12) c = '0' + c.substring(3); if (c.startsWith('5') && c.length === 9) c = '0' + c; return c; }
+        function isValidPhone(p) { const n = normalizePhone(p); return n.length === 10 && n.startsWith('05'); }
+        function validateLoginPhone() { const i = document.getElementById('loginPhone'), h = document.getElementById('loginPhoneHint'), b = document.getElementById('loginBtn'); i.value = i.value.replace(/\D/g, ''); const n = normalizePhone(i.value); if (!i.value.length) { i.className = ''; h.textContent = '10 أرقام تبدأ بـ 05'; h.className = 'input-hint'; b.disabled = true; } else if (isValidPhone(i.value)) { i.className = 'valid'; h.textContent = '✓'; h.className = 'input-hint success'; b.disabled = false; } else { i.className = 'error'; h.textContent = n.length < 10 ? `${10-n.length} أرقام` : 'يجب 05'; h.className = 'input-hint error'; b.disabled = true; } }
+        function validateRegPhone() { const i = document.getElementById('regPhone'), h = document.getElementById('regPhoneHint'), b = document.getElementById('regBtn'), name = document.getElementById('regName').value.trim(); i.value = i.value.replace(/\D/g, ''); const n = normalizePhone(i.value), valid = isValidPhone(i.value) && name.length > 0; if (!i.value.length) { i.className = ''; h.textContent = '10 أرقام'; h.className = 'input-hint'; } else if (isValidPhone(i.value)) { i.className = 'valid'; h.textContent = '✓'; h.className = 'input-hint success'; } else { i.className = 'error'; h.textContent = n.length < 10 ? `${10-n.length}` : '05'; h.className = 'input-hint error'; } b.disabled = !valid; }
+
+        // Auth
+        function switchTab(t) { document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active')); if (t === 'login') { document.querySelector('.tab:first-child').classList.add('active'); document.getElementById('loginTab').classList.add('active'); } else { document.querySelector('.tab:last-child').classList.add('active'); document.getElementById('registerTab').classList.add('active'); } }
+        async function handleLogin(e) { e.preventDefault(); if (!isValidPhone(document.getElementById('loginPhone').value)) { showToast('رقم خاطئ', 'error'); return false; } const p = normalizePhone(document.getElementById('loginPhone').value); showLoading(); const r = await apiPost({ action: 'loginUser', phone: p }); hideLoading(); if (r.notFound) { showToast('غير مسجل', 'warning'); switchTab('register'); document.getElementById('regPhone').value = p; validateRegPhone(); return false; } if (r.error) { showToast(r.error, 'error'); return false; } currentUser = r.user; localStorage.setItem('currentUser', JSON.stringify(currentUser)); updateUserUI(); showPage('dashboardPage'); showToast('مرحباً ' + currentUser.name + ' 👋'); loadStationsCache(); startOnlineTracking(); return false; }
+        async function handleRegister(e) { e.preventDefault(); const name = document.getElementById('regName').value.trim(); if (!name || !isValidPhone(document.getElementById('regPhone').value)) { showToast('تحقق من البيانات', 'error'); return false; } const p = normalizePhone(document.getElementById('regPhone').value); showLoading(); const r = await apiPost({ action: 'registerUser', name, phone: p, email: document.getElementById('regEmail').value.trim(), userType: document.getElementById('regType').value }); hideLoading(); if (r.error && !r.alreadyExists) { showToast(r.error, 'error'); return false; } currentUser = r.user; localStorage.setItem('currentUser', JSON.stringify(currentUser)); updateUserUI(); showPage('dashboardPage'); showToast(r.alreadyExists ? 'مرحباً بعودتك 👋' : 'تم التسجيل بنجاح ✓'); loadStationsCache(); startOnlineTracking(); return false; }
+        function updateUserUI() { document.getElementById('userName').textContent = currentUser.name; document.getElementById('userAvatar').textContent = currentUser.name.charAt(0); document.getElementById('userType').textContent = currentUser.type || 'موظف'; }
+        function showAdminLogin() { document.getElementById('adminLoginModal').classList.add('active'); }
+        async function adminLogin() { const c = document.getElementById('adminCode').value; showLoading(); const r = await apiGet('getAdminCode'); hideLoading(); if (r.code && c === r.code) { closeModal('adminLoginModal'); showPage('adminPage'); loadAdminData(); } else { showToast('رمز خاطئ', 'error'); } }
+        function logout() { stopOnlineTracking(); currentUser = null; localStorage.removeItem('currentUser'); stopVersionCheck(); showPage('loginPage'); document.getElementById('loginPhone').value = ''; document.getElementById('loginBtn').disabled = true; showToast('تم تسجيل الخروج'); }
+        function checkSession() { 
+            const s = localStorage.getItem('currentUser'); 
+            if (s) { 
+                currentUser = JSON.parse(s); 
+                updateUserUI(); 
+                showPage('dashboardPage'); 
+                loadStationsCache(); 
+                startOnlineTracking(); 
+                // تسجيل زيارة جديدة (بدون انتظار)
+                apiPost({ action: 'recordVisit', phone: currentUser.phone, name: currentUser.name }).catch(() => {});
             } 
-            
-            let ex = s.type === 'distribution' ? `<tr><td colspan="4"><strong>المغذي:</strong> ${s.feeder||'-'} | <strong>الحي:</strong> ${s.region||'-'}</td></tr>` : ''; 
-            
-            rc.innerHTML = `<div class="results-table-wrapper"><table class="results-table"><thead><tr><th>المحطة</th><th>النوع</th><th>الخريطة</th><th>إجراء</th></tr></thead><tbody><tr><td><strong>${s.number}</strong></td><td>${tb}</td><td>${url ? `<a href="${url}" target="_blank" class="map-link"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>فتح</a>` : '-'}</td><td>${editBtn}</td></tr>${ex}</tbody></table></div>${feederBtn}`; 
-            
-            rn.textContent = '1'; 
-            if (s.lat && s.lng) { toggleMapMode('nearby'); } else { document.getElementById('mapSection').style.display = 'none'; } 
-        } 
-    }
-    
-    // فتح نافذة التعديل من نتائج البحث
-    function openEditFromSearch() {
-        if (!currentSearchedStation) {
-            showToast('لم يتم العثور على المحطة', 'error');
-            return;
         }
-        
-        const s = currentSearchedStation;
-        editingStationType = s.type;
-        
-        // ملء البيانات
-        document.getElementById('editStationNumber').value = s.number;
-        
-        if (s.type === 'distribution') {
-            document.getElementById('editFeeder').value = s.feeder || '';
-            document.getElementById('editRegion').value = s.region || '';
-            document.getElementById('editFeederGroup').style.display = '';
-            document.getElementById('editRegionGroup').style.display = '';
-        } else {
-            document.getElementById('editFeederGroup').style.display = 'none';
-            document.getElementById('editRegionGroup').style.display = 'none';
-        }
-        
-        document.getElementById('editLatitude').value = s.lat || '';
-        document.getElementById('editLongitude').value = s.lng || '';
-        document.getElementById('editReason').value = '';
-        document.getElementById('editLocationBtn').classList.remove('active');
-        
-        // فتح النافذة
-        document.getElementById('editModal').classList.add('active');
-    }
-    
-    function toggleMapMode(mode) {
-        showFeederMode = (mode === 'feeder');
-        const nearbyBtn = document.getElementById('nearbyBtn');
-        const feederBtn = document.getElementById('feederBtn');
-        
-        if (nearbyBtn && feederBtn) {
-            nearbyBtn.classList.toggle('active', !showFeederMode);
-            feederBtn.classList.toggle('active', showFeederMode);
-        }
-        
-        if (currentSearchedStation && currentSearchedStation.lat && currentSearchedStation.lng) {
-            if (showFeederMode) {
-                loadFeederStations(currentSearchedStation);
-            } else {
-                loadNearbyStationsLocal(currentSearchedStation.lat, currentSearchedStation.lng, currentSearchedStation.number);
-            }
-        }
-    }
-    
-    function loadFeederStations(station) {
-        const ms = document.getElementById('mapSection');
-        if (!station.feeder) { ms.style.display = 'none'; return; }
-        
-        const feederStations = allStations.filter(s => 
-            s.type === 'distribution' && 
-            s.feeder === station.feeder && 
-            s.number !== station.number &&
-            s.lat && s.lng
-        );
-        
-        if (!feederStations.length) { 
-            ms.style.display = 'none'; 
-            showToast('لا توجد محطات أخرى لهذا المغذي', 'warning');
-            return; 
-        }
-        
-        // حساب المسافات
-        feederStations.forEach(s => {
-            s.distance = calcDistance(
-                parseFloat(station.lat), parseFloat(station.lng),
-                parseFloat(s.lat), parseFloat(s.lng)
-            ).toFixed(2);
-        });
-        feederStations.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
-        
-        ms.style.display = 'block';
-        document.getElementById('nearbyCount').textContent = feederStations.length + ' محطة';
-        document.querySelector('#mapSection .results-title h3').textContent = `محطات المغذي (${station.feeder})`;
-        
-        if (nearbyMap) nearbyMap.remove();
-        nearbyMap = L.map('nearbyMap').setView([parseFloat(station.lat), parseFloat(station.lng)], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(nearbyMap);
-        
-        // المحطة المطلوبة (برتقالي)
-        L.marker([parseFloat(station.lat), parseFloat(station.lng)], {
-            icon: L.divIcon({ html: '<div style="background:#e8a54b;width:20px;height:20px;border-radius:50%;border:3px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);"></div>', iconSize: [20,20], iconAnchor: [10,10] })
-        }).addTo(nearbyMap).bindPopup(`<b>${station.number}</b><br>المحطة المطلوبة`);
-        
-        const markers = [[parseFloat(station.lat), parseFloat(station.lng)]];
-        
-        feederStations.forEach(s => {
-            L.marker([parseFloat(s.lat), parseFloat(s.lng)], {
-                icon: L.divIcon({ html: '<div style="background:#5b8fb9;width:14px;height:14px;border-radius:50%;border:2px solid white;"></div>', iconSize: [14,14], iconAnchor: [7,7] })
-            }).addTo(nearbyMap).bindPopup(`<b>${s.number}</b><br>${s.region || ''}<br>المسافة: ${s.distance} كم`);
-            markers.push([parseFloat(s.lat), parseFloat(s.lng)]);
-        });
-        
-        // ضبط حدود الخريطة
-        if (markers.length > 1) {
-            nearbyMap.fitBounds(markers, { padding: [30, 30] });
-        }
-        
-        document.getElementById('nearbyList').innerHTML = feederStations.map(s => {
-            const u = s.googleMap || `https://www.google.com/maps?q=${s.lat},${s.lng}`;
-            return `<div class="nearby-item"><div>🔷 <span class="nearby-number">${s.number}</span> <span class="nearby-distance">${s.distance} كم</span><br><small style="color:var(--text-secondary)">${s.region || ''}</small></div><a href="${u}" target="_blank" class="map-link"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg></a></div>`;
-        }).join('');
-    }
-    function loadNearbyStationsLocal(lat, lng, cur) { const ms = document.getElementById('mapSection'), nb = getNearbyStationsLocal(lat, lng, 3.5).filter(s => s.number !== cur); if (!nb.length) { ms.style.display = 'none'; return; } ms.style.display = 'block'; document.getElementById('nearbyCount').textContent = nb.length; document.querySelector('#mapSection .results-title h3').textContent = 'المحطات القريبة (3.5 كم)'; if (nearbyMap) nearbyMap.remove(); nearbyMap = L.map('nearbyMap').setView([parseFloat(lat), parseFloat(lng)], 14); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(nearbyMap); L.marker([parseFloat(lat), parseFloat(lng)], { icon: L.divIcon({ html: '<div style="background:#e8a54b;width:18px;height:18px;border-radius:50%;border:3px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }) }).addTo(nearbyMap).bindPopup('<b>المحطة المطلوبة</b>'); nb.forEach(s => { if (s.lat && s.lng) { const c = s.type === 'substation' ? '#5b8fb9' : '#5cb85c'; L.marker([parseFloat(s.lat), parseFloat(s.lng)], { icon: L.divIcon({ html: `<div style="background:${c};width:14px;height:14px;border-radius:50%;border:2px solid white;"></div>`, iconSize: [14, 14], iconAnchor: [7, 7] }) }).addTo(nearbyMap).bindPopup(`<b>${s.number}</b><br>${s.typeLabel||''}<br>${s.distance} كم`); } }); document.getElementById('nearbyList').innerHTML = nb.map(s => { const u = s.googleMap || `https://www.google.com/maps?q=${s.lat},${s.lng}`, ico = s.type === 'substation' ? '🔷' : '🟢'; return `<div class="nearby-item"><div>${ico} <span class="nearby-number">${s.number}</span> <span class="nearby-distance">${s.distance} كم</span></div><a href="${u}" target="_blank" class="map-link"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg></a></div>`; }).join(''); }
 
-    // Add
-    function openAddModal(t) { if (t === 'distribution') { document.getElementById('addDistributionModal').classList.add('active'); ['addDistNumber', 'addDistFeeder', 'addDistRegion', 'addDistLat', 'addDistLng', 'addDistReason'].forEach(id => document.getElementById(id).value = ''); document.getElementById('addDistLocationBtn').classList.remove('active'); } else { document.getElementById('addSubstationModal').classList.add('active'); ['addSubShortName', 'addSubLat', 'addSubLng', 'addSubReason'].forEach(id => document.getElementById(id).value = ''); document.getElementById('addSubLocationBtn').classList.remove('active'); } }
-    function getCurrentLocation(pfx) { const btn = document.getElementById(pfx + 'LocationBtn'), lat = document.getElementById(pfx + 'Lat') || document.getElementById(pfx + 'Latitude'), lng = document.getElementById(pfx + 'Lng') || document.getElementById(pfx + 'Longitude'); btn.innerHTML = '<div class="spinner"></div><span>جاري التحديد...</span>'; if (navigator.geolocation) { navigator.geolocation.getCurrentPosition(p => { lat.value = p.coords.latitude.toFixed(8); lng.value = p.coords.longitude.toFixed(8); btn.classList.add('active'); btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span>تم التحديد ✓</span>'; showToast('تم تحديد الموقع بنجاح'); }, () => { btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/></svg><span>تحديد موقعي الحالي</span>'; showToast('فشل تحديد الموقع', 'error'); }, { enableHighAccuracy: true, timeout: 15000 }); } }
-    async function submitAddDistribution() { const n = document.getElementById('addDistNumber').value.trim(), rg = document.getElementById('addDistRegion').value.trim(); if (!n || !rg) { showToast('أكمل البيانات', 'error'); return; } if (searchStationLocal(n).found) { showToast('موجود مسبقاً', 'error'); return; } const fd = document.getElementById('addDistFeeder').value.trim(), lt = document.getElementById('addDistLat').value, lg = document.getElementById('addDistLng').value, rs = document.getElementById('addDistReason').value.trim(); closeModal('addDistributionModal'); showToast('جاري الإضافة...', 'warning'); const ns = { number: n, feeder: fd, region: rg, lat: lt, lng: lg, type: 'distribution', typeLabel: 'توزيع', googleMap: (lt && lg) ? `https://www.google.com/maps?q=${lt},${lg}` : '' }; allStations.push(ns); updateCacheStatus('loaded', allStations.length + ' ✓'); const r = await apiPost({ action: 'addStation', number: n, region: rg, feeder: fd, lat: lt, lng: lg, reason: rs, userName: currentUser?.name || '', userEmail: currentUser?.email || '', userPhone: currentUser?.phone || '' }); if (r.error) { allStations = allStations.filter(s => s.number !== n); updateCacheStatus('loaded', allStations.length + ' ✓'); showToast(r.error, 'error'); return; } localStorage.setItem(CACHE_KEY, JSON.stringify(allStations)); showToast('تمت الإضافة ✓'); document.getElementById('searchInput').value = n; searchStation(); }
-    async function submitAddSubstation() { const sn = document.getElementById('addSubShortName').value.trim().toUpperCase(); if (!sn) { showToast('أدخل الاختصار', 'error'); return; } if (searchStationLocal(sn).found) { showToast('موجود مسبقاً', 'error'); return; } const lt = document.getElementById('addSubLat').value, lg = document.getElementById('addSubLng').value, rs = document.getElementById('addSubReason').value.trim(); closeModal('addSubstationModal'); showToast('جاري الإضافة...', 'warning'); const ns = { number: sn, shortName: sn, lat: lt, lng: lg, type: 'substation', typeLabel: 'تحويل', googleMap: (lt && lg) ? `https://www.google.com/maps?q=${lt},${lg}` : '' }; allStations.push(ns); updateCacheStatus('loaded', allStations.length + ' ✓'); const r = await apiPost({ action: 'addSubstation', shortName: sn, lat: lt, lng: lg, reason: rs, userName: currentUser?.name || '', userEmail: currentUser?.email || '', userPhone: currentUser?.phone || '' }); if (r.error) { allStations = allStations.filter(s => s.number !== sn); updateCacheStatus('loaded', allStations.length + ' ✓'); showToast(r.error, 'error'); return; } localStorage.setItem(CACHE_KEY, JSON.stringify(allStations)); showToast('تمت الإضافة ✓'); document.getElementById('searchInput').value = sn; searchStation(); }
-    async function submitEdit() { 
-        const n = document.getElementById('editStationNumber').value.trim(); 
-        if (!n) { showToast('خطأ في رقم المحطة', 'error'); return; } 
+        // Search
+        let currentSearchedStation = null;
+        let showFeederMode = false;
         
-        const lt = document.getElementById('editLatitude').value.trim();
-        const lg = document.getElementById('editLongitude').value.trim();
-        const rs = document.getElementById('editReason').value.trim(); 
-        
-        closeModal('editModal'); 
-        showToast('جاري التعديل...', 'warning'); 
-        
-        const idx = allStations.findIndex(s => String(s.number).toUpperCase() === n.toUpperCase());
-        if (idx === -1) { showToast('المحطة غير موجودة', 'error'); return; }
-        
-        const old = { ...allStations[idx] }; 
-        
-        if (editingStationType === 'distribution') { 
-            allStations[idx].feeder = document.getElementById('editFeeder').value.trim(); 
-            allStations[idx].region = document.getElementById('editRegion').value.trim(); 
-        } 
-        if (lt && lg) { 
-            allStations[idx].lat = lt; 
-            allStations[idx].lng = lg; 
-            allStations[idx].googleMap = `https://www.google.com/maps?q=${lt},${lg}`; 
-        } 
-        
-        const act = editingStationType === 'distribution' ? 'editStation' : 'editSubstation';
-        const data = editingStationType === 'distribution' 
-            ? { action: act, number: n, feeder: document.getElementById('editFeeder').value.trim(), region: document.getElementById('editRegion').value.trim(), lat: lt, lng: lg, reason: rs, userName: currentUser?.name || '', userEmail: currentUser?.email || '', userPhone: currentUser?.phone || '' } 
-            : { action: act, shortName: n, lat: lt, lng: lg, reason: rs, userName: currentUser?.name || '', userEmail: currentUser?.email || '', userPhone: currentUser?.phone || '' }; 
-        
-        const r = await apiPost(data); 
-        
-        if (r.error) { 
-            allStations[idx] = old; 
-            showToast(r.error, 'error'); 
-            return; 
-        } 
-        
-        localStorage.setItem(CACHE_KEY, JSON.stringify(allStations)); 
-        showToast('تم التعديل بنجاح ✓', 'success'); 
-        document.getElementById('searchInput').value = n; 
-        searchStation(); 
-    }
-
-    // Fault
-    function openFaultModal() { document.getElementById('faultModal').classList.add('active'); for (let i = 1; i <= 6; i++) { const inp = document.getElementById('fault' + i); inp.value = ''; inp.classList.remove('found', 'not-found'); } document.getElementById('faultResults').style.display = 'none'; faultStations = []; }
-    async function searchFaultStations() { 
-        const nums = []; 
-        for (let i = 1; i <= 6; i++) { 
-            const v = document.getElementById('fault' + i).value.trim(); 
-            if (v) nums.push({ i, v }); 
-        } 
-        if (nums.length < 2) { showToast('أدخل 2 على الأقل', 'warning'); return; } 
-        if (!isStationsLoaded) { showLoading(); await loadStationsCache(); hideLoading(); } 
-        
-        faultStations = []; 
-        const tb = document.getElementById('faultTableBody'); 
-        tb.innerHTML = ''; 
-        const lbl = ['A', 'B', 'C', 'D', 'E', 'F']; 
-        let fc = 0; 
-        
-        for (const item of nums) { 
-            const inp = document.getElementById('fault' + item.i);
+        async function searchStation() { 
+            const v = document.getElementById('searchInput').value.trim(); 
+            if (!v) { showToast('أدخل الرقم', 'warning'); return; } 
+            if (!isStationsLoaded) { showLoading(); await loadStationsCache(); hideLoading(); } 
             
-            // تنظيف المدخل للبحث
-            let searchVal = item.v;
+            const r = searchStationLocal(v), rc = document.getElementById('resultsContent'), rn = document.getElementById('resultsCount'); 
+            showFeederMode = false; 
             
-            // محاولة البحث
-            const r = searchStationLocal(searchVal); 
-            
-            if (r.found) { 
-                inp.classList.remove('not-found'); 
-                inp.classList.add('found'); 
-                r.station.label = lbl[fc]; 
-                faultStations.push(r.station); 
-                fc++; 
-                const tl = r.station.type === 'substation' ? '<span class="type-badge type-substation">تحويل</span>' : '<span class="type-badge type-distribution">توزيع</span>'; 
-                tb.innerHTML += `<tr><td><span class="point-label">${r.station.label}</span></td><td><strong>${r.station.number}</strong></td><td>${tl}</td><td><span class="status-found">✓</span></td></tr>`; 
+            if (!r.found) { 
+                rc.innerHTML = `<div class="not-found-card"><h4>غير موجود</h4><div class="searched-number">${v}</div></div>`; 
+                rn.textContent = '0'; 
+                document.getElementById('mapSection').style.display = 'none'; 
+                currentSearchedStation = null; 
             } else { 
-                inp.classList.remove('found'); 
-                inp.classList.add('not-found'); 
-                tb.innerHTML += `<tr><td>-</td><td><strong>${item.v}</strong></td><td>-</td><td><span class="status-not-found">✕</span></td></tr>`; 
+                currentSearchedStation = r.station; 
+                const s = r.station;
+                const url = s.googleMap || (s.lat && s.lng ? `https://www.google.com/maps?q=${s.lat},${s.lng}` : '');
+                const tb = s.type === 'distribution' ? '<span class="type-badge type-distribution">توزيع</span>' : '<span class="type-badge type-substation">تحويل</span>'; 
+                
+                // زر التعديل
+                const editBtn = `<button class="action-btn btn-edit" style="padding:0.4rem 0.8rem;font-size:0.8rem;" onclick="openEditFromSearch()"><svg viewBox="0 0 24 24" style="width:1rem;height:1rem;"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg><span>تعديل</span></button>`;
+                
+                let feederBtn = ''; 
+                if (s.type === 'distribution' && s.feeder) { 
+                    feederBtn = `<div class="feeder-toggle"><button class="feeder-btn active" id="nearbyBtn" onclick="toggleMapMode('nearby')"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>القريبة (3.5 كم)</button><button class="feeder-btn" id="feederBtn" onclick="toggleMapMode('feeder')"><svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>محطات المغذي (${s.feeder})</button></div>`; 
+                } 
+                
+                let ex = s.type === 'distribution' ? `<tr><td colspan="4"><strong>المغذي:</strong> ${s.feeder||'-'} | <strong>الحي:</strong> ${s.region||'-'}</td></tr>` : ''; 
+                
+                rc.innerHTML = `<div class="results-table-wrapper"><table class="results-table"><thead><tr><th>المحطة</th><th>النوع</th><th>الخريطة</th><th>إجراء</th></tr></thead><tbody><tr><td><strong>${s.number}</strong></td><td>${tb}</td><td>${url ? `<a href="${url}" target="_blank" class="map-link"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>فتح</a>` : '-'}</td><td>${editBtn}</td></tr>${ex}</tbody></table></div>${feederBtn}`; 
+                
+                rn.textContent = '1'; 
+                if (s.lat && s.lng) { toggleMapMode('nearby'); } else { document.getElementById('mapSection').style.display = 'none'; } 
             } 
-        } 
+        }
         
-        document.getElementById('faultCount').textContent = fc; 
-        document.getElementById('faultResults').style.display = 'block'; 
+        // فتح نافذة التعديل من نتائج البحث
+        function openEditFromSearch() {
+            if (!currentSearchedStation) {
+                showToast('لم يتم العثور على المحطة', 'error');
+                return;
+            }
+            
+            const s = currentSearchedStation;
+            editingStationType = s.type;
+            
+            // ملء البيانات
+            document.getElementById('editStationNumber').value = s.number;
+            
+            if (s.type === 'distribution') {
+                document.getElementById('editFeeder').value = s.feeder || '';
+                document.getElementById('editRegion').value = s.region || '';
+                document.getElementById('editFeederGroup').style.display = '';
+                document.getElementById('editRegionGroup').style.display = '';
+            } else {
+                document.getElementById('editFeederGroup').style.display = 'none';
+                document.getElementById('editRegionGroup').style.display = 'none';
+            }
+            
+            document.getElementById('editLatitude').value = s.lat || '';
+            document.getElementById('editLongitude').value = s.lng || '';
+            document.getElementById('editReason').value = '';
+            document.getElementById('editLocationBtn').classList.remove('active');
+            
+            // فتح النافذة
+            document.getElementById('editModal').classList.add('active');
+        }
         
-        if (fc >= 1) { 
-            renderFaultMap(); 
-            generateNavigationLink(); 
-            calculateTotalDistance(); 
-        } else { 
-            showToast('لا توجد نتائج', 'warning'); 
-        } 
-    }
-    function calculateTotalDistance() { const vs = faultStations.filter(s => s.lat && s.lng); if (vs.length < 2) { document.getElementById('totalDistance').innerHTML = ''; return; } let td = 0; for (let i = 0; i < vs.length - 1; i++) td += calcDistance(parseFloat(vs[i].lat), parseFloat(vs[i].lng), parseFloat(vs[i+1].lat), parseFloat(vs[i+1].lng)); document.getElementById('totalDistance').innerHTML = `<span class="distance-badge">📏 المسافة: ${td.toFixed(2)} كم</span>`; }
-    function renderFaultMap() { const vs = faultStations.filter(s => s.lat && s.lng); if (!vs.length) { showToast('لا إحداثيات', 'warning'); return; } if (faultMap) faultMap.remove(); let sLat = 0, sLng = 0; vs.forEach(s => { sLat += parseFloat(s.lat); sLng += parseFloat(s.lng); }); const cLat = sLat / vs.length, cLng = sLng / vs.length, zm = vs.length === 1 ? 15 : 13; faultMap = L.map('faultMap').setView([cLat, cLng], zm); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(faultMap); const cols = { distribution: '#e8a54b', substation: '#5b8fb9' }, mks = []; vs.forEach(s => { const c = cols[s.type] || '#e8a54b'; L.marker([parseFloat(s.lat), parseFloat(s.lng)], { icon: L.divIcon({ html: `<div style="background:${c};width:30px;height:30px;border-radius:50%;border:3px solid white;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;box-shadow:0 2px 8px rgba(0,0,0,0.3);">${s.label}</div>`, iconSize: [30, 30], iconAnchor: [15, 15] }) }).addTo(faultMap).bindPopup(`<b>${s.label} - ${s.number}</b><br>${s.typeLabel||''}`); mks.push([parseFloat(s.lat), parseFloat(s.lng)]); }); if (mks.length >= 2) { L.polyline(mks, { color: '#e8a54b', weight: 3, dashArray: '10, 10' }).addTo(faultMap); faultMap.fitBounds(mks, { padding: [30, 30] }); } }
-    function generateNavigationLink() { const vs = faultStations.filter(s => s.lat && s.lng); if (!vs.length) { document.getElementById('faultNavigationLink').style.display = 'none'; return; } let url; if (vs.length === 1) { url = `https://www.google.com/maps/search/?api=1&query=${vs[0].lat},${vs[0].lng}`; } else { url = 'https://www.google.com/maps/dir/'; vs.forEach((s, i) => { url += `${s.lat},${s.lng}`; if (i < vs.length - 1) url += '/'; }); } const lnk = document.getElementById('faultNavigationLink'); lnk.href = url; lnk.style.display = 'flex'; lnk.innerHTML = vs.length === 1 ? '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>فتح الموقع' : '<svg viewBox="0 0 24 24"><path d="M21.71 11.29l-9-9c-.39-.39-1.02-.39-1.41 0l-9 9c-.39.39-.39 1.02 0 1.41l9 9c.39.39 1.02.39 1.41 0l9-9c.39-.38.39-1.01 0-1.41z"/></svg>فتح التنقل'; }
+        function toggleMapMode(mode) {
+            showFeederMode = (mode === 'feeder');
+            const nearbyBtn = document.getElementById('nearbyBtn');
+            const feederBtn = document.getElementById('feederBtn');
+            
+            if (nearbyBtn && feederBtn) {
+                nearbyBtn.classList.toggle('active', !showFeederMode);
+                feederBtn.classList.toggle('active', showFeederMode);
+            }
+            
+            if (currentSearchedStation && currentSearchedStation.lat && currentSearchedStation.lng) {
+                if (showFeederMode) {
+                    loadFeederStations(currentSearchedStation);
+                } else {
+                    loadNearbyStationsLocal(currentSearchedStation.lat, currentSearchedStation.lng, currentSearchedStation.number);
+                }
+            }
+        }
+        
+        function loadFeederStations(station) {
+            const ms = document.getElementById('mapSection');
+            if (!station.feeder) { ms.style.display = 'none'; return; }
+            
+            const feederStations = allStations.filter(s => 
+                s.type === 'distribution' && 
+                s.feeder === station.feeder && 
+                s.number !== station.number &&
+                s.lat && s.lng
+            );
+            
+            if (!feederStations.length) { 
+                ms.style.display = 'none'; 
+                showToast('لا توجد محطات أخرى لهذا المغذي', 'warning');
+                return; 
+            }
+            
+            // حساب المسافات
+            feederStations.forEach(s => {
+                s.distance = calcDistance(
+                    parseFloat(station.lat), parseFloat(station.lng),
+                    parseFloat(s.lat), parseFloat(s.lng)
+                ).toFixed(2);
+            });
+            feederStations.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
+            
+            ms.style.display = 'block';
+            document.getElementById('nearbyCount').textContent = feederStations.length + ' محطة';
+            document.querySelector('#mapSection .results-title h3').textContent = `محطات المغذي (${station.feeder})`;
+            
+            if (nearbyMap) nearbyMap.remove();
+            nearbyMap = L.map('nearbyMap').setView([parseFloat(station.lat), parseFloat(station.lng)], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(nearbyMap);
+            
+            // المحطة المطلوبة (برتقالي)
+            L.marker([parseFloat(station.lat), parseFloat(station.lng)], {
+                icon: L.divIcon({ html: '<div style="background:#e8a54b;width:20px;height:20px;border-radius:50%;border:3px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);"></div>', iconSize: [20,20], iconAnchor: [10,10] })
+            }).addTo(nearbyMap).bindPopup(`<b>${station.number}</b><br>المحطة المطلوبة`);
+            
+            const markers = [[parseFloat(station.lat), parseFloat(station.lng)]];
+            
+            feederStations.forEach(s => {
+                L.marker([parseFloat(s.lat), parseFloat(s.lng)], {
+                    icon: L.divIcon({ html: '<div style="background:#5b8fb9;width:14px;height:14px;border-radius:50%;border:2px solid white;"></div>', iconSize: [14,14], iconAnchor: [7,7] })
+                }).addTo(nearbyMap).bindPopup(`<b>${s.number}</b><br>${s.region || ''}<br>المسافة: ${s.distance} كم`);
+                markers.push([parseFloat(s.lat), parseFloat(s.lng)]);
+            });
+            
+            // ضبط حدود الخريطة
+            if (markers.length > 1) {
+                nearbyMap.fitBounds(markers, { padding: [30, 30] });
+            }
+            
+            document.getElementById('nearbyList').innerHTML = feederStations.map(s => {
+                const u = s.googleMap || `https://www.google.com/maps?q=${s.lat},${s.lng}`;
+                return `<div class="nearby-item"><div>🔷 <span class="nearby-number">${s.number}</span> <span class="nearby-distance">${s.distance} كم</span><br><small style="color:var(--text-secondary)">${s.region || ''}</small></div><a href="${u}" target="_blank" class="map-link"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg></a></div>`;
+            }).join('');
+        }
+        function loadNearbyStationsLocal(lat, lng, cur) { const ms = document.getElementById('mapSection'), nb = getNearbyStationsLocal(lat, lng, 3.5).filter(s => s.number !== cur); if (!nb.length) { ms.style.display = 'none'; return; } ms.style.display = 'block'; document.getElementById('nearbyCount').textContent = nb.length; document.querySelector('#mapSection .results-title h3').textContent = 'المحطات القريبة (3.5 كم)'; if (nearbyMap) nearbyMap.remove(); nearbyMap = L.map('nearbyMap').setView([parseFloat(lat), parseFloat(lng)], 14); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(nearbyMap); L.marker([parseFloat(lat), parseFloat(lng)], { icon: L.divIcon({ html: '<div style="background:#e8a54b;width:18px;height:18px;border-radius:50%;border:3px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }) }).addTo(nearbyMap).bindPopup('<b>المحطة المطلوبة</b>'); nb.forEach(s => { if (s.lat && s.lng) { const c = s.type === 'substation' ? '#5b8fb9' : '#5cb85c'; L.marker([parseFloat(s.lat), parseFloat(s.lng)], { icon: L.divIcon({ html: `<div style="background:${c};width:14px;height:14px;border-radius:50%;border:2px solid white;"></div>`, iconSize: [14, 14], iconAnchor: [7, 7] }) }).addTo(nearbyMap).bindPopup(`<b>${s.number}</b><br>${s.typeLabel||''}<br>${s.distance} كم`); } }); document.getElementById('nearbyList').innerHTML = nb.map(s => { const u = s.googleMap || `https://www.google.com/maps?q=${s.lat},${s.lng}`, ico = s.type === 'substation' ? '🔷' : '🟢'; return `<div class="nearby-item"><div>${ico} <span class="nearby-number">${s.number}</span> <span class="nearby-distance">${s.distance} كم</span></div><a href="${u}" target="_blank" class="map-link"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg></a></div>`; }).join(''); }
 
-    // Admin
-    async function loadAdminData() { showLoading(); const st = await apiGet('getStats'); if (st.stats) { document.getElementById('totalDistribution').textContent = st.stats.totalDistribution || 0; document.getElementById('totalSubstations').textContent = st.stats.totalSubstations || 0; document.getElementById('totalUsers').textContent = st.stats.totalUsers || 0; document.getElementById('totalAdditions').textContent = st.stats.totalAdditions || 0; document.getElementById('totalEdits').textContent = st.stats.totalEdits || 0; } const dy = await apiGet('getDailyStats'); if (dy.success) renderCharts(dy); const us = await apiGet('getUsers'); if (us.users) document.getElementById('adminUsersBody').innerHTML = us.users.map(u => `<tr><td>${u.name}</td><td>${u.phone}</td><td>${u.type||'موظف'}</td><td>${u.registerDate||'-'}</td></tr>`).join(''); const lg = await apiGet('getLogs'); if (lg.logs) document.getElementById('adminLogsBody').innerHTML = lg.logs.slice(-30).reverse().map(l => `<tr><td style="color:${l.type.includes('إضافة') ? 'var(--success)' : 'var(--warning)'}">${l.type}</td><td>${l.station}</td><td>${l.user}</td><td>${l.date}</td></tr>`).join(''); hideLoading(); }
-    function renderCharts(d) { new Chart(document.getElementById('visitsChart'), { type: 'line', data: { labels: d.dailyVisits.map(x => x.date.slice(5)), datasets: [{ label: 'زيارات', data: d.dailyVisits.map(x => x.count), borderColor: '#e8a54b', backgroundColor: 'rgba(232,165,75,0.2)', fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { color: '#c5ddf0' }, grid: { color: '#5b8fb9' } }, x: { ticks: { color: '#c5ddf0' }, grid: { color: '#5b8fb9' } } } } }); new Chart(document.getElementById('activityChart'), { type: 'bar', data: { labels: d.dailyActivity.map(x => x.date.slice(5)), datasets: [{ label: 'إضافات', data: d.dailyActivity.map(x => x.additions), backgroundColor: '#5cb85c' }, { label: 'تعديلات', data: d.dailyActivity.map(x => x.edits), backgroundColor: '#e8a54b' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#c5ddf0' } } }, scales: { y: { beginAtZero: true, ticks: { color: '#c5ddf0' }, grid: { color: '#5b8fb9' } }, x: { ticks: { color: '#c5ddf0' }, grid: { color: '#5b8fb9' } } } } }); }
+        // Add
+        function openAddModal(t) { if (t === 'distribution') { document.getElementById('addDistributionModal').classList.add('active'); ['addDistNumber', 'addDistFeeder', 'addDistRegion', 'addDistLat', 'addDistLng', 'addDistReason'].forEach(id => document.getElementById(id).value = ''); document.getElementById('addDistLocationBtn').classList.remove('active'); } else { document.getElementById('addSubstationModal').classList.add('active'); ['addSubShortName', 'addSubLat', 'addSubLng', 'addSubReason'].forEach(id => document.getElementById(id).value = ''); document.getElementById('addSubLocationBtn').classList.remove('active'); } }
+        function getCurrentLocation(pfx) { const btn = document.getElementById(pfx + 'LocationBtn'), lat = document.getElementById(pfx + 'Lat') || document.getElementById(pfx + 'Latitude'), lng = document.getElementById(pfx + 'Lng') || document.getElementById(pfx + 'Longitude'); btn.innerHTML = '<div class="spinner"></div><span>جاري التحديد...</span>'; if (navigator.geolocation) { navigator.geolocation.getCurrentPosition(p => { lat.value = p.coords.latitude.toFixed(8); lng.value = p.coords.longitude.toFixed(8); btn.classList.add('active'); btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span>تم التحديد ✓</span>'; showToast('تم تحديد الموقع بنجاح'); }, () => { btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/></svg><span>تحديد موقعي الحالي</span>'; showToast('فشل تحديد الموقع', 'error'); }, { enableHighAccuracy: true, timeout: 15000 }); } }
+        async function submitAddDistribution() { const n = document.getElementById('addDistNumber').value.trim(), rg = document.getElementById('addDistRegion').value.trim(); if (!n || !rg) { showToast('أكمل البيانات', 'error'); return; } if (searchStationLocal(n).found) { showToast('موجود مسبقاً', 'error'); return; } const fd = document.getElementById('addDistFeeder').value.trim(), lt = document.getElementById('addDistLat').value, lg = document.getElementById('addDistLng').value, rs = document.getElementById('addDistReason').value.trim(); closeModal('addDistributionModal'); showToast('جاري الإضافة...', 'warning'); const ns = { number: n, feeder: fd, region: rg, lat: lt, lng: lg, type: 'distribution', typeLabel: 'توزيع', googleMap: (lt && lg) ? `https://www.google.com/maps?q=${lt},${lg}` : '' }; allStations.push(ns); updateCacheStatus('loaded', allStations.length + ' ✓'); const r = await apiPost({ action: 'addStation', number: n, region: rg, feeder: fd, lat: lt, lng: lg, reason: rs, userName: currentUser?.name || '', userEmail: currentUser?.email || '', userPhone: currentUser?.phone || '' }); if (r.error) { allStations = allStations.filter(s => s.number !== n); updateCacheStatus('loaded', allStations.length + ' ✓'); showToast(r.error, 'error'); return; } localStorage.setItem(CACHE_KEY, JSON.stringify(allStations)); showToast('تمت الإضافة ✓'); document.getElementById('searchInput').value = n; searchStation(); }
+        async function submitAddSubstation() { const sn = document.getElementById('addSubShortName').value.trim().toUpperCase(); if (!sn) { showToast('أدخل الاختصار', 'error'); return; } if (searchStationLocal(sn).found) { showToast('موجود مسبقاً', 'error'); return; } const lt = document.getElementById('addSubLat').value, lg = document.getElementById('addSubLng').value, rs = document.getElementById('addSubReason').value.trim(); closeModal('addSubstationModal'); showToast('جاري الإضافة...', 'warning'); const ns = { number: sn, shortName: sn, lat: lt, lng: lg, type: 'substation', typeLabel: 'تحويل', googleMap: (lt && lg) ? `https://www.google.com/maps?q=${lt},${lg}` : '' }; allStations.push(ns); updateCacheStatus('loaded', allStations.length + ' ✓'); const r = await apiPost({ action: 'addSubstation', shortName: sn, lat: lt, lng: lg, reason: rs, userName: currentUser?.name || '', userEmail: currentUser?.email || '', userPhone: currentUser?.phone || '' }); if (r.error) { allStations = allStations.filter(s => s.number !== sn); updateCacheStatus('loaded', allStations.length + ' ✓'); showToast(r.error, 'error'); return; } localStorage.setItem(CACHE_KEY, JSON.stringify(allStations)); showToast('تمت الإضافة ✓'); document.getElementById('searchInput').value = sn; searchStation(); }
+        async function submitEdit() { 
+            const n = document.getElementById('editStationNumber').value.trim(); 
+            if (!n) { showToast('خطأ في رقم المحطة', 'error'); return; } 
+            
+            const lt = document.getElementById('editLatitude').value.trim();
+            const lg = document.getElementById('editLongitude').value.trim();
+            const rs = document.getElementById('editReason').value.trim(); 
+            
+            closeModal('editModal'); 
+            showToast('جاري التعديل...', 'warning'); 
+            
+            const idx = allStations.findIndex(s => String(s.number).toUpperCase() === n.toUpperCase());
+            if (idx === -1) { showToast('المحطة غير موجودة', 'error'); return; }
+            
+            const old = { ...allStations[idx] }; 
+            
+            if (editingStationType === 'distribution') { 
+                allStations[idx].feeder = document.getElementById('editFeeder').value.trim(); 
+                allStations[idx].region = document.getElementById('editRegion').value.trim(); 
+            } 
+            if (lt && lg) { 
+                allStations[idx].lat = lt; 
+                allStations[idx].lng = lg; 
+                allStations[idx].googleMap = `https://www.google.com/maps?q=${lt},${lg}`; 
+            } 
+            
+            const act = editingStationType === 'distribution' ? 'editStation' : 'editSubstation';
+            const data = editingStationType === 'distribution' 
+                ? { action: act, number: n, feeder: document.getElementById('editFeeder').value.trim(), region: document.getElementById('editRegion').value.trim(), lat: lt, lng: lg, reason: rs, userName: currentUser?.name || '', userEmail: currentUser?.email || '', userPhone: currentUser?.phone || '' } 
+                : { action: act, shortName: n, lat: lt, lng: lg, reason: rs, userName: currentUser?.name || '', userEmail: currentUser?.email || '', userPhone: currentUser?.phone || '' }; 
+            
+            const r = await apiPost(data); 
+            
+            if (r.error) { 
+                allStations[idx] = old; 
+                showToast(r.error, 'error'); 
+                return; 
+            } 
+            
+            localStorage.setItem(CACHE_KEY, JSON.stringify(allStations)); 
+            showToast('تم التعديل بنجاح ✓', 'success'); 
+            document.getElementById('searchInput').value = n; 
+            searchStation(); 
+        }
 
-    // Init
-    document.addEventListener('DOMContentLoaded', () => {
-        checkSession();
-        checkIOSInstall();
-    });
-    document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); }));
-</script>
-```
+        // Fault
+        function openFaultModal() { document.getElementById('faultModal').classList.add('active'); for (let i = 1; i <= 6; i++) { const inp = document.getElementById('fault' + i); inp.value = ''; inp.classList.remove('found', 'not-found'); } document.getElementById('faultResults').style.display = 'none'; faultStations = []; }
+        async function searchFaultStations() { 
+            const nums = []; 
+            for (let i = 1; i <= 6; i++) { 
+                const v = document.getElementById('fault' + i).value.trim(); 
+                if (v) nums.push({ i, v }); 
+            } 
+            if (nums.length < 2) { showToast('أدخل 2 على الأقل', 'warning'); return; } 
+            if (!isStationsLoaded) { showLoading(); await loadStationsCache(); hideLoading(); } 
+            
+            faultStations = []; 
+            const tb = document.getElementById('faultTableBody'); 
+            tb.innerHTML = ''; 
+            const lbl = ['A', 'B', 'C', 'D', 'E', 'F']; 
+            let fc = 0; 
+            
+            for (const item of nums) { 
+                const inp = document.getElementById('fault' + item.i);
+                
+                // تنظيف المدخل للبحث
+                let searchVal = item.v;
+                
+                // محاولة البحث
+                const r = searchStationLocal(searchVal); 
+                
+                if (r.found) { 
+                    inp.classList.remove('not-found'); 
+                    inp.classList.add('found'); 
+                    r.station.label = lbl[fc]; 
+                    faultStations.push(r.station); 
+                    fc++; 
+                    const tl = r.station.type === 'substation' ? '<span class="type-badge type-substation">تحويل</span>' : '<span class="type-badge type-distribution">توزيع</span>'; 
+                    tb.innerHTML += `<tr><td><span class="point-label">${r.station.label}</span></td><td><strong>${r.station.number}</strong></td><td>${tl}</td><td><span class="status-found">✓</span></td></tr>`; 
+                } else { 
+                    inp.classList.remove('found'); 
+                    inp.classList.add('not-found'); 
+                    tb.innerHTML += `<tr><td>-</td><td><strong>${item.v}</strong></td><td>-</td><td><span class="status-not-found">✕</span></td></tr>`; 
+                } 
+            } 
+            
+            document.getElementById('faultCount').textContent = fc; 
+            document.getElementById('faultResults').style.display = 'block'; 
+            
+            if (fc >= 1) { 
+                renderFaultMap(); 
+                generateNavigationLink(); 
+                calculateTotalDistance(); 
+            } else { 
+                showToast('لا توجد نتائج', 'warning'); 
+            } 
+        }
+        function calculateTotalDistance() { const vs = faultStations.filter(s => s.lat && s.lng); if (vs.length < 2) { document.getElementById('totalDistance').innerHTML = ''; return; } let td = 0; for (let i = 0; i < vs.length - 1; i++) td += calcDistance(parseFloat(vs[i].lat), parseFloat(vs[i].lng), parseFloat(vs[i+1].lat), parseFloat(vs[i+1].lng)); document.getElementById('totalDistance').innerHTML = `<span class="distance-badge">📏 المسافة: ${td.toFixed(2)} كم</span>`; }
+        function renderFaultMap() { const vs = faultStations.filter(s => s.lat && s.lng); if (!vs.length) { showToast('لا إحداثيات', 'warning'); return; } if (faultMap) faultMap.remove(); let sLat = 0, sLng = 0; vs.forEach(s => { sLat += parseFloat(s.lat); sLng += parseFloat(s.lng); }); const cLat = sLat / vs.length, cLng = sLng / vs.length, zm = vs.length === 1 ? 15 : 13; faultMap = L.map('faultMap').setView([cLat, cLng], zm); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(faultMap); const cols = { distribution: '#e8a54b', substation: '#5b8fb9' }, mks = []; vs.forEach(s => { const c = cols[s.type] || '#e8a54b'; L.marker([parseFloat(s.lat), parseFloat(s.lng)], { icon: L.divIcon({ html: `<div style="background:${c};width:30px;height:30px;border-radius:50%;border:3px solid white;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;box-shadow:0 2px 8px rgba(0,0,0,0.3);">${s.label}</div>`, iconSize: [30, 30], iconAnchor: [15, 15] }) }).addTo(faultMap).bindPopup(`<b>${s.label} - ${s.number}</b><br>${s.typeLabel||''}`); mks.push([parseFloat(s.lat), parseFloat(s.lng)]); }); if (mks.length >= 2) { L.polyline(mks, { color: '#e8a54b', weight: 3, dashArray: '10, 10' }).addTo(faultMap); faultMap.fitBounds(mks, { padding: [30, 30] }); } }
+        function generateNavigationLink() { const vs = faultStations.filter(s => s.lat && s.lng); if (!vs.length) { document.getElementById('faultNavigationLink').style.display = 'none'; return; } let url; if (vs.length === 1) { url = `https://www.google.com/maps/search/?api=1&query=${vs[0].lat},${vs[0].lng}`; } else { url = 'https://www.google.com/maps/dir/'; vs.forEach((s, i) => { url += `${s.lat},${s.lng}`; if (i < vs.length - 1) url += '/'; }); } const lnk = document.getElementById('faultNavigationLink'); lnk.href = url; lnk.style.display = 'flex'; lnk.innerHTML = vs.length === 1 ? '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>فتح الموقع' : '<svg viewBox="0 0 24 24"><path d="M21.71 11.29l-9-9c-.39-.39-1.02-.39-1.41 0l-9 9c-.39.39-.39 1.02 0 1.41l9 9c.39.39 1.02.39 1.41 0l9-9c.39-.38.39-1.01 0-1.41z"/></svg>فتح التنقل'; }
 
+        // Admin
+        async function loadAdminData() { 
+            showLoading(); 
+            
+            const stats = await apiGet('getStats'); 
+            if (stats.stats) { 
+                document.getElementById('totalDistribution').textContent = stats.stats.totalDistribution || 0; 
+                document.getElementById('totalSubstations').textContent = stats.stats.totalSubstations || 0; 
+                document.getElementById('totalUsers').textContent = stats.stats.totalUsers || 0; 
+                document.getElementById('totalAdditions').textContent = stats.stats.totalAdditions || 0; 
+                document.getElementById('totalEdits').textContent = stats.stats.totalEdits || 0; 
+                document.getElementById('onlineCount').textContent = stats.stats.onlineCount || 0;
+            } 
+            
+            // جلب المتواجدين حالياً
+            const online = await apiGet('getOnlineUsers');
+            if (online.success) {
+                document.getElementById('onlineBadge').textContent = online.count || 0;
+                const onlineList = document.getElementById('onlineUsersList');
+                if (online.users && online.users.length > 0) {
+                    onlineList.innerHTML = online.users.map(u => {
+                        const initial = u.name ? u.name.charAt(0) : '?';
+                        const timeParts = u.lastActive ? u.lastActive.split(' ')[1] : '';
+                        return `<div class="online-user-card">
+                            <div class="online-user-avatar">${initial}</div>
+                            <div class="online-user-info">
+                                <div class="online-user-name">${u.name || 'مستخدم'}</div>
+                                <div class="online-user-time">🕐 ${timeParts || 'الآن'}</div>
+                            </div>
+                            <div class="online-indicator"></div>
+                        </div>`;
+                    }).join('');
+                } else {
+                    onlineList.innerHTML = '<div class="empty-online">لا يوجد متواجدون حالياً</div>';
+                }
+            }
+            
+            const daily = await apiGet('getDailyStats'); 
+            if (daily.success) renderCharts(daily); 
+            
+            const users = await apiGet('getUsers'); 
+            if (users.users) document.getElementById('adminUsersBody').innerHTML = users.users.map(u => `<tr><td>${u.name}</td><td>${u.phone}</td><td>${u.type||'موظف'}</td><td>${u.registerDate||'-'}</td></tr>`).join(''); 
+            
+            const logs = await apiGet('getLogs'); 
+            if (logs.logs) document.getElementById('adminLogsBody').innerHTML = logs.logs.slice(-30).reverse().map(l => `<tr><td style="color:${l.type.includes('إضافة') ? 'var(--success)' : 'var(--warning)'}">${l.type}</td><td>${l.station}</td><td>${l.user}</td><td>${l.date}</td></tr>`).join(''); 
+            
+            hideLoading(); 
+            
+            // تحديث تلقائي للمتواجدين كل 30 ثانية
+            setTimeout(refreshOnlineUsers, 30000);
+        }
+        
+        async function refreshOnlineUsers() {
+            if (document.getElementById('adminPage').classList.contains('active')) {
+                const online = await apiGet('getOnlineUsers');
+                if (online.success) {
+                    document.getElementById('onlineBadge').textContent = online.count || 0;
+                    document.getElementById('onlineCount').textContent = online.count || 0;
+                    const onlineList = document.getElementById('onlineUsersList');
+                    if (online.users && online.users.length > 0) {
+                        onlineList.innerHTML = online.users.map(u => {
+                            const initial = u.name ? u.name.charAt(0) : '?';
+                            const timeParts = u.lastActive ? u.lastActive.split(' ')[1] : '';
+                            return `<div class="online-user-card">
+                                <div class="online-user-avatar">${initial}</div>
+                                <div class="online-user-info">
+                                    <div class="online-user-name">${u.name || 'مستخدم'}</div>
+                                    <div class="online-user-time">🕐 ${timeParts || 'الآن'}</div>
+                                </div>
+                                <div class="online-indicator"></div>
+                            </div>`;
+                        }).join('');
+                    } else {
+                        onlineList.innerHTML = '<div class="empty-online">لا يوجد متواجدون حالياً</div>';
+                    }
+                }
+                setTimeout(refreshOnlineUsers, 30000);
+            }
+        }
+        function renderCharts(d) { new Chart(document.getElementById('visitsChart'), { type: 'line', data: { labels: d.dailyVisits.map(x => x.date.slice(5)), datasets: [{ label: 'زيارات', data: d.dailyVisits.map(x => x.count), borderColor: '#e8a54b', backgroundColor: 'rgba(232,165,75,0.2)', fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { color: '#c5ddf0' }, grid: { color: '#5b8fb9' } }, x: { ticks: { color: '#c5ddf0' }, grid: { color: '#5b8fb9' } } } } }); new Chart(document.getElementById('activityChart'), { type: 'bar', data: { labels: d.dailyActivity.map(x => x.date.slice(5)), datasets: [{ label: 'إضافات', data: d.dailyActivity.map(x => x.additions), backgroundColor: '#5cb85c' }, { label: 'تعديلات', data: d.dailyActivity.map(x => x.edits), backgroundColor: '#e8a54b' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#c5ddf0' } } }, scales: { y: { beginAtZero: true, ticks: { color: '#c5ddf0' }, grid: { color: '#5b8fb9' } }, x: { ticks: { color: '#c5ddf0' }, grid: { color: '#5b8fb9' } } } } }); }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            checkSession();
+            checkIOSInstall();
+        });
+        document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); }));
+    </script>
 </body>
 </html>
