@@ -403,19 +403,35 @@
         function startVersionCheck() { if (versionCheckTimer) clearInterval(versionCheckTimer); versionCheckTimer = setInterval(checkForUpdates, 30000); }
         function stopVersionCheck() { if (versionCheckTimer) { clearInterval(versionCheckTimer); versionCheckTimer = null; } }
         async function checkForUpdates() { try { const r = await apiGet('getVersion'); if (r.version && r.version !== currentVersion) { await silentRefreshCache(); currentVersion = r.version; localStorage.setItem(CACHE_VERSION_KEY, currentVersion); showToast('تم التحديث'); } } catch (e) {} }
-        async function silentRefreshCache() { try { const r = await apiGet('getAllStations'); if (r.stations && r.stations.length) { allStations = r.stations; isStationsLoaded = true; localStorage.setItem(CACHE_KEY, JSON.stringify(allStations)); updateCacheStatus('loaded', allStations.length + ' محطة'); } } catch (e) {} }
+        async function silentRefreshCache() { try { const r = await apiGet('getAllStations'); if (r.stations && r.stations.length) { allStations = r.stations; isStationsLoaded = true; try { localStorage.setItem(CACHE_KEY, JSON.stringify(allStations)); } catch(e) {} updateCacheStatus('loaded', allStations.length + ' محطة'); } } catch (e) {} }
         
         async function loadStationsCache() { 
             updateCacheStatus('loading', 'جاري التحميل...'); 
+            // مسح الكاش القديم أولاً لتجنب مشكلة تجاوز الحد
+            try {
+                const oldCache = localStorage.getItem(CACHE_KEY);
+                if (oldCache && oldCache.length > 4000000) { // أكثر من 4MB
+                    console.log('Cache too large, clearing...');
+                    localStorage.removeItem(CACHE_KEY);
+                    localStorage.removeItem(CACHE_VERSION_KEY);
+                }
+            } catch(e) {
+                localStorage.removeItem(CACHE_KEY);
+                localStorage.removeItem(CACHE_VERSION_KEY);
+            }
             currentVersion = localStorage.getItem(CACHE_VERSION_KEY); 
             const c = localStorage.getItem(CACHE_KEY); 
             if (c && currentVersion) { 
-                allStations = JSON.parse(c); 
-                isStationsLoaded = true; 
-                updateCacheStatus('loaded', allStations.length + ' محطة'); 
-                startVersionCheck(); 
-                checkForUpdates(); 
-                return; 
+                try {
+                    allStations = JSON.parse(c); 
+                    isStationsLoaded = true; 
+                    updateCacheStatus('loaded', allStations.length + ' محطة'); 
+                    startVersionCheck(); 
+                    checkForUpdates(); 
+                    return; 
+                } catch(e) {
+                    localStorage.removeItem(CACHE_KEY);
+                }
             } 
             await refreshStationsCacheWithProgress(); 
         }
@@ -444,8 +460,18 @@
                     isStationsLoaded = true;
                     currentVersion = versionResult.version || Date.now().toString();
                     bar.style.width = '90%';
-                    localStorage.setItem(CACHE_KEY, JSON.stringify(allStations));
-                    localStorage.setItem(CACHE_VERSION_KEY, currentVersion);
+                    // محاولة الحفظ في localStorage مع معالجة خطأ تجاوز الحد
+                    try {
+                        localStorage.setItem(CACHE_KEY, JSON.stringify(allStations));
+                        localStorage.setItem(CACHE_VERSION_KEY, currentVersion);
+                    } catch (storageError) {
+                        console.warn('Storage quota exceeded, using memory only');
+                        // مسح الكاش القديم ومحاولة مرة أخرى
+                        try {
+                            localStorage.removeItem(CACHE_KEY);
+                            localStorage.removeItem(CACHE_VERSION_KEY);
+                        } catch(e) {}
+                    }
                     bar.style.width = '100%';
                     countEl.textContent = allStations.length + ' محطة';
                     doneEl.classList.add('show');
@@ -476,8 +502,10 @@
                     allStations = s.stations; 
                     isStationsLoaded = true; 
                     currentVersion = v.version || Date.now().toString(); 
-                    localStorage.setItem(CACHE_KEY, JSON.stringify(allStations)); 
-                    localStorage.setItem(CACHE_VERSION_KEY, currentVersion); 
+                    try {
+                        localStorage.setItem(CACHE_KEY, JSON.stringify(allStations)); 
+                        localStorage.setItem(CACHE_VERSION_KEY, currentVersion); 
+                    } catch(e) { console.warn('Storage full'); }
                     updateCacheStatus('loaded', allStations.length + ' محطة'); 
                     startVersionCheck(); 
                 } else { updateCacheStatus('error', 'خطا'); }
