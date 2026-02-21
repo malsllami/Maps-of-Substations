@@ -165,14 +165,15 @@
         .stat-card.online-card .number{color:#5cb85c}
         .online-section{border:1px solid rgba(92,184,92,0.3);background:linear-gradient(135deg,rgba(92,184,92,0.05),transparent)}
         .online-section h3{color:#5cb85c}
+        .online-section h3 svg{width:1.2rem;height:1.2rem;flex-shrink:0}
         .online-badge{background:#5cb85c;color:#fff;padding:0.2rem 0.6rem;border-radius:1rem;font-size:0.8rem;margin-right:0.5rem}
-        .online-users-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:0.75rem}
-        .online-user-card{background:var(--bg-input);border-radius:0.5rem;padding:0.75rem;display:flex;align-items:center;gap:0.75rem;border-right:3px solid #5cb85c}
-        .online-user-avatar{width:2.5rem;height:2.5rem;background:var(--sec-orange);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem}
-        .online-user-info{flex:1}
-        .online-user-name{font-weight:600;font-size:0.9rem}
-        .online-user-time{font-size:0.7rem;color:var(--text-secondary)}
-        .online-indicator{width:10px;height:10px;background:#5cb85c;border-radius:50%;animation:pulse-online 2s infinite}
+        .online-users-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.5rem;max-height:200px;overflow-y:auto}
+        .online-user-card{background:var(--bg-input);border-radius:0.5rem;padding:0.5rem 0.75rem;display:flex;align-items:center;gap:0.5rem;border-right:3px solid #5cb85c}
+        .online-user-avatar{width:2rem;height:2rem;background:var(--sec-orange);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0}
+        .online-user-info{flex:1;min-width:0}
+        .online-user-name{font-weight:600;font-size:0.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .online-user-time{font-size:0.65rem;color:var(--text-secondary)}
+        .online-indicator{width:8px;height:8px;background:#5cb85c;border-radius:50%;animation:pulse-online 2s infinite;flex-shrink:0}
         @keyframes pulse-online{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.2)}}
         .empty-online{text-align:center;padding:2rem;color:var(--text-secondary);font-size:0.9rem}
         .admin-section{background:var(--bg-card);border-radius:0.75rem;padding:1.25rem;margin-bottom:1rem}
@@ -277,7 +278,7 @@
                 <div class="stat-card"><div class="number" id="totalEdits">0</div><div class="label">تعديلات</div></div>
                 <div class="stat-card online-card"><div class="number" id="onlineCount">0</div><div class="label">🟢 متواجدون</div></div>
             </div>
-            <section class="admin-section online-section"><h3><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="#5cb85c"/></svg>المتواجدون <span class="online-badge" id="onlineBadge">0</span></h3><div class="online-users-grid" id="onlineUsersList"><div class="empty-online">لا يوجد متواجدون</div></div></section>
+            <section class="admin-section online-section"><h3>🟢 المتواجدون الان <span class="online-badge" id="onlineBadge">0</span></h3><div class="online-users-grid" id="onlineUsersList"><div class="empty-online">لا يوجد متواجدون حاليا</div></div></section>
             <section class="admin-section"><h3>📈 الزيارات</h3><div class="chart-container"><canvas id="visitsChart"></canvas></div></section>
             <section class="admin-section"><h3>📊 النشاط</h3><div class="chart-container"><canvas id="activityChart"></canvas></div></section>
             <section class="admin-section"><h3>👥 المشتركين</h3><div class="results-table-wrapper"><table class="results-table"><thead><tr><th>الاسم</th><th>الجوال</th><th>النوع</th><th>التسجيل</th></tr></thead><tbody id="adminUsersBody"></tbody></table></div></section>
