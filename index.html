@@ -273,6 +273,62 @@
         .location-btn:hover { border-color: var(--sec-orange); color: var(--sec-orange); }
         .location-btn.active { border-color: var(--success); color: var(--success); background: rgba(72, 187, 120, 0.1); }
         .location-btn svg { width: 1.25rem; height: 1.25rem; fill: currentColor; }
+        
+        .coords-manual-input {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+        .coords-manual-input input {
+            flex: 1;
+            padding: 0.6rem 0.75rem;
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            border-radius: 0.5rem;
+            color: var(--text-primary);
+            font-family: 'Tajawal', monospace;
+            font-size: 0.9rem;
+            text-align: center;
+            direction: ltr;
+        }
+        .coords-manual-input input:focus {
+            border-color: var(--sec-orange);
+            outline: none;
+        }
+        .coords-manual-input input.valid {
+            border-color: var(--success);
+            background: rgba(92, 184, 92, 0.1);
+        }
+        .coords-manual-input input.invalid {
+            border-color: var(--danger);
+        }
+        .coords-manual-input .parse-btn {
+            padding: 0.6rem 1rem;
+            background: var(--sec-blue-lighter);
+            border: none;
+            border-radius: 0.5rem;
+            color: white;
+            cursor: pointer;
+            font-family: 'Tajawal', sans-serif;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .coords-manual-input .parse-btn:hover {
+            background: var(--sec-orange);
+        }
+        .coords-hint {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+            text-align: center;
+        }
+        .coords-or {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            margin: 0.5rem 0;
+        }
 
         .fault-inputs { display: flex; flex-direction: column; gap: 0.75rem; }
         .fault-input-row { display: flex; gap: 0.625rem; flex-wrap: wrap; }
@@ -526,9 +582,17 @@
                     <div class="form-group"><label>رقم المحطة *</label><input type="text" id="addDistNumber" placeholder="41475" required></div>
                     <div class="form-group"><label>المغذي</label><input type="text" id="addDistFeeder" placeholder="MDN2-17"></div>
                     <div class="form-group full-width"><label>الحي *</label><input type="text" id="addDistRegion" required></div>
-                    <div class="form-group"><label>خط العرض</label><input type="text" id="addDistLat" readonly></div>
-                    <div class="form-group"><label>خط الطول</label><input type="text" id="addDistLng" readonly></div>
-                    <div class="form-group full-width"><button type="button" class="location-btn" id="addDistLocationBtn" onclick="getCurrentLocation('addDist')"><svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06z"/></svg><span>تحديد موقعي</span></button></div>
+                    <div class="form-group"><label>خط العرض</label><input type="text" id="addDistLat" readonly placeholder="تلقائي أو يدوي"></div>
+                    <div class="form-group"><label>خط الطول</label><input type="text" id="addDistLng" readonly placeholder="تلقائي أو يدوي"></div>
+                    <div class="form-group full-width">
+                        <button type="button" class="location-btn" id="addDistLocationBtn" onclick="getCurrentLocation('addDist')"><svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06z"/></svg><span>📍 تحديد موقعي الحالي (GPS)</span></button>
+                        <div class="coords-or">— أو أدخل الإحداثيات يدوياً —</div>
+                        <div class="coords-manual-input">
+                            <input type="text" id="addDistCoordsManual" placeholder="21.5234,39.1876" dir="ltr">
+                            <button type="button" class="parse-btn" onclick="parseManualCoords('addDist')">تطبيق</button>
+                        </div>
+                        <div class="coords-hint">الصيغة: خط العرض,خط الطول (مثال: 21.5234,39.1876)</div>
+                    </div>
                     <div class="form-group full-width"><label>السبب</label><textarea id="addDistReason"></textarea></div>
                 </div>
             </div>
@@ -543,9 +607,17 @@
             <div class="modal-body">
                 <div class="form-grid">
                     <div class="form-group full-width"><label>اختصار المحطة *</label><input type="text" id="addSubShortName" placeholder="MDN أو IC5" required></div>
-                    <div class="form-group"><label>خط العرض</label><input type="text" id="addSubLat" readonly></div>
-                    <div class="form-group"><label>خط الطول</label><input type="text" id="addSubLng" readonly></div>
-                    <div class="form-group full-width"><button type="button" class="location-btn" id="addSubLocationBtn" onclick="getCurrentLocation('addSub')"><svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06z"/></svg><span>تحديد موقعي</span></button></div>
+                    <div class="form-group"><label>خط العرض</label><input type="text" id="addSubLat" readonly placeholder="تلقائي أو يدوي"></div>
+                    <div class="form-group"><label>خط الطول</label><input type="text" id="addSubLng" readonly placeholder="تلقائي أو يدوي"></div>
+                    <div class="form-group full-width">
+                        <button type="button" class="location-btn" id="addSubLocationBtn" onclick="getCurrentLocation('addSub')"><svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06z"/></svg><span>📍 تحديد موقعي الحالي (GPS)</span></button>
+                        <div class="coords-or">— أو أدخل الإحداثيات يدوياً —</div>
+                        <div class="coords-manual-input">
+                            <input type="text" id="addSubCoordsManual" placeholder="21.5234,39.1876" dir="ltr">
+                            <button type="button" class="parse-btn" onclick="parseManualCoords('addSub')">تطبيق</button>
+                        </div>
+                        <div class="coords-hint">الصيغة: خط العرض,خط الطول (مثال: 21.5234,39.1876)</div>
+                    </div>
                     <div class="form-group full-width"><label>السبب</label><textarea id="addSubReason"></textarea></div>
                 </div>
             </div>
@@ -566,9 +638,17 @@
                     </div>
                     <div class="form-group" id="editFeederGroup"><label>المغذي</label><input type="text" id="editFeeder"></div>
                     <div class="form-group" id="editRegionGroup"><label>الحي</label><input type="text" id="editRegion"></div>
-                    <div class="form-group"><label>خط العرض</label><input type="text" id="editLatitude" placeholder="يدوي أو تلقائي"></div>
-                    <div class="form-group"><label>خط الطول</label><input type="text" id="editLongitude" placeholder="يدوي أو تلقائي"></div>
-                    <div class="form-group full-width"><button type="button" class="location-btn" id="editLocationBtn" onclick="getCurrentLocation('edit')"><svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/></svg><span>تحديد موقعي الحالي</span></button></div>
+                    <div class="form-group"><label>خط العرض</label><input type="text" id="editLatitude" placeholder="تلقائي أو يدوي"></div>
+                    <div class="form-group"><label>خط الطول</label><input type="text" id="editLongitude" placeholder="تلقائي أو يدوي"></div>
+                    <div class="form-group full-width">
+                        <button type="button" class="location-btn" id="editLocationBtn" onclick="getCurrentLocation('edit')"><svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/></svg><span>📍 تحديد موقعي الحالي (GPS)</span></button>
+                        <div class="coords-or">— أو أدخل الإحداثيات يدوياً —</div>
+                        <div class="coords-manual-input">
+                            <input type="text" id="editCoordsManual" placeholder="21.5234,39.1876" dir="ltr">
+                            <button type="button" class="parse-btn" onclick="parseManualCoords('edit')">تطبيق</button>
+                        </div>
+                        <div class="coords-hint">الصيغة: خط العرض,خط الطول (مثال: 21.5234,39.1876)</div>
+                    </div>
                     <div class="form-group full-width"><label>السبب</label><textarea id="editReason" placeholder="سبب التعديل (اختياري)"></textarea></div>
                 </div>
             </div>
@@ -1095,7 +1175,9 @@
             document.getElementById('editLatitude').value = s.lat || '';
             document.getElementById('editLongitude').value = s.lng || '';
             document.getElementById('editReason').value = '';
+            document.getElementById('editCoordsManual').value = '';
             document.getElementById('editLocationBtn').classList.remove('active');
+            document.getElementById('editLocationBtn').innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/></svg><span>📍 تحديد موقعي الحالي (GPS)</span>';
             
             // فتح النافذة
             document.getElementById('editModal').classList.add('active');
@@ -1181,8 +1263,102 @@
         function loadNearbyStationsLocal(lat, lng, cur) { const ms = document.getElementById('mapSection'), nb = getNearbyStationsLocal(lat, lng, 3.5).filter(s => s.number !== cur); if (!nb.length) { ms.style.display = 'none'; return; } ms.style.display = 'block'; document.getElementById('nearbyCount').textContent = nb.length; document.querySelector('#mapSection .results-title h3').textContent = 'المحطات القريبة (3.5 كم)'; if (nearbyMap) nearbyMap.remove(); nearbyMap = L.map('nearbyMap').setView([parseFloat(lat), parseFloat(lng)], 14); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(nearbyMap); L.marker([parseFloat(lat), parseFloat(lng)], { icon: L.divIcon({ html: '<div style="background:#e8a54b;width:18px;height:18px;border-radius:50%;border:3px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }) }).addTo(nearbyMap).bindPopup('<b>المحطة المطلوبة</b>'); nb.forEach(s => { if (s.lat && s.lng) { const c = s.type === 'substation' ? '#5b8fb9' : '#5cb85c'; L.marker([parseFloat(s.lat), parseFloat(s.lng)], { icon: L.divIcon({ html: `<div style="background:${c};width:14px;height:14px;border-radius:50%;border:2px solid white;"></div>`, iconSize: [14, 14], iconAnchor: [7, 7] }) }).addTo(nearbyMap).bindPopup(`<b>${s.number}</b><br>${s.typeLabel||''}<br>${s.distance} كم`); } }); document.getElementById('nearbyList').innerHTML = nb.map(s => { const u = s.googleMap || `https://www.google.com/maps?q=${s.lat},${s.lng}`, ico = s.type === 'substation' ? '🔷' : '🟢'; return `<div class="nearby-item"><div>${ico} <span class="nearby-number">${s.number}</span> <span class="nearby-distance">${s.distance} كم</span></div><a href="${u}" target="_blank" class="map-link"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg></a></div>`; }).join(''); }
 
         // Add
-        function openAddModal(t) { if (t === 'distribution') { document.getElementById('addDistributionModal').classList.add('active'); ['addDistNumber', 'addDistFeeder', 'addDistRegion', 'addDistLat', 'addDistLng', 'addDistReason'].forEach(id => document.getElementById(id).value = ''); document.getElementById('addDistLocationBtn').classList.remove('active'); } else { document.getElementById('addSubstationModal').classList.add('active'); ['addSubShortName', 'addSubLat', 'addSubLng', 'addSubReason'].forEach(id => document.getElementById(id).value = ''); document.getElementById('addSubLocationBtn').classList.remove('active'); } }
-        function getCurrentLocation(pfx) { const btn = document.getElementById(pfx + 'LocationBtn'), lat = document.getElementById(pfx + 'Lat') || document.getElementById(pfx + 'Latitude'), lng = document.getElementById(pfx + 'Lng') || document.getElementById(pfx + 'Longitude'); btn.innerHTML = '<div class="spinner"></div><span>جاري التحديد...</span>'; if (navigator.geolocation) { navigator.geolocation.getCurrentPosition(p => { lat.value = p.coords.latitude.toFixed(8); lng.value = p.coords.longitude.toFixed(8); btn.classList.add('active'); btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span>تم التحديد ✓</span>'; showToast('تم تحديد الموقع بنجاح'); }, () => { btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/></svg><span>تحديد موقعي الحالي</span>'; showToast('فشل تحديد الموقع', 'error'); }, { enableHighAccuracy: true, timeout: 15000 }); } }
+        function openAddModal(t) { 
+            if (t === 'distribution') { 
+                document.getElementById('addDistributionModal').classList.add('active'); 
+                ['addDistNumber', 'addDistFeeder', 'addDistRegion', 'addDistLat', 'addDistLng', 'addDistReason', 'addDistCoordsManual'].forEach(id => { 
+                    const el = document.getElementById(id); 
+                    if (el) el.value = ''; 
+                }); 
+                document.getElementById('addDistLocationBtn').classList.remove('active');
+                document.getElementById('addDistLocationBtn').innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06z"/></svg><span>📍 تحديد موقعي الحالي (GPS)</span>';
+            } else { 
+                document.getElementById('addSubstationModal').classList.add('active'); 
+                ['addSubShortName', 'addSubLat', 'addSubLng', 'addSubReason', 'addSubCoordsManual'].forEach(id => { 
+                    const el = document.getElementById(id); 
+                    if (el) el.value = ''; 
+                }); 
+                document.getElementById('addSubLocationBtn').classList.remove('active');
+                document.getElementById('addSubLocationBtn').innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06z"/></svg><span>📍 تحديد موقعي الحالي (GPS)</span>';
+            } 
+        }
+        function getCurrentLocation(pfx) { const btn = document.getElementById(pfx + 'LocationBtn'), lat = document.getElementById(pfx + 'Lat') || document.getElementById(pfx + 'Latitude'), lng = document.getElementById(pfx + 'Lng') || document.getElementById(pfx + 'Longitude'); btn.innerHTML = '<div class="spinner"></div><span>جاري التحديد...</span>'; if (navigator.geolocation) { navigator.geolocation.getCurrentPosition(p => { lat.value = p.coords.latitude.toFixed(8); lng.value = p.coords.longitude.toFixed(8); btn.classList.add('active'); btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span>تم التحديد ✓</span>'; showToast('تم تحديد الموقع بنجاح'); // مسح الإدخال اليدوي const manualInput = document.getElementById(pfx + 'CoordsManual'); if (manualInput) manualInput.value = ''; }, () => { btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/></svg><span>📍 تحديد موقعي الحالي (GPS)</span>'; showToast('فشل تحديد الموقع', 'error'); }, { enableHighAccuracy: true, timeout: 15000 }); } }
+        
+        // تحليل الإحداثيات المدخلة يدوياً
+        function parseManualCoords(pfx) {
+            const manualInput = document.getElementById(pfx + 'CoordsManual');
+            const latInput = document.getElementById(pfx + 'Lat') || document.getElementById(pfx + 'Latitude');
+            const lngInput = document.getElementById(pfx + 'Lng') || document.getElementById(pfx + 'Longitude');
+            const btn = document.getElementById(pfx + 'LocationBtn');
+            
+            if (!manualInput || !latInput || !lngInput) return;
+            
+            let value = manualInput.value.trim();
+            
+            if (!value) {
+                showToast('أدخل الإحداثيات أولاً', 'warning');
+                manualInput.classList.add('invalid');
+                setTimeout(() => manualInput.classList.remove('invalid'), 2000);
+                return;
+            }
+            
+            // تنظيف المدخل - إزالة المسافات الزائدة
+            value = value.replace(/\s+/g, '');
+            
+            // محاولة تحليل الإحداثيات
+            // الصيغ المدعومة:
+            // 21.5234,39.1876
+            // 21.5234 , 39.1876
+            // 21.5234, 39.1876
+            
+            let lat, lng;
+            
+            if (value.includes(',')) {
+                const parts = value.split(',');
+                if (parts.length === 2) {
+                    lat = parseFloat(parts[0].trim());
+                    lng = parseFloat(parts[1].trim());
+                }
+            }
+            
+            // التحقق من صحة الإحداثيات
+            if (isNaN(lat) || isNaN(lng)) {
+                showToast('صيغة خاطئة! استخدم: 21.5234,39.1876', 'error');
+                manualInput.classList.add('invalid');
+                setTimeout(() => manualInput.classList.remove('invalid'), 2000);
+                return;
+            }
+            
+            // التحقق من نطاق الإحداثيات (للسعودية تقريباً)
+            // خط العرض: 16 - 32
+            // خط الطول: 34 - 56
+            if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+                showToast('إحداثيات خارج النطاق المسموح', 'error');
+                manualInput.classList.add('invalid');
+                setTimeout(() => manualInput.classList.remove('invalid'), 2000);
+                return;
+            }
+            
+            // تطبيق الإحداثيات
+            latInput.value = lat.toFixed(8);
+            lngInput.value = lng.toFixed(8);
+            
+            // تحديث حالة الزر
+            if (btn) {
+                btn.classList.add('active');
+                btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span>تم إدخال الإحداثيات ✓</span>';
+            }
+            
+            // تأكيد بصري
+            manualInput.classList.add('valid');
+            setTimeout(() => manualInput.classList.remove('valid'), 3000);
+            
+            showToast('تم تطبيق الإحداثيات ✓');
+            
+            // عرض رابط Google Maps للتأكد
+            const mapUrl = `https://www.google.com/maps?q=${lat},${lng}`;
+            console.log('Google Maps Link:', mapUrl);
+        }
         async function submitAddDistribution() { const n = document.getElementById('addDistNumber').value.trim(), rg = document.getElementById('addDistRegion').value.trim(); if (!n || !rg) { showToast('أكمل البيانات', 'error'); return; } if (searchStationLocal(n).found) { showToast('موجود مسبقاً', 'error'); return; } const fd = document.getElementById('addDistFeeder').value.trim(), lt = document.getElementById('addDistLat').value, lg = document.getElementById('addDistLng').value, rs = document.getElementById('addDistReason').value.trim(); closeModal('addDistributionModal'); showToast('جاري الإضافة...', 'warning'); const ns = { number: n, feeder: fd, region: rg, lat: lt, lng: lg, type: 'distribution', typeLabel: 'توزيع', googleMap: (lt && lg) ? `https://www.google.com/maps?q=${lt},${lg}` : '' }; allStations.push(ns); updateCacheStatus('loaded', allStations.length + ' ✓'); const r = await apiPost({ action: 'addStation', number: n, region: rg, feeder: fd, lat: lt, lng: lg, reason: rs, userName: currentUser?.name || '', userEmail: currentUser?.email || '', userPhone: currentUser?.phone || '' }); if (r.error) { allStations = allStations.filter(s => s.number !== n); updateCacheStatus('loaded', allStations.length + ' ✓'); showToast(r.error, 'error'); return; } localStorage.setItem(CACHE_KEY, JSON.stringify(allStations)); showToast('تمت الإضافة ✓'); document.getElementById('searchInput').value = n; searchStation(); }
         async function submitAddSubstation() { const sn = document.getElementById('addSubShortName').value.trim().toUpperCase(); if (!sn) { showToast('أدخل الاختصار', 'error'); return; } if (searchStationLocal(sn).found) { showToast('موجود مسبقاً', 'error'); return; } const lt = document.getElementById('addSubLat').value, lg = document.getElementById('addSubLng').value, rs = document.getElementById('addSubReason').value.trim(); closeModal('addSubstationModal'); showToast('جاري الإضافة...', 'warning'); const ns = { number: sn, shortName: sn, lat: lt, lng: lg, type: 'substation', typeLabel: 'تحويل', googleMap: (lt && lg) ? `https://www.google.com/maps?q=${lt},${lg}` : '' }; allStations.push(ns); updateCacheStatus('loaded', allStations.length + ' ✓'); const r = await apiPost({ action: 'addSubstation', shortName: sn, lat: lt, lng: lg, reason: rs, userName: currentUser?.name || '', userEmail: currentUser?.email || '', userPhone: currentUser?.phone || '' }); if (r.error) { allStations = allStations.filter(s => s.number !== sn); updateCacheStatus('loaded', allStations.length + ' ✓'); showToast(r.error, 'error'); return; } localStorage.setItem(CACHE_KEY, JSON.stringify(allStations)); showToast('تمت الإضافة ✓'); document.getElementById('searchInput').value = sn; searchStation(); }
         async function submitEdit() { 
