@@ -719,7 +719,7 @@
     </div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbyfmi8nhQPWThWKUWCRME9ttj9VS6dXRh3Pbap1D7S-8ZQ_W76B1EjX3i6zeH9knLK18Q/exec';
+        const API_URL = 'ضع_رابط_الـ_API_هنا';
         let currentUser = null, nearbyMap = null, faultMap = null, faultStations = [], editingStationType = null, deferredPrompt = null;
         const CACHE_KEY = 'sec_stations_v7', CACHE_VERSION_KEY = 'sec_version_v7';
         let allStations = [], isStationsLoaded = false, versionCheckTimer = null, currentVersion = null;
@@ -902,8 +902,25 @@
         // Helpers
         function showLoading(t = 'جاري التحميل...') { document.getElementById('loadingOverlay').classList.add('active'); }
         function hideLoading() { document.getElementById('loadingOverlay').classList.remove('active'); }
-        async function apiGet(action, params = {}) { const url = new URL(API_URL); url.searchParams.append('action', action); Object.keys(params).forEach(k => url.searchParams.append(k, params[k])); return (await fetch(url)).json(); }
-        async function apiPost(data) { return (await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(data) })).json(); }
+        async function apiGet(action, params = {}) { 
+            try {
+                const url = new URL(API_URL); 
+                url.searchParams.append('action', action); 
+                Object.keys(params).forEach(k => url.searchParams.append(k, params[k])); 
+                return (await fetch(url)).json(); 
+            } catch (e) {
+                console.error('API Error:', e);
+                return { error: 'فشل الاتصال بالخادم' };
+            }
+        }
+        async function apiPost(data) { 
+            try {
+                return (await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(data) })).json(); 
+            } catch (e) {
+                console.error('API Error:', e);
+                return { error: 'فشل الاتصال بالخادم' };
+            }
+        }
         function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
         function showToast(msg, type = 'success') { const c = document.getElementById('toastContainer'), t = document.createElement('div'); t.className = `toast toast-${type}`; t.innerHTML = msg; c.appendChild(t); setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000); }
@@ -1090,8 +1107,70 @@
 
         // Auth
         function switchTab(t) { document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active')); if (t === 'login') { document.querySelector('.tab:first-child').classList.add('active'); document.getElementById('loginTab').classList.add('active'); } else { document.querySelector('.tab:last-child').classList.add('active'); document.getElementById('registerTab').classList.add('active'); } }
-        async function handleLogin(e) { e.preventDefault(); if (!isValidPhone(document.getElementById('loginPhone').value)) { showToast('رقم خاطئ', 'error'); return false; } const p = normalizePhone(document.getElementById('loginPhone').value); showLoading(); const r = await apiPost({ action: 'loginUser', phone: p }); hideLoading(); if (r.notFound) { showToast('غير مسجل', 'warning'); switchTab('register'); document.getElementById('regPhone').value = p; validateRegPhone(); return false; } if (r.error) { showToast(r.error, 'error'); return false; } currentUser = r.user; localStorage.setItem('currentUser', JSON.stringify(currentUser)); updateUserUI(); showPage('dashboardPage'); showToast('مرحباً ' + currentUser.name + ' 👋'); loadStationsCache(); startOnlineTracking(); return false; }
-        async function handleRegister(e) { e.preventDefault(); const name = document.getElementById('regName').value.trim(); if (!name || !isValidPhone(document.getElementById('regPhone').value)) { showToast('تحقق من البيانات', 'error'); return false; } const p = normalizePhone(document.getElementById('regPhone').value); showLoading(); const r = await apiPost({ action: 'registerUser', name, phone: p, email: document.getElementById('regEmail').value.trim(), userType: document.getElementById('regType').value }); hideLoading(); if (r.error && !r.alreadyExists) { showToast(r.error, 'error'); return false; } currentUser = r.user; localStorage.setItem('currentUser', JSON.stringify(currentUser)); updateUserUI(); showPage('dashboardPage'); showToast(r.alreadyExists ? 'مرحباً بعودتك 👋' : 'تم التسجيل بنجاح ✓'); loadStationsCache(); startOnlineTracking(); return false; }
+        async function handleLogin(e) { 
+            e.preventDefault(); 
+            if (!isValidPhone(document.getElementById('loginPhone').value)) { 
+                showToast('رقم خاطئ', 'error'); 
+                return false; 
+            } 
+            const p = normalizePhone(document.getElementById('loginPhone').value); 
+            showLoading(); 
+            try {
+                const r = await apiPost({ action: 'loginUser', phone: p }); 
+                hideLoading(); 
+                if (r.notFound) { 
+                    showToast('غير مسجل', 'warning'); 
+                    switchTab('register'); 
+                    document.getElementById('regPhone').value = p; 
+                    validateRegPhone(); 
+                    return false; 
+                } 
+                if (r.error) { 
+                    showToast(r.error, 'error'); 
+                    return false; 
+                } 
+                currentUser = r.user; 
+                localStorage.setItem('currentUser', JSON.stringify(currentUser)); 
+                updateUserUI(); 
+                showPage('dashboardPage'); 
+                showToast('مرحباً ' + currentUser.name + ' 👋'); 
+                loadStationsCache(); 
+                startOnlineTracking(); 
+            } catch (err) {
+                hideLoading();
+                showToast('فشل الاتصال - تحقق من الإنترنت', 'error');
+            }
+            return false; 
+        }
+        async function handleRegister(e) { 
+            e.preventDefault(); 
+            const name = document.getElementById('regName').value.trim(); 
+            if (!name || !isValidPhone(document.getElementById('regPhone').value)) { 
+                showToast('تحقق من البيانات', 'error'); 
+                return false; 
+            } 
+            const p = normalizePhone(document.getElementById('regPhone').value); 
+            showLoading(); 
+            try {
+                const r = await apiPost({ action: 'registerUser', name, phone: p, email: document.getElementById('regEmail').value.trim(), userType: document.getElementById('regType').value }); 
+                hideLoading(); 
+                if (r.error && !r.alreadyExists) { 
+                    showToast(r.error, 'error'); 
+                    return false; 
+                } 
+                currentUser = r.user; 
+                localStorage.setItem('currentUser', JSON.stringify(currentUser)); 
+                updateUserUI(); 
+                showPage('dashboardPage'); 
+                showToast(r.alreadyExists ? 'مرحباً بعودتك 👋' : 'تم التسجيل بنجاح ✓'); 
+                loadStationsCache(); 
+                startOnlineTracking(); 
+            } catch (err) {
+                hideLoading();
+                showToast('فشل الاتصال - تحقق من الإنترنت', 'error');
+            }
+            return false; 
+        }
         function updateUserUI() { document.getElementById('userName').textContent = currentUser.name; document.getElementById('userAvatar').textContent = currentUser.name.charAt(0); document.getElementById('userType').textContent = currentUser.type || 'موظف'; }
         function showAdminLogin() { document.getElementById('adminLoginModal').classList.add('active'); }
         async function adminLogin() { const c = document.getElementById('adminCode').value; showLoading(); const r = await apiGet('getAdminCode'); hideLoading(); if (r.code && c === r.code) { closeModal('adminLoginModal'); showPage('adminPage'); loadAdminData(); } else { showToast('رمز خاطئ', 'error'); } }
