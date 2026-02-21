@@ -431,8 +431,14 @@
             try {
                 bar.style.width = '30%';
                 countEl.textContent = 'جاري جلب البيانات...';
-                const [versionResult, stationsResult] = await Promise.all([apiGet('getVersion'), apiGet('getAllStations')]);
+                const versionResult = await apiGet('getVersion');
+                const stationsResult = await apiGet('getAllStations');
+                console.log('Version Result:', versionResult);
+                console.log('Stations Result:', stationsResult);
                 bar.style.width = '70%';
+                if (stationsResult.error) {
+                    throw new Error(stationsResult.error);
+                }
                 if (stationsResult.stations && stationsResult.stations.length > 0) {
                     allStations = stationsResult.stations;
                     isStationsLoaded = true;
@@ -446,13 +452,19 @@
                     updateCacheStatus('loaded', allStations.length + ' محطة');
                     setTimeout(function() { overlay.classList.remove('active'); showToast('تم تحميل ' + allStations.length + ' محطة'); }, 1500);
                     startVersionCheck();
-                } else { throw new Error('no data'); }
+                } else { 
+                    countEl.textContent = 'لا توجد بيانات';
+                    updateCacheStatus('error', 'لا توجد بيانات');
+                    console.log('No stations found. Check sheet names in Apps Script.');
+                    setTimeout(function() { overlay.classList.remove('active'); }, 3000);
+                }
             } catch (e) {
+                console.error('Load Error:', e);
                 bar.style.width = '100%';
                 bar.style.background = 'var(--danger)';
-                countEl.textContent = 'خطا في التحميل';
+                countEl.textContent = 'خطا: ' + (e.message || 'فشل الاتصال');
                 updateCacheStatus('error', 'خطا في الاتصال');
-                setTimeout(function() { overlay.classList.remove('active'); showToast('خطا في التحميل', 'error'); }, 2000);
+                setTimeout(function() { overlay.classList.remove('active'); showToast('خطا: ' + e.message, 'error'); }, 3000);
             }
         }
         
