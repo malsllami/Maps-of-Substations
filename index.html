@@ -573,7 +573,19 @@
             } 
         }
         
-        function showPage(id) { document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); }); document.getElementById(id).classList.add('active'); }
+        function showPage(id) { 
+            console.log('Switching to page:', id);
+            var pages = document.querySelectorAll('.page');
+            for (var i = 0; i < pages.length; i++) {
+                pages[i].classList.remove('active');
+                pages[i].style.display = 'none';
+            }
+            var targetPage = document.getElementById(id);
+            if (targetPage) {
+                targetPage.classList.add('active');
+                targetPage.style.display = 'block';
+            }
+        }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
         function showToast(msg, type) { type = type || 'success'; var c = document.getElementById('toastContainer'), t = document.createElement('div'); t.className = 'toast toast-' + type; t.innerHTML = msg; c.appendChild(t); setTimeout(function() { t.style.opacity = '0'; setTimeout(function() { t.remove(); }, 300); }, 3000); }
         function togglePassword() { var i = document.getElementById('adminCode'); i.type = i.type === 'password' ? 'text' : 'password'; }
@@ -737,7 +749,20 @@
                 bounds.push([parseFloat(s.lat), parseFloat(s.lng)]);
             });
             if (bounds.length > 1) nearbyMap.fitBounds(bounds, { padding: [20, 20] });
-            document.getElementById('nearbyList').innerHTML = '<div style="font-size:0.85rem;color:var(--text-secondary);">' + stations.length + ' محطة قريبة</div>';
+            // عرض قائمة المحطات القريبة مع التفاصيل
+            var listHtml = '<div style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:0.5rem;">' + stations.filter(function(s){return s.number !== center.number;}).length + ' محطة قريبة</div>';
+            listHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:0.5rem;">';
+            stations.filter(function(s){return s.number !== center.number;}).slice(0, 12).forEach(function(s) {
+                var typeColor = s.type === 'distribution' ? '#5cb85c' : '#5b8fb9';
+                var url = s.googleMap || (s.lat && s.lng ? 'https://www.google.com/maps?q=' + s.lat + ',' + s.lng : '');
+                listHtml += '<div style="background:var(--bg-input);padding:0.5rem;border-radius:0.4rem;border-right:3px solid ' + typeColor + ';">';
+                listHtml += '<div style="font-weight:600;">' + s.number + '</div>';
+                listHtml += '<div style="font-size:0.75rem;color:var(--text-secondary);">📍 ' + s.distance + ' كم</div>';
+                if (url) listHtml += '<a href="' + url + '" target="_blank" style="font-size:0.7rem;color:var(--sec-orange);text-decoration:none;">🗺️ الخريطة</a>';
+                listHtml += '</div>';
+            });
+            listHtml += '</div>';
+            document.getElementById('nearbyList').innerHTML = listHtml;
         }
         
         function renderFeederMap(center, stations) {
@@ -754,7 +779,19 @@
                 bounds.push([parseFloat(s.lat), parseFloat(s.lng)]);
             });
             if (bounds.length > 1) nearbyMap.fitBounds(bounds, { padding: [20, 20] });
-            document.getElementById('nearbyList').innerHTML = '<div style="font-size:0.85rem;color:var(--text-secondary);">' + stations.length + ' محطة على نفس المغذي</div>';
+            // عرض قائمة محطات المغذي
+            var listHtml = '<div style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:0.5rem;">' + stations.length + ' محطة على نفس المغذي</div>';
+            listHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:0.5rem;">';
+            stations.slice(0, 12).forEach(function(s) {
+                var url = s.googleMap || (s.lat && s.lng ? 'https://www.google.com/maps?q=' + s.lat + ',' + s.lng : '');
+                listHtml += '<div style="background:var(--bg-input);padding:0.5rem;border-radius:0.4rem;border-right:3px solid #5b8fb9;">';
+                listHtml += '<div style="font-weight:600;">' + s.number + '</div>';
+                listHtml += '<div style="font-size:0.75rem;color:var(--text-secondary);">📍 ' + s.distance + ' كم</div>';
+                if (url) listHtml += '<a href="' + url + '" target="_blank" style="font-size:0.7rem;color:var(--sec-orange);text-decoration:none;">🗺️ الخريطة</a>';
+                listHtml += '</div>';
+            });
+            listHtml += '</div>';
+            document.getElementById('nearbyList').innerHTML = listHtml;
         }
 
         function openAddModal(t) { 
