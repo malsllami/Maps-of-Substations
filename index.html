@@ -176,6 +176,10 @@
         .online-section{border:1px solid rgba(92,184,92,0.3);background:linear-gradient(135deg,rgba(92,184,92,0.05),transparent)}
         .online-section h3{color:#5cb85c}
         .online-section h3 svg{width:1.2rem;height:1.2rem;flex-shrink:0}
+        .refresh-online-btn{background:transparent;border:none;cursor:pointer;font-size:1rem;padding:0.2rem 0.4rem;border-radius:0.3rem;transition:0.3s;margin-right:0.5rem}
+        .refresh-online-btn:hover{background:rgba(92,184,92,0.2);transform:rotate(180deg)}
+        .refresh-online-btn.loading{animation:spin 1s linear infinite}
+        @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
         .online-badge{background:#5cb85c;color:#fff;padding:0.2rem 0.6rem;border-radius:1rem;font-size:0.8rem;margin-right:0.5rem}
         .online-users-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.5rem;max-height:200px;overflow-y:auto}
         .online-user-card{background:var(--bg-input);border-radius:0.5rem;padding:0.5rem 0.75rem;display:flex;align-items:center;gap:0.5rem;border-right:3px solid #5cb85c}
@@ -293,7 +297,7 @@
             <div class="stat-card"><div class="number" id="totalEdits">0</div><div class="label">تعديلات</div></div>
             <div class="stat-card online-card"><div class="number" id="onlineCount">0</div><div class="label">🟢 متواجدون</div></div>
         </div>
-        <section class="admin-section online-section"><h3>🟢 المتواجدون الان <span class="online-badge" id="onlineBadge">0</span></h3><div class="online-users-grid" id="onlineUsersList"><div class="empty-online">لا يوجد متواجدون حاليا</div></div></section>
+        <section class="admin-section online-section"><h3>🟢 المتواجدون الان <span class="online-badge" id="onlineBadge">0</span> <button class="refresh-online-btn" onclick="refreshOnlineUsers()" title="تحديث">🔄</button></h3><div class="online-users-grid" id="onlineUsersList"><div class="empty-online">لا يوجد متواجدون حاليا</div></div></section>
         <section class="admin-section"><h3>📈 الزيارات</h3><div class="chart-container"><canvas id="visitsChart"></canvas></div></section>
         <section class="admin-section"><h3>📊 النشاط</h3><div class="chart-container"><canvas id="activityChart"></canvas></div></section>
         <section class="admin-section"><h3>👥 المشتركين</h3><div class="results-table-wrapper"><table class="results-table"><thead><tr><th>الاسم</th><th>الجوال</th><th>النوع</th><th>التسجيل</th></tr></thead><tbody id="adminUsersBody"></tbody></table></div></section>
@@ -411,6 +415,7 @@
 <script>
     const API_URL = 'https://script.google.com/macros/s/AKfycbxvKAboKtvrB-EQRdwXqpDX4CvLpFNfo7W-A5RdKA7EdtE21FqUDLA5aY2iJeJjIUNsXQ/exec';
     let currentUser = null, nearbyMap = null, faultMap = null, faultStations = [], editingStationType = null, deferredPrompt = null;
+    let visitsChartInstance = null, activityChartInstance = null;
     let isAdmin = false;
     const CACHE_KEY = 'sec_stations_v8', CACHE_VERSION_KEY = 'sec_version_v8';
     let allStations = [], isStationsLoaded = false, currentVersion = null;
@@ -1139,17 +1144,57 @@
         }
     }
     
+    async function refreshOnlineUsers() {
+        var btn = document.querySelector('.refresh-online-btn');
+        if (btn) btn.classList.add('loading');
+        
+        try {
+            var online = await apiGet('getOnlineUsers');
+            if (online.success) {
+                document.getElementById('onlineBadge').textContent = online.count || 0;
+                document.getElementById('onlineCount').textContent = online.count || 0;
+                var onlineList = document.getElementById('onlineUsersList');
+                if (online.users && online.users.length > 0) {
+                    onlineList.innerHTML = online.users.map(function(u) { 
+                        return '<div class="online-user-card"><div class="online-user-avatar">' + (u.name ? u.name.charAt(0) : '?') + '</div><div class="online-user-info"><div class="online-user-name">' + (u.name || 'مستخدم') + '</div><div class="online-user-time">🕐 ' + (u.lastActive ? u.lastActive.split(' ')[1] : '') + '</div></div><div class="online-indicator"></div></div>'; 
+                    }).join('');
+                } else { 
+                    onlineList.innerHTML = '<div class="empty-online">لا يوجد متواجدون حاليا</div>'; 
+                }
+                showToast('تم التحديث');
+            }
+        } catch (e) {
+            showToast('فشل التحديث', 'error');
+        }
+        
+        if (btn) btn.classList.remove('loading');
+    }
+    
     function renderCharts(d) { 
-        new Chart(document.getElementById('visitsChart'), { 
-            type: 'line', 
-            data: { labels: d.dailyVisits.map(function(x) { return x.date.slice(5); }), datasets: [{ label: 'زيارات', data: d.dailyVisits.map(function(x) { return x.count; }), borderColor: '#e8a54b', backgroundColor: 'rgba(232,165,75,0.2)', fill: true, tension: 0.4 }] }, 
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { color: '#c5ddf0' }, grid: { color: '#5b8fb9' } }, x: { ticks: { color: '#c5ddf0' }, grid: { color: '#5b8fb9' } } } } 
-        }); 
-        new Chart(document.getElementById('activityChart'), { 
-            type: 'bar', 
-            data: { labels: d.dailyActivity.map(function(x) { return x.date.slice(5); }), datasets: [{ label: 'اضافات', data: d.dailyActivity.map(function(x) { return x.additions; }), backgroundColor: '#5cb85c' }, { label: 'تعديلات', data: d.dailyActivity.map(function(x) { return x.edits; }), backgroundColor: '#e8a54b' }] }, 
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#c5ddf0' } } }, scales: { y: { beginAtZero: true, ticks: { color: '#c5ddf0' }, grid: { color: '#5b8fb9' } }, x: { ticks: { color: '#c5ddf0' }, grid: { color: '#5b8fb9' } } } } 
-        }); 
+        // تدمير الرسوم القديمة إذا وجدت
+        if (visitsChartInstance) { visitsChartInstance.destroy(); visitsChartInstance = null; }
+        if (activityChartInstance) { activityChartInstance.destroy(); activityChartInstance = null; }
+        
+        // التحقق من وجود البيانات
+        if (!d.dailyVisits || !d.dailyActivity) {
+            console.log('No chart data available');
+            return;
+        }
+        
+        try {
+            visitsChartInstance = new Chart(document.getElementById('visitsChart'), { 
+                type: 'line', 
+                data: { labels: d.dailyVisits.map(function(x) { return x.date ? x.date.slice(5) : ''; }), datasets: [{ label: 'زيارات', data: d.dailyVisits.map(function(x) { return x.count || 0; }), borderColor: '#e8a54b', backgroundColor: 'rgba(232,165,75,0.2)', fill: true, tension: 0.4 }] }, 
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { color: '#c5ddf0' }, grid: { color: '#5b8fb9' } }, x: { ticks: { color: '#c5ddf0' }, grid: { color: '#5b8fb9' } } } } 
+            }); 
+            activityChartInstance = new Chart(document.getElementById('activityChart'), { 
+                type: 'bar', 
+                data: { labels: d.dailyActivity.map(function(x) { return x.date ? x.date.slice(5) : ''; }), datasets: [{ label: 'اضافات', data: d.dailyActivity.map(function(x) { return x.additions || 0; }), backgroundColor: '#5cb85c' }, { label: 'تعديلات', data: d.dailyActivity.map(function(x) { return x.edits || 0; }), backgroundColor: '#e8a54b' }] }, 
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#c5ddf0' } } }, scales: { y: { beginAtZero: true, ticks: { color: '#c5ddf0' }, grid: { color: '#5b8fb9' } }, x: { ticks: { color: '#c5ddf0' }, grid: { color: '#5b8fb9' } } } } 
+            });
+        } catch (e) {
+            console.error('Chart render error:', e);
+        }
     }
 
     window.addEventListener('beforeinstallprompt', function(e) { e.preventDefault(); deferredPrompt = e; showInstallBanner(); });
