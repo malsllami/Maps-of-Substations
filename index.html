@@ -172,6 +172,19 @@
         .stat-card .label{color:var(--text-secondary);font-size:0.8rem}
         .stat-card.online-card{background:linear-gradient(135deg,rgba(92,184,92,0.2),rgba(92,184,92,0.1));border:1px solid rgba(92,184,92,0.5)}
         .stat-card.online-card .number{color:#5cb85c}
+        .stat-card.api-card{background:linear-gradient(135deg,rgba(52,152,219,0.2),rgba(52,152,219,0.1));border:1px solid rgba(52,152,219,0.5)}
+        .stat-card.api-card .number{color:#3498db}
+        .api-section{border:1px solid rgba(52,152,219,0.3);background:linear-gradient(135deg,rgba(52,152,219,0.05),transparent)}
+        .api-section h3{color:#3498db}
+        .api-stats-container{padding:0.5rem}
+        .api-progress-container{margin-bottom:1rem}
+        .api-progress-bar{background:var(--bg-card);border-radius:0.5rem;height:1.5rem;overflow:hidden;border:1px solid var(--border)}
+        .api-progress-fill{height:100%;background:linear-gradient(90deg,#3498db,#2ecc71);border-radius:0.5rem;transition:width 0.5s ease;width:0%}
+        .api-progress-text{display:flex;justify-content:space-between;margin-top:0.5rem;font-size:0.85rem;color:var(--text-secondary)}
+        .api-details{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:0.5rem}
+        .api-day-stat{background:var(--bg-card);padding:0.5rem;border-radius:0.5rem;text-align:center;border:1px solid var(--border)}
+        .api-day-stat .day{font-size:0.7rem;color:var(--text-secondary)}
+        .api-day-stat .count{font-size:1rem;font-weight:600;color:#3498db}
         .online-section{border:1px solid rgba(92,184,92,0.3);background:linear-gradient(135deg,rgba(92,184,92,0.05),transparent)}
         .online-section h3{color:#5cb85c}
         .online-section h3 svg{width:1.2rem;height:1.2rem;flex-shrink:0}
@@ -294,8 +307,10 @@
                 <div class="stat-card"><div class="number" id="totalAdditions">0</div><div class="label">اضافات</div></div>
                 <div class="stat-card"><div class="number" id="totalEdits">0</div><div class="label">تعديلات</div></div>
                 <div class="stat-card online-card"><div class="number" id="onlineCount">0</div><div class="label">🟢 متواجدون</div></div>
+                <div class="stat-card api-card"><div class="number" id="apiRequestsToday">0</div><div class="label">📡 طلبات اليوم</div></div>
             </div>
             <section class="admin-section online-section"><h3>🟢 المتواجدون الان <span class="online-badge" id="onlineBadge">0</span> <button class="refresh-online-btn" onclick="refreshOnlineUsers()" title="تحديث">🔄</button></h3><div class="online-users-grid" id="onlineUsersList"><div class="empty-online">لا يوجد متواجدون حاليا</div></div></section>
+            <section class="admin-section api-section"><h3>📡 طلبات API <button class="refresh-online-btn" onclick="refreshApiStats()" title="تحديث">🔄</button></h3><div class="api-stats-container"><div class="api-progress-container"><div class="api-progress-bar"><div class="api-progress-fill" id="apiProgressFill"></div></div><div class="api-progress-text"><span id="apiUsageText">0 / 20,000</span><span id="apiPercentage">0%</span></div></div><div class="api-details" id="apiDetails"></div></div></section>
             <section class="admin-section"><h3>📈 الزيارات</h3><div class="chart-container"><canvas id="visitsChart"></canvas></div></section>
             <section class="admin-section"><h3>📊 النشاط</h3><div class="chart-container"><canvas id="activityChart"></canvas></div></section>
             <section class="admin-section"><h3>👥 المشتركين</h3><div class="results-table-wrapper"><table class="results-table"><thead><tr><th>الاسم</th><th>الجوال</th><th>النوع</th><th>التسجيل</th></tr></thead><tbody id="adminUsersBody"></tbody></table></div></section>
@@ -411,7 +426,7 @@
     <div class="install-btn" id="installBtn"><button class="close-install" onclick="hideInstallBanner(event)">×</button><svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg><span onclick="installApp()">تثبيت التطبيق</span></div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbxvKAboKtvrB-EQRdwXqpDX4CvLpFNfo7W-A5RdKA7EdtE21FqUDLA5aY2iJeJjIUNsXQ/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyNEgsMLLoqveKxx2uhSpkfY1GxL97cKo3UNl_6iKvWr1m4X-AcMmyPHgyzzqLelSJ4JA/exec';
         let currentUser = null, nearbyMap = null, faultMap = null, faultStations = [], editingStationType = null, deferredPrompt = null;
         let visitsChartInstance = null, activityChartInstance = null;
         let isAdmin = false;
@@ -1118,15 +1133,17 @@
             document.getElementById('totalEdits').textContent = '...';
             document.getElementById('onlineCount').textContent = '...';
             document.getElementById('onlineBadge').textContent = '...';
+            document.getElementById('apiRequestsToday').textContent = '...';
             
             // تحميل كل البيانات بالتوازي (أسرع 5 مرات!)
             try {
-                var [stats, online, daily, users, logs] = await Promise.all([
+                var [stats, online, daily, users, logs, apiStats] = await Promise.all([
                     apiGet('getStats'),
                     apiGet('getOnlineUsers'),
                     apiGet('getDailyStats'),
                     apiGet('getUsers'),
-                    apiGet('getLogs')
+                    apiGet('getLogs'),
+                    apiGet('getApiStats')
                 ]);
                 
                 // تحديث الإحصائيات
@@ -1146,6 +1163,11 @@
                     if (online.users && online.users.length > 0) {
                         onlineList.innerHTML = online.users.map(function(u) { return '<div class="online-user-card"><div class="online-user-avatar">' + (u.name ? u.name.charAt(0) : '?') + '</div><div class="online-user-info"><div class="online-user-name">' + (u.name || 'مستخدم') + '</div><div class="online-user-time">🕐 ' + (u.lastActive ? u.lastActive.split(' ')[1] : '') + '</div></div><div class="online-indicator"></div></div>'; }).join('');
                     } else { onlineList.innerHTML = '<div class="empty-online">لا يوجد متواجدون</div>'; }
+                }
+                
+                // تحديث إحصائيات API
+                if (apiStats.success && apiStats.stats) {
+                    updateApiStatsUI(apiStats.stats);
                 }
                 
                 // تحديث الرسوم البيانية
@@ -1178,6 +1200,50 @@
                     } else { 
                         onlineList.innerHTML = '<div class="empty-online">لا يوجد متواجدون حاليا</div>'; 
                     }
+                    showToast('تم التحديث');
+                }
+            } catch (e) {
+                showToast('فشل التحديث', 'error');
+            }
+            
+            if (btn) btn.classList.remove('loading');
+        }
+        
+        function updateApiStatsUI(stats) {
+            document.getElementById('apiRequestsToday').textContent = stats.today.toLocaleString();
+            document.getElementById('apiProgressFill').style.width = Math.min(stats.percentage, 100) + '%';
+            document.getElementById('apiUsageText').textContent = stats.today.toLocaleString() + ' / 20,000';
+            document.getElementById('apiPercentage').textContent = stats.percentage + '%';
+            
+            // تغيير لون شريط التقدم حسب الاستخدام
+            var fill = document.getElementById('apiProgressFill');
+            if (stats.percentage > 80) {
+                fill.style.background = 'linear-gradient(90deg, #e74c3c, #c0392b)';
+            } else if (stats.percentage > 50) {
+                fill.style.background = 'linear-gradient(90deg, #f39c12, #e67e22)';
+            } else {
+                fill.style.background = 'linear-gradient(90deg, #3498db, #2ecc71)';
+            }
+            
+            // عرض إحصائيات الأسبوع
+            var detailsHtml = '';
+            if (stats.weekly && stats.weekly.length > 0) {
+                stats.weekly.forEach(function(day) {
+                    var dayName = new Date(day.date).toLocaleDateString('ar-SA', { weekday: 'short' });
+                    detailsHtml += '<div class="api-day-stat"><div class="day">' + dayName + '</div><div class="count">' + day.count.toLocaleString() + '</div></div>';
+                });
+            }
+            document.getElementById('apiDetails').innerHTML = detailsHtml;
+        }
+        
+        async function refreshApiStats() {
+            var btn = document.querySelector('.api-section .refresh-online-btn');
+            if (btn) btn.classList.add('loading');
+            
+            try {
+                var result = await apiGet('getApiStats');
+                if (result.success && result.stats) {
+                    updateApiStatsUI(result.stats);
                     showToast('تم التحديث');
                 }
             } catch (e) {
