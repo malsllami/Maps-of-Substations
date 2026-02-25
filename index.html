@@ -185,6 +185,15 @@
         .api-day-stat{background:var(--bg-card);padding:0.5rem;border-radius:0.5rem;text-align:center;border:1px solid var(--border)}
         .api-day-stat .day{font-size:0.7rem;color:var(--text-secondary)}
         .api-day-stat .count{font-size:1rem;font-weight:600;color:#3498db}
+        .copy-phones-btn{background:linear-gradient(135deg,#9b59b6,#8e44ad);color:white;border:none;padding:0.3rem 0.8rem;border-radius:0.5rem;cursor:pointer;font-size:0.8rem;margin-right:0.5rem;transition:0.3s}
+        .copy-phones-btn:hover{transform:scale(1.05);box-shadow:0 2px 8px rgba(155,89,182,0.4)}
+        .whatsapp-message-box{display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap}
+        .whatsapp-message-box input{flex:1;min-width:200px;padding:0.6rem;border-radius:0.5rem;border:1px solid var(--border);background:var(--bg-card);color:var(--text-primary);font-size:0.9rem}
+        .whatsapp-message-box input::placeholder{color:var(--text-secondary)}
+        .send-all-btn{background:linear-gradient(135deg,#25D366,#128C7E);color:white;border:none;padding:0.6rem 1rem;border-radius:0.5rem;cursor:pointer;font-size:0.85rem;white-space:nowrap;transition:0.3s}
+        .send-all-btn:hover{transform:scale(1.05);box-shadow:0 2px 8px rgba(37,211,102,0.4)}
+        .whatsapp-btn{background:#25D366;color:white;border:none;padding:0.3rem 0.6rem;border-radius:0.4rem;cursor:pointer;font-size:0.8rem;transition:0.3s}
+        .whatsapp-btn:hover{background:#128C7E;transform:scale(1.1)}
         .online-section{border:1px solid rgba(92,184,92,0.3);background:linear-gradient(135deg,rgba(92,184,92,0.05),transparent)}
         .online-section h3{color:#5cb85c}
         .online-section h3 svg{width:1.2rem;height:1.2rem;flex-shrink:0}
@@ -313,7 +322,7 @@
             <section class="admin-section api-section"><h3>📡 طلبات API <button class="refresh-online-btn" onclick="refreshApiStats()" title="تحديث">🔄</button></h3><div class="api-stats-container"><div class="api-progress-container"><div class="api-progress-bar"><div class="api-progress-fill" id="apiProgressFill"></div></div><div class="api-progress-text"><span id="apiUsageText">0 / 20,000</span><span id="apiPercentage">0%</span></div></div><div class="api-details" id="apiDetails"></div></div></section>
             <section class="admin-section"><h3>📈 الزيارات</h3><div class="chart-container"><canvas id="visitsChart"></canvas></div></section>
             <section class="admin-section"><h3>📊 النشاط</h3><div class="chart-container"><canvas id="activityChart"></canvas></div></section>
-            <section class="admin-section"><h3>👥 المشتركين</h3><div class="results-table-wrapper"><table class="results-table"><thead><tr><th>الاسم</th><th>الجوال</th><th>النوع</th><th>التسجيل</th></tr></thead><tbody id="adminUsersBody"></tbody></table></div></section>
+            <section class="admin-section"><h3>👥 المشتركين <button class="copy-phones-btn" onclick="copyAllPhones()" title="نسخ جميع الأرقام">📋 نسخ الأرقام</button></h3><div class="whatsapp-message-box"><input type="text" id="broadcastMessage" placeholder="اكتب الرسالة هنا... (ستُرسل لكل مشترك)"><button class="send-all-btn" onclick="openAllWhatsApp()">📱 فتح واتساب للجميع</button></div><div class="results-table-wrapper"><table class="results-table"><thead><tr><th>الاسم</th><th>الجوال</th><th>النوع</th><th>التسجيل</th><th>واتساب</th></tr></thead><tbody id="adminUsersBody"></tbody></table></div></section>
             <section class="admin-section"><h3>📋 السجلات</h3><div class="results-table-wrapper"><table class="results-table"><thead><tr><th>النوع</th><th>المحطة</th><th>المستخدم</th><th>التاريخ</th></tr></thead><tbody id="adminLogsBody"></tbody></table></div></section>
         </div>
     </div>
@@ -426,7 +435,7 @@
     <div class="install-btn" id="installBtn"><button class="close-install" onclick="hideInstallBanner(event)">×</button><svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg><span onclick="installApp()">تثبيت التطبيق</span></div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbyNEgsMLLoqveKxx2uhSpkfY1GxL97cKo3UNl_6iKvWr1m4X-AcMmyPHgyzzqLelSJ4JA/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxvKAboKtvrB-EQRdwXqpDX4CvLpFNfo7W-A5RdKA7EdtE21FqUDLA5aY2iJeJjIUNsXQ/exec';
         let currentUser = null, nearbyMap = null, faultMap = null, faultStations = [], editingStationType = null, deferredPrompt = null;
         let visitsChartInstance = null, activityChartInstance = null;
         let isAdmin = false;
@@ -1174,7 +1183,13 @@
                 if (daily.success) renderCharts(daily);
                 
                 // تحديث قائمة المستخدمين
-                if (users.users) document.getElementById('adminUsersBody').innerHTML = users.users.map(function(u) { return '<tr><td>' + u.name + '</td><td>' + u.phone + '</td><td>' + (u.type||'موظف') + '</td><td>' + (u.registerDate||'-') + '</td></tr>'; }).join('');
+                if (users.users) {
+                    window.allUsersData = users.users; // حفظ البيانات للاستخدام لاحقاً
+                    document.getElementById('adminUsersBody').innerHTML = users.users.map(function(u) { 
+                        var phone = u.phone ? String(u.phone).replace(/^0/, '966') : '';
+                        return '<tr><td>' + u.name + '</td><td>' + u.phone + '</td><td>' + (u.type||'موظف') + '</td><td>' + (u.registerDate||'-') + '</td><td><button class="whatsapp-btn" onclick="sendWhatsApp(\'' + phone + '\')">📱</button></td></tr>'; 
+                    }).join('');
+                }
                 
                 // تحديث السجلات
                 if (logs.logs) document.getElementById('adminLogsBody').innerHTML = logs.logs.slice(-30).reverse().map(function(l) { return '<tr><td style="color:' + (l.type.indexOf('اضافة') !== -1 ? 'var(--success)' : 'var(--warning)') + '">' + l.type + '</td><td>' + l.station + '</td><td>' + l.user + '</td><td>' + l.date + '</td></tr>'; }).join('');
@@ -1251,6 +1266,64 @@
             }
             
             if (btn) btn.classList.remove('loading');
+        }
+        
+        // دوال الواتساب
+        function copyAllPhones() {
+            if (!window.allUsersData || window.allUsersData.length === 0) {
+                showToast('لا يوجد مشتركين', 'warning');
+                return;
+            }
+            var phones = window.allUsersData.map(function(u) {
+                var phone = String(u.phone || '');
+                if (phone.startsWith('05')) {
+                    phone = '966' + phone.substring(1);
+                } else if (phone.startsWith('5')) {
+                    phone = '966' + phone;
+                }
+                return phone;
+            }).filter(function(p) { return p.length > 0; });
+            
+            var text = phones.join('\n');
+            navigator.clipboard.writeText(text).then(function() {
+                showToast('تم نسخ ' + phones.length + ' رقم ✅');
+            }).catch(function() {
+                var ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                showToast('تم نسخ ' + phones.length + ' رقم ✅');
+            });
+        }
+        
+        function sendWhatsApp(phone) {
+            var msg = document.getElementById('broadcastMessage').value.trim();
+            var url = 'https://wa.me/' + phone;
+            if (msg) url += '?text=' + encodeURIComponent(msg);
+            window.open(url, '_blank');
+        }
+        
+        function openAllWhatsApp() {
+            var msg = document.getElementById('broadcastMessage').value.trim();
+            if (!msg) { showToast('اكتب الرسالة أولاً', 'warning'); return; }
+            if (!window.allUsersData || window.allUsersData.length === 0) { showToast('لا يوجد مشتركين', 'warning'); return; }
+            
+            var count = window.allUsersData.length;
+            if (!confirm('سيتم فتح ' + count + ' نافذة واتساب.\nهل تريد المتابعة؟')) return;
+            
+            var delay = 0;
+            window.allUsersData.forEach(function(u) {
+                setTimeout(function() {
+                    var phone = String(u.phone || '');
+                    if (phone.startsWith('05')) phone = '966' + phone.substring(1);
+                    else if (phone.startsWith('5')) phone = '966' + phone;
+                    if (phone) window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank');
+                }, delay);
+                delay += 500;
+            });
+            showToast('جاري فتح ' + count + ' محادثة...');
         }
         
         function renderCharts(d) { 
