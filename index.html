@@ -1129,32 +1129,11 @@
                 return;
             }
             
-            showToast('جاري تحديد موقعك...', 'warning');
-            
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        // بناء الرابط مع موقع المستخدم كنقطة بداية
-                        var navUrl = 'https://www.google.com/maps/dir/';
-                        navUrl += position.coords.latitude + ',' + position.coords.longitude + '/';
-                        validStations.forEach(function(s) { navUrl += s.lat + ',' + s.lng + '/'; });
-                        window.open(navUrl, '_blank');
-                    },
-                    function(error) {
-                        // إذا فشل تحديد الموقع، افتح بدون موقع المستخدم
-                        showToast('تعذر تحديد موقعك، سيتم فتح الملاحة بدونه', 'warning');
-                        var navUrl = 'https://www.google.com/maps/dir/';
-                        validStations.forEach(function(s) { navUrl += s.lat + ',' + s.lng + '/'; });
-                        window.open(navUrl, '_blank');
-                    },
-                    { enableHighAccuracy: true, timeout: 10000 }
-                );
-            } else {
-                // المتصفح لا يدعم تحديد الموقع
-                var navUrl = 'https://www.google.com/maps/dir/';
-                validStations.forEach(function(s) { navUrl += s.lat + ',' + s.lng + '/'; });
-                window.open(navUrl, '_blank');
-            }
+            // استخدام Google Maps مباشرة مع "موقعي الحالي" كنقطة بداية
+            // Google Maps سيحدد الموقع تلقائياً
+            var navUrl = 'https://www.google.com/maps/dir/My+Location/';
+            validStations.forEach(function(s) { navUrl += s.lat + ',' + s.lng + '/'; });
+            window.open(navUrl, '_blank');
         }
         
         function calculateTotalDistance() {
