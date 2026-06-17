@@ -1447,10 +1447,63 @@
         function installApp() { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.userChoice.then(function(r) { deferredPrompt = null; hideInstallBanner(); if (r.outcome === 'accepted') showToast('تم التثبيت'); }); } }
         function checkIOSInstall() { var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent); var isStandalone = window.navigator.standalone; if (isIOS && !isStandalone && !localStorage.getItem('iosPromptShown')) { setTimeout(function() { }, 3000); } }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            checkSession();
+        // ============================================================
+        // جسر الربط مع نظام إدارة الورديات
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', async function() {
             checkIOSInstall();
             loadContactPhone();
+
+            var bp = new URLSearchParams(window.location.search);
+            var bName   = bp.get('bridge_name');
+            var bPhone  = bp.get('bridge_phone');
+            var bAction = bp.get('bridge_action');
+            var bQ      = bp.get('bridge_q');
+
+            if (bName && bPhone) {
+                // دخول تلقائي من نظام الورديات
+                showLoading();
+                try {
+                    var norm = normalizePhone(bPhone);
+                    var r = await apiPost({ action: 'loginUser', phone: norm });
+                    if (r.notFound) {
+                        r = await apiPost({ action: 'registerUser', name: bName, phone: norm, userType: 'موظف' });
+                    }
+                    hideLoading();
+                    var u = r.user || (r.success ? { name: bName, phone: norm, type: 'موظف' } : null);
+                    if (u) {
+                        currentUser = u;
+                        var uStr = JSON.stringify(u);
+                        localStorage.setItem('currentUser', uStr);
+                        sessionStorage.setItem('currentUser', uStr);
+                        updateUserUI();
+                        showPage('dashboardPage');
+                        loadStationsCache();
+                        startOnlineTracking();
+                        // تنفيذ الإجراء المطلوب بعد تحميل البيانات
+                        setTimeout(function() {
+                            if (bAction === 'search' && bQ) {
+                                var si = document.getElementById('searchInput');
+                                if (si) { si.value = bQ; searchStation(); }
+                            } else if (bAction === 'add-dist') {
+                                openAddModal('distribution');
+                            } else if (bAction === 'add-sub') {
+                                openAddModal('substation');
+                            } else if (bAction === 'fault') {
+                                openFaultModal();
+                            }
+                        }, 900);
+                        showToast('مرحبا ' + (u.name || bName) + ' — من نظام الورديات');
+                    } else {
+                        checkSession();
+                    }
+                } catch(e) {
+                    hideLoading();
+                    checkSession();
+                }
+            } else {
+                checkSession();
+            }
         });
         document.querySelectorAll('.modal-overlay').forEach(function(m) { m.addEventListener('click', function(e) { if (e.target === m) m.classList.remove('active'); }); });
 
