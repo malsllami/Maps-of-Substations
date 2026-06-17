@@ -285,6 +285,10 @@
         .cal-today-btn{background:var(--sec-orange);border:1px solid var(--sec-orange);color:#fff;padding:0 0.75rem;height:2.2rem;border-radius:1rem;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:0.85rem;font-weight:600;transition:0.3s}
         .cal-today-btn:hover{opacity:0.85}
         .cal-month-sub{font-size:0.75rem;color:var(--text-secondary);font-weight:400;margin-top:0.15rem}
+        .cal-zoom-bar{display:flex;align-items:center;justify-content:flex-end;gap:0.4rem;margin-bottom:0.5rem}
+        .cal-zoom-btn{background:var(--bg-input);border:1px solid var(--border);color:var(--text-primary);width:2rem;height:2rem;border-radius:0.4rem;cursor:pointer;font-size:1.1rem;font-weight:700;display:flex;align-items:center;justify-content:center;transition:0.3s;line-height:1}
+        .cal-zoom-btn:hover{background:var(--sec-orange);border-color:var(--sec-orange)}
+        .cal-zoom-wrapper{overflow-x:auto;-webkit-overflow-scrolling:touch}
         @media(max-width:480px){.cal-grid{grid-template-columns:repeat(7,1fr);gap:0.15rem}.cal-card{padding:0.25rem;min-height:auto}.cal-dnum{font-size:0.7rem}.cal-dname{font-size:0.45rem}.csp-label{font-size:0.45rem;padding:0.08rem 0.12rem;min-width:0.8rem}.csp-status{font-size:0.45rem;padding:0.08rem 0.12rem}.cal-hijri{font-size:0.45rem;margin-bottom:0.12rem}.cal-shift-pill{gap:0.1rem;margin-bottom:0.1rem}.cal-day-hdr{font-size:0.5rem;padding:0.2rem 0}}
     </style>
 </head>
@@ -1460,6 +1464,7 @@
             var _selectedShift = 'all';
             var _containerId = null;
             var _initialized = false;
+            var _zoom = 1.0;
 
             var CYCLE   = ['morning','morning','evening','evening','off','off','off','off'];
             var REF_POS = { 'أ':5, 'ب':1, 'ج':7, 'د':3 };
@@ -1510,16 +1515,23 @@
 
             function _pad(n) { return n < 10 ? '0' + n : '' + n; }
 
+            function _applyZoom() {
+                var inner = document.getElementById('calZoomInner');
+                if (inner) inner.style.zoom = _zoom;
+            }
+
             function init(containerId) {
                 _containerId = containerId;
                 if (!_initialized) {
                     _year  = new Date().getFullYear();
                     _month = new Date().getMonth() + 1;
                     _selectedShift = 'all';
+                    _zoom = 1.0;
                 }
                 _initialized = true;
                 _renderShell();
                 _renderMonth();
+                _applyZoom();
             }
 
             function _renderShell() {
@@ -1544,10 +1556,19 @@
                         '<button class="sf-btn sf-c" data-s="ج">وردية ج</button>' +
                         '<button class="sf-btn sf-d" data-s="د">وردية د</button>' +
                     '</div>' +
-                    '<div class="cal-day-headers">' +
-                        DAYS_MED.map(function(d) { return '<div class="cal-day-hdr">' + d + '</div>'; }).join('') +
+                    '<div class="cal-zoom-bar">' +
+                        '<span style="font-size:0.75rem;color:var(--text-secondary)">حجم الخلايا:</span>' +
+                        '<button class="cal-zoom-btn" id="calZoomOut">−</button>' +
+                        '<button class="cal-zoom-btn" id="calZoomIn">+</button>' +
                     '</div>' +
-                    '<div class="cal-grid" id="calGrid"></div>' +
+                    '<div class="cal-zoom-wrapper">' +
+                        '<div id="calZoomInner">' +
+                            '<div class="cal-day-headers">' +
+                                DAYS_MED.map(function(d) { return '<div class="cal-day-hdr">' + d + '</div>'; }).join('') +
+                            '</div>' +
+                            '<div class="cal-grid" id="calGrid"></div>' +
+                        '</div>' +
+                    '</div>' +
                     '<div id="calSummary"></div>';
 
                 document.getElementById('calPrev').onclick = function() {
@@ -1569,6 +1590,14 @@
                         var todayEl = document.querySelector('#calGrid .cal-today');
                         if (todayEl) todayEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     }, 80);
+                };
+                document.getElementById('calZoomIn').onclick = function() {
+                    _zoom = Math.min(parseFloat((_zoom + 0.15).toFixed(2)), 2.0);
+                    _applyZoom();
+                };
+                document.getElementById('calZoomOut').onclick = function() {
+                    _zoom = Math.max(parseFloat((_zoom - 0.15).toFixed(2)), 0.4);
+                    _applyZoom();
                 };
                 el.querySelectorAll('.sf-btn').forEach(function(btn) {
                     btn.onclick = function() {
@@ -1641,6 +1670,7 @@
 
                 grid.innerHTML = html;
                 _renderSummary(summary);
+                _applyZoom();
             }
 
             function _renderSummary(summary) {
