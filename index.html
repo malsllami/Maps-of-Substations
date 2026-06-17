@@ -245,6 +245,44 @@
         .password-wrapper{position:relative}
         .password-wrapper input{padding-left:2.5rem}
         .spinner{width:1rem;height:1rem;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite}
+        .btn-calendar{background:linear-gradient(135deg,#1565C0,#0D47A1);color:#fff}
+        .cal-page-content{padding:1rem;max-width:1200px;margin:0 auto}
+        .cal-nav{display:flex;align-items:center;justify-content:space-between;background:var(--bg-card);border-radius:0.75rem;padding:0.75rem 1rem;margin-bottom:1rem}
+        .cal-nav-btn{background:var(--bg-input);border:1px solid var(--border);color:var(--text-primary);width:2.5rem;height:2.5rem;border-radius:50%;cursor:pointer;font-size:1.25rem;display:flex;align-items:center;justify-content:center;transition:0.3s}
+        .cal-nav-btn:hover{background:var(--sec-orange);border-color:var(--sec-orange)}
+        .cal-month-title{font-size:1.1rem;font-weight:700;color:var(--sec-orange)}
+        .shift-filter-bar{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem}
+        .sf-btn{padding:0.5rem 1rem;border:2px solid var(--border);border-radius:2rem;background:var(--bg-input);color:var(--text-secondary);font-family:'Tajawal',sans-serif;font-size:0.85rem;cursor:pointer;transition:0.3s}
+        .sf-btn.active,.sf-btn:hover{border-color:var(--sec-orange);color:#fff;background:var(--sec-orange)}
+        .sf-btn.sf-a.active{background:#1565C0;border-color:#1565C0}
+        .sf-btn.sf-b.active{background:#00838F;border-color:#00838F}
+        .sf-btn.sf-c.active{background:#2E7D32;border-color:#2E7D32}
+        .sf-btn.sf-d.active{background:#6A1B9A;border-color:#6A1B9A}
+        .cal-day-headers{display:grid;grid-template-columns:repeat(7,1fr);gap:0.25rem;margin-bottom:0.5rem}
+        .cal-day-hdr{text-align:center;font-size:0.7rem;color:var(--text-secondary);padding:0.3rem}
+        .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:0.35rem;margin-bottom:1rem}
+        .cal-empty{background:transparent}
+        .cal-card{background:var(--bg-card);border-radius:0.5rem;padding:0.5rem;border:1px solid var(--border);min-height:5rem}
+        .cal-card.cal-today{border-color:var(--sec-orange);box-shadow:0 0 0 2px rgba(232,165,75,0.3)}
+        .cal-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.2rem}
+        .cal-dname{font-size:0.6rem;color:var(--text-secondary)}
+        .cal-dnum{font-size:0.9rem;font-weight:700;color:var(--text-primary)}
+        .cal-dnum.today-num{color:var(--sec-orange)}
+        .cal-hijri{font-size:0.6rem;color:var(--text-secondary);margin-bottom:0.3rem}
+        .cal-shift-pill{display:flex;align-items:center;gap:0.25rem;margin-bottom:0.2rem}
+        .csp-label{font-size:0.65rem;font-weight:700;color:#fff;border-radius:0.25rem;padding:0.1rem 0.3rem;min-width:1.2rem;text-align:center}
+        .csp-status{font-size:0.6rem;border-radius:0.25rem;padding:0.1rem 0.3rem;flex:1}
+        .csp-morning{background:rgba(29,78,216,0.2);color:#93C5FD}
+        .csp-evening{background:rgba(109,40,217,0.2);color:#C4B5FD}
+        .csp-off{background:rgba(75,85,99,0.2);color:#9CA3AF}
+        .cal-summary-wrap{background:var(--bg-card);border-radius:0.75rem;padding:1rem;margin-bottom:1rem}
+        .cal-summary-title{font-size:0.95rem;font-weight:700;color:var(--sec-orange);margin-bottom:0.75rem}
+        .cal-summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0.75rem}
+        .cal-sum-card{border-radius:0.5rem;padding:0.75rem;border:1px solid var(--border);background:var(--bg-input)}
+        .cal-sum-shift{font-weight:700;margin-bottom:0.5rem;font-size:0.9rem}
+        .cal-sum-row{display:flex;justify-content:space-between;font-size:0.8rem;padding:0.15rem 0;color:var(--text-secondary)}
+        .cal-sum-row b{color:var(--text-primary)}
+        @media(max-width:480px){.cal-grid{grid-template-columns:repeat(7,1fr);gap:0.2rem}.cal-card{padding:0.3rem;min-height:4rem}.cal-dnum{font-size:0.75rem}.csp-label{font-size:0.55rem}.csp-status{display:none}.cal-hijri{display:none}}
     </style>
 </head>
 <body>
@@ -293,6 +331,7 @@
                     <button class="action-btn btn-add" onclick="openAddModal('distribution')"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg><span>توزيع</span></button>
                     <button class="action-btn btn-add-sub" onclick="openAddModal('substation')"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg><span>تحويل</span></button>
                     <button class="action-btn btn-fault" onclick="openFaultModal()"><svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg><span>اعطال</span></button>
+                    <button class="action-btn btn-calendar" onclick="showCalendarPage()"><svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .89-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.11-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg><span>تقويم الدوام</span></button>
                 </div>
             </section>
             <section class="results-section" id="resultsSection" style="display:none;"><div class="results-header"><h3>النتائج</h3><span class="results-count" id="resultsCount">0</span></div><div id="resultsContent"></div></section>
@@ -324,6 +363,18 @@
             <section class="admin-section"><h3>📊 النشاط</h3><div class="chart-container"><canvas id="activityChart"></canvas></div></section>
             <section class="admin-section"><h3>👥 المشتركين <button class="copy-phones-btn" onclick="copyAllPhones()" title="نسخ جميع الأرقام">📋 نسخ الأرقام</button></h3><div class="whatsapp-message-box"><input type="text" id="broadcastMessage" placeholder="اكتب الرسالة هنا... (ستُرسل لكل مشترك)"><button class="send-all-btn" onclick="openAllWhatsApp()">📱 فتح واتساب للجميع</button></div><div class="results-table-wrapper"><table class="results-table"><thead><tr><th>الاسم</th><th>الجوال</th><th>النوع</th><th>التسجيل</th><th>واتساب</th></tr></thead><tbody id="adminUsersBody"></tbody></table></div></section>
             <section class="admin-section"><h3>📋 السجلات</h3><div class="results-table-wrapper"><table class="results-table"><thead><tr><th>النوع</th><th>المحطة</th><th>المستخدم</th><th>التاريخ</th></tr></thead><tbody id="adminLogsBody"></tbody></table></div></section>
+        </div>
+    </div>
+
+    <div class="page" id="calendarPage">
+        <header class="header">
+            <div class="header-right"><span class="logo">📅</span><div><h1>تقويم الدوام</h1><p>الورديات - جدة</p></div></div>
+            <div class="header-left">
+                <button class="back-to-dashboard-btn" onclick="backFromCalendar()">🏠 الرئيسية</button>
+            </div>
+        </header>
+        <div class="cal-page-content">
+            <div id="shiftCalendarContainer"></div>
         </div>
     </div>
 
@@ -1391,6 +1442,208 @@
             loadContactPhone();
         });
         document.querySelectorAll('.modal-overlay').forEach(function(m) { m.addEventListener('click', function(e) { if (e.target === m) m.classList.remove('active'); }); });
+
+        // ============================================================
+        // تقويم الدوام - خوارزمية الورديات
+        // ============================================================
+
+        var ShiftCalendar = (function() {
+            var _year  = new Date().getFullYear();
+            var _month = new Date().getMonth() + 1;
+            var _selectedShift = 'all';
+            var _containerId = null;
+            var _initialized = false;
+
+            var CYCLE   = ['morning','morning','evening','evening','off','off','off','off'];
+            var REF_POS = { 'أ':5, 'ب':1, 'ج':7, 'د':3 };
+            var REF_DATE = new Date('2026-05-26T00:00:00');
+
+            var SHIFTS = {
+                'أ': { key:'a', color:'#1565C0' },
+                'ب': { key:'b', color:'#00838F' },
+                'ج': { key:'c', color:'#2E7D32' },
+                'د': { key:'d', color:'#6A1B9A' }
+            };
+            var SHIFT_KEYS = ['أ','ب','ج','د'];
+
+            var STATUS_LABEL = { morning:'☀ صباح', evening:'🌙 مساء', off:'— إجازة' };
+            var STATUS_CLASS = { morning:'csp-morning', evening:'csp-evening', off:'csp-off' };
+
+            var MONTHS_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+            var DAYS_AR   = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+            var DAYS_SHORT = ['أحد','اثن','ثلا','أرب','خمس','جمع','سبت'];
+            var HIJRI_MONTHS = ['محرم','صفر','ربيع الأول','ربيع الآخر','جمادى الأولى','جمادى الآخرة','رجب','شعبان','رمضان','شوال','ذو القعدة','ذو الحجة'];
+
+            function _shiftStatus(letter, dateStr) {
+                var d    = new Date(dateStr + 'T00:00:00');
+                var diff = Math.round((d - REF_DATE) / 86400000);
+                var pos  = ((REF_POS[letter] || 0) + diff % 8 + 8) % 8;
+                return CYCLE[pos];
+            }
+
+            function _toHijri(year, month, day) {
+                var m = month, y = year;
+                if (m <= 2) { y--; m += 12; }
+                var A = Math.floor(y / 100);
+                var B = 2 - A + Math.floor(A / 4);
+                var jd = Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + day + B - 1524;
+                var l  = jd - 1948440 + 10632;
+                var n  = Math.floor((l - 1) / 10631);
+                l = l - 10631 * n + 354;
+                var j = Math.floor((10985 - l) / 5316) * Math.floor((50 * l) / 17719) +
+                        Math.floor(l / 5670) * Math.floor((43 * l) / 15238);
+                l = l - Math.floor((30 - j) / 15) * Math.floor((17719 * j) / 50) -
+                    Math.floor(j / 16) * Math.floor((15238 * j) / 43) + 29;
+                return {
+                    year:  30 * n + j - 30,
+                    month: Math.floor((24 * l) / 709),
+                    day:   l - Math.floor((709 * Math.floor((24 * l) / 709)) / 24)
+                };
+            }
+
+            function _pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+            function init(containerId) {
+                _containerId = containerId;
+                if (!_initialized) {
+                    _year  = new Date().getFullYear();
+                    _month = new Date().getMonth() + 1;
+                    _selectedShift = 'all';
+                }
+                _initialized = true;
+                _renderShell();
+                _renderMonth();
+            }
+
+            function _renderShell() {
+                var el = document.getElementById(_containerId);
+                if (!el) return;
+                el.innerHTML =
+                    '<div class="cal-nav">' +
+                        '<button class="cal-nav-btn" id="calPrev">&#8250;</button>' +
+                        '<span class="cal-month-title" id="calMonthTitle"></span>' +
+                        '<button class="cal-nav-btn" id="calNext">&#8249;</button>' +
+                    '</div>' +
+                    '<div class="shift-filter-bar" id="shiftFilterBar">' +
+                        '<button class="sf-btn active" data-s="all">الكل</button>' +
+                        '<button class="sf-btn sf-a" data-s="أ">وردية أ</button>' +
+                        '<button class="sf-btn sf-b" data-s="ب">وردية ب</button>' +
+                        '<button class="sf-btn sf-c" data-s="ج">وردية ج</button>' +
+                        '<button class="sf-btn sf-d" data-s="د">وردية د</button>' +
+                    '</div>' +
+                    '<div class="cal-day-headers">' +
+                        DAYS_SHORT.map(function(d) { return '<div class="cal-day-hdr">' + d + '</div>'; }).join('') +
+                    '</div>' +
+                    '<div class="cal-grid" id="calGrid"></div>' +
+                    '<div id="calSummary"></div>';
+
+                document.getElementById('calPrev').onclick = function() {
+                    _month--;
+                    if (_month < 1) { _month = 12; _year--; }
+                    _renderMonth();
+                };
+                document.getElementById('calNext').onclick = function() {
+                    _month++;
+                    if (_month > 12) { _month = 1; _year++; }
+                    _renderMonth();
+                };
+                el.querySelectorAll('.sf-btn').forEach(function(btn) {
+                    btn.onclick = function() {
+                        _selectedShift = this.dataset.s;
+                        el.querySelectorAll('.sf-btn').forEach(function(b) { b.classList.remove('active'); });
+                        this.classList.add('active');
+                        _renderMonth();
+                    };
+                });
+            }
+
+            function _renderMonth() {
+                var titleEl = document.getElementById('calMonthTitle');
+                if (titleEl) titleEl.textContent = MONTHS_AR[_month - 1] + ' ' + _year;
+
+                var grid = document.getElementById('calGrid');
+                if (!grid) return;
+
+                var today    = new Date();
+                var todayStr = today.getFullYear() + '-' + _pad(today.getMonth() + 1) + '-' + _pad(today.getDate());
+                var daysInMonth = new Date(_year, _month, 0).getDate();
+                var firstDow    = new Date(_year, _month - 1, 1).getDay();
+
+                var summary = {};
+                SHIFT_KEYS.forEach(function(k) { summary[k] = { morning:0, evening:0, off:0 }; });
+
+                var html = '';
+                for (var e = 0; e < firstDow; e++) html += '<div class="cal-empty"></div>';
+
+                for (var d = 1; d <= daysInMonth; d++) {
+                    var dateStr = _year + '-' + _pad(_month) + '-' + _pad(d);
+                    var dateObj = new Date(dateStr + 'T00:00:00');
+                    var hijri   = _toHijri(_year, _month, d);
+                    var isToday = dateStr === todayStr;
+                    var dow     = dateObj.getDay();
+
+                    var pillsHtml = '';
+                    SHIFT_KEYS.forEach(function(letter) {
+                        var sh = SHIFTS[letter];
+                        if (_selectedShift !== 'all' && _selectedShift !== letter) return;
+                        var status = _shiftStatus(letter, dateStr);
+                        summary[letter][status]++;
+                        pillsHtml +=
+                            '<div class="cal-shift-pill">' +
+                                '<span class="csp-label" style="background:' + sh.color + '">' + letter + '</span>' +
+                                '<span class="csp-status ' + STATUS_CLASS[status] + '">' + STATUS_LABEL[status] + '</span>' +
+                            '</div>';
+                    });
+
+                    html +=
+                        '<div class="cal-card' + (isToday ? ' cal-today' : '') + '">' +
+                            '<div class="cal-card-head">' +
+                                '<span class="cal-dname">' + DAYS_SHORT[dow] + '</span>' +
+                                '<span class="cal-dnum' + (isToday ? ' today-num' : '') + '">' + d + '</span>' +
+                            '</div>' +
+                            '<div class="cal-hijri">' + hijri.day + ' ' + HIJRI_MONTHS[hijri.month - 1] + '</div>' +
+                            pillsHtml +
+                        '</div>';
+                }
+
+                grid.innerHTML = html;
+                _renderSummary(summary);
+            }
+
+            function _renderSummary(summary) {
+                var el = document.getElementById('calSummary');
+                if (!el) return;
+                var keys = _selectedShift === 'all' ? SHIFT_KEYS : [_selectedShift];
+                var html = '<div class="cal-summary-wrap"><div class="cal-summary-title">ملخص الشهر</div><div class="cal-summary-grid">';
+                keys.forEach(function(letter) {
+                    var s  = summary[letter] || { morning:0, evening:0, off:0 };
+                    var sh = SHIFTS[letter];
+                    html +=
+                        '<div class="cal-sum-card" style="border-top:3px solid ' + sh.color + '">' +
+                            '<div class="cal-sum-shift" style="color:' + sh.color + '">وردية ' + letter + '</div>' +
+                            '<div class="cal-sum-row"><span>☀ صباح</span><b>' + s.morning + '</b></div>' +
+                            '<div class="cal-sum-row"><span>🌙 مساء</span><b>' + s.evening + '</b></div>' +
+                            '<div class="cal-sum-row"><span>— إجازة</span><b>' + s.off + '</b></div>' +
+                        '</div>';
+                });
+                html += '</div></div>';
+                el.innerHTML = html;
+            }
+
+            return { init: init };
+        })();
+
+        function showCalendarPage() {
+            document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+            document.getElementById('calendarPage').classList.add('active');
+            ShiftCalendar.init('shiftCalendarContainer');
+        }
+
+        function backFromCalendar() {
+            document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+            document.getElementById('dashboardPage').classList.add('active');
+        }
+
     </script>
 </body>
 </html>
