@@ -1634,14 +1634,12 @@
         })();
 
         function showCalendarPage() {
-            document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
-            document.getElementById('calendarPage').classList.add('active');
+            showPage('calendarPage');
             ShiftCalendar.init('shiftCalendarContainer');
         }
 
         function backFromCalendar() {
-            document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
-            document.getElementById('dashboardPage').classList.add('active');
+            showPage('dashboardPage');
         }
 
     </script>
