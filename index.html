@@ -282,7 +282,10 @@
         .cal-sum-shift{font-weight:700;margin-bottom:0.5rem;font-size:0.9rem}
         .cal-sum-row{display:flex;justify-content:space-between;font-size:0.8rem;padding:0.15rem 0;color:var(--text-secondary)}
         .cal-sum-row b{color:var(--text-primary)}
-        @media(max-width:480px){.cal-grid{grid-template-columns:repeat(7,1fr);gap:0.2rem}.cal-card{padding:0.3rem;min-height:4rem}.cal-dnum{font-size:0.75rem}.csp-label{font-size:0.55rem}.csp-status{display:none}.cal-hijri{display:none}}
+        .cal-today-btn{background:var(--sec-orange);border:1px solid var(--sec-orange);color:#fff;padding:0 0.75rem;height:2.2rem;border-radius:1rem;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:0.85rem;font-weight:600;transition:0.3s}
+        .cal-today-btn:hover{opacity:0.85}
+        .cal-month-sub{font-size:0.75rem;color:var(--text-secondary);font-weight:400;margin-top:0.15rem}
+        @media(max-width:480px){.cal-grid{grid-template-columns:repeat(7,1fr);gap:0.15rem}.cal-card{padding:0.25rem;min-height:auto}.cal-dnum{font-size:0.7rem}.cal-dname{font-size:0.45rem}.csp-label{font-size:0.45rem;padding:0.08rem 0.12rem;min-width:0.8rem}.csp-status{font-size:0.45rem;padding:0.08rem 0.12rem}.cal-hijri{font-size:0.45rem;margin-bottom:0.12rem}.cal-shift-pill{gap:0.1rem;margin-bottom:0.1rem}.cal-day-hdr{font-size:0.5rem;padding:0.2rem 0}}
     </style>
 </head>
 <body>
@@ -747,12 +750,14 @@
                 hideLoading(); 
                 if (r.notFound) { showToast('غير مسجل', 'warning'); switchTab('register'); document.getElementById('regPhone').value = p; validateRegPhone(); return false; } 
                 if (r.error) { showToast(r.error, 'error'); return false; } 
-                currentUser = r.user; 
-                localStorage.setItem('currentUser', JSON.stringify(currentUser)); 
-                updateUserUI(); 
-                showPage('dashboardPage'); 
-                showToast('مرحبا ' + currentUser.name); 
-                loadStationsCache(); 
+                currentUser = r.user;
+                var _uStr = JSON.stringify(currentUser);
+                localStorage.setItem('currentUser', _uStr);
+                sessionStorage.setItem('currentUser', _uStr);
+                updateUserUI();
+                showPage('dashboardPage');
+                showToast('مرحبا ' + currentUser.name);
+                loadStationsCache();
                 startOnlineTracking(); 
             } catch (err) { hideLoading(); showToast('فشل الاتصال', 'error'); }
             return false; 
@@ -768,12 +773,14 @@
                 var r = await apiPost({ action: 'registerUser', name: name, phone: p, email: document.getElementById('regEmail').value.trim(), userType: document.getElementById('regType').value }); 
                 hideLoading(); 
                 if (r.error && !r.alreadyExists) { showToast(r.error, 'error'); return false; } 
-                currentUser = r.user; 
-                localStorage.setItem('currentUser', JSON.stringify(currentUser)); 
-                updateUserUI(); 
-                showPage('dashboardPage'); 
-                showToast(r.alreadyExists ? 'مرحبا بعودتك' : 'تم التسجيل'); 
-                loadStationsCache(); 
+                currentUser = r.user;
+                var _uStr = JSON.stringify(currentUser);
+                localStorage.setItem('currentUser', _uStr);
+                sessionStorage.setItem('currentUser', _uStr);
+                updateUserUI();
+                showPage('dashboardPage');
+                showToast(r.alreadyExists ? 'مرحبا بعودتك' : 'تم التسجيل');
+                loadStationsCache();
                 startOnlineTracking(); 
             } catch (err) { hideLoading(); showToast('فشل الاتصال', 'error'); }
             return false; 
@@ -820,8 +827,8 @@
                 document.getElementById('adminToggleBtn').style.display = 'flex';
             }
         }
-        function logout() { stopOnlineTracking(); currentUser = null; isAdmin = false; localStorage.removeItem('currentUser'); localStorage.removeItem('isAdmin'); document.getElementById('adminToggleBtn').style.display = 'none'; showPage('loginPage'); document.getElementById('loginPhone').value = ''; document.getElementById('loginBtn').disabled = true; showToast('تم الخروج'); }
-        function checkSession() { var s = localStorage.getItem('currentUser'); if (s) { currentUser = JSON.parse(s); updateUserUI(); showPage('dashboardPage'); loadStationsCache(); startOnlineTracking(); checkAdminStatus(); } }
+        function logout() { stopOnlineTracking(); currentUser = null; isAdmin = false; localStorage.removeItem('currentUser'); localStorage.removeItem('isAdmin'); sessionStorage.removeItem('currentUser'); sessionStorage.removeItem('isAdmin'); document.getElementById('adminToggleBtn').style.display = 'none'; showPage('loginPage'); document.getElementById('loginPhone').value = ''; document.getElementById('loginBtn').disabled = true; showToast('تم الخروج'); }
+        function checkSession() { try { var s = sessionStorage.getItem('currentUser') || localStorage.getItem('currentUser'); if (s) { var u = JSON.parse(s); if (u && u.name) { currentUser = u; sessionStorage.setItem('currentUser', s); localStorage.setItem('currentUser', s); updateUserUI(); showPage('dashboardPage'); loadStationsCache(); startOnlineTracking(); checkAdminStatus(); return; } } } catch(e) { sessionStorage.removeItem('currentUser'); localStorage.removeItem('currentUser'); } showPage('loginPage'); }
 
         async function searchStation() { 
             var v = convertArabicToEnglishNumbers(document.getElementById('searchInput').value.trim()); 
@@ -1471,7 +1478,7 @@
 
             var MONTHS_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
             var DAYS_AR   = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
-            var DAYS_SHORT = ['أحد','اثن','ثلا','أرب','خمس','جمع','سبت'];
+            var DAYS_MED  = ['أحد','اثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت'];
             var HIJRI_MONTHS = ['محرم','صفر','ربيع الأول','ربيع الآخر','جمادى الأولى','جمادى الآخرة','رجب','شعبان','رمضان','شوال','ذو القعدة','ذو الحجة'];
 
             function _shiftStatus(letter, dateStr) {
@@ -1521,8 +1528,14 @@
                 el.innerHTML =
                     '<div class="cal-nav">' +
                         '<button class="cal-nav-btn" id="calPrev">&#8250;</button>' +
-                        '<span class="cal-month-title" id="calMonthTitle"></span>' +
-                        '<button class="cal-nav-btn" id="calNext">&#8249;</button>' +
+                        '<div style="text-align:center">' +
+                            '<div class="cal-month-title" id="calMonthTitle"></div>' +
+                            '<div class="cal-month-sub" id="calMonthHijri"></div>' +
+                        '</div>' +
+                        '<div style="display:flex;gap:0.4rem;align-items:center">' +
+                            '<button class="cal-today-btn" id="calToday">اليوم</button>' +
+                            '<button class="cal-nav-btn" id="calNext">&#8249;</button>' +
+                        '</div>' +
                     '</div>' +
                     '<div class="shift-filter-bar" id="shiftFilterBar">' +
                         '<button class="sf-btn active" data-s="all">الكل</button>' +
@@ -1532,7 +1545,7 @@
                         '<button class="sf-btn sf-d" data-s="د">وردية د</button>' +
                     '</div>' +
                     '<div class="cal-day-headers">' +
-                        DAYS_SHORT.map(function(d) { return '<div class="cal-day-hdr">' + d + '</div>'; }).join('') +
+                        DAYS_MED.map(function(d) { return '<div class="cal-day-hdr">' + d + '</div>'; }).join('') +
                     '</div>' +
                     '<div class="cal-grid" id="calGrid"></div>' +
                     '<div id="calSummary"></div>';
@@ -1547,6 +1560,16 @@
                     if (_month > 12) { _month = 1; _year++; }
                     _renderMonth();
                 };
+                document.getElementById('calToday').onclick = function() {
+                    var now = new Date();
+                    _year  = now.getFullYear();
+                    _month = now.getMonth() + 1;
+                    _renderMonth();
+                    setTimeout(function() {
+                        var todayEl = document.querySelector('#calGrid .cal-today');
+                        if (todayEl) todayEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 80);
+                };
                 el.querySelectorAll('.sf-btn').forEach(function(btn) {
                     btn.onclick = function() {
                         _selectedShift = this.dataset.s;
@@ -1558,16 +1581,26 @@
             }
 
             function _renderMonth() {
+                var daysInMonth = new Date(_year, _month, 0).getDate();
+                var firstDow    = new Date(_year, _month - 1, 1).getDay();
+
                 var titleEl = document.getElementById('calMonthTitle');
                 if (titleEl) titleEl.textContent = MONTHS_AR[_month - 1] + ' ' + _year;
+
+                var subEl = document.getElementById('calMonthHijri');
+                if (subEl) {
+                    var hFirst = _toHijri(_year, _month, 1);
+                    var hLast  = _toHijri(_year, _month, daysInMonth);
+                    subEl.textContent = (hFirst.month === hLast.month)
+                        ? HIJRI_MONTHS[hFirst.month - 1] + ' ' + hFirst.year + ' هـ'
+                        : HIJRI_MONTHS[hFirst.month - 1] + ' – ' + HIJRI_MONTHS[hLast.month - 1] + ' ' + hFirst.year + ' هـ';
+                }
 
                 var grid = document.getElementById('calGrid');
                 if (!grid) return;
 
                 var today    = new Date();
                 var todayStr = today.getFullYear() + '-' + _pad(today.getMonth() + 1) + '-' + _pad(today.getDate());
-                var daysInMonth = new Date(_year, _month, 0).getDate();
-                var firstDow    = new Date(_year, _month - 1, 1).getDay();
 
                 var summary = {};
                 SHIFT_KEYS.forEach(function(k) { summary[k] = { morning:0, evening:0, off:0 }; });
@@ -1598,7 +1631,7 @@
                     html +=
                         '<div class="cal-card' + (isToday ? ' cal-today' : '') + '">' +
                             '<div class="cal-card-head">' +
-                                '<span class="cal-dname">' + DAYS_SHORT[dow] + '</span>' +
+                                '<span class="cal-dname">' + DAYS_AR[dow] + '</span>' +
                                 '<span class="cal-dnum' + (isToday ? ' today-num' : '') + '">' + d + '</span>' +
                             '</div>' +
                             '<div class="cal-hijri">' + hijri.day + ' ' + HIJRI_MONTHS[hijri.month - 1] + '</div>' +
