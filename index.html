@@ -53,7 +53,7 @@
         .admin-link{text-align:center;margin-top:1.5rem}
         .admin-link a{color:var(--text-secondary);font-size:0.85rem;text-decoration:none}
         .admin-link a:hover{color:var(--sec-orange)}
-        .header{background:var(--bg-card);padding:0.75rem 1rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+        .header{background:var(--bg-card);padding:0.75rem 1rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:800}
         .header-right{display:flex;align-items:center;gap:0.75rem}
         .header-right .logo{font-size:1.5rem}
         .header-right h1{font-size:1rem;color:var(--sec-orange)}
@@ -82,7 +82,7 @@
         .admin-toggle-btn:hover{background:linear-gradient(135deg,#8e44ad,#7d3c98);transform:scale(1.05)}
         .employee-toggle-btn{background:linear-gradient(135deg,#3498db,#2980b9);color:#fff;border:none;padding:0.4rem 0.75rem;border-radius:0.5rem;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:0.8rem;font-weight:600;transition:0.3s;display:flex;align-items:center;gap:0.3rem}
         .employee-toggle-btn:hover{background:linear-gradient(135deg,#2980b9,#1f6dad);transform:scale(1.05)}
-        .main-content{padding:1rem;max-width:1200px;margin:0 auto}
+        .main-content{padding:1rem;max-width:1200px;margin:0 auto;isolation:isolate}
         .search-section{background:var(--bg-card);border-radius:1rem;padding:1.25rem;margin-bottom:1rem}
         .search-section h2{display:flex;align-items:center;gap:0.5rem;font-size:1.1rem;margin-bottom:1rem;color:var(--sec-orange)}
         .search-section h2 svg{width:1.25rem;height:1.25rem;fill:var(--sec-orange)}
@@ -125,7 +125,7 @@
         .map-section h3{font-size:1rem;color:var(--sec-orange);margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem}
         .map-container{height:300px;border-radius:0.75rem;overflow:hidden}
         .leaflet-container{background:var(--bg-input)}
-        .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:1000;padding:1rem;overflow-y:auto}
+        .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.92);display:none;align-items:center;justify-content:center;z-index:1000;padding:1rem;overflow-y:auto}
         .modal-overlay.active{display:flex}
         .modal{background:var(--bg-card);border-radius:1rem;width:100%;max-width:500px;max-height:90vh;overflow-y:auto}
         .modal-header{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.25rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg-card);z-index:10}
@@ -258,10 +258,10 @@
         @keyframes globeScrollLines{from{transform:translateX(-17px)}to{transform:translateX(0)}}
         @keyframes globeRingPulse{0%,100%{opacity:0.7;transform:scale(1)}50%{opacity:1;transform:scale(1.06)}}
         .globe-map-wrap{position:relative;border-radius:50%;overflow:hidden;border:3px solid rgba(232,165,75,0.6);box-shadow:0 0 60px rgba(232,165,75,0.4),0 0 120px rgba(80,140,255,0.15),0 12px 40px rgba(0,0,0,0.7);animation:globeExpand 0.85s cubic-bezier(0.34,1.56,0.64,1);background:#000510}
-        .globe-atmosphere{position:absolute;inset:-2px;border-radius:50%;background:radial-gradient(circle at center,transparent 46%,rgba(100,180,255,0.15) 56%,rgba(50,120,220,0.38) 69%,rgba(8,20,60,0.82) 83%,rgba(0,4,18,0.97) 96%);pointer-events:none;z-index:600}
+        .globe-atmosphere{position:absolute;inset:-2px;border-radius:50%;background:radial-gradient(circle at center,transparent 46%,rgba(100,180,255,0.15) 56%,rgba(50,120,220,0.38) 69%,rgba(8,20,60,0.82) 83%,rgba(0,4,18,0.97) 96%);pointer-events:none;z-index:6}
         .globe-map-inner{width:100%;height:100%}
-        .globe-shine{position:absolute;top:7%;left:7%;width:32%;height:22%;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,0.28) 0%,transparent 70%);pointer-events:none;z-index:500}
-        .globe-ring-pulse{position:absolute;inset:-4px;border-radius:50%;border:3px solid var(--sec-orange);animation:globeRingPulse 2.2s ease-in-out infinite;pointer-events:none;z-index:500}
+        .globe-shine{position:absolute;top:7%;left:7%;width:32%;height:22%;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,0.28) 0%,transparent 70%);pointer-events:none;z-index:5}
+        .globe-ring-pulse{position:absolute;inset:-4px;border-radius:50%;border:3px solid var(--sec-orange);animation:globeRingPulse 2.2s ease-in-out infinite;pointer-events:none;z-index:5}
         @keyframes globeExpand{from{transform:scale(0.15);opacity:0}to{transform:scale(1);opacity:1}}
         .globe-label{font-size:0.88rem;color:var(--text-secondary);text-align:center;min-height:1.4rem}
         /* نبضات نقطة الموقع داخل الكرة */
@@ -314,41 +314,241 @@
           .sl-item{font-size:0.65rem}
         }
         @media(max-width:360px){.shift-today-bar{grid-template-columns:repeat(2,1fr)}}
+        /* ===== GLOWING CIRCLE LOGIN ===== */
+        .login-page{background:#06090f!important}
+        .login-page.active{display:flex!important;flex-direction:column;align-items:center;justify-content:center;min-height:100vh}
+        .login-card{background:transparent!important;box-shadow:none!important;border-radius:0!important;padding:0!important;width:auto!important;max-width:none!important;display:flex;flex-direction:column;align-items:center}
+        .login-circle-outer{position:relative;--cr:145px;width:calc(var(--cr)*2 + 20px);height:calc(var(--cr)*2 + 20px);display:flex;align-items:center;justify-content:center}
+        .ring-wrap{position:absolute;inset:0;border-radius:50%;animation:ringPulse 3s ease-in-out infinite}
+        @keyframes ringPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.045);opacity:0.8}}
+        .ring-wrap.spinning{animation:ringRotate 1.15s linear infinite}
+        @keyframes ringRotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+        .ring-wrap span{position:absolute;top:50%;left:50%;width:3px;height:20px;background:linear-gradient(to bottom,#00e5ff,rgba(0,229,255,0.15));border-radius:3px;margin-left:-1.5px;margin-top:calc(-1*var(--cr));transform-origin:center var(--cr);transform:rotate(calc(var(--i)*7.2deg));opacity:0.6;box-shadow:0 0 6px #00e5ff,0 0 14px rgba(0,229,255,0.35)}
+        .login-inner{position:relative;z-index:10;width:calc(var(--cr)*1.1);text-align:center;display:flex;flex-direction:column;align-items:center;gap:0.7rem}
+        .login-circle-title{font-size:2rem;font-weight:700;color:#00e5ff;text-shadow:0 0 22px rgba(0,229,255,0.75);letter-spacing:0.05em;margin-bottom:0.1rem}
+        .login-inner .form-group{width:100%;margin-bottom:0;text-align:right}
+        .login-inner .form-group label{font-size:0.72rem;color:rgba(0,229,255,0.65);margin-bottom:0.3rem;display:block}
+        .login-inner .form-group input{background:rgba(0,229,255,0.04);border:1.5px solid rgba(0,229,255,0.28);color:#fff;border-radius:0.5rem;padding:0.58rem 0.75rem;font-size:0.88rem;width:100%;direction:ltr;text-align:center;font-family:'Tajawal',sans-serif}
+        .login-inner .form-group input:focus{border-color:#00e5ff;outline:none;box-shadow:0 0 10px rgba(0,229,255,0.22)}
+        .login-inner .form-group input.valid{border-color:#00e5ff;box-shadow:0 0 8px rgba(0,229,255,0.32)}
+        .login-inner .form-group input.error{border-color:#ff4081}
+        .login-inner .input-hint{font-size:0.68rem;color:rgba(0,229,255,0.5);margin-top:0.18rem;text-align:center}
+        .login-inner .input-hint.success{color:#00e5ff}
+        .login-inner .input-hint.error{color:#ff4081}
+        .login-inner .btn-primary{background:linear-gradient(135deg,#00acc1,#00e5ff);color:#06090f;font-weight:700;width:100%;border-radius:2rem;padding:0.68rem;box-shadow:0 4px 20px rgba(0,229,255,0.28);font-size:0.95rem;font-family:'Tajawal',sans-serif;border:none;cursor:pointer}
+        .login-inner .btn-primary:hover:not(:disabled){box-shadow:0 6px 28px rgba(0,229,255,0.48);transform:translateY(-2px)}
+        .login-inner .btn-primary:disabled{opacity:0.38;cursor:not-allowed;transform:none}
+        .remember-row{display:flex;align-items:center;gap:0.45rem;font-size:0.73rem;color:rgba(255,255,255,0.38);width:100%;justify-content:center}
+        .remember-row input[type=checkbox]{accent-color:#00e5ff;width:0.88rem;height:0.88rem;flex-shrink:0;cursor:pointer}
+        .remember-row label{cursor:pointer;margin:0}
+        .login-links{margin-top:1.1rem;display:flex;flex-direction:column;align-items:center;gap:0.6rem}
+        .login-links a,.login-links span{color:#00e5ff;font-size:0.9rem;text-decoration:none;cursor:pointer;opacity:0.72;transition:0.2s;font-family:'Tajawal',sans-serif}
+        .login-links a:hover,.login-links span:hover{opacity:1;text-shadow:0 0 10px rgba(0,229,255,0.55)}
+        .login-register-card{background:rgba(0,229,255,0.03);border:1px solid rgba(0,229,255,0.18);border-radius:1rem;padding:1.25rem 1.5rem;width:300px;margin-top:0.8rem;display:none}
+        .login-register-card.active{display:block}
+        .login-register-card .form-group label{color:rgba(0,229,255,0.65);font-size:0.78rem}
+        .login-register-card .form-group input,.login-register-card .form-group select{background:rgba(0,229,255,0.04);border:1.5px solid rgba(0,229,255,0.22);color:#fff;border-radius:0.5rem;font-family:'Tajawal',sans-serif}
+        .login-register-card .form-group input:focus,.login-register-card .form-group select:focus{border-color:#00e5ff;outline:none;box-shadow:0 0 8px rgba(0,229,255,0.2)}
+        .login-register-card .form-group select option{background:#08101e}
+        .login-register-card .btn-success{background:linear-gradient(135deg,#00acc1,#00e5ff);color:#06090f;font-weight:700;font-family:'Tajawal',sans-serif;border:none}
+        .login-page .tabs{display:none!important}
+        .login-page .login-logo{display:none!important}
+        .login-page .admin-link{display:none!important}
+        /* روابط داخل الدائرة */
+        .login-inner-links{display:flex;align-items:center;justify-content:center;gap:0.55rem;margin-top:0.35rem;flex-wrap:wrap}
+        .login-inner-links span,.login-inner-links a{color:rgba(0,229,255,0.62);font-size:0.78rem;cursor:pointer;text-decoration:none;transition:0.2s;font-family:'Tajawal',sans-serif}
+        .login-inner-links span:hover,.login-inner-links a:hover{color:#00e5ff;text-shadow:0 0 8px rgba(0,229,255,0.5)}
+        .lil-sep{opacity:0.28;cursor:default!important;pointer-events:none}
+        .sep-or{text-align:center;font-size:0.68rem;color:rgba(0,229,255,0.32);margin:0.15rem 0;display:flex;align-items:center;gap:0.4rem;width:100%}
+        .sep-or::before,.sep-or::after{content:'';flex:1;height:1px;background:rgba(0,229,255,0.14)}
+        /* اوفرليز الدائرة (تسجيل + مدير) */
+        .circle-overlay{position:fixed;inset:0;background:#06090f;z-index:2800;display:none;flex-direction:column;align-items:center;justify-content:center;padding:1rem;overflow-y:auto}
+        .circle-overlay.active{display:flex;animation:coIn 0.42s cubic-bezier(0.34,1.3,0.64,1) both}
+        @keyframes coIn{from{opacity:0;transform:scale(0.88) translateY(30px)}to{opacity:1;transform:scale(1) translateY(0)}}
+        .circle-overlay .login-inner{width:calc(var(--cr)*1.12)}
+        .circle-overlay .login-inner .btn-success{background:linear-gradient(135deg,#00acc1,#00e5ff);color:#06090f;font-weight:700;border:none;border-radius:2rem;padding:0.7rem;font-family:'Tajawal',sans-serif;font-size:0.95rem;cursor:pointer;box-shadow:0 4px 20px rgba(0,229,255,0.28);width:100%;margin-top:0.2rem}
+        .circle-overlay .login-inner .btn-primary{background:linear-gradient(135deg,#00acc1,#00e5ff);color:#06090f;font-weight:700;border:none;border-radius:2rem;padding:0.7rem;font-family:'Tajawal',sans-serif;font-size:0.95rem;cursor:pointer;box-shadow:0 4px 20px rgba(0,229,255,0.28);width:100%}
+        /* بيل التنقل أسفل الدائرة */
+        .login-nav-pill,.circle-overlay-links{display:inline-flex;align-items:center;justify-content:center;gap:0.75rem;padding:0.58rem 1.6rem;margin-top:1.2rem;background:rgba(0,229,255,0.06);border:1px solid rgba(0,229,255,0.22);border-radius:2rem;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);flex-shrink:0}
+        .login-nav-pill span,.login-nav-pill a,.circle-overlay-links a{color:rgba(0,229,255,0.75);font-size:0.9rem;cursor:pointer;text-decoration:none;font-family:'Tajawal',sans-serif;font-weight:600;transition:0.2s;white-space:nowrap}
+        .login-nav-pill span:hover,.login-nav-pill a:hover,.circle-overlay-links a:hover{color:#00e5ff;text-shadow:0 0 10px rgba(0,229,255,0.55)}
+        .login-nav-pill .lil-sep{opacity:0.3;cursor:default;pointer-events:none}
+        @media(max-width:340px){.login-nav-pill,.circle-overlay-links{padding:0.45rem 1rem;font-size:0.78rem;gap:0.5rem}}
+        .admin-code-wrap{position:relative;width:100%}
+        .admin-code-wrap input{background:rgba(0,229,255,0.04);border:1.5px solid rgba(0,229,255,0.28);color:#fff;border-radius:0.5rem;padding:0.7rem 2.5rem 0.7rem 0.75rem;font-size:1.6rem;width:100%;text-align:center;letter-spacing:0.5em;font-family:monospace}
+        .admin-code-wrap input:focus{border-color:#00e5ff;outline:none;box-shadow:0 0 10px rgba(0,229,255,0.22)}
+        .admin-code-wrap button{position:absolute;left:0.5rem;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(0,229,255,0.45);cursor:pointer;font-size:1rem;padding:0.2rem}
+        /* زر البصمة */
+        .biometric-btn{display:flex;flex-direction:column;align-items:center;gap:0.28rem;cursor:pointer;padding:0.35rem;background:transparent;border:none;width:100%}
+        .fp-wrap{position:relative;width:58px;height:58px;display:flex;align-items:center;justify-content:center}
+        .fp-ring{position:absolute;border-radius:50%;border:1.5px solid rgba(0,229,255,0.5);animation:fpRingOut 2.4s ease-out infinite}
+        .fp-ring:nth-child(1){inset:0;animation-delay:0s}
+        .fp-ring:nth-child(2){inset:-11px;animation-delay:0.7s;border-color:rgba(0,229,255,0.28)}
+        .fp-ring:nth-child(3){inset:-22px;animation-delay:1.4s;border-color:rgba(0,229,255,0.1)}
+        @keyframes fpRingOut{0%{transform:scale(0.82);opacity:1}100%{transform:scale(1.55);opacity:0}}
+        .fp-svg{width:46px;height:54px;position:relative;z-index:1;filter:drop-shadow(0 0 4px rgba(0,229,255,0.35))}
+        .fp-svg path{stroke:#00e5ff;stroke-width:1.7;fill:none;stroke-linecap:round;opacity:0}
+        .fp-p1{stroke-dasharray:20;stroke-dashoffset:20;animation:fpDraw 0.3s 0.1s ease forwards}
+        .fp-p2{stroke-dasharray:78;stroke-dashoffset:78;animation:fpDraw 0.4s 0.28s ease forwards}
+        .fp-p3{stroke-dasharray:124;stroke-dashoffset:124;animation:fpDraw 0.48s 0.46s ease forwards}
+        .fp-p4{stroke-dasharray:170;stroke-dashoffset:170;animation:fpDraw 0.52s 0.64s ease forwards}
+        .fp-p5{stroke-dasharray:215;stroke-dashoffset:215;animation:fpDraw 0.56s 0.82s ease forwards}
+        .fp-p6{stroke-dasharray:252;stroke-dashoffset:252;animation:fpDraw 0.6s 1s ease forwards}
+        @keyframes fpDraw{to{opacity:0.78;stroke-dashoffset:0}}
+        .biometric-btn:active .fp-svg path,.biometric-btn:hover .fp-svg path{opacity:1!important;filter:drop-shadow(0 0 5px #00e5ff)}
+        .fp-label{font-size:0.66rem;color:rgba(0,229,255,0.48);font-family:'Tajawal',sans-serif;letter-spacing:0.04em}
+        /* ===== ضغط عناصر الدائرة ===== */
+        .login-inner{gap:0.38rem}
+        .login-circle-title{font-size:1.6rem;margin-bottom:0.05rem}
+        .login-inner .form-group{margin-bottom:0}
+        .login-inner .form-group label{display:none}
+        .login-inner .form-group input{padding:0.48rem 0.7rem;font-size:0.85rem}
+        .login-inner .input-hint{font-size:0.6rem;margin-top:0.08rem}
+        .login-inner .btn-primary{padding:0.55rem;font-size:0.86rem}
+        .remember-row{font-size:0.65rem;margin-top:0}
+        .login-inner-links{margin-top:0.18rem}
+        .sep-or{margin:0.08rem 0}
+        .fp-wrap{width:48px;height:48px}
+        .fp-svg{width:38px;height:44px}
+        .fp-label{font-size:0.6rem}
+        .circle-overlay .login-inner{gap:0.35rem}
+        .circle-overlay .form-group{margin-bottom:0}
+        .circle-overlay .form-group label{font-size:0.68rem;margin-bottom:0.2rem}
+        .circle-overlay .form-group input,.circle-overlay .form-group select{padding:0.46rem 0.65rem;font-size:0.84rem}
+        .circle-overlay .form-group .input-hint{font-size:0.58rem;margin-top:0.06rem}
+        .circle-overlay .login-circle-title{margin-bottom:0.1rem}
+        .circle-overlay .btn-success{padding:0.55rem;font-size:0.88rem}
+        .circle-overlay .btn-primary{padding:0.55rem;font-size:0.88rem}
+        .circle-overlay .form-row{grid-template-columns:1fr;gap:0.25rem}
+        /* ===== شيبس البحث ===== */
+        .search-chips-wrap{background:var(--bg-card);border-radius:1rem;padding:1rem 1.25rem;margin-bottom:1rem}
+        .chips-row{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:0}
+        .action-chip{display:inline-flex;align-items:center;gap:0.3rem;padding:0.5rem 0.9rem;border-radius:2rem;cursor:pointer;font-size:0.8rem;font-weight:600;font-family:'Tajawal',sans-serif;transition:all 0.28s cubic-bezier(0.34,1.56,0.64,1);border:1.5px solid transparent;user-select:none;-webkit-tap-highlight-color:transparent}
+        .action-chip svg{width:1rem;height:1rem;fill:currentColor;flex-shrink:0}
+        .action-chip:active{transform:scale(0.9)}
+        .chip-search{background:rgba(232,165,75,0.12);border-color:var(--sec-orange);color:var(--sec-orange)}
+        .chip-search.open{background:var(--sec-orange);color:#fff}
+        .chip-fault{background:rgba(229,115,115,0.12);border-color:var(--danger);color:var(--danger)}
+        .chip-shift{background:rgba(14,165,233,0.12);border-color:#0ea5e9;color:#0ea5e9}
+        .chip-add{background:rgba(92,184,92,0.12);border-color:var(--success);color:var(--success)}
+        .chip-sub{background:rgba(91,143,185,0.12);border-color:var(--sec-blue-lighter);color:var(--sec-blue-lighter)}
+        /* اتساع مربع البحث بأنيميشن */
+        .search-expand-wrap{display:grid;grid-template-rows:0fr;transition:grid-template-rows 0.42s cubic-bezier(0.34,1.56,0.64,1);overflow:hidden}
+        .search-expand-wrap.open{grid-template-rows:1fr}
+        .search-expand-inner{min-height:0;overflow:hidden;transition:padding 0.35s ease}
+        .search-expand-wrap.open .search-expand-inner{padding-top:0.85rem}
+        .search-expand-bar{display:flex;gap:0.45rem;align-items:center}
+        .search-expand-bar input{flex:1;padding:0.72rem 1rem;background:var(--bg-input);border:2px solid var(--sec-orange);border-radius:0.75rem;color:var(--text-primary);font-size:1rem;font-family:'Tajawal',sans-serif;transition:box-shadow 0.3s}
+        .search-expand-bar input:focus{outline:none;box-shadow:0 0 0 3px rgba(232,165,75,0.18)}
+        .sch-go{background:var(--sec-orange);border:none;border-radius:0.6rem;width:2.5rem;height:2.5rem;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:0.2s}
+        .sch-go:hover{transform:scale(1.08);box-shadow:0 4px 12px rgba(232,165,75,0.4)}
+        .sch-go svg{width:1.2rem;height:1.2rem;fill:#fff}
+        .sch-cls{background:transparent;border:1.5px solid var(--border);border-radius:0.6rem;width:2.2rem;height:2.2rem;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-secondary);font-size:1.1rem;flex-shrink:0;transition:0.2s;line-height:1}
+        .sch-cls:hover{border-color:var(--danger);color:var(--danger)}
+        /* ===== Responsive: دائرة الدخول ===== */
+        /* جوال صغير جداً */
+        @media(max-width:340px){.login-circle-outer{--cr:128px}.login-inner{gap:0.28rem}.login-circle-title{font-size:1.3rem}.login-inner .form-group input{padding:0.4rem 0.55rem;font-size:0.78rem}.login-inner .btn-primary{padding:0.42rem;font-size:0.78rem}.fp-wrap{width:40px;height:40px}.fp-svg{width:32px;height:38px}.action-chip{padding:0.32rem 0.52rem;font-size:0.68rem}}
+        /* جوال عادي */
+        @media(min-width:341px) and (max-width:480px){.login-circle-outer{--cr:145px}}
+        /* تابلت */
+        @media(min-width:481px) and (max-width:899px){.login-circle-outer{--cr:168px}.circle-overlay .login-circle-outer{--cr:182px}.login-inner{gap:0.55rem}.login-circle-title{font-size:1.9rem}.login-inner .form-group label{display:block}.circle-overlay .form-group label{display:block}.login-inner .form-group input{padding:0.58rem 0.75rem;font-size:0.9rem}.login-inner .btn-primary{padding:0.65rem;font-size:0.92rem}.fp-wrap{width:55px;height:55px}.fp-svg{width:44px;height:52px}}
+        /* لابتوب وشاشات كبيرة */
+        @media(min-width:900px){.login-circle-outer{--cr:185px}.circle-overlay .login-circle-outer{--cr:198px}.login-inner{gap:0.6rem}.login-circle-title{font-size:2rem}.login-inner .form-group label{display:block}.circle-overlay .form-group label{display:block}.login-inner .form-group input{padding:0.62rem 0.8rem;font-size:0.92rem}.login-inner .btn-primary{padding:0.7rem;font-size:0.95rem}.fp-wrap{width:58px;height:58px}.fp-svg{width:46px;height:54px}.search-chips-wrap{padding:1.25rem 1.5rem}.action-chip{padding:0.55rem 1.1rem;font-size:0.86rem}}
     </style>
 </head>
 <body>
     <div class="page login-page" id="loginPage">
         <div class="login-card">
-            <div class="login-logo"><div class="icon">⚡</div><h1>نظام محطات SEC</h1><p>الشركة السعودية للكهرباء - جدة</p></div>
-            <div class="tabs"><div class="tab active" onclick="switchTab('login')">تسجيل دخول</div><div class="tab" onclick="switchTab('register')">مشترك جديد</div></div>
-            <div class="tab-content active" id="loginTab">
-                <form onsubmit="return handleLogin(event)">
-                    <div class="form-group"><label>رقم الجوال</label><input type="tel" id="loginPhone" placeholder="05xxxxxxxx" maxlength="10" oninput="validateLoginPhone()" required><div class="input-hint" id="loginPhoneHint">10 ارقام تبدا بـ 05</div></div>
-                    <button type="submit" class="btn btn-primary" id="loginBtn" disabled>دخول</button>
-                    <div style="display:flex;align-items:center;gap:0.6rem;margin-top:0.9rem;">
-                        <input type="checkbox" id="rememberMeCheck" checked style="width:1.1rem;height:1.1rem;accent-color:var(--sec-orange);cursor:pointer;flex-shrink:0;">
-                        <label for="rememberMeCheck" style="color:var(--text-secondary);font-size:0.85rem;cursor:pointer;margin:0;">تذكرني على هذا الجهاز</label>
+            <div class="login-circle-outer">
+                <div class="ring-wrap" id="ringWrap"></div>
+                <div class="login-inner">
+                    <div class="login-circle-title">دخول</div>
+                    <form onsubmit="return handleLogin(event)" style="display:flex;flex-direction:column;gap:0.5rem;width:100%;">
+                        <div class="form-group"><label>رقم الجوال</label><input type="tel" id="loginPhone" placeholder="05xxxxxxxx" maxlength="10" oninput="validateLoginPhone()" required><div class="input-hint" id="loginPhoneHint">10 ارقام تبدا بـ 05</div></div>
+                        <button type="submit" class="btn btn-primary" id="loginBtn" disabled>دخول</button>
+                        <div class="remember-row"><input type="checkbox" id="rememberMeCheck" checked><label for="rememberMeCheck">تذكرني</label></div>
+                    </form>
+                    <div id="biometricSection" style="display:none;width:100%;text-align:center;">
+                        <div class="sep-or"><span>أو</span></div>
+                        <button type="button" class="biometric-btn" onclick="loginWithBiometric()">
+                            <div class="fp-wrap">
+                                <div class="fp-ring"></div><div class="fp-ring"></div><div class="fp-ring"></div>
+                                <svg class="fp-svg" viewBox="0 0 64 75" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path class="fp-p1" d="M32 36 C30 32 30 27 32 24 C34 27 34 32 32 36Z"/>
+                                    <path class="fp-p2" d="M24 39 C21 33 21 22 26 16 C28 13 30 12 32 12 C34 12 36 13 38 16 C43 22 43 33 40 39"/>
+                                    <path class="fp-p3" d="M16 43 C13 35 13 19 20 11 C24 5 28 3 32 3 C36 3 40 5 44 11 C51 19 51 35 48 43"/>
+                                    <path class="fp-p4" d="M9 50 C6 39 6 19 14 9 C19 2 25 0 32 0 C39 0 45 2 50 9 C58 19 58 39 55 50"/>
+                                    <path class="fp-p5" d="M4 60 C1 47 1 23 10 11 C16 3 23 0 32 0 C41 0 48 3 54 11 C63 23 63 47 60 61"/>
+                                    <path class="fp-p6" d="M1 72 C-1 57 0 30 10 16 C17 5 24 2 32 2 C40 2 47 5 54 16 C64 30 65 57 62 73"/>
+                                </svg>
+                            </div>
+                            <span class="fp-label">دخول بالبصمة</span>
+                        </button>
                     </div>
-                </form>
-                <div id="biometricSection" style="display:none;margin-top:0.75rem;">
-                    <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.6rem;"><div style="flex:1;height:1px;background:var(--border);"></div><span style="color:var(--text-secondary);font-size:0.8rem;white-space:nowrap;">أو</span><div style="flex:1;height:1px;background:var(--border);"></div></div>
-                    <button type="button" onclick="loginWithBiometric()" style="width:100%;padding:0.8rem;border:2px solid var(--sec-orange);border-radius:0.5rem;background:linear-gradient(135deg,rgba(232,165,75,0.1),rgba(232,165,75,0.05));color:var(--sec-orange);font-family:'Tajawal',sans-serif;font-size:0.95rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem;transition:0.3s;" onmouseover="this.style.background='linear-gradient(135deg,rgba(232,165,75,0.2),rgba(232,165,75,0.1))'" onmouseout="this.style.background='linear-gradient(135deg,rgba(232,165,75,0.1),rgba(232,165,75,0.05))'">
-                        <span style="font-size:1.3rem;">👆</span> دخول بالبصمة
-                    </button>
                 </div>
             </div>
-            <div class="tab-content" id="registerTab">
-                <form onsubmit="return handleRegister(event)">
+        </div>
+        <div class="login-nav-pill">
+            <span onclick="showRegisterView()">مشترك جديد</span>
+            <span class="lil-sep">|</span>
+            <a href="#" onclick="showAdminLogin()">🔐 المدير</a>
+        </div>
+    </div>
+
+
+    <!-- اوفرلي تسجيل مشترك جديد -->
+    <div class="circle-overlay" id="registerOverlay">
+        <div class="login-circle-outer">
+            <div class="ring-wrap" id="regRingWrap"></div>
+            <div class="login-inner">
+                <div class="login-circle-title" style="font-size:1.45rem;">مشترك جديد</div>
+                <form id="registerTab" onsubmit="return handleRegister(event)" style="display:flex;flex-direction:column;gap:0.45rem;width:100%;">
                     <div class="form-group"><label>الاسم *</label><input type="text" id="regName" placeholder="الاسم" oninput="validateRegPhone()" required></div>
-                    <div class="form-row">
-                        <div class="form-group"><label>رقم الجوال *</label><input type="tel" id="regPhone" placeholder="05xxxxxxxx" maxlength="10" oninput="validateRegPhone()" required><div class="input-hint" id="regPhoneHint">10 ارقام</div></div>
-                        <div class="form-group"><label>النوع</label><select id="regType"><option value="موظف">موظف</option><option value="مقاول">مقاول</option></select></div>
-                    </div>
+                    <div class="form-row"><div class="form-group"><label>رقم الجوال</label><input type="tel" id="regPhone" placeholder="05xxxxxxxx" maxlength="10" oninput="validateRegPhone()" required><div class="input-hint" id="regPhoneHint">10 ارقام</div></div><div class="form-group"><label>النوع</label><select id="regType"><option value="موظف">موظف</option><option value="مقاول">مقاول</option></select></div></div>
                     <div class="form-group"><label>البريد</label><input type="email" id="regEmail" placeholder="example@email.com"></div>
                     <button type="submit" class="btn btn-success" id="regBtn" disabled>تسجيل</button>
                 </form>
             </div>
-            <div class="admin-link"><a href="#" onclick="showAdminLogin()">🔐 دخول المدير</a></div>
+        </div>
+        <div class="circle-overlay-links">
+            <a href="#" onclick="showLoginView()">← رجوع للدخول</a>
+        </div>
+    </div>
+
+    <!-- اوفرلي دخول المدير -->
+    <div class="circle-overlay" id="adminCircleOverlay">
+        <div class="login-circle-outer">
+            <div class="ring-wrap" id="adminRingWrap"></div>
+            <div class="login-inner">
+                <div class="login-circle-title" style="font-size:1.5rem;">المدير</div>
+                <div style="display:flex;flex-direction:column;gap:0.6rem;width:100%;">
+                    <div class="form-group">
+                        <label>رمز الدخول</label>
+                        <div class="admin-code-wrap"><input type="password" id="adminCode" placeholder="••••" onkeypress="if(event.key==='Enter')adminLogin()"><button type="button" onclick="togglePassword()">👁</button></div>
+                    </div>
+                    <button class="btn btn-primary" onclick="adminLogin()">دخول</button>
+                </div>
+                <div id="adminBiometricSection" style="display:none;width:100%;text-align:center;">
+                    <div class="sep-or"><span>أو</span></div>
+                    <button type="button" class="biometric-btn" onclick="loginWithBiometric()">
+                        <div class="fp-wrap">
+                            <div class="fp-ring"></div><div class="fp-ring"></div><div class="fp-ring"></div>
+                            <svg class="fp-svg" viewBox="0 0 64 75" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path class="fp-p1" d="M32 36 C30 32 30 27 32 24 C34 27 34 32 32 36Z"/>
+                                <path class="fp-p2" d="M24 39 C21 33 21 22 26 16 C28 13 30 12 32 12 C34 12 36 13 38 16 C43 22 43 33 40 39"/>
+                                <path class="fp-p3" d="M16 43 C13 35 13 19 20 11 C24 5 28 3 32 3 C36 3 40 5 44 11 C51 19 51 35 48 43"/>
+                                <path class="fp-p4" d="M9 50 C6 39 6 19 14 9 C19 2 25 0 32 0 C39 0 45 2 50 9 C58 19 58 39 55 50"/>
+                                <path class="fp-p5" d="M4 60 C1 47 1 23 10 11 C16 3 23 0 32 0 C41 0 48 3 54 11 C63 23 63 47 60 61"/>
+                                <path class="fp-p6" d="M1 72 C-1 57 0 30 10 16 C17 5 24 2 32 2 C40 2 47 5 54 16 C64 30 65 57 62 73"/>
+                            </svg>
+                        </div>
+                        <span class="fp-label">دخول بالبصمة</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="circle-overlay-links">
+            <a href="#" onclick="hideAdminCircle()">← رجوع</a>
         </div>
     </div>
 
@@ -364,15 +564,32 @@
             </div>
         </header>
         <div class="main-content">
-            <section class="search-section">
-                <h2><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>البحث عن محطة</h2>
-                <div class="search-box"><input type="text" id="searchInput" placeholder="رقم المحطة او اسم محطة التحويل" onkeypress="if(event.key==='Enter')searchStation()"></div>
-                <div class="action-buttons">
-                    <button class="action-btn btn-search" onclick="searchStation()"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg><span>بحث</span></button>
-                    <button class="action-btn btn-add" onclick="openAddModal('distribution')"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg><span>توزيع</span></button>
-                    <button class="action-btn btn-add-sub" onclick="openAddModal('substation')"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg><span>تحويل</span></button>
-                    <button class="action-btn btn-fault" onclick="openFaultModal()"><svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg><span>اعطال</span></button>
-                    <button class="action-btn btn-shift" onclick="goToShiftPage()"><svg viewBox="0 0 24 24" style="width:1.25rem;height:1.25rem;"><path d="M20 3h-1V1h-2v2H7V1H5v2H4C2.9 3 2 3.9 2 5v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/><path d="M8 10h2v2H8zm4 0h2v2h-2zm4 0h2v2h-2zM8 14h2v2H8zm4 0h2v2h-2zm4 0h2v2h-2zM8 18h2v2H8zm4 0h2v2h-2z"/></svg><span>الورديات</span></button>
+            <section class="search-chips-wrap">
+                <div class="chips-row">
+                    <div class="action-chip chip-search" id="searchChip" onclick="toggleSearchInput(this)">
+                        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg><span>بحث</span>
+                    </div>
+                    <div class="action-chip chip-fault" onclick="openFaultModal()">
+                        <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg><span>اعطال</span>
+                    </div>
+                    <div class="action-chip chip-shift" onclick="goToShiftPage()">
+                        <svg viewBox="0 0 24 24"><path d="M20 3h-1V1h-2v2H7V1H5v2H4C2.9 3 2 3.9 2 5v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/><path d="M8 10h2v2H8zm4 0h2v2h-2zm4 0h2v2h-2zM8 14h2v2H8zm4 0h2v2h-2zm4 0h2v2h-2zM8 18h2v2H8zm4 0h2v2h-2z"/></svg><span>الورديات</span>
+                    </div>
+                    <div class="action-chip chip-add" onclick="openAddModal('distribution')">
+                        <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg><span>توزيع</span>
+                    </div>
+                    <div class="action-chip chip-sub" onclick="openAddModal('substation')">
+                        <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg><span>تحويل</span>
+                    </div>
+                </div>
+                <div class="search-expand-wrap" id="searchExpandWrap">
+                    <div class="search-expand-inner">
+                        <div class="search-expand-bar">
+                            <input type="text" id="searchInput" placeholder="رقم المحطة او اسم محطة التحويل" onkeypress="if(event.key==='Enter')searchStation()">
+                            <button class="sch-go" onclick="searchStation()"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></button>
+                            <button class="sch-cls" onclick="closeSearchInput()">✕</button>
+                        </div>
+                    </div>
                 </div>
             </section>
             <section id="globeSection" class="globe-section" style="display:none;">
@@ -465,13 +682,6 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="adminLoginModal">
-        <div class="modal" style="max-width:350px;">
-            <div class="modal-header"><h3>🔐 دخول المدير</h3><button class="modal-close" onclick="closeModal('adminLoginModal')"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg></button></div>
-            <div class="modal-body"><div class="form-group"><label>رمز الدخول</label><div class="password-wrapper"><input type="password" id="adminCode" placeholder="****"><button type="button" class="password-toggle" onclick="togglePassword()">👁</button></div></div></div>
-            <div class="modal-footer"><button class="btn btn-primary" onclick="adminLogin()">دخول</button></div>
-        </div>
-    </div>
 
     <div class="modal-overlay" id="addDistributionModal">
         <div class="modal">
@@ -792,8 +1002,7 @@
             } 
         }
         
-        function showPage(id) { 
-            console.log('Switching to page:', id);
+        function showPage(id) {
             var pages = document.querySelectorAll('.page');
             for (var i = 0; i < pages.length; i++) {
                 pages[i].classList.remove('active');
@@ -802,7 +1011,7 @@
             var targetPage = document.getElementById(id);
             if (targetPage) {
                 targetPage.classList.add('active');
-                targetPage.style.display = 'block';
+                targetPage.style.display = targetPage.classList.contains('login-page') ? 'flex' : 'block';
             }
         }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
@@ -823,18 +1032,25 @@
         function validateLoginPhone() { var i = document.getElementById('loginPhone'), h = document.getElementById('loginPhoneHint'), b = document.getElementById('loginBtn'); i.value = convertArabicToEnglishNumbers(i.value).replace(/\D/g, ''); var n = normalizePhone(i.value); if (!i.value.length) { i.className = ''; h.textContent = '10 ارقام تبدا بـ 05'; h.className = 'input-hint'; b.disabled = true; } else if (isValidPhone(i.value)) { i.className = 'valid'; h.textContent = '✓'; h.className = 'input-hint success'; b.disabled = false; } else { i.className = 'error'; h.textContent = n.length < 10 ? (10-n.length) + ' ارقام' : 'يجب 05'; h.className = 'input-hint error'; b.disabled = true; } }
         function validateRegPhone() { var i = document.getElementById('regPhone'), h = document.getElementById('regPhoneHint'), b = document.getElementById('regBtn'), name = document.getElementById('regName').value.trim(); i.value = convertArabicToEnglishNumbers(i.value).replace(/\D/g, ''); var valid = isValidPhone(i.value) && name.length > 0; if (!i.value.length) { i.className = ''; h.textContent = '10 ارقام'; h.className = 'input-hint'; } else if (isValidPhone(i.value)) { i.className = 'valid'; h.textContent = '✓'; h.className = 'input-hint success'; } else { i.className = 'error'; h.className = 'input-hint error'; } b.disabled = !valid; }
 
-        function switchTab(t) { document.querySelectorAll('.tab').forEach(function(x) { x.classList.remove('active'); }); document.querySelectorAll('.tab-content').forEach(function(x) { x.classList.remove('active'); }); if (t === 'login') { document.querySelector('.tab:first-child').classList.add('active'); document.getElementById('loginTab').classList.add('active'); } else { document.querySelector('.tab:last-child').classList.add('active'); document.getElementById('registerTab').classList.add('active'); } }
+        function showRegisterView() { var o = document.getElementById('registerOverlay'); if (!o) return; o.classList.add('active'); var w = document.getElementById('regRingWrap'); if (w && !w.dataset.g) { for (var i=0;i<50;i++){var s=document.createElement('span');s.style.setProperty('--i',i);w.appendChild(s);} w.dataset.g='1'; } }
+        function showLoginView() { var o = document.getElementById('registerOverlay'); if (o) o.classList.remove('active'); }
+        function switchTab(t) { if (t === 'login') { showLoginView(); } else { showRegisterView(); } }
+        function showAdminLogin() { var o = document.getElementById('adminCircleOverlay'); if (!o) return; o.classList.add('active'); document.getElementById('adminCode').value=''; var w = document.getElementById('adminRingWrap'); if (w && !w.dataset.g) { for (var i=0;i<50;i++){var s=document.createElement('span');s.style.setProperty('--i',i);w.appendChild(s);} w.dataset.g='1'; } checkBiometricAvailable(); }
+        function hideAdminCircle() { var o = document.getElementById('adminCircleOverlay'); if (o) o.classList.remove('active'); }
         
-        async function handleLogin(e) { 
-            e.preventDefault(); 
-            if (!isValidPhone(document.getElementById('loginPhone').value)) { showToast('رقم خاطئ', 'error'); return false; } 
-            var p = normalizePhone(document.getElementById('loginPhone').value); 
-            showLoading(); 
+        async function handleLogin(e) {
+            e.preventDefault();
+            if (!isValidPhone(document.getElementById('loginPhone').value)) { showToast('رقم خاطئ', 'error'); return false; }
+            var p = normalizePhone(document.getElementById('loginPhone').value);
+            var ring = document.getElementById('ringWrap');
+            var btn = document.getElementById('loginBtn');
+            if (ring) ring.classList.add('spinning');
+            if (btn) btn.disabled = true;
             try {
-                var r = await apiPost({ action: 'loginUser', phone: p }); 
-                hideLoading(); 
-                if (r.notFound) { showToast('غير مسجل', 'warning'); switchTab('register'); document.getElementById('regPhone').value = p; validateRegPhone(); return false; } 
-                if (r.error) { showToast(r.error, 'error'); return false; } 
+                var r = await apiPost({ action: 'loginUser', phone: p });
+                if (ring) ring.classList.remove('spinning');
+                if (r.notFound) { if (btn) btn.disabled = false; showToast('غير مسجل', 'warning'); switchTab('register'); document.getElementById('regPhone').value = p; validateRegPhone(); return false; }
+                if (r.error) { if (btn) btn.disabled = false; showToast(r.error, 'error'); return false; }
                 currentUser = r.user;
                 saveSession(currentUser);
                 updateUserUI();
@@ -843,7 +1059,7 @@
                 loadStationsCache();
                 startOnlineTracking();
                 offerBiometricSetup();
-            } catch (err) { hideLoading(); showToast('فشل الاتصال', 'error'); }
+            } catch (err) { if (ring) ring.classList.remove('spinning'); if (btn) btn.disabled = false; showToast('فشل الاتصال', 'error'); }
             return false;
         }
 
@@ -852,11 +1068,14 @@
             var name = document.getElementById('regName').value.trim();
             if (!name || !isValidPhone(document.getElementById('regPhone').value)) { showToast('تحقق من البيانات', 'error'); return false; }
             var p = normalizePhone(document.getElementById('regPhone').value);
-            showLoading();
+            var ring = document.getElementById('ringWrap');
+            var btn = document.getElementById('regBtn');
+            if (ring) ring.classList.add('spinning');
+            if (btn) btn.disabled = true;
             try {
                 var r = await apiPost({ action: 'registerUser', name: name, phone: p, email: document.getElementById('regEmail').value.trim(), userType: document.getElementById('regType').value });
-                hideLoading();
-                if (r.error && !r.alreadyExists) { showToast(r.error, 'error'); return false; }
+                if (ring) ring.classList.remove('spinning');
+                if (r.error && !r.alreadyExists) { if (btn) btn.disabled = false; showToast(r.error, 'error'); return false; }
                 currentUser = r.user;
                 saveSession(currentUser);
                 updateUserUI();
@@ -864,30 +1083,33 @@
                 showToast(r.alreadyExists ? 'مرحبا بعودتك' : 'تم التسجيل');
                 loadStationsCache();
                 startOnlineTracking();
-                offerBiometricSetup(); 
-            } catch (err) { hideLoading(); showToast('فشل الاتصال', 'error'); }
-            return false; 
+                offerBiometricSetup();
+            } catch (err) { if (ring) ring.classList.remove('spinning'); if (btn) btn.disabled = false; showToast('فشل الاتصال', 'error'); }
+            return false;
         }
         
         function updateUserUI() { document.getElementById('userName').textContent = currentUser.name; document.getElementById('userAvatar').textContent = currentUser.name.charAt(0); document.getElementById('userType').textContent = currentUser.type || 'موظف'; }
-        function showAdminLogin() { document.getElementById('adminLoginModal').classList.add('active'); }
-        async function adminLogin() { 
-            var c = document.getElementById('adminCode').value; 
-            showLoading(); 
-            var r = await apiGet('getAdminCode'); 
-            hideLoading(); 
-            if (r.code && c === r.code) { 
-                isAdmin = true;
-                localStorage.setItem('isAdmin', 'true');
-                document.getElementById('adminToggleBtn').style.display = 'flex';
-                closeModal('adminLoginModal');
-                showPage('adminPage');
-                loadAdminData();
-                showToast('مرحبا بك في لوحة المدير');
-                offerBiometricSetup();
-            } else {
-                showToast('رمز خاطئ', 'error'); 
-            } 
+        async function adminLogin() {
+            var c = document.getElementById('adminCode').value;
+            var ring = document.getElementById('adminRingWrap');
+            var btn = document.querySelector('#adminCircleOverlay .btn-primary');
+            if (ring) ring.classList.add('spinning');
+            if (btn) btn.disabled = true;
+            try {
+                var r = await apiGet('getAdminCode');
+                if (ring) ring.classList.remove('spinning');
+                if (btn) btn.disabled = false;
+                if (r.code && c === r.code) {
+                    isAdmin = true;
+                    localStorage.setItem('isAdmin', 'true');
+                    document.getElementById('adminToggleBtn').style.display = 'flex';
+                    hideAdminCircle();
+                    showPage('adminPage');
+                    loadAdminData();
+                    showToast('مرحبا بك في لوحة المدير');
+                    offerBiometricSetup();
+                } else { showToast('رمز خاطئ', 'error'); }
+            } catch(e) { if (ring) ring.classList.remove('spinning'); if (btn) btn.disabled = false; showToast('فشل الاتصال', 'error'); }
         }
         function goToAdminPage() {
             if (isAdmin) {
@@ -929,8 +1151,11 @@
 
         function checkBiometricAvailable() {
             var hasCred = !!localStorage.getItem('biometric_credential_id');
+            var show = (window.PublicKeyCredential && hasCred) ? 'block' : 'none';
             var sec = document.getElementById('biometricSection');
-            if (sec) sec.style.display = (window.PublicKeyCredential && hasCred) ? 'block' : 'none';
+            if (sec) sec.style.display = show;
+            var adminSec = document.getElementById('adminBiometricSection');
+            if (adminSec) adminSec.style.display = show;
         }
 
         function dismissBiometricBanner() {
@@ -1081,7 +1306,10 @@
             }, 420);
         }
 
+        function toggleSearchInput(el) { var w = document.getElementById('searchExpandWrap'); var open = w.classList.contains('open'); if (open) { w.classList.remove('open'); el.classList.remove('open'); } else { w.classList.add('open'); el.classList.add('open'); setTimeout(function(){ var inp = document.getElementById('searchInput'); if(inp) inp.focus(); }, 420); } }
+        function closeSearchInput() { document.getElementById('searchExpandWrap').classList.remove('open'); var c = document.getElementById('searchChip'); if(c) c.classList.remove('open'); }
         async function searchStation() {
+            var wrap = document.getElementById('searchExpandWrap'); if (wrap && !wrap.classList.contains('open')) { var chip = document.getElementById('searchChip'); if(chip) toggleSearchInput(chip); return; }
             var v = convertArabicToEnglishNumbers(document.getElementById('searchInput').value.trim());
             document.getElementById('searchInput').value = v;
             if (!v) { showToast('ادخل الرقم', 'warning'); return; }
@@ -1848,6 +2076,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
+            (function() { var w = document.getElementById('ringWrap'); if (!w) return; for (var i = 0; i < 50; i++) { var s = document.createElement('span'); s.style.setProperty('--i', i); w.appendChild(s); } })();
             checkSession();
             checkIOSInstall();
             loadContactPhone();
