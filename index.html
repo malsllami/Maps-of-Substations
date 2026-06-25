@@ -245,55 +245,79 @@
         .password-wrapper{position:relative}
         .password-wrapper input{padding-left:2.5rem}
         .spinner{width:1rem;height:1rem;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite}
-        .btn-calendar{background:linear-gradient(135deg,#1565C0,#0D47A1);color:#fff}
-        .cal-page-content{padding:1rem;max-width:1200px;margin:0 auto}
-        .cal-nav{display:flex;align-items:center;justify-content:space-between;background:var(--bg-card);border-radius:0.75rem;padding:0.75rem 1rem;margin-bottom:1rem}
-        .cal-nav-btn{background:var(--bg-input);border:1px solid var(--border);color:var(--text-primary);width:2.5rem;height:2.5rem;border-radius:50%;cursor:pointer;font-size:1.25rem;display:flex;align-items:center;justify-content:center;transition:0.3s}
-        .cal-nav-btn:hover{background:var(--sec-orange);border-color:var(--sec-orange)}
-        .cal-month-title{font-size:1.1rem;font-weight:700;color:var(--sec-orange)}
-        .shift-filter-bar{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem}
-        .sf-btn{padding:0.5rem 1rem;border:2px solid var(--border);border-radius:2rem;background:var(--bg-input);color:var(--text-secondary);font-family:'Tajawal',sans-serif;font-size:0.85rem;cursor:pointer;transition:0.3s}
-        .sf-btn.active,.sf-btn:hover{border-color:var(--sec-orange);color:#fff;background:var(--sec-orange)}
-        .sf-btn.sf-a.active{background:#1565C0;border-color:#1565C0}
-        .sf-btn.sf-b.active{background:#00838F;border-color:#00838F}
-        .sf-btn.sf-c.active{background:#2E7D32;border-color:#2E7D32}
-        .sf-btn.sf-d.active{background:#6A1B9A;border-color:#6A1B9A}
-        .cal-day-headers{display:grid;grid-template-columns:repeat(7,1fr);gap:0.25rem;margin-bottom:0.5rem}
-        .cal-day-hdr{text-align:center;font-size:0.7rem;color:var(--text-secondary);padding:0.3rem}
-        .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:0.35rem;margin-bottom:1rem}
-        .cal-empty{background:transparent}
-        .cal-card{background:var(--bg-card);border-radius:0.5rem;padding:0.5rem;border:1px solid var(--border);min-height:5rem}
-        .cal-card.cal-today{border-color:var(--sec-orange);box-shadow:0 0 0 2px rgba(232,165,75,0.3)}
-        .cal-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.2rem}
-        .cal-dname{font-size:0.6rem;color:var(--text-secondary)}
-        .cal-dnum{font-size:0.9rem;font-weight:700;color:var(--text-primary)}
-        .cal-dnum.today-num{color:var(--sec-orange)}
-        .cal-hijri{font-size:0.6rem;color:var(--text-secondary);margin-bottom:0.3rem}
-        .cal-shift-pill{display:flex;align-items:center;gap:0.25rem;margin-bottom:0.2rem}
-        .csp-label{font-size:0.65rem;font-weight:700;color:#fff;border-radius:0.25rem;padding:0.1rem 0.3rem;min-width:1.2rem;text-align:center}
-        .csp-status{font-size:0.6rem;border-radius:0.25rem;padding:0.1rem 0.3rem;flex:1}
-        .csp-morning{background:rgba(29,78,216,0.2);color:#93C5FD}
-        .csp-evening{background:rgba(109,40,217,0.2);color:#C4B5FD}
-        .csp-off{background:rgba(75,85,99,0.2);color:#9CA3AF}
-        .cal-summary-wrap{background:var(--bg-card);border-radius:0.75rem;padding:1rem;margin-bottom:1rem}
-        .cal-summary-title{font-size:0.95rem;font-weight:700;color:var(--sec-orange);margin-bottom:0.75rem}
-        .cal-summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0.75rem}
-        .cal-sum-card{border-radius:0.5rem;padding:0.75rem;border:1px solid var(--border);background:var(--bg-input)}
-        .cal-sum-shift{font-weight:700;margin-bottom:0.5rem;font-size:0.9rem}
-        .cal-sum-row{display:flex;justify-content:space-between;font-size:0.8rem;padding:0.15rem 0;color:var(--text-secondary)}
-        .cal-sum-row b{color:var(--text-primary)}
-        .cal-today-btn{background:var(--sec-orange);border:1px solid var(--sec-orange);color:#fff;padding:0 0.75rem;height:2.2rem;border-radius:1rem;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:0.85rem;font-weight:600;transition:0.3s}
-        .cal-today-btn:hover{opacity:0.85}
-        .cal-month-sub{font-size:0.75rem;color:var(--text-secondary);font-weight:400;margin-top:0.15rem}
-        .cal-zoom-bar{display:flex;align-items:center;justify-content:flex-end;gap:0.4rem;margin-bottom:0.5rem}
-        .cal-zoom-btn{background:var(--bg-input);border:1px solid var(--border);color:var(--text-primary);width:2rem;height:2rem;border-radius:0.4rem;cursor:pointer;font-size:1.1rem;font-weight:700;display:flex;align-items:center;justify-content:center;transition:0.3s;line-height:1}
-        .cal-zoom-btn:hover{background:var(--sec-orange);border-color:var(--sec-orange)}
-        .cal-zoom-wrapper{overflow-x:auto;-webkit-overflow-scrolling:touch}
-        @media(max-width:480px){.cal-grid{grid-template-columns:repeat(7,1fr);gap:0.15rem}.cal-card{padding:0.25rem;min-height:auto}.cal-dnum{font-size:0.7rem}.cal-dname{font-size:0.45rem}.csp-label{font-size:0.45rem;padding:0.08rem 0.12rem;min-width:0.8rem}.csp-status{font-size:0.45rem;padding:0.08rem 0.12rem}.cal-hijri{font-size:0.45rem;margin-bottom:0.12rem}.cal-shift-pill{gap:0.1rem;margin-bottom:0.1rem}.cal-day-hdr{font-size:0.5rem;padding:0.2rem 0}}
+        /* === الكرة الأرضية === */
+        .globe-section{background:var(--bg-card);border-radius:1rem;padding:1.5rem 1rem;margin-bottom:1rem;display:flex;flex-direction:column;align-items:center;gap:1rem;animation:globeFadeIn 0.4s ease}
+        @keyframes globeFadeIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+        .globe-spinner-wrap{position:relative;width:88px;height:88px;display:flex;align-items:center;justify-content:center}
+        .globe-sphere{width:80px;height:80px;border-radius:50%;background:radial-gradient(circle at 32% 32%,#7ab5d8 0%,#2d6a9f 30%,#1e3a5f 60%,#0d1825 100%);box-shadow:0 0 24px rgba(232,165,75,0.5),inset -8px -8px 20px rgba(0,0,0,0.55),inset 6px 6px 16px rgba(91,143,185,0.25);position:relative;overflow:hidden;animation:globePulseGlow 2s ease-in-out infinite}
+        .globe-sphere::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 16px,rgba(255,255,255,0.09) 16px,rgba(255,255,255,0.09) 17px);animation:globeScrollLines 1.6s linear infinite;border-radius:50%}
+        .globe-sphere::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(180deg,transparent,transparent 16px,rgba(255,255,255,0.06) 16px,rgba(255,255,255,0.06) 17px);border-radius:50%}
+        .globe-continent{position:absolute;top:28%;left:18%;width:64%;height:44%;background:rgba(46,139,87,0.45);border-radius:40% 60% 55% 45%/50% 40% 60% 50%;filter:blur(2px);animation:globeScrollLines 1.6s linear infinite}
+        .globe-ring-outer{position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(232,165,75,0.6);animation:globeRingPulse 2s ease-in-out infinite}
+        @keyframes globePulseGlow{0%,100%{box-shadow:0 0 24px rgba(232,165,75,0.5),inset -8px -8px 20px rgba(0,0,0,0.55)}50%{box-shadow:0 0 40px rgba(232,165,75,0.85),inset -8px -8px 20px rgba(0,0,0,0.55)}}
+        @keyframes globeScrollLines{from{transform:translateX(-17px)}to{transform:translateX(0)}}
+        @keyframes globeRingPulse{0%,100%{opacity:0.7;transform:scale(1)}50%{opacity:1;transform:scale(1.06)}}
+        .globe-map-wrap{position:relative;border-radius:50%;overflow:hidden;border:3px solid rgba(232,165,75,0.6);box-shadow:0 0 60px rgba(232,165,75,0.4),0 0 120px rgba(80,140,255,0.15),0 12px 40px rgba(0,0,0,0.7);animation:globeExpand 0.85s cubic-bezier(0.34,1.56,0.64,1);background:#000510}
+        .globe-atmosphere{position:absolute;inset:-2px;border-radius:50%;background:radial-gradient(circle at center,transparent 46%,rgba(100,180,255,0.15) 56%,rgba(50,120,220,0.38) 69%,rgba(8,20,60,0.82) 83%,rgba(0,4,18,0.97) 96%);pointer-events:none;z-index:600}
+        .globe-map-inner{width:100%;height:100%}
+        .globe-shine{position:absolute;top:7%;left:7%;width:32%;height:22%;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,0.28) 0%,transparent 70%);pointer-events:none;z-index:500}
+        .globe-ring-pulse{position:absolute;inset:-4px;border-radius:50%;border:3px solid var(--sec-orange);animation:globeRingPulse 2.2s ease-in-out infinite;pointer-events:none;z-index:500}
+        @keyframes globeExpand{from{transform:scale(0.15);opacity:0}to{transform:scale(1);opacity:1}}
+        .globe-label{font-size:0.88rem;color:var(--text-secondary);text-align:center;min-height:1.4rem}
+        /* نبضات نقطة الموقع داخل الكرة */
+        @keyframes locationPulse{0%{transform:translate(-50%,-50%) scale(1);opacity:0.9}100%{transform:translate(-50%,-50%) scale(3.5);opacity:0}}
+        /* === تقويم الورديات === */
+        .btn-shift{background:linear-gradient(135deg,#0ea5e9,#0369a1);color:#fff}
+        .shift-cal-wrap{max-width:800px;margin:0 auto;padding:0 0 2rem}
+        .shift-today-bar{background:var(--bg-card);border-radius:0.75rem;padding:0.75rem;margin-bottom:1rem;display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem}
+        .stb-card{border-radius:0.6rem;padding:0.65rem 0.4rem;text-align:center;border-top:3px solid;transition:0.2s}
+        .stb-name{font-size:0.72rem;font-weight:700;margin-bottom:0.2rem}
+        .stb-icon{font-size:1.4rem;line-height:1.4}
+        .stb-label{font-size:0.6rem;margin-top:0.1rem;line-height:1.4}
+        .shift-cal-box{background:var(--bg-card);border-radius:0.75rem;padding:0.85rem}
+        .shift-cal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem}
+        .shift-nav{background:var(--bg-input);border:1px solid var(--border);color:var(--text-primary);padding:0.45rem 0.85rem;border-radius:0.5rem;cursor:pointer;font-size:1.1rem;font-family:'Tajawal',sans-serif;transition:0.2s}
+        .shift-nav:hover{background:var(--sec-orange);border-color:var(--sec-orange);color:#fff}
+        .shift-m-title{text-align:center}
+        .shift-m-title .mg{font-size:1rem;font-weight:700;color:var(--sec-orange)}
+        .shift-m-title .mh{font-size:0.73rem;color:var(--text-secondary);margin-top:1px}
+        .shift-legend{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.7rem;padding:0.5rem 0.65rem;background:var(--bg-input);border-radius:0.5rem}
+        .sl-item{display:flex;align-items:center;gap:0.3rem;font-size:0.7rem;color:var(--text-secondary)}
+        .sl-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+        .shift-grid-wrap{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+        .sdow{text-align:center;font-size:0.62rem;color:var(--text-secondary);padding:0.4rem 0;font-weight:600}
+        /* خلية التقويم */
+        .sc{background:var(--bg-input);border-radius:4px;padding:3px 3px 4px;cursor:pointer;transition:0.18s;border:1.5px solid transparent;overflow:hidden;position:relative}
+        .sc:hover:not(.sc-om){border-color:rgba(232,165,75,0.55);background:rgba(232,165,75,0.05);z-index:2}
+        .sc.sc-today{border-color:var(--sec-orange)!important;background:rgba(232,165,75,0.09)!important}
+        .sc.sc-om{opacity:0.2;cursor:default;pointer-events:none}
+        .sc .gd{font-size:0.78rem;font-weight:700;line-height:1.15;color:var(--text-primary)}
+        .sc .hd{font-size:0.5rem;color:var(--text-secondary);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        /* أشرطة الورديات - 2×2 */
+        .sc-bars{display:grid;grid-template-columns:1fr 1fr;gap:2px}
+        .sc-bar{height:6px;border-radius:2px}
+        /* نافذة التفاصيل */
+        .shift-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.65rem;margin-top:0.5rem}
+        .sdc{border-radius:0.6rem;padding:0.75rem;border-right:4px solid}
+        .sdc-head{display:flex;align-items:center;gap:0.45rem;margin-bottom:0.4rem}
+        .sdc-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.85rem;flex-shrink:0;color:#fff}
+        @media(max-width:480px){
+          .shift-today-bar{gap:0.35rem}
+          .stb-card{padding:0.5rem 0.25rem}
+          .stb-name{font-size:0.65rem}
+          .stb-label{font-size:0.55rem}
+          .sc .hd{display:none}
+          .sc .gd{font-size:0.72rem}
+          .sc-bar{height:5px}
+          .shift-detail-grid{grid-template-columns:1fr}
+          .shift-legend{gap:0.35rem}
+          .sl-item{font-size:0.65rem}
+        }
+        @media(max-width:360px){.shift-today-bar{grid-template-columns:repeat(2,1fr)}}
     </style>
 </head>
 <body>
-    <div class="page login-page active" id="loginPage">
+    <div class="page login-page" id="loginPage">
         <div class="login-card">
             <div class="login-logo"><div class="icon">⚡</div><h1>نظام محطات SEC</h1><p>الشركة السعودية للكهرباء - جدة</p></div>
             <div class="tabs"><div class="tab active" onclick="switchTab('login')">تسجيل دخول</div><div class="tab" onclick="switchTab('register')">مشترك جديد</div></div>
@@ -301,7 +325,17 @@
                 <form onsubmit="return handleLogin(event)">
                     <div class="form-group"><label>رقم الجوال</label><input type="tel" id="loginPhone" placeholder="05xxxxxxxx" maxlength="10" oninput="validateLoginPhone()" required><div class="input-hint" id="loginPhoneHint">10 ارقام تبدا بـ 05</div></div>
                     <button type="submit" class="btn btn-primary" id="loginBtn" disabled>دخول</button>
+                    <div style="display:flex;align-items:center;gap:0.6rem;margin-top:0.9rem;">
+                        <input type="checkbox" id="rememberMeCheck" checked style="width:1.1rem;height:1.1rem;accent-color:var(--sec-orange);cursor:pointer;flex-shrink:0;">
+                        <label for="rememberMeCheck" style="color:var(--text-secondary);font-size:0.85rem;cursor:pointer;margin:0;">تذكرني على هذا الجهاز</label>
+                    </div>
                 </form>
+                <div id="biometricSection" style="display:none;margin-top:0.75rem;">
+                    <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.6rem;"><div style="flex:1;height:1px;background:var(--border);"></div><span style="color:var(--text-secondary);font-size:0.8rem;white-space:nowrap;">أو</span><div style="flex:1;height:1px;background:var(--border);"></div></div>
+                    <button type="button" onclick="loginWithBiometric()" style="width:100%;padding:0.8rem;border:2px solid var(--sec-orange);border-radius:0.5rem;background:linear-gradient(135deg,rgba(232,165,75,0.1),rgba(232,165,75,0.05));color:var(--sec-orange);font-family:'Tajawal',sans-serif;font-size:0.95rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem;transition:0.3s;" onmouseover="this.style.background='linear-gradient(135deg,rgba(232,165,75,0.2),rgba(232,165,75,0.1))'" onmouseout="this.style.background='linear-gradient(135deg,rgba(232,165,75,0.1),rgba(232,165,75,0.05))'">
+                        <span style="font-size:1.3rem;">👆</span> دخول بالبصمة
+                    </button>
+                </div>
             </div>
             <div class="tab-content" id="registerTab">
                 <form onsubmit="return handleRegister(event)">
@@ -338,8 +372,21 @@
                     <button class="action-btn btn-add" onclick="openAddModal('distribution')"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg><span>توزيع</span></button>
                     <button class="action-btn btn-add-sub" onclick="openAddModal('substation')"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg><span>تحويل</span></button>
                     <button class="action-btn btn-fault" onclick="openFaultModal()"><svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg><span>اعطال</span></button>
-                    <button class="action-btn btn-calendar" onclick="showCalendarPage()"><svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .89-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.11-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg><span>تقويم الدوام</span></button>
+                    <button class="action-btn btn-shift" onclick="goToShiftPage()"><svg viewBox="0 0 24 24" style="width:1.25rem;height:1.25rem;"><path d="M20 3h-1V1h-2v2H7V1H5v2H4C2.9 3 2 3.9 2 5v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/><path d="M8 10h2v2H8zm4 0h2v2h-2zm4 0h2v2h-2zM8 14h2v2H8zm4 0h2v2h-2zm4 0h2v2h-2zM8 18h2v2H8zm4 0h2v2h-2z"/></svg><span>الورديات</span></button>
                 </div>
+            </section>
+            <section id="globeSection" class="globe-section" style="display:none;">
+                <div id="globeSpinner" class="globe-spinner-wrap">
+                    <div class="globe-sphere"><div class="globe-continent"></div></div>
+                    <div class="globe-ring-outer"></div>
+                </div>
+                <div id="globeMapWrap" class="globe-map-wrap" style="display:none;">
+                    <div id="globeMapInner" class="globe-map-inner"></div>
+                    <div class="globe-shine"></div>
+                    <div class="globe-ring-pulse"></div>
+                    <div class="globe-atmosphere"></div>
+                </div>
+                <div id="globeLabel" class="globe-label">🔍 جاري البحث...</div>
             </section>
             <section class="results-section" id="resultsSection" style="display:none;"><div class="results-header"><h3>النتائج</h3><span class="results-count" id="resultsCount">0</span></div><div id="resultsContent"></div></section>
             <section class="map-section" id="mapSection" style="display:none;"><h3 id="mapTitle">📍 المحطات القريبة</h3><div id="nearbyMap" class="map-container"></div><div id="nearbyList" style="margin-top:1rem;"></div></section>
@@ -373,15 +420,48 @@
         </div>
     </div>
 
-    <div class="page" id="calendarPage">
+    <!-- بانر البصمة الثابت - يظهر فوق أي صفحة -->
+    <div id="biometricBanner" style="display:none;position:fixed;bottom:1rem;left:1rem;right:1rem;z-index:1600;background:linear-gradient(135deg,rgba(20,20,30,0.96),rgba(30,20,10,0.95));border:1px solid rgba(232,165,75,0.5);border-radius:0.75rem;padding:0.85rem 1rem;align-items:center;gap:0.75rem;flex-wrap:wrap;box-shadow:0 6px 30px rgba(0,0,0,0.6);backdrop-filter:blur(12px);">
+        <span style="font-size:1.5rem;">👆</span>
+        <div style="flex:1;min-width:150px;"><div style="font-weight:600;font-size:0.9rem;">تفعيل تسجيل الدخول بالبصمة</div><div style="font-size:0.75rem;color:var(--text-secondary);">ادخل بسرعة في المرات القادمة بدون كتابة رقمك</div></div>
+        <button onclick="setupBiometric()" style="padding:0.5rem 1rem;background:var(--sec-orange);border:none;border-radius:0.5rem;color:#fff;font-family:'Tajawal',sans-serif;font-weight:600;cursor:pointer;font-size:0.85rem;white-space:nowrap;">تفعيل الآن</button>
+        <button onclick="dismissBiometricBanner()" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;font-size:1.4rem;padding:0.2rem 0.5rem;line-height:1;">×</button>
+    </div>
+
+    <!-- صفحة تقويم الورديات -->
+    <div class="page dashboard-page" id="shiftPage">
         <header class="header">
-            <div class="header-right"><span class="logo">📅</span><div><h1>تقويم الدوام</h1><p>الورديات - جدة</p></div></div>
+            <div class="header-right">
+                <button class="back-to-dashboard-btn" onclick="backFromShift()">← رجوع</button>
+                <div><h1>تقويم الورديات</h1><p>جدة - SEC</p></div>
+            </div>
             <div class="header-left">
-                <button class="back-to-dashboard-btn" onclick="backFromCalendar()">🏠 الرئيسية</button>
+                <button onclick="shiftCalGotoToday()" style="background:rgba(232,165,75,0.15);border:1px solid rgba(232,165,75,0.4);color:var(--sec-orange);padding:0.4rem 0.75rem;border-radius:0.5rem;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:0.82rem;font-weight:600;">اليوم</button>
             </div>
         </header>
-        <div class="cal-page-content">
-            <div id="shiftCalendarContainer"></div>
+        <div class="main-content">
+            <div class="shift-cal-wrap">
+                <div class="shift-today-bar" id="shiftTodayBar"></div>
+                <div class="shift-cal-box">
+                    <div class="shift-cal-head">
+                        <button class="shift-nav" onclick="nextShiftMonth()">‹</button>
+                        <div class="shift-m-title" id="shiftMonthTitle"></div>
+                        <button class="shift-nav" onclick="prevShiftMonth()">›</button>
+                    </div>
+                    <div class="shift-legend" id="shiftLegend"></div>
+                    <div class="shift-grid-wrap" style="margin-bottom:2px;">
+                        <div class="sdow">أحد</div><div class="sdow">إثنين</div><div class="sdow">ثلاثاء</div><div class="sdow">أربعاء</div><div class="sdow">خميس</div><div class="sdow">جمعة</div><div class="sdow">سبت</div>
+                    </div>
+                    <div class="shift-grid-wrap" id="shiftCalGrid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="shiftDetailModal">
+        <div class="modal" style="max-width:420px;">
+            <div class="modal-header"><h3>📅 تفاصيل اليوم</h3><button class="modal-close" onclick="closeModal('shiftDetailModal')"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg></button></div>
+            <div class="modal-body" id="shiftDetailBody"></div>
         </div>
     </div>
 
@@ -495,6 +575,7 @@
     <script>
         const API_URL = 'https://script.google.com/macros/s/AKfycbxGopljlI-_c9OYYGIL6AVvTjj4F7HxA_r-_7dQ0DiHw0H9y18r8Jl6lMWgyIPmX8Q/exec';
         let currentUser = null, nearbyMap = null, faultMap = null, faultStations = [], editingStationType = null, deferredPrompt = null;
+        let globeLeafletMap = null;
         let visitsChartInstance = null, activityChartInstance = null;
         let isAdmin = false;
         const CACHE_KEY = 'sec_stations_v8', CACHE_VERSION_KEY = 'sec_version_v8';
@@ -755,37 +836,35 @@
                 if (r.notFound) { showToast('غير مسجل', 'warning'); switchTab('register'); document.getElementById('regPhone').value = p; validateRegPhone(); return false; } 
                 if (r.error) { showToast(r.error, 'error'); return false; } 
                 currentUser = r.user;
-                var _uStr = JSON.stringify(currentUser);
-                localStorage.setItem('currentUser', _uStr);
-                sessionStorage.setItem('currentUser', _uStr);
+                saveSession(currentUser);
                 updateUserUI();
                 showPage('dashboardPage');
                 showToast('مرحبا ' + currentUser.name);
                 loadStationsCache();
-                startOnlineTracking(); 
+                startOnlineTracking();
+                offerBiometricSetup();
             } catch (err) { hideLoading(); showToast('فشل الاتصال', 'error'); }
-            return false; 
+            return false;
         }
-        
-        async function handleRegister(e) { 
-            e.preventDefault(); 
-            var name = document.getElementById('regName').value.trim(); 
-            if (!name || !isValidPhone(document.getElementById('regPhone').value)) { showToast('تحقق من البيانات', 'error'); return false; } 
-            var p = normalizePhone(document.getElementById('regPhone').value); 
-            showLoading(); 
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            var name = document.getElementById('regName').value.trim();
+            if (!name || !isValidPhone(document.getElementById('regPhone').value)) { showToast('تحقق من البيانات', 'error'); return false; }
+            var p = normalizePhone(document.getElementById('regPhone').value);
+            showLoading();
             try {
-                var r = await apiPost({ action: 'registerUser', name: name, phone: p, email: document.getElementById('regEmail').value.trim(), userType: document.getElementById('regType').value }); 
-                hideLoading(); 
-                if (r.error && !r.alreadyExists) { showToast(r.error, 'error'); return false; } 
+                var r = await apiPost({ action: 'registerUser', name: name, phone: p, email: document.getElementById('regEmail').value.trim(), userType: document.getElementById('regType').value });
+                hideLoading();
+                if (r.error && !r.alreadyExists) { showToast(r.error, 'error'); return false; }
                 currentUser = r.user;
-                var _uStr = JSON.stringify(currentUser);
-                localStorage.setItem('currentUser', _uStr);
-                sessionStorage.setItem('currentUser', _uStr);
+                saveSession(currentUser);
                 updateUserUI();
                 showPage('dashboardPage');
                 showToast(r.alreadyExists ? 'مرحبا بعودتك' : 'تم التسجيل');
                 loadStationsCache();
-                startOnlineTracking(); 
+                startOnlineTracking();
+                offerBiometricSetup(); 
             } catch (err) { hideLoading(); showToast('فشل الاتصال', 'error'); }
             return false; 
         }
@@ -801,23 +880,25 @@
                 isAdmin = true;
                 localStorage.setItem('isAdmin', 'true');
                 document.getElementById('adminToggleBtn').style.display = 'flex';
-                closeModal('adminLoginModal'); 
-                showPage('adminPage'); 
+                closeModal('adminLoginModal');
+                showPage('adminPage');
                 loadAdminData();
                 showToast('مرحبا بك في لوحة المدير');
-            } else { 
+                offerBiometricSetup();
+            } else {
                 showToast('رمز خاطئ', 'error'); 
             } 
         }
         function goToAdminPage() {
             if (isAdmin) {
                 showPage('adminPage');
-                // تحميل البيانات في الخلفية بدون انتظار
                 loadAdminData();
+                offerBiometricSetup();
             }
         }
         function backToEmployee() {
             showPage('dashboardPage');
+            offerBiometricSetup();
         }
         function adminLogout() {
             isAdmin = false;
@@ -831,29 +912,203 @@
                 document.getElementById('adminToggleBtn').style.display = 'flex';
             }
         }
-        function logout() { stopOnlineTracking(); currentUser = null; isAdmin = false; localStorage.removeItem('currentUser'); localStorage.removeItem('isAdmin'); sessionStorage.removeItem('currentUser'); sessionStorage.removeItem('isAdmin'); document.getElementById('adminToggleBtn').style.display = 'none'; showPage('loginPage'); document.getElementById('loginPhone').value = ''; document.getElementById('loginBtn').disabled = true; showToast('تم الخروج'); }
-        function checkSession() { try { var s = sessionStorage.getItem('currentUser') || localStorage.getItem('currentUser'); if (s) { var u = JSON.parse(s); if (u && u.name) { currentUser = u; sessionStorage.setItem('currentUser', s); localStorage.setItem('currentUser', s); updateUserUI(); showPage('dashboardPage'); loadStationsCache(); startOnlineTracking(); checkAdminStatus(); return; } } } catch(e) { sessionStorage.removeItem('currentUser'); localStorage.removeItem('currentUser'); } showPage('loginPage'); }
+        function logout() { stopOnlineTracking(); currentUser = null; isAdmin = false; localStorage.removeItem('currentUser'); sessionStorage.removeItem('currentUser'); localStorage.removeItem('isAdmin'); if (!localStorage.getItem('biometric_credential_id')) { localStorage.removeItem('biometric_banner_dismissed'); } document.getElementById('adminToggleBtn').style.display = 'none'; showPage('loginPage'); document.getElementById('loginPhone').value = ''; document.getElementById('loginBtn').disabled = true; checkBiometricAvailable(); showToast('تم الخروج'); }
+        function checkSession() { try { var s = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser'); if (s) { currentUser = JSON.parse(s); if (!currentUser || !currentUser.name) throw new Error('bad session'); updateUserUI(); showPage('dashboardPage'); loadStationsCache(); startOnlineTracking(); checkAdminStatus(); offerBiometricSetup(); } else { showPage('loginPage'); checkBiometricAvailable(); } } catch(e) { localStorage.removeItem('currentUser'); sessionStorage.removeItem('currentUser'); localStorage.removeItem('isAdmin'); showPage('loginPage'); checkBiometricAvailable(); } }
 
-        async function searchStation() { 
-            var v = convertArabicToEnglishNumbers(document.getElementById('searchInput').value.trim()); 
-            document.getElementById('searchInput').value = v; // تحديث الحقل بالأرقام الإنجليزية
-            if (!v) { showToast('ادخل الرقم', 'warning'); return; } 
-            if (!isStationsLoaded) { showLoading(); await loadStationsCache(); hideLoading(); } 
-            var r = searchStationLocal(v), rc = document.getElementById('resultsContent'), rn = document.getElementById('resultsCount'); 
+        // === تذكرني + البصمة ===
+        function saveSession(user) {
+            var check = document.getElementById('rememberMeCheck');
+            if (!check || check.checked) {
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                sessionStorage.removeItem('currentUser');
+            } else {
+                sessionStorage.setItem('currentUser', JSON.stringify(user));
+                localStorage.removeItem('currentUser');
+            }
+        }
+
+        function checkBiometricAvailable() {
+            var hasCred = !!localStorage.getItem('biometric_credential_id');
+            var sec = document.getElementById('biometricSection');
+            if (sec) sec.style.display = (window.PublicKeyCredential && hasCred) ? 'block' : 'none';
+        }
+
+        function dismissBiometricBanner() {
+            var b = document.getElementById('biometricBanner');
+            if (b) b.style.display = 'none';
+            localStorage.setItem('biometric_banner_dismissed', '1');
+        }
+
+        function offerBiometricSetup() {
+            if (!currentUser) return;
+            if (localStorage.getItem('biometric_credential_id')) return;
+            if (localStorage.getItem('biometric_banner_dismissed')) return;
+            setTimeout(function() {
+                var b = document.getElementById('biometricBanner');
+                if (b) b.style.display = 'flex';
+            }, 800);
+        }
+
+        async function setupBiometric() {
+            if (!window.PublicKeyCredential) { showToast('المتصفح لا يدعم البصمة، جرب Chrome أو Edge', 'warning'); return; }
+            try {
+                var hasAuth = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+                if (!hasAuth) { showToast('الجهاز لا يدعم البصمة — فعّل Windows Hello أو بصمة الجوال في إعدادات الجهاز أولاً', 'warning'); return; }
+            } catch(e) {}
+            try {
+                var rpId = (location.hostname && location.hostname !== '') ? location.hostname : undefined;
+                var challenge = new Uint8Array(32);
+                crypto.getRandomValues(challenge);
+                var createOptions = {
+                    challenge: challenge,
+                    rp: { name: 'SEC Stations' },
+                    user: { id: new TextEncoder().encode(currentUser.phone), name: currentUser.phone, displayName: currentUser.name },
+                    pubKeyCredParams: [{ alg: -7, type: 'public-key' }, { alg: -257, type: 'public-key' }],
+                    authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', requireResidentKey: false },
+                    timeout: 60000
+                };
+                if (rpId) createOptions.rp.id = rpId;
+                var cred = await navigator.credentials.create({ publicKey: createOptions });
+                var credId = btoa(String.fromCharCode.apply(null, new Uint8Array(cred.rawId)));
+                localStorage.setItem('biometric_credential_id', credId);
+                localStorage.setItem('biometric_user', JSON.stringify(currentUser));
+                localStorage.setItem('biometric_banner_dismissed', '1');
+                dismissBiometricBanner();
+                showToast('✅ تم تفعيل تسجيل الدخول بالبصمة');
+            } catch(e) {
+                if (e.name === 'NotSupportedError' || e.name === 'SecurityError') {
+                    showToast('البصمة تحتاج HTTPS — الميزة غير متاحة على هذا الرابط', 'warning');
+                } else if (e.name !== 'NotAllowedError') {
+                    showToast('فشل تفعيل البصمة', 'error');
+                }
+            }
+        }
+
+        async function loginWithBiometric() {
+            var credId = localStorage.getItem('biometric_credential_id');
+            if (!credId) { showToast('لم يتم تفعيل البصمة بعد', 'warning'); return; }
+            try {
+                var challenge = new Uint8Array(32);
+                crypto.getRandomValues(challenge);
+                var credBytes = Uint8Array.from(atob(credId), function(c) { return c.charCodeAt(0); });
+                await navigator.credentials.get({ publicKey: {
+                    challenge: challenge,
+                    allowCredentials: [{ id: credBytes, type: 'public-key', transports: ['internal'] }],
+                    userVerification: 'required',
+                    timeout: 60000
+                }});
+                var savedUser = JSON.parse(localStorage.getItem('biometric_user'));
+                if (!savedUser) { showToast('بيانات غير موجودة، سجّل دخول بالجوال مرة واحدة', 'error'); return; }
+                currentUser = savedUser;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                updateUserUI();
+                showPage('dashboardPage');
+                loadStationsCache();
+                startOnlineTracking();
+                checkAdminStatus();
+                showToast('مرحبا ' + currentUser.name + ' 👋');
+            } catch(e) {
+                if (e.name === 'NotAllowedError') return;
+                if (e.name === 'SecurityError') { showToast('البصمة تحتاج HTTPS', 'warning'); return; }
+                showToast('فشل التحقق بالبصمة', 'error');
+            }
+        }
+
+        function showGlobeMini() {
+            var gs = document.getElementById('globeSection');
+            var spinner = document.getElementById('globeSpinner');
+            var mapWrap = document.getElementById('globeMapWrap');
+            if (globeLeafletMap) { globeLeafletMap.remove(); globeLeafletMap = null; }
+            mapWrap.style.display = 'none';
+            spinner.style.display = 'flex';
+            document.getElementById('globeLabel').innerHTML = '🔍 جاري البحث...';
+            gs.style.display = 'flex';
+        }
+
+        function showGlobeExpanded(lat, lng, stationNumber, region) {
+            var spinner = document.getElementById('globeSpinner');
+            var mapWrap = document.getElementById('globeMapWrap');
+            var mapsUrl = 'https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng;
+            spinner.style.display = 'none';
+            var size = Math.min(window.innerWidth - 64, 320);
+            mapWrap.style.width = size + 'px';
+            mapWrap.style.height = size + 'px';
+            mapWrap.style.display = 'block';
+            mapWrap.style.cursor = 'pointer';
+            mapWrap.onclick = function() { window.open(mapsUrl, '_blank'); };
+            var regionText = region ? ' &bull; <span style="color:var(--text-secondary)">' + region + '</span>' : '';
+            document.getElementById('globeLabel').innerHTML = '📍 <strong style="color:var(--sec-orange)">' + stationNumber + '</strong>' + regionText + ' &mdash; جدة<br><small style="color:var(--text-secondary);font-size:0.75rem;">اضغط على الكرة للتنقل 🧭</small>';
+            if (globeLeafletMap) { globeLeafletMap.remove(); globeLeafletMap = null; }
+            setTimeout(function() {
+                globeLeafletMap = L.map('globeMapInner', { zoomControl: false, attributionControl: false, fadeAnimation: true, zoomAnimation: true });
+                // صور الأقمار الصناعية (ESRI World Imagery) - مثل Google Earth
+                L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }).addTo(globeLeafletMap);
+                // البداية من "الفضاء" - منظور واسع لقارة آسيا
+                globeLeafletMap.setView([28.0, 55.0], 2);
+                var pulseHtml = '<div style="position:relative;width:24px;height:24px;">'
+                    + '<div style="position:absolute;top:50%;left:50%;width:16px;height:16px;background:#e8a54b;border-radius:50%;border:3px solid #fff;box-shadow:0 0 16px rgba(232,165,75,1),0 0 30px rgba(232,165,75,0.5);transform:translate(-50%,-50%);z-index:2;"></div>'
+                    + '<div style="position:absolute;top:50%;left:50%;width:16px;height:16px;border:2px solid #e8a54b;border-radius:50%;transform:translate(-50%,-50%);animation:locationPulse 1.6s ease-out infinite;"></div>'
+                    + '<div style="position:absolute;top:50%;left:50%;width:16px;height:16px;border:2px solid #e8a54b;border-radius:50%;transform:translate(-50%,-50%);animation:locationPulse 1.6s ease-out 0.6s infinite;"></div>'
+                    + '<div style="position:absolute;top:50%;left:50%;width:16px;height:16px;border:2px solid rgba(232,165,75,0.5);border-radius:50%;transform:translate(-50%,-50%);animation:locationPulse 1.6s ease-out 1.2s infinite;"></div>'
+                    + '</div>';
+                var pulseIcon = L.divIcon({ className: '', html: pulseHtml, iconSize: [24, 24], iconAnchor: [12, 12] });
+                var marker = L.marker([lat, lng], { icon: pulseIcon }).addTo(globeLeafletMap);
+                var popupContent = '<b style="color:#e8a54b;font-size:1rem;">' + stationNumber + '</b>'
+                    + (region ? '<br>🏘️ ' + region : '')
+                    + '<br><a href="' + mapsUrl + '" target="_blank" style="color:#5b8fb9;font-size:0.8rem;text-decoration:none;">🧭 التنقل في قوقل ماب</a>';
+                marker.bindPopup(popupContent);
+                // المرحلة 1: من الفضاء إلى المملكة العربية السعودية
+                setTimeout(function() {
+                    globeLeafletMap.flyTo([24.0, 44.5], 5, { duration: 1.6, easeLinearity: 0.35 });
+                    // المرحلة 2: من المملكة إلى جدة
+                    setTimeout(function() {
+                        globeLeafletMap.flyTo([lat, lng], 14, { duration: 1.8, easeLinearity: 0.25 });
+                        setTimeout(function() { marker.openPopup(); }, 2200);
+                    }, 2000);
+                }, 500);
+            }, 80);
+        }
+
+        function hideGlobe() {
+            var gs = document.getElementById('globeSection');
+            gs.style.opacity = '0';
+            gs.style.transition = 'opacity 0.4s ease';
+            setTimeout(function() {
+                gs.style.display = 'none';
+                gs.style.opacity = '';
+                gs.style.transition = '';
+                if (globeLeafletMap) { globeLeafletMap.remove(); globeLeafletMap = null; }
+            }, 420);
+        }
+
+        async function searchStation() {
+            var v = convertArabicToEnglishNumbers(document.getElementById('searchInput').value.trim());
+            document.getElementById('searchInput').value = v;
+            if (!v) { showToast('ادخل الرقم', 'warning'); return; }
+            showGlobeMini();
+            if (!isStationsLoaded) { showLoading(); await loadStationsCache(); hideLoading(); }
+            var r = searchStationLocal(v), rc = document.getElementById('resultsContent'), rn = document.getElementById('resultsCount');
             document.getElementById('resultsSection').style.display = 'block';
-            showFeederMode = false; 
-            if (!r.found) { 
-                rc.innerHTML = '<div class="not-found-card"><h4>غير موجود</h4><div class="searched-number">' + v + '</div></div>'; 
-                rn.textContent = '0'; 
-                document.getElementById('mapSection').style.display = 'none'; 
-                currentSearchedStation = null; 
-            } else { 
-                currentSearchedStation = r.station; 
+            showFeederMode = false;
+            if (!r.found) {
+                document.getElementById('globeLabel').innerHTML = '<span style="color:var(--danger)">❌ لم يتم العثور على المحطة: ' + v + '</span>';
+                setTimeout(hideGlobe, 1800);
+                rc.innerHTML = '<div class="not-found-card"><h4>غير موجود</h4><div class="searched-number">' + v + '</div></div>';
+                rn.textContent = '0';
+                document.getElementById('mapSection').style.display = 'none';
+                currentSearchedStation = null;
+            } else {
+                currentSearchedStation = r.station;
                 var s = r.station;
+                if (s.lat && s.lng) {
+                    showGlobeExpanded(parseFloat(s.lat), parseFloat(s.lng), s.number, s.region || '');
+                } else {
+                    hideGlobe();
+                }
                 var url = s.googleMap || (s.lat && s.lng ? 'https://www.google.com/maps?q=' + s.lat + ',' + s.lng : '');
-                var tb = s.type === 'distribution' ? '<span class="type-badge type-distribution">توزيع</span>' : '<span class="type-badge type-substation">تحويل</span>'; 
+                var tb = s.type === 'distribution' ? '<span class="type-badge type-distribution">توزيع</span>' : '<span class="type-badge type-substation">تحويل</span>';
                 var editBtn = '<button class="action-btn btn-edit" style="padding:0.4rem 0.8rem;font-size:0.8rem;" onclick="openEditFromSearch()"><svg viewBox="0 0 24 24" style="width:1rem;height:1rem;"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg><span>تعديل</span></button>';
-                var feederBtn = ''; 
+                var feederBtn = '';
                 if (s.type === 'distribution' && s.feeder) { 
                     feederBtn = '<div class="feeder-toggle"><button class="feeder-btn active" id="nearbyBtn" onclick="toggleMapMode(\'nearby\')"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>القريبة (1.5 كم)</button><button class="feeder-btn" id="feederBtn" onclick="toggleMapMode(\'feeder\')"><svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>محطات المغذي (' + s.feeder + ')</button></div>'; 
                 } 
@@ -1447,317 +1702,157 @@
         function installApp() { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.userChoice.then(function(r) { deferredPrompt = null; hideInstallBanner(); if (r.outcome === 'accepted') showToast('تم التثبيت'); }); } }
         function checkIOSInstall() { var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent); var isStandalone = window.navigator.standalone; if (isIOS && !isStandalone && !localStorage.getItem('iosPromptShown')) { setTimeout(function() { }, 3000); } }
 
-        // ============================================================
-        // جسر الربط مع نظام إدارة الورديات
-        // ============================================================
-        document.addEventListener('DOMContentLoaded', async function() {
+        // === تقويم الورديات ===
+        var shiftCalDate = new Date();
+        var SHIFT_REFS = {
+            'أ': new Date(2026, 5, 22),
+            'ب': new Date(2026, 5, 18),
+            'ج': new Date(2026, 5, 20),
+            'د': new Date(2026, 5, 24)
+        };
+        var SHIFT_COLORS = { 'أ': '#f97316', 'ب': '#3b82f6', 'ج': '#16a34a', 'د': '#a21caf' };
+        var SHIFT_ST = {
+            morning: { icon: '☀️', tc: '#fbbf24', bg: 'rgba(251,191,36,0.18)', label: 'صباح' },
+            evening: { icon: '🌙', tc: '#818cf8', bg: 'rgba(79,70,229,0.18)',   label: 'مساء' },
+            off:     { icon: '💤', tc: '#94a3b8', bg: 'rgba(148,163,184,0.1)',  label: 'أوف'  }
+        };
+        var H_MONTHS = ['محرم','صفر','ربيع الأول','ربيع الثاني','جمادى الأولى','جمادى الآخرة','رجب','شعبان','رمضان','شوال','ذو القعدة','ذو الحجة'];
+        var G_MONTHS = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+
+        function getShiftCycleDay(s, date) {
+            var r = SHIFT_REFS[s];
+            var ref = new Date(r.getFullYear(), r.getMonth(), r.getDate());
+            var d   = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+            return (((Math.round((d - ref) / 86400000)) % 8) + 8) % 8;
+        }
+        function getShiftInfo(s, date) {
+            var d = getShiftCycleDay(s, date);
+            if (d < 2) return { type:'morning', icon:'☀️', short:'ص'+(d+1), full:'صباح - اليوم '+(d===0?'الأول':'الثاني'), time:'7:00 ص — 7:00 م' };
+            if (d < 4) return { type:'evening', icon:'🌙', short:'م'+(d-1), full:'مساء - اليوم '+(d===2?'الأول':'الثاني'), time:'7:00 م — 7:00 ص' };
+            return { type:'off', icon:'💤', short:'أو'+(d-3), full:'إجازة - اليوم '+['الأول','الثاني','الثالث','الرابع'][d-4], time:'يوم راحة' };
+        }
+        function toHijri(date) {
+            try {
+                var p = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura',{year:'numeric',month:'numeric',day:'numeric'}).formatToParts(date);
+                var o = {}; p.forEach(function(x){ o[x.type] = parseInt(x.value); });
+                return { y: o.year, m: o.month, d: o.day };
+            } catch(e) { return { y:1447, m:1, d:1 }; }
+        }
+        function goToShiftPage() {
+            showPage('shiftPage');
+            shiftCalDate = new Date();
+            renderShiftTodayBar();
+            renderShiftCalendar();
+        }
+        function backFromShift() { showPage('dashboardPage'); }
+        function shiftCalGotoToday() { shiftCalDate = new Date(); renderShiftCalendar(); }
+        function prevShiftMonth() { shiftCalDate = new Date(shiftCalDate.getFullYear(), shiftCalDate.getMonth()-1, 1); renderShiftCalendar(); }
+        function nextShiftMonth() { shiftCalDate = new Date(shiftCalDate.getFullYear(), shiftCalDate.getMonth()+1, 1); renderShiftCalendar(); }
+
+        function renderShiftTodayBar() {
+            var today = new Date();
+            var sh = ['أ','ب','ج','د'];
+            var html = '';
+            sh.forEach(function(s) {
+                var info = getShiftInfo(s, today);
+                var sc = SHIFT_COLORS[s];
+                var st = SHIFT_ST[info.type];
+                html += '<div class="stb-card" style="background:'+st.bg+';border-top-color:'+sc+';">' +
+                    '<div class="stb-name" style="color:'+sc+';">وردية '+s+'</div>' +
+                    '<div class="stb-icon">'+info.icon+'</div>' +
+                    '<div class="stb-label" style="color:'+st.tc+';">'+info.full+'</div></div>';
+            });
+            document.getElementById('shiftTodayBar').innerHTML = html;
+        }
+
+        function renderShiftCalendar() {
+            var y = shiftCalDate.getFullYear(), m = shiftCalDate.getMonth();
+            var today = new Date();
+            var todayKey = today.getFullYear()+'-'+today.getMonth()+'-'+today.getDate();
+            var firstDay = new Date(y, m, 1), lastDate = new Date(y, m+1, 0).getDate();
+            var h1 = toHijri(firstDay), h2 = toHijri(new Date(y, m+1, 0));
+            var hStr = h1.m === h2.m ? (H_MONTHS[h1.m-1]+' '+h1.y) : (H_MONTHS[h1.m-1]+' — '+H_MONTHS[h2.m-1]+' '+h1.y);
+            document.getElementById('shiftMonthTitle').innerHTML =
+                '<div class="mg">'+G_MONTHS[m]+' '+y+'</div><div class="mh">'+hStr+' هـ</div>';
+            var sh = ['أ','ب','ج','د'];
+            var legHtml = '';
+            sh.forEach(function(s){ legHtml += '<div class="sl-item"><div class="sl-dot" style="background:'+SHIFT_COLORS[s]+';"></div>وردية '+s+'</div>'; });
+            legHtml += '<div class="sl-item"><div class="sl-dot" style="background:rgba(251,191,36,0.8);"></div>صباح</div>';
+            legHtml += '<div class="sl-item"><div class="sl-dot" style="background:rgba(59,130,246,0.8);"></div>مساء</div>';
+            legHtml += '<div class="sl-item"><div class="sl-dot" style="background:rgba(107,114,128,0.6);"></div>إجازة</div>';
+            document.getElementById('shiftLegend').innerHTML = legHtml;
+            var html = '', startDOW = firstDay.getDay();
+            for (var i = 0; i < startDOW; i++) html += renderShiftCell(new Date(y, m, i-startDOW+1), true, todayKey);
+            for (var d = 1; d <= lastDate; d++) html += renderShiftCell(new Date(y, m, d), false, todayKey);
+            var rem = (7 - ((startDOW+lastDate) % 7)) % 7;
+            for (var j = 1; j <= rem; j++) html += renderShiftCell(new Date(y, m+1, j), true, todayKey);
+            document.getElementById('shiftCalGrid').innerHTML = html;
+        }
+
+        function renderShiftCell(date, om, todayKey) {
+            var key = date.getFullYear()+'-'+date.getMonth()+'-'+date.getDate();
+            var isToday = key === todayKey;
+            var h = toHijri(date);
+            var sh = ['أ','ب','ج','د'];
+            var cls = 'sc'+(om?' sc-om':'')+(isToday?' sc-today':'');
+            var bars = '';
+            sh.forEach(function(s) {
+                var info = getShiftInfo(s, date);
+                var c = SHIFT_COLORS[s];
+                var barStyle;
+                if (info.type === 'morning') {
+                    barStyle = 'background:'+c+';box-shadow:0 0 4px '+c+'88;';
+                } else if (info.type === 'evening') {
+                    barStyle = 'background:#0f1e3d;border:1.5px solid '+c+';';
+                } else {
+                    barStyle = 'background:'+c+';opacity:0.13;';
+                }
+                bars += '<div class="sc-bar" style="'+barStyle+'" title="'+s+': '+info.full+'"></div>';
+            });
+            var oc = om ? '' : ('onclick="showShiftDetail('+date.getFullYear()+','+(date.getMonth())+','+date.getDate()+')"');
+            return '<div class="'+cls+'" '+oc+'>' +
+                '<div class="gd">'+date.getDate()+'</div>' +
+                '<div class="hd">'+h.d+' '+H_MONTHS[h.m-1].substring(0,3)+'</div>' +
+                '<div class="sc-bars">'+bars+'</div></div>';
+        }
+
+        function showShiftDetail(yr, mo, dy) {
+            var date = new Date(yr, mo, dy);
+            var h = toHijri(date);
+            var days = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+            var gDate = date.getDate()+' '+G_MONTHS[date.getMonth()]+' '+date.getFullYear();
+            var hDate = h.d+' '+H_MONTHS[h.m-1]+' '+h.y;
+            var sh = ['أ','ب','ج','د'];
+            var html = '<div style="text-align:center;margin-bottom:0.9rem;padding-bottom:0.9rem;border-bottom:1px solid var(--border);">' +
+                '<div style="font-size:1.1rem;font-weight:700;color:var(--sec-orange);">'+days[date.getDay()]+'</div>' +
+                '<div style="font-size:1rem;font-weight:600;">'+gDate+'</div>' +
+                '<div style="font-size:0.78rem;color:var(--text-secondary);">'+hDate+' هـ</div></div>' +
+                '<div style="display:flex;flex-direction:column;gap:0.5rem;">';
+            sh.forEach(function(s) {
+                var info = getShiftInfo(s, date);
+                var sc = SHIFT_COLORS[s];
+                var st = SHIFT_ST[info.type];
+                html += '<div style="display:flex;align-items:center;gap:0.75rem;padding:0.7rem 0.9rem;border-radius:0.65rem;background:'+st.bg+';border-right:4px solid '+sc+';">' +
+                    '<div style="width:38px;height:38px;border-radius:50%;background:'+sc+';display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;color:#fff;flex-shrink:0;">'+s+'</div>' +
+                    '<div style="flex:1;min-width:0;">' +
+                    '<div style="font-weight:700;font-size:0.92rem;">وردية '+s+'</div>' +
+                    '<div style="font-size:0.78rem;color:'+st.tc+';font-weight:600;margin-top:2px;">'+info.full+'</div>' +
+                    '<div style="font-size:0.68rem;color:var(--text-secondary);margin-top:2px;">'+info.time+'</div>' +
+                    '</div>' +
+                    '<div style="font-size:2rem;flex-shrink:0;line-height:1;">'+info.icon+'</div>' +
+                    '</div>';
+            });
+            html += '</div>';
+            document.getElementById('shiftDetailBody').innerHTML = html;
+            document.getElementById('shiftDetailModal').classList.add('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            checkSession();
             checkIOSInstall();
             loadContactPhone();
-
-            var bp = new URLSearchParams(window.location.search);
-            var bName   = bp.get('bridge_name');
-            var bPhone  = bp.get('bridge_phone');
-            var bAction = bp.get('bridge_action');
-            var bQ      = bp.get('bridge_q');
-
-            if (bName && bPhone) {
-                // دخول تلقائي من نظام الورديات
-                showLoading();
-                try {
-                    var norm = normalizePhone(bPhone);
-                    var r = await apiPost({ action: 'loginUser', phone: norm });
-                    if (r.notFound) {
-                        r = await apiPost({ action: 'registerUser', name: bName, phone: norm, userType: 'موظف' });
-                    }
-                    hideLoading();
-                    var u = r.user || (r.success ? { name: bName, phone: norm, type: 'موظف' } : null);
-                    if (u) {
-                        currentUser = u;
-                        var uStr = JSON.stringify(u);
-                        localStorage.setItem('currentUser', uStr);
-                        sessionStorage.setItem('currentUser', uStr);
-                        updateUserUI();
-                        showPage('dashboardPage');
-                        loadStationsCache();
-                        startOnlineTracking();
-                        // تنفيذ الإجراء المطلوب بعد تحميل البيانات
-                        setTimeout(function() {
-                            if (bAction === 'search' && bQ) {
-                                var si = document.getElementById('searchInput');
-                                if (si) { si.value = bQ; searchStation(); }
-                            } else if (bAction === 'add-dist') {
-                                openAddModal('distribution');
-                            } else if (bAction === 'add-sub') {
-                                openAddModal('substation');
-                            } else if (bAction === 'fault') {
-                                openFaultModal();
-                            }
-                        }, 900);
-                        showToast('مرحبا ' + (u.name || bName) + ' — من نظام الورديات');
-                    } else {
-                        checkSession();
-                    }
-                } catch(e) {
-                    hideLoading();
-                    checkSession();
-                }
-            } else {
-                checkSession();
-            }
         });
         document.querySelectorAll('.modal-overlay').forEach(function(m) { m.addEventListener('click', function(e) { if (e.target === m) m.classList.remove('active'); }); });
-
-        // ============================================================
-        // تقويم الدوام - خوارزمية الورديات
-        // ============================================================
-
-        var ShiftCalendar = (function() {
-            var _year  = new Date().getFullYear();
-            var _month = new Date().getMonth() + 1;
-            var _selectedShift = 'all';
-            var _containerId = null;
-            var _initialized = false;
-            var _zoom = 1.0;
-
-            var CYCLE   = ['morning','morning','evening','evening','off','off','off','off'];
-            var REF_POS = { 'أ':5, 'ب':1, 'ج':7, 'د':3 };
-            var REF_DATE = new Date('2026-05-26T00:00:00');
-
-            var SHIFTS = {
-                'أ': { key:'a', color:'#1565C0' },
-                'ب': { key:'b', color:'#00838F' },
-                'ج': { key:'c', color:'#2E7D32' },
-                'د': { key:'d', color:'#6A1B9A' }
-            };
-            var SHIFT_KEYS = ['أ','ب','ج','د'];
-
-            var STATUS_LABEL = { morning:'☀ صباح', evening:'🌙 مساء', off:'— إجازة' };
-            var STATUS_CLASS = { morning:'csp-morning', evening:'csp-evening', off:'csp-off' };
-
-            var MONTHS_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
-            var DAYS_AR   = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
-            var DAYS_MED  = ['أحد','اثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت'];
-            var HIJRI_MONTHS = ['محرم','صفر','ربيع الأول','ربيع الآخر','جمادى الأولى','جمادى الآخرة','رجب','شعبان','رمضان','شوال','ذو القعدة','ذو الحجة'];
-
-            function _shiftStatus(letter, dateStr) {
-                var d    = new Date(dateStr + 'T00:00:00');
-                var diff = Math.round((d - REF_DATE) / 86400000);
-                var pos  = ((REF_POS[letter] || 0) + diff % 8 + 8) % 8;
-                return CYCLE[pos];
-            }
-
-            function _toHijri(year, month, day) {
-                var m = month, y = year;
-                if (m <= 2) { y--; m += 12; }
-                var A = Math.floor(y / 100);
-                var B = 2 - A + Math.floor(A / 4);
-                var jd = Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + day + B - 1524;
-                var l  = jd - 1948440 + 10632;
-                var n  = Math.floor((l - 1) / 10631);
-                l = l - 10631 * n + 354;
-                var j = Math.floor((10985 - l) / 5316) * Math.floor((50 * l) / 17719) +
-                        Math.floor(l / 5670) * Math.floor((43 * l) / 15238);
-                l = l - Math.floor((30 - j) / 15) * Math.floor((17719 * j) / 50) -
-                    Math.floor(j / 16) * Math.floor((15238 * j) / 43) + 29;
-                return {
-                    year:  30 * n + j - 30,
-                    month: Math.floor((24 * l) / 709),
-                    day:   l - Math.floor((709 * Math.floor((24 * l) / 709)) / 24)
-                };
-            }
-
-            function _pad(n) { return n < 10 ? '0' + n : '' + n; }
-
-            function _applyZoom() {
-                var inner = document.getElementById('calZoomInner');
-                if (inner) inner.style.zoom = _zoom;
-            }
-
-            function init(containerId) {
-                _containerId = containerId;
-                if (!_initialized) {
-                    _year  = new Date().getFullYear();
-                    _month = new Date().getMonth() + 1;
-                    _selectedShift = 'all';
-                    _zoom = 1.0;
-                }
-                _initialized = true;
-                _renderShell();
-                _renderMonth();
-                _applyZoom();
-            }
-
-            function _renderShell() {
-                var el = document.getElementById(_containerId);
-                if (!el) return;
-                el.innerHTML =
-                    '<div class="cal-nav">' +
-                        '<button class="cal-nav-btn" id="calPrev">&#8250;</button>' +
-                        '<div style="text-align:center">' +
-                            '<div class="cal-month-title" id="calMonthTitle"></div>' +
-                            '<div class="cal-month-sub" id="calMonthHijri"></div>' +
-                        '</div>' +
-                        '<div style="display:flex;gap:0.4rem;align-items:center">' +
-                            '<button class="cal-today-btn" id="calToday">اليوم</button>' +
-                            '<button class="cal-nav-btn" id="calNext">&#8249;</button>' +
-                        '</div>' +
-                    '</div>' +
-                    '<div class="shift-filter-bar" id="shiftFilterBar">' +
-                        '<button class="sf-btn active" data-s="all">الكل</button>' +
-                        '<button class="sf-btn sf-a" data-s="أ">وردية أ</button>' +
-                        '<button class="sf-btn sf-b" data-s="ب">وردية ب</button>' +
-                        '<button class="sf-btn sf-c" data-s="ج">وردية ج</button>' +
-                        '<button class="sf-btn sf-d" data-s="د">وردية د</button>' +
-                    '</div>' +
-                    '<div class="cal-zoom-bar">' +
-                        '<span style="font-size:0.75rem;color:var(--text-secondary)">حجم الخلايا:</span>' +
-                        '<button class="cal-zoom-btn" id="calZoomOut">−</button>' +
-                        '<button class="cal-zoom-btn" id="calZoomIn">+</button>' +
-                    '</div>' +
-                    '<div class="cal-zoom-wrapper">' +
-                        '<div id="calZoomInner">' +
-                            '<div class="cal-day-headers">' +
-                                DAYS_MED.map(function(d) { return '<div class="cal-day-hdr">' + d + '</div>'; }).join('') +
-                            '</div>' +
-                            '<div class="cal-grid" id="calGrid"></div>' +
-                        '</div>' +
-                    '</div>' +
-                    '<div id="calSummary"></div>';
-
-                document.getElementById('calPrev').onclick = function() {
-                    _month--;
-                    if (_month < 1) { _month = 12; _year--; }
-                    _renderMonth();
-                };
-                document.getElementById('calNext').onclick = function() {
-                    _month++;
-                    if (_month > 12) { _month = 1; _year++; }
-                    _renderMonth();
-                };
-                document.getElementById('calToday').onclick = function() {
-                    var now = new Date();
-                    _year  = now.getFullYear();
-                    _month = now.getMonth() + 1;
-                    _renderMonth();
-                    setTimeout(function() {
-                        var todayEl = document.querySelector('#calGrid .cal-today');
-                        if (todayEl) todayEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }, 80);
-                };
-                document.getElementById('calZoomIn').onclick = function() {
-                    _zoom = Math.min(parseFloat((_zoom + 0.15).toFixed(2)), 2.0);
-                    _applyZoom();
-                };
-                document.getElementById('calZoomOut').onclick = function() {
-                    _zoom = Math.max(parseFloat((_zoom - 0.15).toFixed(2)), 0.4);
-                    _applyZoom();
-                };
-                el.querySelectorAll('.sf-btn').forEach(function(btn) {
-                    btn.onclick = function() {
-                        _selectedShift = this.dataset.s;
-                        el.querySelectorAll('.sf-btn').forEach(function(b) { b.classList.remove('active'); });
-                        this.classList.add('active');
-                        _renderMonth();
-                    };
-                });
-            }
-
-            function _renderMonth() {
-                var daysInMonth = new Date(_year, _month, 0).getDate();
-                var firstDow    = new Date(_year, _month - 1, 1).getDay();
-
-                var titleEl = document.getElementById('calMonthTitle');
-                if (titleEl) titleEl.textContent = MONTHS_AR[_month - 1] + ' ' + _year;
-
-                var subEl = document.getElementById('calMonthHijri');
-                if (subEl) {
-                    var hFirst = _toHijri(_year, _month, 1);
-                    var hLast  = _toHijri(_year, _month, daysInMonth);
-                    subEl.textContent = (hFirst.month === hLast.month)
-                        ? HIJRI_MONTHS[hFirst.month - 1] + ' ' + hFirst.year + ' هـ'
-                        : HIJRI_MONTHS[hFirst.month - 1] + ' – ' + HIJRI_MONTHS[hLast.month - 1] + ' ' + hFirst.year + ' هـ';
-                }
-
-                var grid = document.getElementById('calGrid');
-                if (!grid) return;
-
-                var today    = new Date();
-                var todayStr = today.getFullYear() + '-' + _pad(today.getMonth() + 1) + '-' + _pad(today.getDate());
-
-                var summary = {};
-                SHIFT_KEYS.forEach(function(k) { summary[k] = { morning:0, evening:0, off:0 }; });
-
-                var html = '';
-                for (var e = 0; e < firstDow; e++) html += '<div class="cal-empty"></div>';
-
-                for (var d = 1; d <= daysInMonth; d++) {
-                    var dateStr = _year + '-' + _pad(_month) + '-' + _pad(d);
-                    var dateObj = new Date(dateStr + 'T00:00:00');
-                    var hijri   = _toHijri(_year, _month, d);
-                    var isToday = dateStr === todayStr;
-                    var dow     = dateObj.getDay();
-
-                    var pillsHtml = '';
-                    SHIFT_KEYS.forEach(function(letter) {
-                        var sh = SHIFTS[letter];
-                        if (_selectedShift !== 'all' && _selectedShift !== letter) return;
-                        var status = _shiftStatus(letter, dateStr);
-                        summary[letter][status]++;
-                        pillsHtml +=
-                            '<div class="cal-shift-pill">' +
-                                '<span class="csp-label" style="background:' + sh.color + '">' + letter + '</span>' +
-                                '<span class="csp-status ' + STATUS_CLASS[status] + '">' + STATUS_LABEL[status] + '</span>' +
-                            '</div>';
-                    });
-
-                    html +=
-                        '<div class="cal-card' + (isToday ? ' cal-today' : '') + '">' +
-                            '<div class="cal-card-head">' +
-                                '<span class="cal-dname">' + DAYS_AR[dow] + '</span>' +
-                                '<span class="cal-dnum' + (isToday ? ' today-num' : '') + '">' + d + '</span>' +
-                            '</div>' +
-                            '<div class="cal-hijri">' + hijri.day + ' ' + HIJRI_MONTHS[hijri.month - 1] + '</div>' +
-                            pillsHtml +
-                        '</div>';
-                }
-
-                grid.innerHTML = html;
-                _renderSummary(summary);
-                _applyZoom();
-            }
-
-            function _renderSummary(summary) {
-                var el = document.getElementById('calSummary');
-                if (!el) return;
-                var keys = _selectedShift === 'all' ? SHIFT_KEYS : [_selectedShift];
-                var html = '<div class="cal-summary-wrap"><div class="cal-summary-title">ملخص الشهر</div><div class="cal-summary-grid">';
-                keys.forEach(function(letter) {
-                    var s  = summary[letter] || { morning:0, evening:0, off:0 };
-                    var sh = SHIFTS[letter];
-                    html +=
-                        '<div class="cal-sum-card" style="border-top:3px solid ' + sh.color + '">' +
-                            '<div class="cal-sum-shift" style="color:' + sh.color + '">وردية ' + letter + '</div>' +
-                            '<div class="cal-sum-row"><span>☀ صباح</span><b>' + s.morning + '</b></div>' +
-                            '<div class="cal-sum-row"><span>🌙 مساء</span><b>' + s.evening + '</b></div>' +
-                            '<div class="cal-sum-row"><span>— إجازة</span><b>' + s.off + '</b></div>' +
-                        '</div>';
-                });
-                html += '</div></div>';
-                el.innerHTML = html;
-            }
-
-            return { init: init };
-        })();
-
-        function showCalendarPage() {
-            showPage('calendarPage');
-            ShiftCalendar.init('shiftCalendarContainer');
-        }
-
-        function backFromCalendar() {
-            showPage('dashboardPage');
-        }
-
     </script>
 </body>
 </html>
