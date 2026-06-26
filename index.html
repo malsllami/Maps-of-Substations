@@ -14,25 +14,20 @@
         document.getElementById('manifest-placeholder').setAttribute('href', URL.createObjectURL(blob));
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
     <style>
+        /* ================================================
+           المتغيرات والأساسيات
+           ================================================ */
         :root{--sec-orange:#e8a54b;--sec-blue:#1e3a5f;--sec-blue-light:#2d4a6f;--sec-blue-lighter:#5b8fb9;--success:#5cb85c;--warning:#f0c36d;--danger:#e57373;--bg-dark:#0f1c2e;--bg-card:#1a2d47;--bg-input:#243447;--text-primary:#fff;--text-secondary:#a0b4c8;--border:#3d5a80}
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:'Tajawal',sans-serif;background:var(--bg-dark);color:var(--text-primary);min-height:100vh}
         .page{display:none;min-height:100vh}.page.active{display:block}
         .login-page{display:flex;align-items:center;justify-content:center;padding:1rem;background:linear-gradient(135deg,var(--bg-dark),var(--sec-blue))}
         .login-card{background:var(--bg-card);border-radius:1rem;padding:2rem;width:100%;max-width:400px;box-shadow:0 10px 40px rgba(0,0,0,0.3)}
-        .login-logo{text-align:center;margin-bottom:1.5rem}
-        .login-logo .icon{font-size:3rem;background:linear-gradient(135deg,#e8a54b,#d4923a);width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
-        .login-logo h1{font-size:1.5rem;color:var(--sec-orange)}
-        .login-logo p{color:var(--text-secondary);font-size:0.85rem}
-        .tabs{display:flex;margin-bottom:1.5rem;background:var(--bg-input);border-radius:0.5rem;padding:0.25rem}
-        .tab{flex:1;padding:0.75rem;text-align:center;border-radius:0.4rem;cursor:pointer;transition:0.3s;color:var(--text-secondary)}
-        .tab.active{background:linear-gradient(135deg,#e8a54b,#d4923a);color:#fff;font-weight:600}
-        .tab-content{display:none}.tab-content.active{display:block}
         .form-group{margin-bottom:1rem}
         .form-group label{display:block;margin-bottom:0.5rem;color:var(--text-secondary);font-size:0.85rem}
         .form-group input,.form-group select,.form-group textarea{width:100%;padding:0.75rem 1rem;background:var(--bg-input);border:2px solid var(--border);border-radius:0.5rem;color:var(--text-primary);font-family:'Tajawal',sans-serif;font-size:1rem}
@@ -50,9 +45,9 @@
         .btn-secondary{background:var(--bg-input);color:var(--text-primary);border:1px solid var(--border)}
         .btn-warning{background:var(--warning);color:#1a1a1a}
         .btn-danger{background:var(--danger);color:#fff}
-        .admin-link{text-align:center;margin-top:1.5rem}
-        .admin-link a{color:var(--text-secondary);font-size:0.85rem;text-decoration:none}
-        .admin-link a:hover{color:var(--sec-orange)}
+        /* ================================================
+           الهيدر
+           ================================================ */
         .header{background:var(--bg-card);padding:0.75rem 1rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:800}
         .header-right{display:flex;align-items:center;gap:0.75rem}
         .header-right .logo{font-size:1.5rem}
@@ -75,13 +70,12 @@
         .logout-btn:hover{background:var(--danger);color:#fff}
         .logout-btn svg{width:1rem;height:1rem;fill:currentColor}
         .admin-toggle-btn{background:linear-gradient(135deg,#9b59b6,#8e44ad);color:#fff;border:none;padding:0.4rem 0.75rem;border-radius:0.5rem;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:0.8rem;font-weight:600;transition:0.3s;display:flex;align-items:center;gap:0.3rem}
-        .admin-toggle-btn:hover{transform:scale(1.05);box-shadow:0 3px 10px rgba(155,89,182,0.4)}
+        .admin-toggle-btn:hover{background:linear-gradient(135deg,#8e44ad,#7d3c98);transform:scale(1.05);box-shadow:0 3px 10px rgba(155,89,182,0.4)}
         .back-to-dashboard-btn{background:linear-gradient(135deg,#3498db,#2980b9);color:#fff;border:none;padding:0.4rem 0.75rem;border-radius:0.5rem;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:0.8rem;font-weight:600;transition:0.3s;display:flex;align-items:center;gap:0.3rem}
         .back-to-dashboard-btn:hover{transform:scale(1.05)}
-        .admin-toggle-btn{background:linear-gradient(135deg,#9b59b6,#8e44ad);color:#fff;border:none;padding:0.4rem 0.75rem;border-radius:0.5rem;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:0.8rem;font-weight:600;transition:0.3s;display:flex;align-items:center;gap:0.3rem}
-        .admin-toggle-btn:hover{background:linear-gradient(135deg,#8e44ad,#7d3c98);transform:scale(1.05)}
-        .employee-toggle-btn{background:linear-gradient(135deg,#3498db,#2980b9);color:#fff;border:none;padding:0.4rem 0.75rem;border-radius:0.5rem;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:0.8rem;font-weight:600;transition:0.3s;display:flex;align-items:center;gap:0.3rem}
-        .employee-toggle-btn:hover{background:linear-gradient(135deg,#2980b9,#1f6dad);transform:scale(1.05)}
+        /* ================================================
+           المحتوى الرئيسي والبحث والنتائج
+           ================================================ */
         .main-content{padding:1rem;max-width:1200px;margin:0 auto;isolation:isolate}
         .search-section{background:var(--bg-card);border-radius:1rem;padding:1.25rem;margin-bottom:1rem}
         .search-section h2{display:flex;align-items:center;gap:0.5rem;font-size:1.1rem;margin-bottom:1rem;color:var(--sec-orange)}
@@ -125,6 +119,9 @@
         .map-section h3{font-size:1rem;color:var(--sec-orange);margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem}
         .map-container{height:300px;border-radius:0.75rem;overflow:hidden}
         .leaflet-container{background:var(--bg-input)}
+        /* ================================================
+           النوافذ المنبثقة (Modals)
+           ================================================ */
         .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.92);display:none;align-items:center;justify-content:center;z-index:1000;padding:1rem;overflow-y:auto}
         .modal-overlay.active{display:flex}
         .modal{background:var(--bg-card);border-radius:1rem;width:100%;max-width:500px;max-height:90vh;overflow-y:auto}
@@ -152,6 +149,9 @@
         .coords-manual-input .parse-btn:hover{background:var(--sec-orange)}
         .coords-hint{font-size:0.7rem;color:var(--text-secondary);margin-top:0.25rem;text-align:center}
         .coords-or{text-align:center;color:var(--text-secondary);font-size:0.8rem;margin:0.5rem 0}
+        /* ================================================
+           تتبع الأعطال
+           ================================================ */
         .fault-inputs{display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-bottom:1rem}
         .fault-input{position:relative}
         .fault-input label{position:absolute;top:-0.5rem;right:0.5rem;background:var(--bg-card);padding:0 0.25rem;font-size:0.7rem;color:var(--text-secondary)}
@@ -166,6 +166,9 @@
         .nav-link{display:inline-flex;align-items:center;gap:0.5rem;padding:0.75rem 1.25rem;background:var(--success);color:#fff;text-decoration:none;border-radius:0.5rem;font-weight:600}
         .nav-link:hover{background:#4a9d4a}
         .total-distance{display:flex;align-items:center;gap:0.5rem;padding:0.75rem 1rem;background:var(--bg-input);border-radius:0.5rem;color:var(--sec-orange);font-weight:600}
+        /* ================================================
+           لوحة المدير
+           ================================================ */
         .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:0.75rem;margin-bottom:1.5rem}
         .stat-card{background:var(--bg-card);border-radius:0.75rem;padding:1rem;text-align:center;border:1px solid var(--border)}
         .stat-card .number{font-size:1.75rem;font-weight:700;color:var(--sec-orange)}
@@ -192,8 +195,8 @@
         .whatsapp-message-box input::placeholder{color:var(--text-secondary)}
         .send-all-btn{background:linear-gradient(135deg,#25D366,#128C7E);color:white;border:none;padding:0.6rem 1rem;border-radius:0.5rem;cursor:pointer;font-size:0.85rem;white-space:nowrap;transition:0.3s;display:inline-flex;align-items:center;gap:0.4rem}
         .send-all-btn:hover{transform:scale(1.05);box-shadow:0 2px 8px rgba(37,211,102,0.4)}
-        .whatsapp-btn{background:#25D366;color:white;border:none;padding:0.3rem 0.6rem;border-radius:0.4rem;cursor:pointer;font-size:0.8rem;transition:0.3s}
-        .whatsapp-btn:hover{background:#128C7E;transform:scale(1.1)}
+        .wa-table-btn{background:#25D366;color:white;border:none;padding:0.3rem 0.6rem;border-radius:0.4rem;cursor:pointer;font-size:0.8rem;transition:0.3s}
+        .wa-table-btn:hover{background:#128C7E;transform:scale(1.1)}
         .online-section{border:1px solid rgba(92,184,92,0.3);background:linear-gradient(135deg,rgba(92,184,92,0.05),transparent)}
         .online-section h3{color:#5cb85c}
         .online-section h3 svg{width:1.2rem;height:1.2rem;flex-shrink:0}
@@ -214,10 +217,12 @@
         .admin-section{background:var(--bg-card);border-radius:0.75rem;padding:1.25rem;margin-bottom:1rem}
         .admin-section h3{display:flex;align-items:center;gap:0.5rem;color:var(--sec-orange);margin-bottom:1rem;font-size:1rem}
         .chart-container{height:200px}
+        /* ================================================
+           التحميل والاشعارات (Loading / Toast / PWA)
+           ================================================ */
         .loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,28,46,0.9);display:none;align-items:center;justify-content:center;z-index:2000;flex-direction:column;gap:1rem}
         .loading-overlay.active{display:flex}
         .loading-spinner{width:50px;height:50px;border:4px solid var(--border);border-top-color:var(--sec-orange);border-radius:50%;animation:spin 1s linear infinite}
-        @keyframes spin{to{transform:rotate(360deg)}}
         .first-load-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(30,58,95,0.95);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:3000;gap:1.5rem}
         .first-load-overlay.active{display:flex}
         .first-load-logo{font-size:4rem;animation:pulse 1.5s infinite}
@@ -341,19 +346,6 @@
         .remember-row{display:flex;align-items:center;gap:0.45rem;font-size:0.73rem;color:rgba(255,255,255,0.38);width:100%;justify-content:center}
         .remember-row input[type=checkbox]{accent-color:#00e5ff;width:0.88rem;height:0.88rem;flex-shrink:0;cursor:pointer}
         .remember-row label{cursor:pointer;margin:0}
-        .login-links{margin-top:1.1rem;display:flex;flex-direction:column;align-items:center;gap:0.6rem}
-        .login-links a,.login-links span{color:#00e5ff;font-size:0.9rem;text-decoration:none;cursor:pointer;opacity:0.72;transition:0.2s;font-family:'Tajawal',sans-serif}
-        .login-links a:hover,.login-links span:hover{opacity:1;text-shadow:0 0 10px rgba(0,229,255,0.55)}
-        .login-register-card{background:rgba(0,229,255,0.03);border:1px solid rgba(0,229,255,0.18);border-radius:1rem;padding:1.25rem 1.5rem;width:300px;margin-top:0.8rem;display:none}
-        .login-register-card.active{display:block}
-        .login-register-card .form-group label{color:rgba(0,229,255,0.65);font-size:0.78rem}
-        .login-register-card .form-group input,.login-register-card .form-group select{background:rgba(0,229,255,0.04);border:1.5px solid rgba(0,229,255,0.22);color:#fff;border-radius:0.5rem;font-family:'Tajawal',sans-serif}
-        .login-register-card .form-group input:focus,.login-register-card .form-group select:focus{border-color:#00e5ff;outline:none;box-shadow:0 0 8px rgba(0,229,255,0.2)}
-        .login-register-card .form-group select option{background:#08101e}
-        .login-register-card .btn-success{background:linear-gradient(135deg,#00acc1,#00e5ff);color:#06090f;font-weight:700;font-family:'Tajawal',sans-serif;border:none}
-        .login-page .tabs{display:none!important}
-        .login-page .login-logo{display:none!important}
-        .login-page .admin-link{display:none!important}
         /* روابط داخل الدائرة */
         .login-inner-links{display:flex;align-items:center;justify-content:center;gap:0.55rem;margin-top:0.35rem;flex-wrap:wrap}
         .login-inner-links span,.login-inner-links a{color:rgba(0,229,255,0.62);font-size:0.78rem;cursor:pointer;text-decoration:none;transition:0.2s;font-family:'Tajawal',sans-serif}
@@ -797,6 +789,9 @@
     <div class="install-btn" id="installBtn"><button class="close-install" onclick="hideInstallBanner(event)">×</button><svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg><span onclick="installApp()">تثبيت التطبيق</span></div>
 
     <script>
+        // ================================================
+        // الثوابت والمتغيرات الرئيسية
+        // ================================================
         const API_URL = 'https://script.google.com/macros/s/AKfycbxGopljlI-_c9OYYGIL6AVvTjj4F7HxA_r-_7dQ0DiHw0H9y18r8Jl6lMWgyIPmX8Q/exec';
         let currentUser = null, nearbyMap = null, faultMap = null, faultStations = [], editingStationType = null, deferredPrompt = null;
         let globeLeafletMap = null;
@@ -807,6 +802,9 @@
         let onlineUpdateTimer = null, contactPhone = '966500000000';
         let currentSearchedStation = null, showFeederMode = false;
 
+        // ================================================
+        // أدوات مساعدة (Utilities)
+        // ================================================
         // التحقق من الاتصال بالإنترنت
         function isOnline() { return navigator.onLine; }
         
@@ -852,6 +850,9 @@
             } catch(e) { return null; }
         }
         
+        // ================================================
+        // إدارة الكاش والبيانات
+        // ================================================
         async function loadStationsCache() { 
             updateCacheStatus('loading', 'جاري التحميل...'); 
             // مسح الكاش القديم (الإصدار 7 غير المضغوط)
@@ -991,6 +992,9 @@
         
         function calcDistance(lat1, lon1, lat2, lon2) { var R = 6371, dLat = (lat2 - lat1) * Math.PI / 180, dLon = (lon2 - lon1) * Math.PI / 180, a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2)*Math.sin(dLon/2); return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); }
 
+        // ================================================
+        // API والواجهة العامة (UI helpers)
+        // ================================================
         function showLoading() { document.getElementById('loadingOverlay').classList.add('active'); }
         function hideLoading() { document.getElementById('loadingOverlay').classList.remove('active'); }
         
@@ -1035,6 +1039,9 @@
         async function loadContactPhone() { try { var r = await apiGet('getContactNumber'); if (r.phone) contactPhone = r.phone; } catch (e) {} }
         function openWhatsApp() { var phone = contactPhone.replace(/\D/g, ''); if (phone.startsWith('0')) phone = '966' + phone.substring(1); if (!phone.startsWith('966')) phone = '966' + phone; window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent('السلام عليكم'), '_blank'); }
 
+        // ================================================
+        // المصادقة والجلسات (Auth & Session)
+        // ================================================
         function startOnlineTracking() { if (!currentUser) return; updateMyOnlineStatus(); if (onlineUpdateTimer) clearInterval(onlineUpdateTimer); onlineUpdateTimer = setInterval(updateMyOnlineStatus, 30000); }
         function stopOnlineTracking() { if (onlineUpdateTimer) { clearInterval(onlineUpdateTimer); onlineUpdateTimer = null; } setMeOffline(); }
         async function updateMyOnlineStatus() { if (!currentUser) return; try { await apiPost({ action: 'updateOnline', phone: currentUser.phone, name: currentUser.name }); } catch (e) {} }
@@ -1151,7 +1158,9 @@
         function logout() { stopOnlineTracking(); currentUser = null; isAdmin = false; localStorage.removeItem('currentUser'); sessionStorage.removeItem('currentUser'); localStorage.removeItem('isAdmin'); if (!localStorage.getItem('biometric_credential_id')) { localStorage.removeItem('biometric_banner_dismissed'); } document.getElementById('adminToggleBtn').style.display = 'none'; showPage('loginPage'); document.getElementById('loginPhone').value = ''; document.getElementById('loginBtn').disabled = true; checkBiometricAvailable(); showToast('تم الخروج'); }
         function checkSession() { try { var s = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser'); if (s) { currentUser = JSON.parse(s); if (!currentUser || !currentUser.name) throw new Error('bad session'); updateUserUI(); showPage('dashboardPage'); loadStationsCache(); startOnlineTracking(); checkAdminStatus(); offerBiometricSetup(); } else { showPage('loginPage'); checkBiometricAvailable(); } } catch(e) { localStorage.removeItem('currentUser'); sessionStorage.removeItem('currentUser'); localStorage.removeItem('isAdmin'); showPage('loginPage'); checkBiometricAvailable(); } }
 
-        // === تذكرني + البصمة ===
+        // ================================================
+        // البصمة (WebAuthn / Biometric)
+        // ================================================
         function saveSession(user) {
             var check = document.getElementById('rememberMeCheck');
             if (!check || check.checked) {
@@ -1253,6 +1262,9 @@
             }
         }
 
+        // ================================================
+        // الكرة الأرضية والبحث (Globe & Search)
+        // ================================================
         function showGlobeMini() {
             var gs = document.getElementById('globeSection');
             var spinner = document.getElementById('globeSpinner');
@@ -1482,6 +1494,9 @@
             document.getElementById('nearbyList').innerHTML = listHtml;
         }
 
+        // ================================================
+        // إدارة المحطات (إضافة / تعديل)
+        // ================================================
         function openAddModal(t) { 
             if (t === 'distribution') { 
                 document.getElementById('addDistributionModal').classList.add('active'); 
@@ -1613,6 +1628,9 @@
             searchStation(); 
         }
 
+        // ================================================
+        // تتبع الأعطال (Fault Tracking)
+        // ================================================
         function openFaultModal() { document.getElementById('faultModal').classList.add('active'); for (var i = 1; i <= 6; i++) { var inp = document.getElementById('fault' + i); if (inp) { inp.value = ''; inp.className = ''; } } document.getElementById('faultResults').style.display = 'none'; }
         
         async function searchFaultStations() { 
@@ -1706,6 +1724,9 @@
             document.getElementById('totalDistance').innerHTML = '📏 المسافة: ' + total.toFixed(2) + ' كم';
         }
 
+        // ================================================
+        // لوحة المدير (Admin Dashboard)
+        // ================================================
         async function loadAdminData() { 
             // إظهار حالة التحميل في البطاقات
             document.getElementById('totalDistribution').textContent = '...';
@@ -1767,7 +1788,7 @@
                     window.allUsersData = users.users; // حفظ البيانات للاستخدام لاحقاً
                     document.getElementById('adminUsersBody').innerHTML = users.users.map(function(u) { 
                         var phone = u.phone ? String(u.phone).replace(/^0/, '966') : '';
-                        return '<tr><td>' + u.name + '</td><td>' + u.phone + '</td><td>' + (u.type||'موظف') + '</td><td>' + (u.registerDate||'-') + '</td><td><button class="whatsapp-btn" onclick="sendWhatsApp(\'' + phone + '\')"><svg viewBox="0 0 24 24" style="width:1rem;height:1rem;fill:#fff;vertical-align:middle;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></button></td></tr>'; 
+                        return '<tr><td>' + u.name + '</td><td>' + u.phone + '</td><td>' + (u.type||'موظف') + '</td><td>' + (u.registerDate||'-') + '</td><td><button class="wa-table-btn" onclick="sendWhatsApp(\'' + phone + '\')"><svg viewBox="0 0 24 24" style="width:1rem;height:1rem;fill:#fff;vertical-align:middle;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></button></td></tr>'; 
                     }).join('');
                 }
                 
@@ -1775,6 +1796,7 @@
                 if (logs.logs) document.getElementById('adminLogsBody').innerHTML = logs.logs.slice(-30).reverse().map(function(l) { return '<tr><td style="color:' + (l.type.indexOf('اضافة') !== -1 ? 'var(--success)' : 'var(--warning)') + '">' + l.type + '</td><td>' + l.station + '</td><td>' + l.user + '</td><td>' + l.date + '</td></tr>'; }).join('');
             } catch (e) {
                 console.error('Error loading admin data:', e);
+                showToast('فشل تحميل بيانات لوحة المدير', 'error');
             }
         }
         
@@ -1938,13 +1960,18 @@
             }
         }
 
+        // ================================================
+        // تثبيت التطبيق (PWA Install)
+        // ================================================
         window.addEventListener('beforeinstallprompt', function(e) { e.preventDefault(); deferredPrompt = e; showInstallBanner(); });
         function showInstallBanner() { var b = document.getElementById('installBtn'); if (b && !localStorage.getItem('installBannerClosed')) { b.classList.add('show'); document.body.classList.add('install-visible'); } }
         function hideInstallBanner(e) { if (e) e.stopPropagation(); var b = document.getElementById('installBtn'); if (b) { b.classList.remove('show'); document.body.classList.remove('install-visible'); localStorage.setItem('installBannerClosed', 'true'); } }
         function installApp() { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.userChoice.then(function(r) { deferredPrompt = null; hideInstallBanner(); if (r.outcome === 'accepted') showToast('تم التثبيت'); }); } }
         function checkIOSInstall() { var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent); var isStandalone = window.navigator.standalone; if (isIOS && !isStandalone && !localStorage.getItem('iosPromptShown')) { setTimeout(function() { }, 3000); } }
 
-        // === تقويم الورديات ===
+        // ================================================
+        // تقويم الورديات (Shift Calendar)
+        // ================================================
         var shiftCalDate = new Date();
         var SHIFT_REFS = {
             'أ': new Date(2026, 5, 22),
