@@ -651,12 +651,15 @@
         <button onclick="dismissBiometricBanner()" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;font-size:1.4rem;padding:0.2rem 0.5rem;line-height:1;">×</button>
     </div>
 
-    <div id="adminBiometricBanner" style="display:none;position:fixed;bottom:1rem;left:1rem;right:1rem;z-index:1600;background:linear-gradient(135deg,rgba(20,20,30,0.96),rgba(30,20,10,0.95));border:1px solid rgba(155,89,182,0.5);border-radius:0.75rem;padding:0.85rem 1rem;align-items:center;gap:0.75rem;flex-wrap:wrap;box-shadow:0 6px 30px rgba(0,0,0,0.6);backdrop-filter:blur(12px);">
+    <div id="adminBiometricBanner" style="display:none;position:fixed;bottom:6rem;left:1rem;right:1rem;z-index:1600;background:linear-gradient(135deg,rgba(20,20,30,0.96),rgba(30,20,10,0.95));border:1px solid rgba(155,89,182,0.5);border-radius:0.75rem;padding:0.85rem 1rem;align-items:center;gap:0.75rem;flex-wrap:wrap;box-shadow:0 6px 30px rgba(0,0,0,0.6);backdrop-filter:blur(12px);">
         <span style="font-size:1.5rem;">🔐</span>
         <div style="flex:1;min-width:150px;"><div style="font-weight:600;font-size:0.9rem;">تفعيل بصمة المدير</div><div style="font-size:0.75rem;color:var(--text-secondary);">دخول للوحة المدير بالبصمة بدون كتابة الرمز كل مرة</div></div>
         <button onclick="setupAdminBiometric()" style="padding:0.5rem 1rem;background:#9b59b6;border:none;border-radius:0.5rem;color:#fff;font-family:'Tajawal',sans-serif;font-weight:600;cursor:pointer;font-size:0.85rem;white-space:nowrap;">تفعيل الآن</button>
         <button onclick="dismissAdminBiometricBanner()" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;font-size:1.4rem;padding:0.2rem 0.5rem;line-height:1;">×</button>
     </div>
+    <!-- ملاحظة: bottom:6rem هنا مقصود (مش نفس قيمة بانر الموظف bottom:1rem) -- موظف
+         يملك صلاحية مدير بنفس الجلسة (زر "موظف"/"المدير" بالأعلى) ممكن يخلي البانرين
+         مؤهلين للظهور بنفس الوقت؛ الإزاحة تمنع التراكب لو صار هذا فعلاً. -->
 
 
     <!-- صفحة تقويم الورديات -->
@@ -1146,7 +1149,7 @@
             if (isAdmin) {
                 showPage('adminPage');
                 loadAdminData();
-                offerBiometricSetup();
+                offerAdminBiometricSetup();
             }
         }
         function backToEmployee() {
