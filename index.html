@@ -96,6 +96,7 @@ header{
   transition:opacity .9s ease;
 }
 #map-container.active{opacity:1;pointer-events:auto;}
+.leaflet-tile-pane{filter:brightness(1.6) contrast(1.15);}
 .hero-content{
   position:absolute;inset:0;z-index:5;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -173,21 +174,22 @@ h1{
 }
 .back-btn.show{display:flex;}
 .station-table{
-  position:absolute;bottom:14px;right:14px;left:14px;z-index:6;
+  position:absolute;bottom:12px;right:12px;z-index:6;
+  width:min(280px, calc(100% - 24px));
   background:var(--bg-card);border:1px solid var(--border-strong);
-  border-radius:14px;padding:14px 16px;
+  border-radius:12px;padding:10px 14px;
   display:none;
-  max-height:calc(100% - 28px);overflow-y:auto;
-  box-shadow:0 8px 24px rgba(0,0,0,.25);
+  max-height:calc(100% - 24px);overflow-y:auto;
+  box-shadow:0 8px 24px rgba(0,0,0,.3);
 }
 .station-table.show{display:block;}
-.station-table .st-name{font-weight:700;font-size:14px;margin-bottom:10px;}
-.station-table table{width:100%;border-collapse:collapse;font-size:12px;}
-.station-table td{padding:5px 0;color:var(--text-secondary);}
+.station-table .st-name{font-weight:700;font-size:12.5px;margin-bottom:6px;line-height:1.4;}
+.station-table table{width:100%;border-collapse:collapse;font-size:11px;}
+.station-table td{padding:3px 0;color:var(--text-secondary);}
 .station-table td.v{color:var(--text-primary);font-weight:500;text-align:left;font-family:'JetBrains Mono',monospace;direction:ltr;}
-.station-table .st-actions{display:flex;gap:8px;margin-top:10px;}
+.station-table .st-actions{display:flex;gap:6px;margin-top:8px;}
 .station-table .st-btn{
-  flex:1;text-align:center;font-size:12px;padding:8px;border-radius:8px;
+  flex:1;text-align:center;font-size:11px;padding:6px;border-radius:7px;
   border:1px solid var(--border-strong);background:var(--bg);color:var(--text-primary);
   text-decoration:none;cursor:pointer;transition:.2s;
 }
@@ -196,7 +198,7 @@ h1{
 .cards-section{
   position:relative;z-index:5;
   padding:0 32px 60px;
-  display:flex;justify-content:center;
+  display:flex;flex-direction:column;align-items:center;
 }
 body.guest-mode #cardsSection{display:none;}
 body.guest-mode .globe-stage{width:min(900px,94vw);height:min(720px,80vh);}
@@ -257,7 +259,7 @@ footer{
   .login-btn{padding:7px 12px;font-size:12px;}
   .theme-toggle{width:34px;height:34px;}
   .hero{padding-top:100px;}
-  .globe-stage{height:min(440px, 50vh);width:92vw;}
+  .globe-stage{height:min(540px, 62vh);width:92vw;}
   .cards-row{gap:6px;}
   .stat-card{padding:10px 8px;border-right-width:2px;}
   .stat-card .label{font-size:10.5px;line-height:1.3;}
@@ -324,10 +326,10 @@ footer{
 </section>
 
 <section class="cards-section" id="cardsSection">
-  <div style="display:flex;justify-content:center;margin-bottom:10px;width:100%;max-width:760px">
-    <button id="refreshStatsBtn" style="background:transparent;border:none;color:var(--text-secondary);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;padding:4px 8px;font-family:'IBM Plex Sans Arabic',sans-serif" aria-label="تحديث الإحصائيات">
-      <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"></path></svg>
-      تحديث البيانات
+  <div style="display:flex;justify-content:center;margin-bottom:8px;width:100%;max-width:760px">
+    <button id="refreshStatsBtn" style="background:transparent;border:1px solid var(--border);border-radius:14px;color:var(--text-secondary);font-size:10.5px;cursor:pointer;display:flex;align-items:center;gap:5px;padding:5px 10px;font-family:'IBM Plex Sans Arabic',sans-serif" aria-label="تحديث الإحصائيات">
+      <svg id="refreshIcon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"></path></svg>
+      تحديث
     </button>
   </div>
   <div class="cards-row">
