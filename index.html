@@ -226,6 +226,8 @@ footer{
   .login-btn{padding:7px 12px;font-size:12px;}
   .theme-toggle{width:34px;height:34px;}
   .hero{padding-top:110px;}
+  .hero-content{transform:translateY(14vh);}
+  .hero-content.shrink{transform:translateY(-16vh);}
 }
 @media (max-width:340px){
   .logo-text{font-size:11px;}
@@ -347,6 +349,28 @@ document.querySelectorAll('.stat-card').forEach(card=>{
 
 /* ===== تبديل الثيم ===== */
 const themeToggle = document.getElementById('themeToggle');
+/* ===== حالة تسجيل الدخول بالهيدر ===== */
+(function(){
+  const raw = localStorage.getItem('sec-session');
+  if(!raw) return;
+  try{
+    const session = JSON.parse(raw);
+    const loginBtn = document.getElementById('loginBtn');
+    if(!loginBtn || !session.name) return;
+    loginBtn.textContent = session.name.split(' ')[0];
+    loginBtn.removeAttribute('href');
+    loginBtn.style.cursor = 'pointer';
+    loginBtn.addEventListener('click', (e)=>{
+      e.preventDefault();
+      if(confirm('تسجيل الخروج؟')){
+        localStorage.removeItem('sec-session');
+        localStorage.removeItem('sec-phone');
+        location.reload();
+      }
+    });
+  }catch(e){}
+})();
+
 themeToggle.addEventListener('click', ()=>{
   const cur = document.body.getAttribute('data-theme');
   const next = cur === 'dark' ? 'light' : 'dark';
