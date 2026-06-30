@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تسجيل الدخول | محطات التوزيع</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue-deep:#1B4D8C; --blue-mid:#2E7DD1; --teal:#1FAE8C; --teal-light:#4DD6B5;
+}
+[data-theme="dark"]{
+  --bg:#0A1420; --bg-elev:#101D2E; --bg-card:#0D1826;
+  --text-primary:#EAF1F7; --text-secondary:#8FA3B8;
+  --border:rgba(255,255,255,0.08); --border-strong:rgba(255,255,255,0.16);
+  --danger:#E0654F; --danger-bg:rgba(224,101,79,0.1);
+}
+[data-theme="light"]{
+  --bg:#F4F8FB; --bg-elev:#FFFFFF; --bg-card:#FFFFFF;
+  --text-primary:#102035; --text-secondary:#52647A;
+  --border:rgba(16,32,53,0.10); --border-strong:rgba(16,32,53,0.20);
+  --danger:#C8412C; --danger-bg:rgba(200,65,44,0.08);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'IBM Plex Sans Arabic',sans-serif;
+  background:var(--bg); color:var(--text-primary);
+  min-height:100vh; display:flex; align-items:center; justify-content:center;
+  padding:24px; transition:background .3s,color .3s;
+}
+.auth-card{
+  width:100%; max-width:400px;
+  background:var(--bg-card); border:1px solid var(--border);
+  border-radius:16px; padding:32px 28px;
+}
+.brand{display:flex; align-items:center; gap:10px; margin-bottom:28px;}
+.brand-mark{width:28px;height:28px;border-radius:50%;background:conic-gradient(from 200deg, var(--blue-deep), var(--blue-mid), var(--teal), var(--teal-light), var(--blue-deep));}
+.brand-text{font-size:14px;font-weight:700;}
+.tabs{display:flex; background:var(--bg); border-radius:10px; padding:4px; margin-bottom:24px; border:1px solid var(--border);}
+.tab{flex:1; text-align:center; padding:9px; border-radius:7px; font-size:13px; cursor:pointer; color:var(--text-secondary); transition:.2s;}
+.tab.active{background:var(--bg-card); color:var(--text-primary); font-weight:500; box-shadow:0 1px 3px rgba(0,0,0,.1);}
+h2{font-size:18px; font-weight:700; margin-bottom:6px;}
+.desc{font-size:13px; color:var(--text-secondary); margin-bottom:22px; line-height:1.6;}
+.field{margin-bottom:16px;}
+.field label{display:block; font-size:12.5px; color:var(--text-secondary); margin-bottom:7px;}
+.input-base{
+  width:100%; height:46px; background:var(--bg); border:1px solid var(--border-strong);
+  border-radius:10px; color:var(--text-primary); font-family:inherit; font-size:14px;
+  padding:0 14px; outline:none; transition:border-color .2s;
+}
+.input-base:focus{border-color:var(--teal);}
+.phone-field{display:flex; gap:8px;}
+.country-select{
+  display:flex; align-items:center; gap:6px; height:46px; padding:0 10px;
+  background:var(--bg); border:1px solid var(--border-strong); border-radius:10px;
+  cursor:pointer; position:relative; min-width:92px; flex-shrink:0;
+}
+.country-flag{width:20px; height:14px; border-radius:2px; overflow:hidden; flex-shrink:0;}
+.country-code{font-family:'JetBrains Mono',monospace; font-size:13px; direction:ltr;}
+.country-dropdown{
+  position:absolute; top:52px; right:0; width:230px; max-height:240px; overflow-y:auto;
+  background:var(--bg-card); border:1px solid var(--border-strong); border-radius:10px;
+  box-shadow:0 8px 24px rgba(0,0,0,.2); z-index:20; display:none;
+}
+.country-dropdown.open{display:block;}
+.country-option{display:flex; align-items:center; gap:10px; padding:10px 12px; cursor:pointer; font-size:13px;}
+.country-option:hover{background:var(--bg);}
+.phone-input{flex:1; direction:ltr; text-align:right; font-family:'JetBrains Mono',monospace;}
+.error-banner{
+  background:var(--danger-bg); color:var(--danger); font-size:12.5px;
+  padding:10px 12px; border-radius:8px; margin-bottom:16px; display:none; line-height:1.6;
+}
+.error-banner.show{display:block;}
+
+.btn-progress{
+  position:relative; width:100%; height:46px; border-radius:10px; border:none;
+  background:var(--teal); color:#fff; font-family:inherit; font-size:14px; font-weight:700;
+  cursor:pointer; overflow:hidden; transition:opacity .2s;
+}
+.btn-progress:disabled{cursor:not-allowed;}
+.btn-progress .label{position:relative; z-index:2; display:flex; align-items:center; justify-content:center; gap:8px; height:100%;}
+.btn-progress .fill{
+  position:absolute; inset:0; width:0%; background:rgba(255,255,255,0.28);
+  transition:width .25s linear; z-index:1;
+}
+.btn-progress.error .fill{background:rgba(255,255,255,0.0);}
+.btn-progress.error{background:var(--danger);}
+.btn-progress .pct{font-family:'JetBrains Mono',monospace; font-size:13px;}
+.btn-progress .check{display:none;}
+.btn-progress.success .check{display:inline;}
+.btn-progress.success .pct, .btn-progress.success .default-label{display:none;}
+
+.fingerprint-step{display:none; text-align:center; padding:20px 0;}
+.fingerprint-step.show{display:block;}
+.fp-icon{
+  width:64px; height:64px; border-radius:50%; border:2px solid var(--teal);
+  display:flex; align-items:center; justify-content:center; margin:0 auto 16px;
+  animation:pulse 1.6s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(31,174,140,.3);}50%{box-shadow:0 0 0 10px rgba(31,174,140,0);}}
+.field-disabled{opacity:.5; pointer-events:none;}
+.switch-link{text-align:center; margin-top:18px; font-size:13px; color:var(--text-secondary);}
+.switch-link a{color:var(--teal); cursor:pointer; text-decoration:none; font-weight:500;}
+</style>
+</head>
+<body data-theme="dark" id="bodyEl">
+<script>
+(function(){
+  var saved = localStorage.getItem('sec-theme');
+  if(saved === 'light' || saved === 'dark') document.getElementById('bodyEl').setAttribute('data-theme', saved);
+})();
+</script>
+
+<div class="auth-card">
+  <div class="brand">
+    <div class="brand-mark"></div>
+    <div class="brand-text">محطات التوزيع — SEC</div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" id="tabLogin">تسجيل الدخول</div>
+    <div class="tab" id="tabRegister">عضو جديد</div>
+  </div>
+
+  <div id="errorBanner" class="error-banner"></div>
+
+  <!-- ===== خطوة إدخال الجوال (مشتركة) ===== -->
+  <div id="phoneStep">
+    <h2 id="stepTitle">تسجيل الدخول</h2>
+    <p class="desc" id="stepDesc">أدخل رقم جوالك المسجل، ثم تحقق ببصمتك أو Face ID</p>
+
+    <div class="field" id="nameField" style="display:none">
+      <label>الاسم الكامل</label>
+      <input type="text" class="input-base" id="nameInput" placeholder="محمد عبدالله السلامي">
+    </div>
+
+    <div class="field">
+      <label>رقم الجوال</label>
+      <div class="phone-field">
+        <div class="country-select" id="countrySelect">
+          <span class="country-flag" id="selectedFlag">🇸🇦</span>
+          <span class="country-code" id="selectedCode">+966</span>
+          <span style="font-size:10px;color:var(--text-secondary)">▾</span>
+          <div class="country-dropdown" id="countryDropdown"></div>
+        </div>
+        <input type="tel" class="input-base phone-input" id="phoneInput" placeholder="5xxxxxxxx" inputmode="tel">
+      </div>
+    </div>
+
+    <div class="field" id="emailField" style="display:none">
+      <label>الإيميل (اختياري)</label>
+      <input type="email" class="input-base" id="emailInput" placeholder="name@example.com" dir="ltr">
+    </div>
+
+    <button class="btn-progress" id="mainBtn">
+      <span class="label">
+        <span class="default-label" id="mainBtnLabel">متابعة</span>
+        <span class="pct" id="mainBtnPct"></span>
+        <span class="check">✓</span>
+      </span>
+      <span class="fill" id="mainBtnFill"></span>
+    </button>
+  </div>
+
+  <!-- ===== خطوة البصمة ===== -->
+  <div class="fingerprint-step" id="fingerprintStep">
+    <div class="fp-icon">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1FAE8C" stroke-width="1.6"><path d="M12 11c1 0 2 .5 2 2v3M8 12v3a4 4 0 0 0 8 0v-3a4 4 0 0 0-4-4 1 1 0 0 0-1 1"/><path d="M5 12a7 7 0 0 1 14 0v2"/><path d="M2.5 13a9.5 9.5 0 0 1 19 0"/></svg>
+    </div>
+    <p style="font-size:14px; font-weight:500; margin-bottom:6px;" id="fpTitle">استخدم بصمتك للمتابعة</p>
+    <p style="font-size:12.5px; color:var(--text-secondary)">سيطلب جهازك التحقق ببصمة الإصبع أو الوجه</p>
+  </div>
+
+  <div class="switch-link" id="switchHint">ما عندك حساب؟ <a id="goRegister">سجّل كعضو جديد</a></div>
+</div>
+
+<script>
+/* ===== الثيم ===== */
+const phone10ToFull = (code, local) => code + local.replace(/^0+/, '');
+
+/* ===== قائمة الدول الخليجية/العربية، السعودية افتراضي ===== */
+const countries = [
+  {code:'+966', flag:'🇸🇦', name:'السعودية'},
+  {code:'+971', flag:'🇦🇪', name:'الإمارات'},
+  {code:'+973', flag:'🇧🇭', name:'البحرين'},
+  {code:'+965', flag:'🇰🇼', name:'الكويت'},
+  {code:'+974', flag:'🇶🇦', name:'قطر'},
+  {code:'+968', flag:'🇴🇲', name:'عُمان'},
+  {code:'+20',  flag:'🇪🇬', name:'مصر'},
+  {code:'+962',  flag:'🇯🇴', name:'الأردن'},
+];
+let selectedCountry = countries[0];
+const dropdown = document.getElementById('countryDropdown');
+countries.forEach(c=>{
+  const opt = document.createElement('div');
+  opt.className = 'country-option';
+  opt.innerHTML = `<span>${c.flag}</span><span style="font-family:'JetBrains Mono',monospace">${c.code}</span><span style="color:var(--text-secondary)">${c.name}</span>`;
+  opt.addEventListener('click', ()=>{
+    selectedCountry = c;
+    document.getElementById('selectedFlag').textContent = c.flag;
+    document.getElementById('selectedCode').textContent = c.code;
+    dropdown.classList.remove('open');
+  });
+  dropdown.appendChild(opt);
+});
+document.getElementById('countrySelect').addEventListener('click', (e)=>{
+  e.stopPropagation();
+  dropdown.classList.toggle('open');
+});
+document.addEventListener('click', ()=> dropdown.classList.remove('open'));
+
+/* ===== تحويل أرقام عربية لإنجليزية بالإدخال ===== */
+const phoneInput = document.getElementById('phoneInput');
+phoneInput.addEventListener('input', ()=>{
+  const arabicIndic = '٠١٢٣٤٥٦٧٨٩';
+  phoneInput.value = phoneInput.value.replace(/[٠-٩]/g, d => arabicIndic.indexOf(d)).replace(/[^\d]/g,'');
+});
+
+/* ===== التبديل بين تسجيل الدخول / عضو جديد ===== */
+let mode = 'login';
+const tabLogin = document.getElementById('tabLogin');
+const tabRegister = document.getElementById('tabRegister');
+function setMode(m){
+  mode = m;
+  tabLogin.classList.toggle('active', m==='login');
+  tabRegister.classList.toggle('active', m==='register');
+  document.getElementById('nameField').style.display = m==='register' ? 'block':'none';
+  document.getElementById('emailField').style.display = m==='register' ? 'block':'none';
+  document.getElementById('stepTitle').textContent = m==='login' ? 'تسجيل الدخول' : 'إنشاء حساب جديد';
+  document.getElementById('stepDesc').textContent = m==='login'
+    ? 'أدخل رقم جوالك المسجل، ثم تحقق ببصمتك أو Face ID'
+    : 'سجّل بياناتك، ثم سجّل بصمة جهازك فورًا لتأمين الدخول';
+  document.getElementById('switchHint').innerHTML = m==='login'
+    ? 'ما عندك حساب؟ <a id="goRegister">سجّل كعضو جديد</a>'
+    : 'عندك حساب؟ <a id="goLogin">سجّل الدخول</a>';
+  hideError();
+  bindSwitchLinks();
+}
+function bindSwitchLinks(){
+  const r = document.getElementById('goRegister');
+  const l = document.getElementById('goLogin');
+  if(r) r.addEventListener('click', ()=>setMode('register'));
+  if(l) l.addEventListener('click', ()=>setMode('login'));
+}
+tabLogin.addEventListener('click', ()=>setMode('login'));
+tabRegister.addEventListener('click', ()=>setMode('register'));
+bindSwitchLinks();
+
+function showError(msg){
+  const el = document.getElementById('errorBanner');
+  el.textContent = msg; el.classList.add('show');
+}
+function hideError(){ document.getElementById('errorBanner').classList.remove('show'); }
+
+/* ============================================================
+ *  مكوّن زر التقدم القابل لإعادة الاستخدام
+ *  منع التكرار: disable فوري + قفل أي حقل بالنموذج
+ * ============================================================ */
+function ProgressButton(btnEl, labelEl, pctEl, fillEl, formFields){
+  let running = false;
+  return {
+    async run(taskFn){
+      if(running) return; // حماية إضافية من النقر المزدوج
+      running = true;
+      btnEl.disabled = true;
+      btnEl.classList.remove('error','success');
+      formFields.forEach(f=>f.classList.add('field-disabled'));
+      labelEl.style.display='none';
+      pctEl.style.display='inline';
+
+      let progress = 0;
+      const tick = setInterval(()=>{
+        progress = Math.min(progress + Math.random()*14, 92);
+        fillEl.style.width = progress+'%';
+        pctEl.textContent = Math.round(progress)+'%';
+      }, 120);
+
+      try{
+        const result = await taskFn();
+        clearInterval(tick);
+        fillEl.style.width = '100%';
+        pctEl.textContent = '100%';
+        await new Promise(r=>setTimeout(r,250));
+        btnEl.classList.add('success');
+        await new Promise(r=>setTimeout(r,500));
+        return result;
+      }catch(err){
+        clearInterval(tick);
+        btnEl.classList.add('error');
+        fillEl.style.width = '0%';
+        showError(err.message || 'حدث خطأ، حاول مرة أخرى');
+        throw err;
+      }finally{
+        running = false;
+        btnEl.disabled = false;
+        btnEl.classList.remove('error','success');
+        labelEl.style.display='inline';
+        pctEl.style.display='none';
+        fillEl.style.width='0%';
+        formFields.forEach(f=>f.classList.remove('field-disabled'));
+      }
+    }
+  };
+}
+
+const mainBtn = document.getElementById('mainBtn');
+const mainBtnLabel = document.getElementById('mainBtnLabel');
+const mainBtnPct = document.getElementById('mainBtnPct');
+const mainBtnFill = document.getElementById('mainBtnFill');
+const formFields = [phoneInput, document.getElementById('nameInput'), document.getElementById('emailInput'), document.getElementById('countrySelect')];
+const progressBtn = ProgressButton(mainBtn, mainBtnLabel, mainBtnPct, mainBtnFill, formFields);
+
+/* ============================================================
+ *  محاكاة استدعاء الباكند (استبدلها بـ fetch فعلي لرابط Apps Script)
+ * ============================================================ */
+const API_URL = 'PUT_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
+async function callBackend(action, payload){
+  // مثال فعلي:
+  // const res = await fetch(API_URL, {method:'POST', body: JSON.stringify({action, ...payload})});
+  // return await res.json();
+  await new Promise(r=>setTimeout(r, 900)); // محاكاة فقط
+  return { success:true };
+}
+
+mainBtn.addEventListener('click', async ()=>{
+  hideError();
+  const phone = selectedCountry.code + phoneInput.value.trim();
+  if(phoneInput.value.trim().length < 8){
+    showError('الرجاء إدخال رقم جوال صحيح'); return;
+  }
+  if(mode==='register' && document.getElementById('nameInput').value.trim().length < 2){
+    showError('الرجاء إدخال الاسم الكامل'); return;
+  }
+
+  try{
+    await progressBtn.run(async ()=>{
+      if(mode==='login'){
+        const check = await callBackend('checkPhone', {phone});
+        if(!check.success) throw new Error(check.error || 'رقم غير مسجل');
+        return startWebAuthnLogin(phone);
+      } else {
+        const name = document.getElementById('nameInput').value.trim();
+        const email = document.getElementById('emailInput').value.trim();
+        const begin = await callBackend('registerBegin', {phone, name, email});
+        if(!begin.success) throw new Error(begin.error);
+        return startWebAuthnRegistration(phone, begin);
+      }
+    });
+  }catch(e){ /* الخطأ ظاهر بالفعل بالبانر */ }
+});
+
+/* ============================================================
+ *  WebAuthn — تسجيل بصمة جديدة
+ * ============================================================ */
+async function startWebAuthnRegistration(phone, beginResponse){
+  document.getElementById('phoneStep').style.display='none';
+  document.getElementById('fingerprintStep').classList.add('show');
+  document.getElementById('fpTitle').textContent = 'سجّل بصمتك الآن لتأمين حسابك';
+
+  // مثال فعلي لاستدعاء WebAuthn (يحتاج beginResponse.challenge من الباكند كـ ArrayBuffer):
+  // const cred = await navigator.credentials.create({ publicKey: { ... } });
+  // await callBackend('registerComplete', {phone, credential: serialize(cred), deviceName: navigator.platform});
+
+  await new Promise(r=>setTimeout(r, 1200)); // محاكاة فقط
+  localStorage.setItem('sec-phone', phone);
+  document.getElementById('fpTitle').textContent = 'تم تسجيل البصمة بنجاح';
+}
+
+/* ============================================================
+ *  WebAuthn — الدخول ببصمة موجودة
+ * ============================================================ */
+async function startWebAuthnLogin(phone){
+  document.getElementById('phoneStep').style.display='none';
+  document.getElementById('fingerprintStep').classList.add('show');
+  document.getElementById('fpTitle').textContent = 'تحقق ببصمتك للدخول';
+
+  // const begin = await callBackend('loginBegin', {phone});
+  // const cred = await navigator.credentials.get({ publicKey: { ... } });
+  // const result = await callBackend('loginComplete', {phone, credential: serialize(cred)});
+
+  await new Promise(r=>setTimeout(r, 1200)); // محاكاة فقط
+  localStorage.setItem('sec-phone', phone);
+}
+
+/* ===== اقتراح آخر رقم جوال مستخدم تلقائيًا ===== */
+window.addEventListener('load', ()=>{
+  const saved = localStorage.getItem('sec-phone');
+  if(saved){
+    const match = countries.find(c => saved.startsWith(c.code));
+    if(match){
+      selectedCountry = match;
+      document.getElementById('selectedFlag').textContent = match.flag;
+      document.getElementById('selectedCode').textContent = match.code;
+      phoneInput.value = saved.slice(match.code.length);
+    }
+  }
+});
+</script>
+</body>
+</html>
