@@ -71,6 +71,7 @@ h2{font-size:18px; font-weight:700; margin-bottom:6px;}
   padding:10px 12px; border-radius:8px; margin-bottom:16px; display:none; line-height:1.6;
 }
 .error-banner.show{display:block;}
+.member-type-btn.active{border-color:var(--teal)!important;background:var(--teal)!important;color:#fff!important;font-weight:500;}
 
 .btn-progress{
   position:relative; width:100%; height:46px; border-radius:10px; border:none;
@@ -154,6 +155,14 @@ h2{font-size:18px; font-weight:700; margin-bottom:6px;}
       <input type="text" class="input-base" id="nameInput" placeholder="محمد أحمد السلامي">
     </div>
 
+    <div class="field" id="memberTypeField" style="display:none">
+      <label>نوع العضوية</label>
+      <div style="display:flex;gap:8px">
+        <button type="button" class="member-type-btn active" data-type="موظف" style="flex:1;height:44px;border-radius:10px;border:1px solid var(--border-strong);background:var(--bg);color:var(--text-primary);font-family:inherit;font-size:13px;cursor:pointer;transition:.2s">موظف</button>
+        <button type="button" class="member-type-btn" data-type="مقاول" style="flex:1;height:44px;border-radius:10px;border:1px solid var(--border-strong);background:var(--bg);color:var(--text-primary);font-family:inherit;font-size:13px;cursor:pointer;transition:.2s">مقاول</button>
+      </div>
+    </div>
+
     <div class="field">
       <label>رقم الجوال</label>
       <div class="phone-field">
@@ -222,6 +231,15 @@ const countries = [
   {code:'+962',  flag:'🇯🇴', name:'الأردن'},
 ];
 let selectedCountry = countries[0];
+
+let selectedMemberType = 'موظف';
+document.querySelectorAll('.member-type-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.member-type-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedMemberType = btn.dataset.type;
+  });
+});
 const dropdown = document.getElementById('countryDropdown');
 countries.forEach(c=>{
   const opt = document.createElement('div');
@@ -257,6 +275,7 @@ function setMode(m){
   tabLogin.classList.toggle('active', m==='login');
   tabRegister.classList.toggle('active', m==='register');
   document.getElementById('nameField').style.display = m==='register' ? 'block':'none';
+  document.getElementById('memberTypeField').style.display = m==='register' ? 'block':'none';
   document.getElementById('emailField').style.display = m==='register' ? 'block':'none';
   document.getElementById('stepTitle').textContent = m==='login' ? 'تسجيل الدخول' : 'إنشاء حساب جديد';
   document.getElementById('stepDesc').textContent = m==='login'
@@ -394,7 +413,7 @@ mainBtn.addEventListener('click', async ()=>{
       } else {
         const name = document.getElementById('nameInput').value.trim();
         const email = document.getElementById('emailInput').value.trim();
-        const reg = await callBackend('registerUser', {name, phone, email});
+        const reg = await callBackend('registerUser', {name, phone, email, memberType: selectedMemberType});
         if(!reg.success) throw new Error(reg.error || 'تعذّر إنشاء الحساب');
         result = await startWebAuthnRegistration(phone, name);
       }
@@ -494,11 +513,16 @@ async function startWebAuthnLogin(phone){
   const begin = await callBackend('generateLoginChallenge', {phone});
   if(!begin.success){
     if(begin.notRegistered){
+      // عضو موجود بالنظام لكن بدون بصمة مسجّلة (مثلًا عضو منقول من موقع سابق)
+      // ينتقل مباشرة لتفعيل البصمة، بدون المرور بـ registerUser من جديد
       fpProgress.fail();
-      document.getElementById('fingerprintStep').classList.remove('show');
-      document.getElementById('phoneStep').style.display='block';
-      setMode('register');
-      throw new Error('لا يوجد بصمة مسجلة لهذا الرقم، سجّل كعضو جديد أولًا');
+      document.getElementById('fpTitle').textContent = 'لا توجد بصمة مسجّلة، سيتم تفعيلها الآن';
+      try{
+        const result = await startWebAuthnRegistration(phone, begin.name || '');
+        return result;
+      }catch(regErr){
+        throw regErr;
+      }
     }
     throw new Error(begin.error || 'تعذّر بدء تسجيل الدخول');
   }
