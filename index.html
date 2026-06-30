@@ -96,7 +96,7 @@ header{
   transition:opacity .9s ease;
 }
 #map-container.active{opacity:1;pointer-events:auto;}
-.leaflet-tile-pane{filter:brightness(1.6) contrast(1.15);}
+[data-theme="dark"] .leaflet-tile-pane{filter:invert(0.92) hue-rotate(180deg) brightness(0.95) contrast(0.9);}
 .hero-content{
   position:absolute;inset:0;z-index:5;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -464,7 +464,6 @@ themeToggle.addEventListener('click', ()=>{
   document.body.setAttribute('data-theme', next);
   localStorage.setItem('sec-theme', next);
   updateGlobeColors();
-  if(currentTileLayer) swapTiles(next);
 });
 
 /* ===== الكرة الأرضية Three.js — محصورة بحدود globeStage فقط ===== */
@@ -638,28 +637,21 @@ searchInput.addEventListener('keydown', (e)=>{
 });
 
 let leafletMap = null, currentTileLayer = null, marker = null;
-const tileURLs = {
-  dark: 'https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-  light: 'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
-};
+const TILE_URL = 'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
 
 function initMap(){
   leafletMap = L.map('map-container', {zoomControl:false, attributionControl:false}).setView([21.54,39.19], 12);
-  const theme = document.body.getAttribute('data-theme');
-  currentTileLayer = L.tileLayer(tileURLs[theme], {maxZoom:19}).addTo(leafletMap);
+  currentTileLayer = L.tileLayer(TILE_URL, {maxZoom:19}).addTo(leafletMap);
   L.control.zoom({position:'bottomleft'}).addTo(leafletMap);
   setTimeout(()=>leafletMap.invalidateSize(), 50);
   setTimeout(()=>leafletMap.invalidateSize(), 400);
 }
 
-function swapTiles(theme){
-  if(currentTileLayer) leafletMap.removeLayer(currentTileLayer);
-  currentTileLayer = L.tileLayer(tileURLs[theme], {maxZoom:19}).addTo(leafletMap);
-}
-
 const teal = ()=> document.body.getAttribute('data-theme')==='dark' ? '#4DD6B5':'#1FAE8C';
 
+let currentStation = null;
 function goToStation(s){
+  currentStation = s;
   if(!leafletMap) initMap();
   searchLens.classList.remove('open');
   document.getElementById('heroContent').classList.add('hidden');
@@ -690,12 +682,130 @@ function goToStation(s){
           </table>
           <div class="st-actions">
             <a class="st-btn primary" href="${mapsUrl}" target="_blank" rel="noopener">انتقال لقوقل ماب</a>
-            <a class="st-btn" href="auth.html">تعديل</a>
+            <button class="st-btn" id="openEditBtn">تعديل</button>
           </div>`;
         stationTable.classList.add('show');
+        document.getElementById('openEditBtn').addEventListener('click', openEditForm);
       }, 200);
     }
   }, 16);
+}
+
+/* ============================================================
+ *  نموذج تعديل المحطة (مغذي/منطقة/موقع) — يفتح فوق الجدول
+ * ============================================================ */
+let editPreviewMap = null, editPreviewMarker = null;
+
+function openEditForm(){
+  if(!hasValidSession()){
+    searchHint.innerHTML = 'سجّل دخول للتعديل — <a href="auth.html" style="color:var(--teal);font-weight:500;text-decoration:underline">تسجيل الدخول</a>';
+    searchHint.className = 'search-hint err';
+    return;
+  }
+  const s = currentStation;
+  const isDistribution = s.type === 'توزيع';
+
+  stationTable.innerHTML = `
+    <div class="st-name">تعديل: ${s.name}</div>
+    <div id="editError" style="display:none;font-size:11px;color:#E0654F;margin-bottom:8px;"></div>
+    ${isDistribution ? `
+    <div style="margin-bottom:8px;">
+      <label style="font-size:10.5px;color:var(--text-secondary)">المغذي</label>
+      <input id="editFeeder" class="edit-input" value="${s.feeder || ''}">
+    </div>
+    <div style="margin-bottom:8px;">
+      <label style="font-size:10.5px;color:var(--text-secondary)">المنطقة</label>
+      <input id="editRegion" class="edit-input" value="${s.region || ''}">
+    </div>` : ''}
+    <div style="display:flex;gap:6px;margin-bottom:8px;">
+      <input id="editLat" class="edit-input" placeholder="خط العرض" value="${s.lat.toFixed(6)}">
+      <input id="editLng" class="edit-input" placeholder="خط الطول" value="${s.lng.toFixed(6)}">
+    </div>
+    <button id="useGpsBtn" type="button" style="width:100%;font-size:11px;padding:6px;border-radius:7px;border:1px solid var(--border-strong);background:var(--bg);color:var(--teal);cursor:pointer;margin-bottom:8px;">📍 استخدام موقعي الحالي</button>
+    <div id="editPreviewMap" style="width:100%;height:120px;border-radius:8px;overflow:hidden;margin-bottom:8px;"></div>
+    <div class="st-actions">
+      <button class="st-btn primary" id="saveEditBtn">حفظ التعديل</button>
+      <button class="st-btn" id="cancelEditBtn">إلغاء</button>
+    </div>`;
+
+  const styleTag = document.createElement('style');
+  styleTag.textContent = `.edit-input{width:100%;height:34px;background:var(--bg);border:1px solid var(--border-strong);border-radius:7px;color:var(--text-primary);font-size:11.5px;padding:0 10px;font-family:'JetBrains Mono',monospace;direction:ltr;text-align:right;}`;
+  stationTable.appendChild(styleTag);
+
+  setTimeout(()=>{
+    if(editPreviewMap){ editPreviewMap.remove(); editPreviewMap = null; }
+    editPreviewMap = L.map('editPreviewMap', {zoomControl:false, attributionControl:false, dragging:true}).setView([s.lat, s.lng], 15);
+    L.tileLayer(TILE_URL, {maxZoom:19}).addTo(editPreviewMap);
+    editPreviewMarker = L.marker([s.lat, s.lng], {draggable:true}).addTo(editPreviewMap);
+    editPreviewMarker.on('dragend', ()=>{
+      const pos = editPreviewMarker.getLatLng();
+      document.getElementById('editLat').value = pos.lat.toFixed(6);
+      document.getElementById('editLng').value = pos.lng.toFixed(6);
+    });
+    setTimeout(()=>editPreviewMap.invalidateSize(), 100);
+
+    document.getElementById('editLat').addEventListener('input', syncPreviewFromInputs);
+    document.getElementById('editLng').addEventListener('input', syncPreviewFromInputs);
+  }, 50);
+
+  function syncPreviewFromInputs(){
+    const lat = parseFloat(document.getElementById('editLat').value);
+    const lng = parseFloat(document.getElementById('editLng').value);
+    if(!isNaN(lat) && !isNaN(lng) && editPreviewMap){
+      editPreviewMarker.setLatLng([lat,lng]);
+      editPreviewMap.setView([lat,lng]);
+    }
+  }
+
+  document.getElementById('useGpsBtn').addEventListener('click', ()=>{
+    if(!navigator.geolocation){ alert('المتصفح لا يدعم تحديد الموقع'); return; }
+    navigator.geolocation.getCurrentPosition(pos=>{
+      document.getElementById('editLat').value = pos.coords.latitude.toFixed(6);
+      document.getElementById('editLng').value = pos.coords.longitude.toFixed(6);
+      syncPreviewFromInputs();
+    }, ()=> alert('تعذّر الحصول على الموقع، تأكد من تفعيل صلاحية الموقع'));
+  });
+
+  document.getElementById('cancelEditBtn').addEventListener('click', ()=> goToStation(currentStation));
+
+  document.getElementById('saveEditBtn').addEventListener('click', async function(){
+    const btn = this;
+    if(btn.disabled) return;
+    const lat = parseFloat(document.getElementById('editLat').value);
+    const lng = parseFloat(document.getElementById('editLng').value);
+    const errEl = document.getElementById('editError');
+    if(isNaN(lat) || isNaN(lng)){
+      errEl.textContent = 'الرجاء إدخال إحداثية صحيحة'; errEl.style.display='block'; return;
+    }
+    errEl.style.display='none';
+    btn.disabled = true;
+    btn.textContent = 'جاري الحفظ...';
+
+    const session = JSON.parse(localStorage.getItem('sec-session') || '{}');
+    const opKey = 'edit_' + s.id + '_' + Date.now();
+    try{
+      const res = await callBackend('updateCoordinates', {
+        opKey, phone: session.phone, stationId: s.id, type: s.type,
+        lat, lng, method: 'يدوي/GPS',
+        feeder: isDistribution ? document.getElementById('editFeeder').value.trim() : undefined,
+        region: isDistribution ? document.getElementById('editRegion').value.trim() : undefined
+      });
+      if(!res.success) throw new Error(res.error || 'فشل الحفظ');
+
+      stationTable.innerHTML = `
+        <div style="text-align:center;padding:6px 0;">
+          <div style="color:var(--teal);font-weight:700;font-size:13px;margin-bottom:6px;">✓ تم حفظ التعديل بنجاح</div>
+          <div style="font-size:10.5px;color:var(--text-secondary);line-height:1.6;">
+            اضغط زر <b>"تحديث البيانات"</b> بأسفل الصفحة الرئيسية عشان التعديل يظهر بنتائج البحث.
+          </div>
+        </div>`;
+      currentStation.lat = lat; currentStation.lng = lng;
+      if(marker) marker.setLatLng([lat,lng]);
+    }catch(err){
+      errEl.textContent = err.message; errEl.style.display='block';
+      btn.disabled = false; btn.textContent = 'حفظ التعديل';
+    }
+  });
 }
 
 backBtn.addEventListener('click', ()=>{
