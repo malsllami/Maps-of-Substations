@@ -121,6 +121,14 @@ h2{font-size:18px; font-weight:700; margin-bottom:6px;}
 .fp-icon.verifying svg{opacity:1;}
 .field-disabled{opacity:.5; pointer-events:none;}
 .switch-link{text-align:center; margin-top:18px; font-size:13px; color:var(--text-secondary);}
+.admin-code-step{display:none;text-align:center;padding:10px 0;}
+.admin-code-step.show{display:block;}
+.admin-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(200,162,78,0.12);border:1px solid rgba(200,162,78,0.35);border-radius:20px;padding:6px 16px;margin-bottom:18px;}
+.admin-badge-dot{width:8px;height:8px;border-radius:50%;background:#C8A24E;}
+.admin-code-input{width:100%;height:52px;background:var(--bg);border:1.5px solid var(--border-strong);border-radius:12px;color:var(--text-primary);font-family:'JetBrains Mono',monospace;font-size:22px;text-align:center;letter-spacing:6px;outline:none;margin-bottom:10px;transition:border-color .2s;}
+.admin-code-input:focus{border-color:#C8A24E;}
+.admin-skip{font-size:12px;color:var(--text-secondary);cursor:pointer;margin-top:8px;display:block;}
+.admin-skip:hover{color:var(--text-primary);}
 .switch-link a{color:var(--teal); cursor:pointer; text-decoration:none; font-weight:500;}
 </style>
 </head>
@@ -172,13 +180,8 @@ h2{font-size:18px; font-weight:700; margin-bottom:6px;}
           <span style="font-size:10px;color:var(--text-secondary)">▾</span>
           <div class="country-dropdown" id="countryDropdown"></div>
         </div>
-        <input type="tel" class="input-base phone-input" id="phoneInput" placeholder="5xxxxxxxx" inputmode="tel">
+        <input type="text" inputmode="tel" class="input-base phone-input" id="phoneInput" placeholder="5xxxxxxxx" autocomplete="tel">
       </div>
-    </div>
-
-    <div class="field" id="emailField" style="display:none">
-      <label>الإيميل (اختياري)</label>
-      <input type="email" class="input-base" id="emailInput" placeholder="name@example.com" dir="ltr">
     </div>
 
     <button class="btn-progress" id="mainBtn">
@@ -210,6 +213,22 @@ h2{font-size:18px; font-weight:700; margin-bottom:6px;}
     <p class="fp-progress" id="fpProgress"></p>
     <p style="font-size:14px; font-weight:500; margin-bottom:6px;" id="fpTitle">استخدم بصمتك للمتابعة</p>
     <p style="font-size:12.5px; color:var(--text-secondary)">سيطلب جهازك التحقق ببصمة الإصبع أو الوجه</p>
+  </div>
+
+  <div class="admin-code-step" id="adminCodeStep">
+    <div class="admin-badge">
+      <span class="admin-badge-dot"></span>
+      <span style="font-size:12.5px;color:#C8A24E;font-weight:600">دخول لوحة المدير</span>
+    </div>
+    <p style="font-size:14px;font-weight:500;margin-bottom:6px" id="adminCodeName"></p>
+    <p style="font-size:12.5px;color:var(--text-secondary);margin-bottom:16px">أدخل رمز المدير للوصول للوحة التحكم</p>
+    <input class="admin-code-input" id="adminCodeInput" type="password" inputmode="numeric" maxlength="10" placeholder="••••">
+    <div id="adminCodeError" style="font-size:12px;color:#E0654F;min-height:16px;margin-bottom:8px;"></div>
+    <button class="btn-progress" id="adminCodeBtn" style="margin-bottom:8px">
+      <span class="label"><span id="adminCodeLabel">تأكيد الرمز</span><span class="pct" id="adminCodePct" style="display:none"></span></span>
+      <span class="fill" id="adminCodeFill"></span>
+    </button>
+    <span class="admin-skip" id="adminCodeSkip">الدخول كعضو عادي بدل المدير</span>
   </div>
 
   <div class="switch-link" id="switchHint">ما عندك حساب؟ <a id="goRegister">سجّل كعضو جديد</a></div>
@@ -276,7 +295,6 @@ function setMode(m){
   tabRegister.classList.toggle('active', m==='register');
   document.getElementById('nameField').style.display = m==='register' ? 'block':'none';
   document.getElementById('memberTypeField').style.display = m==='register' ? 'block':'none';
-  document.getElementById('emailField').style.display = m==='register' ? 'block':'none';
   document.getElementById('stepTitle').textContent = m==='login' ? 'تسجيل الدخول' : 'إنشاء حساب جديد';
   document.getElementById('stepDesc').textContent = m==='login'
     ? 'أدخل رقم جوالك المسجل، ثم تحقق ببصمتك أو Face ID'
@@ -358,7 +376,7 @@ const mainBtn = document.getElementById('mainBtn');
 const mainBtnLabel = document.getElementById('mainBtnLabel');
 const mainBtnPct = document.getElementById('mainBtnPct');
 const mainBtnFill = document.getElementById('mainBtnFill');
-const formFields = [phoneInput, document.getElementById('nameInput'), document.getElementById('emailInput'), document.getElementById('countrySelect')];
+const formFields = [phoneInput, document.getElementById('nameInput'), document.getElementById('countrySelect')];
 const progressBtn = ProgressButton(mainBtn, mainBtnLabel, mainBtnPct, mainBtnFill, formFields);
 
 /* ============================================================
@@ -412,14 +430,13 @@ mainBtn.addEventListener('click', async ()=>{
         result = await startWebAuthnLogin(phone);
       } else {
         const name = document.getElementById('nameInput').value.trim();
-        const email = document.getElementById('emailInput').value.trim();
-        const reg = await callBackend('registerUser', {name, phone, email, memberType: selectedMemberType});
+        const reg = await callBackend('registerUser', {name, phone, memberType: selectedMemberType});
         if(!reg.success) throw new Error(reg.error || 'تعذّر إنشاء الحساب');
         result = await startWebAuthnRegistration(phone, name);
       }
       if(result && result.success){
-        await new Promise(r=>setTimeout(r, 700)); // وقت كافٍ لقراءة رسالة "تم بنجاح"
-        window.location.href = 'index.html';
+        await new Promise(r=>setTimeout(r, 700));
+        window.location.href = result.role === 'admin' ? 'admin.html' : 'index.html';
       }
       return result;
     });
@@ -561,6 +578,11 @@ async function startWebAuthnLogin(phone){
   if(!result.success){ fpProgress.fail(); throw new Error(result.error || 'فشل التحقق من تسجيل الدخول'); }
   fpProgress.finish();
 
+  if(result.role === 'admin'){
+    const adminResult = await askAdminCode(phone, result.name);
+    return adminResult;
+  }
+
   saveSession(phone, result.name, result.role || 'member');
   return result;
 }
@@ -568,6 +590,71 @@ async function startWebAuthnLogin(phone){
 function saveSession(phone, name, role){
   localStorage.setItem('sec-phone', phone);
   localStorage.setItem('sec-session', JSON.stringify({phone, name, role, ts: Date.now()}));
+}
+
+/* ============================================================
+ *  شاشة رمز المدير — تظهر بعد نجاح البصمة لو الحساب مدير
+ * ============================================================ */
+function askAdminCode(phone, name){
+  return new Promise((resolve, reject)=>{
+    document.getElementById('fingerprintStep').classList.remove('show');
+    const step = document.getElementById('adminCodeStep');
+    step.classList.add('show');
+    document.getElementById('adminCodeName').textContent = name || '';
+    document.getElementById('adminCodeInput').value = '';
+    document.getElementById('adminCodeError').textContent = '';
+
+    const btn = document.getElementById('adminCodeBtn');
+    const label = document.getElementById('adminCodeLabel');
+    const pct = document.getElementById('adminCodePct');
+    const fill = document.getElementById('adminCodeFill');
+    const errEl = document.getElementById('adminCodeError');
+    let running = false;
+
+    // Enter بالكيبورد
+    document.getElementById('adminCodeInput').addEventListener('keydown', function handler(e){
+      if(e.key==='Enter'){ submit(); }
+    });
+
+    async function submit(){
+      if(running) return;
+      const code = document.getElementById('adminCodeInput').value.trim();
+      if(!code){ errEl.textContent = 'الرجاء إدخال الرمز'; return; }
+      running = true;
+      btn.disabled = true;
+      label.style.display='none'; pct.style.display='inline';
+      let p = 0;
+      const tick = setInterval(()=>{ p=Math.min(p+Math.random()*18,92); fill.style.width=p+'%'; pct.textContent=Math.round(p)+'%'; },120);
+
+      try{
+        const res = await callBackend('verifyAdminCode', {phone, code});
+        clearInterval(tick);
+        fill.style.width='100%'; pct.textContent='100%';
+        if(!res.success) throw new Error(res.error || 'رمز غير صحيح');
+        await new Promise(r=>setTimeout(r,300));
+        saveSession(phone, name, 'admin');
+        step.classList.remove('show');
+        resolve({success:true, role:'admin', name});
+      }catch(err){
+        clearInterval(tick);
+        btn.classList.add('error');
+        errEl.textContent = err.message;
+        running = false;
+        btn.disabled = false;
+        label.style.display='inline'; pct.style.display='none'; fill.style.width='0%';
+        setTimeout(()=>btn.classList.remove('error'), 600);
+      }
+    }
+
+    btn.addEventListener('click', submit);
+
+    // تخطي → دخول كعضو عادي
+    document.getElementById('adminCodeSkip').addEventListener('click', ()=>{
+      saveSession(phone, name, 'member');
+      step.classList.remove('show');
+      resolve({success:true, role:'member', name});
+    });
+  });
 }
 
 function startFpProgress(){
