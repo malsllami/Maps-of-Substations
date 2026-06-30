@@ -3,830 +3,171 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>محطات التوزيع | الشركة السعودية للطاقة</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<title>حسابي | محطات التوزيع</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{
-  --blue-deep:#1B4D8C;
-  --blue-mid:#2E7DD1;
-  --teal:#1FAE8C;
-  --teal-light:#4DD6B5;
-}
-[data-theme="dark"]{
-  --bg:#0A1420;
-  --bg-elev:#101D2E;
-  --bg-card:#0D1826;
-  --text-primary:#EAF1F7;
-  --text-secondary:#8FA3B8;
-  --border:rgba(255,255,255,0.08);
-  --border-strong:rgba(255,255,255,0.16);
-  --globe-line:rgba(77,214,181,0.35);
-  --globe-point:#4DD6B5;
-}
-[data-theme="light"]{
-  --bg:#EAF1F6;
-  --bg-elev:#F4F8FB;
-  --bg-card:#FFFFFF;
-  --text-primary:#102035;
-  --text-secondary:#52647A;
-  --border:rgba(16,32,53,0.12);
-  --border-strong:rgba(16,32,53,0.22);
-  --globe-line:rgba(27,77,140,0.45);
-  --globe-point:#1FAE8C;
-}
+:root{--blue-deep:#1B4D8C;--blue-mid:#2E7DD1;--teal:#1FAE8C;--teal-light:#4DD6B5;}
+[data-theme="dark"]{--bg:#0A1420;--bg-card:#0D1826;--text-primary:#EAF1F7;--text-secondary:#8FA3B8;--border:rgba(255,255,255,0.08);--border-strong:rgba(255,255,255,0.16);--danger:#E0654F;--danger-bg:rgba(224,101,79,0.1);}
+[data-theme="light"]{--bg:#EAF1F6;--bg-card:#FFFFFF;--text-primary:#102035;--text-secondary:#52647A;--border:rgba(16,32,53,0.10);--border-strong:rgba(16,32,53,0.20);--danger:#C8412C;--danger-bg:rgba(200,65,44,0.08);}
 *{margin:0;padding:0;box-sizing:border-box;}
-html,body{height:100%;}
-body{
-  font-family:'IBM Plex Sans Arabic',sans-serif;
-  background:var(--bg);
-  color:var(--text-primary);
-  overflow-x:hidden;
-  transition:background .4s ease,color .4s ease;
-}
-header{
-  position:fixed;top:0;right:0;left:0;z-index:50;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:16px 32px;
-  background:linear-gradient(to bottom, var(--bg) 65%, transparent);
-}
-.logo{display:flex;align-items:center;gap:10px;min-width:0;}
-.logo-mark{
-  width:30px;height:30px;border-radius:50%;flex-shrink:0;
-  background:conic-gradient(from 200deg, var(--blue-deep), var(--blue-mid), var(--teal), var(--teal-light), var(--blue-deep));
-}
-.logo-text{font-size:15px;font-weight:700;letter-spacing:.3px;white-space:nowrap;}
-.logo-sub{font-size:11px;color:var(--text-secondary);margin-top:1px;white-space:nowrap;}
-.header-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
-.login-btn{
-  text-decoration:none;font-size:13px;font-weight:500;color:var(--text-primary);
-  background:var(--bg-card);border:1px solid var(--border-strong);
-  padding:9px 16px;border-radius:8px;white-space:nowrap;
-  transition:border-color .2s, background .2s, transform .15s;
-}
-.login-btn:hover{border-color:var(--teal);background:var(--bg-elev);}
-.login-btn:active{transform:scale(0.97);}
-.theme-toggle{
-  width:38px;height:38px;border-radius:50%;flex-shrink:0;
-  border:1px solid var(--border-strong);
-  background:var(--bg-card);
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;color:var(--text-primary);
-  transition:border-color .2s, background .2s, transform .15s;
-}
-.theme-toggle:hover{border-color:var(--teal);background:var(--bg-elev);}
-.theme-toggle:active{transform:scale(0.92);}
-.hero{
-  position:relative;
-  min-height:100vh;
-  display:flex;align-items:center;justify-content:center;
-  padding:110px 20px 50px;
-}
-.globe-stage{
-  position:relative;
-  width:min(680px, 92vw);
-  height:min(520px, 60vh);
-  overflow:hidden;
-  background:transparent;
-}
-#globe-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:1;}
-#map-container{
-  position:absolute;inset:0;width:100%;height:100%;z-index:2;
-  opacity:0;pointer-events:none;
-  transition:opacity .9s ease;
-}
-#map-container.active{opacity:1;pointer-events:auto;}
-[data-theme="dark"] .leaflet-tile-pane{filter:invert(0.92) hue-rotate(180deg) brightness(0.95) contrast(0.9);}
-.hero-content{
-  position:absolute;inset:0;z-index:5;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:0 30px;pointer-events:none;
-  transition:opacity .4s ease;
-}
-.hero-content .search-wrap{pointer-events:auto;}
-.hero-content.hidden{opacity:0;pointer-events:none;}
-.eyebrow{
-  font-family:'JetBrains Mono',monospace;
-  font-size:11px;letter-spacing:2px;color:var(--teal);
-  margin-bottom:14px;text-transform:uppercase;
-  text-align:center;width:100%;
-}
-h1{
-  font-size:clamp(28px,4vw,46px);
-  font-weight:700;
-  text-align:center;
-  line-height:1.3;
-  margin-bottom:8px;
-}
-.h1-accent{
-  background:linear-gradient(90deg, var(--blue-mid), var(--teal));
-  -webkit-background-clip:text;
-  background-clip:text;
-  -webkit-text-fill-color:transparent;
-}
-.subtitle{
-  color:var(--text-secondary);
-  font-size:15px;text-align:center;max-width:520px;
-  margin-bottom:18px;
-}
-.search-wrap{pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:10px;}
-.search-lens{
-  width:58px;height:58px;border-radius:50%;
-  background:transparent;
-  border:none;
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;transition:width .45s cubic-bezier(.25,.8,.3,1),border-radius .45s,background .3s,border-color .3s;
-  overflow:visible;
-  position:relative;
-}
-.search-lens svg{
-  flex-shrink:0;width:30px;height:30px;stroke:var(--teal);
-  filter:drop-shadow(0 4px 10px rgba(31,174,140,0.45)) drop-shadow(0 2px 6px rgba(0,0,0,0.25));
-  transition:width .3s,height .3s;
-}
-.search-lens.open{
-  width:340px;border-radius:27px;
-  background:var(--bg-card);
-  border:2px solid var(--teal);
-  justify-content:flex-start;padding:0 18px;gap:10px;
-  box-shadow:0 8px 28px rgba(31,174,140,0.2), 0 2px 10px rgba(0,0,0,0.16);
-}
-.search-lens.open svg{
-  stroke:var(--text-primary);width:20px;height:20px;
-  filter:none;
-}
-.search-lens input{
-  flex:1;background:transparent;border:none;outline:none;
-  color:var(--text-primary);font-family:'JetBrains Mono',monospace;font-size:14px;
-  direction:ltr;text-align:right;
-}
-.search-lens input::placeholder{color:var(--text-secondary);font-family:'IBM Plex Sans Arabic',sans-serif;}
-.search-hint{font-size:12px;color:var(--text-secondary);min-height:16px;text-align:center;}
-.search-hint.err{color:#E0654F;}
-.search-hint.ok{color:var(--teal);}
-.back-btn{
-  pointer-events:auto;
-  position:absolute;top:14px;right:14px;display:none;
-  align-items:center;gap:6px;
-  font-size:12.5px;color:var(--text-secondary);
-  background:var(--bg-card);border:1px solid var(--border);
-  padding:7px 14px;border-radius:20px;cursor:pointer;z-index:6;
-}
-.back-btn.show{display:flex;}
-.station-table{
-  position:absolute;bottom:12px;right:12px;z-index:6;
-  width:min(280px, calc(100% - 24px));
-  background:var(--bg-card);border:1px solid var(--border-strong);
-  border-radius:12px;padding:10px 14px;
-  display:none;
-  max-height:calc(100% - 24px);overflow-y:auto;
-  box-shadow:0 8px 24px rgba(0,0,0,.3);
-}
-.station-table.show{display:block;}
-.station-table .st-name{font-weight:700;font-size:12.5px;margin-bottom:6px;line-height:1.4;}
-.station-table table{width:100%;border-collapse:collapse;font-size:11px;}
-.station-table td{padding:3px 0;color:var(--text-secondary);}
-.station-table td.v{color:var(--text-primary);font-weight:500;text-align:left;font-family:'JetBrains Mono',monospace;direction:ltr;}
-.station-table .st-actions{display:flex;gap:6px;margin-top:8px;}
-.station-table .st-btn{
-  flex:1;text-align:center;font-size:11px;padding:6px;border-radius:7px;
-  border:1px solid var(--border-strong);background:var(--bg);color:var(--text-primary);
-  text-decoration:none;cursor:pointer;transition:.2s;
-}
-.station-table .st-btn:hover{border-color:var(--teal);}
-.station-table .st-btn.primary{background:var(--teal);border-color:var(--teal);color:#fff;}
-.cards-section{
-  position:relative;z-index:5;
-  padding:0 32px 60px;
-  display:flex;flex-direction:column;align-items:center;
-}
-body.guest-mode #cardsSection{display:none;}
-body.guest-mode .globe-stage{width:min(900px,94vw);height:min(720px,80vh);}
-@media (max-width:600px){
-  body.guest-mode .globe-stage{height:min(620px,74vh);}
-}
-.cards-row{
-  display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;max-width:760px;width:100%;
-  align-items:start;
-}
-.stat-card{
-  min-width:0;
-  background:var(--bg-card);
-  border:1px solid var(--border);
-  border-radius:4px;
-  border-right:3px solid var(--teal);
-  padding:14px 14px;
-  cursor:pointer;
-  transition:border-color .2s, transform .2s, padding .35s ease;
-}
-.stat-card:nth-child(2){border-right-color:var(--blue-mid);}
-.stat-card:nth-child(3){border-right-color:#C8A24E;}
-.stat-card:hover{transform:translateY(-2px);}
-.stat-card .top{display:flex;justify-content:space-between;align-items:center;}
-.stat-card .num{
-  font-family:'JetBrains Mono',monospace;font-size:30px;font-weight:700;
-  direction:ltr;display:block;text-align:right;
-  max-height:0;opacity:0;overflow:hidden;
-  transition:max-height .4s cubic-bezier(.25,.8,.3,1), opacity .3s ease, margin-bottom .4s ease;
-  margin-bottom:0;
-}
-.stat-card.expanded .num{max-height:44px;opacity:1;margin-bottom:2px;}
-.stat-card.expanded{padding:18px 20px;}
-.stat-card .label{font-size:13px;color:var(--text-secondary);transition:font-size .3s ease;}
-.stat-card.expanded .label{font-size:12px;}
-.stat-card .chev{color:var(--text-secondary);transition:transform .3s;font-size:14px;}
-.stat-card.expanded .chev{transform:rotate(180deg);}
-.stat-panel{
-  max-height:0;overflow:hidden;
-  transition:max-height .45s cubic-bezier(.25,.8,.3,1), margin-top .45s;
-}
-.stat-card.expanded .stat-panel{max-height:160px;margin-top:14px;}
-.stat-panel-inner{border-top:1px solid var(--border);padding-top:12px;display:flex;flex-direction:column;gap:8px;}
-.stat-panel-row{display:flex;justify-content:space-between;font-size:12.5px;}
-.stat-panel-row .v{font-family:'JetBrains Mono',monospace;color:var(--teal);direction:ltr;}
-.legend-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-left:6px;}
-footer{
-  text-align:center;padding:24px;font-size:11px;color:var(--text-secondary);
-  border-top:1px solid var(--border);
-}
-@media (max-width:600px){
-  .search-lens.open{width:88vw;}
-  header{padding:12px 14px;}
-  .logo-sub{display:none;}
-  .logo-text{font-size:13px;}
-  .logo-mark{width:24px;height:24px;}
-  .header-actions{gap:6px;}
-  .login-btn{padding:7px 12px;font-size:12px;}
-  .theme-toggle{width:34px;height:34px;}
-  .hero{padding-top:100px;}
-  .globe-stage{height:min(600px, 70vh);width:94vw;}
-  .cards-row{gap:6px;}
-  .stat-card{padding:10px 8px;border-right-width:2px;}
-  .stat-card .label{font-size:10.5px;line-height:1.3;}
-  .stat-card .num{font-size:20px;}
-  .cards-section{padding:0 12px 50px;}
-}
-@media (max-width:340px){
-  .logo-text{font-size:11px;}
-  .login-btn{padding:6px 9px;font-size:11px;}
-}
+body{font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;padding:24px;transition:background .3s,color .3s;}
+.wrap{max-width:480px;margin:0 auto;}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+.back-link{font-size:13px;color:var(--text-secondary);text-decoration:none;display:flex;align-items:center;gap:6px;}
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:16px;}
+.avatar{width:56px;height:56px;border-radius:50%;background:conic-gradient(from 200deg,var(--blue-deep),var(--blue-mid),var(--teal),var(--teal-light),var(--blue-deep));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:20px;margin-bottom:14px;}
+h2{font-size:17px;font-weight:700;margin-bottom:4px;}
+.role-badge{display:inline-block;font-size:11px;color:var(--teal);background:rgba(31,174,140,0.1);padding:3px 10px;border-radius:10px;margin-top:6px;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:12px;color:var(--text-secondary);margin-bottom:6px;}
+.input-base{width:100%;height:44px;background:var(--bg);border:1px solid var(--border-strong);border-radius:10px;color:var(--text-primary);font-family:inherit;font-size:14px;padding:0 14px;outline:none;}
+.input-base:disabled{opacity:.55;}
+.input-base:focus{border-color:var(--teal);}
+.meta-row{display:flex;justify-content:space-between;font-size:12.5px;padding:8px 0;border-top:1px solid var(--border);color:var(--text-secondary);}
+.meta-row span:last-child{color:var(--text-primary);font-family:'JetBrains Mono',monospace;}
+.error-banner{background:var(--danger-bg);color:var(--danger);font-size:12.5px;padding:10px 12px;border-radius:8px;margin-bottom:14px;display:none;}
+.error-banner.show{display:block;}
+.success-banner{background:rgba(31,174,140,0.12);color:var(--teal);font-size:12.5px;padding:10px 12px;border-radius:8px;margin-bottom:14px;display:none;}
+.success-banner.show{display:block;}
+.btn-progress{position:relative;width:100%;height:46px;border-radius:10px;border:none;background:var(--teal);color:#fff;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;overflow:hidden;}
+.btn-progress:disabled{cursor:not-allowed;}
+.btn-progress .label{position:relative;z-index:2;display:flex;align-items:center;justify-content:center;gap:8px;height:100%;}
+.btn-progress .fill{position:absolute;inset:0;width:0%;background:rgba(255,255,255,0.28);transition:width .25s linear;z-index:1;}
+.btn-progress.error{background:var(--danger);}
+.btn-progress .pct{font-family:'JetBrains Mono',monospace;font-size:13px;display:none;}
 </style>
 </head>
 <body data-theme="dark" id="bodyEl">
 <script>
 (function(){
   var saved = localStorage.getItem('sec-theme');
-  if(saved === 'light' || saved === 'dark'){
-    document.getElementById('bodyEl').setAttribute('data-theme', saved);
-  }
+  if(saved==='light'||saved==='dark') document.getElementById('bodyEl').setAttribute('data-theme', saved);
+  var session = localStorage.getItem('sec-session');
+  if(!session){ location.href = 'auth.html'; }
 })();
 </script>
 
-<header>
-  <div class="logo">
-    <div class="logo-mark"></div>
-    <div>
-      <div class="logo-text">الشركة السعودية للطاقة</div>
-      <div class="logo-sub">محطات التوزيع — منصة الإحداثيات</div>
+<div class="wrap">
+  <div class="topbar">
+    <a href="index.html" class="back-link">→ رجوع للصفحة الرئيسية</a>
+  </div>
+
+  <div class="card" id="profileCard">
+    <div class="avatar" id="avatarInitial">-</div>
+    <h2 id="profileName">...</h2>
+    <div style="font-size:12.5px;color:var(--text-secondary);font-family:'JetBrains Mono',monospace;direction:ltr;text-align:right" id="profilePhone">-</div>
+    <span class="role-badge" id="memberTypeBadge"></span>
+    <div class="meta-row">
+      <span>آخر دخول ناجح</span>
+      <span id="lastLoginVal">—</span>
     </div>
   </div>
-  <div class="header-actions">
-    <a href="auth.html" class="login-btn" id="loginBtn">تسجيل الدخول</a>
-    <div class="theme-toggle" id="themeToggle" aria-label="تبديل الوضع الداكن والفاتح">
-      <svg id="themeIcon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"></circle><line x1="12" y1="2" x2="12" y2="4"></line><line x1="12" y1="20" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="6.34" y2="6.34"></line><line x1="17.66" y1="17.66" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="4" y2="12"></line><line x1="20" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="6.34" y2="17.66"></line><line x1="17.66" y1="6.34" x2="19.07" y2="4.93"></line></svg>
-    </div>
-  </div>
-</header>
 
-<section class="hero" id="heroSection">
-  <div class="globe-stage" id="globeStage">
-    <canvas id="globe-canvas"></canvas>
-    <div id="map-container"></div>
-
-    <div class="hero-content" id="heroContent">
-      <div class="eyebrow">SEC // DISTRIBUTION NETWORK</div>
-      <h1>ابحث عن <span class="h1-accent">إحداثيات</span> محطتك</h1>
-      <p class="subtitle">أدخل رقم محطة التوزيع أو محطة التحويل لعرض موقعها بدقة على الخريطة</p>
-      <div class="search-wrap">
-        <div class="search-lens" id="searchLens">
-          <svg id="searchLensIcon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          <input id="searchInput" type="text" placeholder="مثال: T-014 أو ١٤" inputmode="text">
-        </div>
-        <div class="search-hint" id="searchHint"></div>
+  <div class="card" id="statsCard" style="display:none">
+    <div style="font-size:13px;font-weight:700;margin-bottom:12px;color:var(--text-secondary)">مساهماتك في قاعدة البيانات</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+      <div style="text-align:center;padding:10px 6px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--teal)" id="statTotal">0</div>
+        <div style="font-size:10px;color:var(--text-secondary);margin-top:3px">إجمالي</div>
+      </div>
+      <div style="text-align:center;padding:10px 6px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--blue-mid)" id="statAdditions">0</div>
+        <div style="font-size:10px;color:var(--text-secondary);margin-top:3px">إضافات</div>
+      </div>
+      <div style="text-align:center;padding:10px 6px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:#C8A24E" id="statEdits">0</div>
+        <div style="font-size:10px;color:var(--text-secondary);margin-top:3px">تعديلات</div>
       </div>
     </div>
-
-    <div class="back-btn" id="backBtn">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-      رجوع للبحث
-    </div>
-
-    <div class="station-table" id="stationTable"></div>
   </div>
-</section>
 
-<section class="cards-section" id="cardsSection">
-  <div style="display:flex;justify-content:center;margin-bottom:8px;width:100%;max-width:760px">
-    <button id="refreshStatsBtn" style="background:transparent;border:1px solid var(--border);border-radius:14px;color:var(--text-secondary);font-size:10.5px;cursor:pointer;display:flex;align-items:center;gap:5px;padding:5px 10px;font-family:'IBM Plex Sans Arabic',sans-serif" aria-label="تحديث الإحصائيات">
-      <svg id="refreshIcon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"></path></svg>
-      تحديث
+  <div class="card">
+    <div id="errorBanner" class="error-banner"></div>
+    <div id="successBanner" class="success-banner">تم حفظ التعديلات بنجاح</div>
+
+    <div class="field">
+      <label>الاسم الكامل</label>
+      <input type="text" class="input-base" id="nameInput" disabled>
+    </div>
+    <div class="field">
+      <label>رقم الجوال</label>
+      <input type="text" class="input-base" id="phoneInput" disabled dir="ltr">
+    </div>
+    <div class="field">
+      <label>الإيميل (اختياري)</label>
+      <input type="email" class="input-base" id="emailInput" dir="ltr">
+    </div>
+    <button class="btn-progress" id="saveBtn">
+      <span class="label"><span id="saveLabel">حفظ الإيميل</span><span class="pct" id="savePct"></span></span>
+      <span class="fill" id="saveFill"></span>
     </button>
   </div>
-  <div class="cards-row">
-    <div class="stat-card" data-card="stations">
-      <div class="top">
-        <div><span class="num" id="countStations">0</span><div class="label">إجمالي المحطات</div></div>
-        <span class="chev">▾</span>
-      </div>
-      <div class="stat-panel"><div class="stat-panel-inner" id="panelStations"></div></div>
-    </div>
-    <div class="stat-card" data-card="additions">
-      <div class="top">
-        <div><span class="num" id="countAdditions">0</span><div class="label">إضافات</div></div>
-        <span class="chev">▾</span>
-      </div>
-      <div class="stat-panel"><div class="stat-panel-inner" id="panelAdditions"></div></div>
-    </div>
-    <div class="stat-card" data-card="edits">
-      <div class="top">
-        <div><span class="num" id="countEdits">0</span><div class="label">تعديلات</div></div>
-        <span class="chev">▾</span>
-      </div>
-      <div class="stat-panel"><div class="stat-panel-inner" id="panelEdits"></div></div>
-    </div>
-  </div>
-</section>
+</div>
 
-<footer>معاينة Phase 1 — بيانات تجريبية لأغراض التصميم فقط</footer>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyxZUSLZNa6UlZLINsfAEe8CmQPoNGJbpnNtUDxP019TfL8uLh_5fuP0e5HE6daP8dh1w/exec';
 async function callBackend(action, payload){
-  const res = await fetch(API_URL, { method:'POST', body: JSON.stringify({ action, ...(payload||{}) }) });
+  const res = await fetch(API_URL, {method:'POST', body: JSON.stringify({action, ...(payload||{})})});
   return await res.json();
 }
 
-let lastStatsFetch = 0;
-const STATS_STALE_MS = 3 * 60 * 1000; // لا يُعاد الجلب إلا بعد مرور 3 دقائق على آخر تحديث فعلي
+const session = JSON.parse(localStorage.getItem('sec-session') || '{}');
+const phone = session.phone;
 
-async function loadStats(){
+function showError(msg){ const el=document.getElementById('errorBanner'); el.textContent=msg; el.classList.add('show'); document.getElementById('successBanner').classList.remove('show'); }
+function hideMsgs(){ document.getElementById('errorBanner').classList.remove('show'); document.getElementById('successBanner').classList.remove('show'); }
+
+async function loadProfile(){
+  const res = await callBackend('getMemberProfile', {phone});
+  if(!res.success){ showError(res.error || 'تعذّر تحميل البيانات'); return; }
+  document.getElementById('profileName').textContent = res.name;
+  document.getElementById('profilePhone').textContent = res.phone;
+  document.getElementById('avatarInitial').textContent = res.name.trim()[0] || '؟';
+  document.getElementById('memberTypeBadge').textContent = res.memberType || 'عضو';
+  document.getElementById('nameInput').value = res.name;
+  document.getElementById('phoneInput').value = res.phone;
+  document.getElementById('emailInput').value = res.email || '';
+  document.getElementById('lastLoginVal').textContent = res.lastLogin ? new Date(res.lastLogin).toLocaleString('ar-SA') : 'أول دخول';
+  if(res.stats){
+    document.getElementById('statTotal').textContent = res.stats.total;
+    document.getElementById('statAdditions').textContent = res.stats.additions;
+    document.getElementById('statEdits').textContent = res.stats.edits;
+    document.getElementById('statsCard').style.display = 'block';
+  }
+}
+loadProfile();
+
+const saveBtn = document.getElementById('saveBtn');
+const saveLabel = document.getElementById('saveLabel');
+const savePct = document.getElementById('savePct');
+const saveFill = document.getElementById('saveFill');
+let savingNow = false;
+
+saveBtn.addEventListener('click', async ()=>{
+  if(savingNow) return;
+  hideMsgs();
+  savingNow = true;
+  saveBtn.disabled = true;
+  saveLabel.style.display='none'; savePct.style.display='inline';
+  let p = 0;
+  const tick = setInterval(()=>{ p=Math.min(p+Math.random()*15,92); saveFill.style.width=p+'%'; savePct.textContent=Math.round(p)+'%'; },120);
+
   try{
-    const stats = await callBackend('getStats');
-    lastStatsFetch = Date.now();
-    if(!stats.success) return;
-    document.getElementById('countStations').textContent = stats.totalStations;
-    document.getElementById('countAdditions').textContent = stats.additions;
-    document.getElementById('countEdits').textContent = stats.edits;
-    document.getElementById('panelStations').innerHTML = `
-      <div class="stat-panel-row"><span><span class="legend-dot" style="background:var(--teal)"></span>محطات توزيع</span><span class="v">${stats.distribution}</span></div>
-      <div class="stat-panel-row"><span><span class="legend-dot" style="background:var(--blue-mid)"></span>محطات تحويل</span><span class="v">${stats.substations}</span></div>`;
-    document.getElementById('panelAdditions').innerHTML = `
-      <div class="stat-panel-row"><span>قيد التطوير</span><span class="v">—</span></div>`;
-    document.getElementById('panelEdits').innerHTML = `
-      <div class="stat-panel-row"><span>آخر 30 يومًا</span><span class="v">${stats.edits}</span></div>`;
-  }catch(e){ console.error('فشل تحميل الإحصائيات', e); }
-}
-loadStats();
-
-/* ===== تحديث صامت عند عودة التبويب من حالة الخمول، مو على فترات ثابتة ===== */
-document.addEventListener('visibilitychange', ()=>{
-  if(document.visibilityState === 'visible' && (Date.now() - lastStatsFetch) > STATS_STALE_MS){
-    loadStats();
-  }
-});
-window.addEventListener('focus', ()=>{
-  if((Date.now() - lastStatsFetch) > STATS_STALE_MS){
-    loadStats();
-  }
-});
-
-const refreshBtn = document.getElementById('refreshStatsBtn');
-const refreshIcon = document.getElementById('refreshIcon');
-refreshBtn.addEventListener('click', async ()=>{
-  if(refreshBtn.disabled) return;
-  refreshBtn.disabled = true;
-  refreshIcon.style.transition = 'transform .6s linear';
-  refreshIcon.style.transform = 'rotate(360deg)';
-  await loadStats();
-  setTimeout(()=>{
-    refreshIcon.style.transform = 'rotate(0deg)';
-    refreshBtn.disabled = false;
-  }, 600);
-});
-
-document.querySelectorAll('.stat-card').forEach(card=>{
-  card.addEventListener('click', ()=>{
-    const wasOpen = card.classList.contains('expanded');
-    document.querySelectorAll('.stat-card').forEach(c=>c.classList.remove('expanded'));
-    if(!wasOpen) card.classList.add('expanded');
-  });
-});
-
-/* ===== تبديل الثيم ===== */
-const themeToggle = document.getElementById('themeToggle');
-/* ===== حالة تسجيل الدخول بالهيدر — جلسة متجددة 4 أيام من آخر نشاط ===== */
-const SESSION_MAX_AGE_MS = 4 * 24 * 60 * 60 * 1000;
-(function(){
-  const raw = localStorage.getItem('sec-session');
-  if(!raw) return;
-  try{
-    const session = JSON.parse(raw);
-    const age = Date.now() - (session.ts || 0);
-    if(age > SESSION_MAX_AGE_MS){
-      localStorage.removeItem('sec-session');
-      localStorage.removeItem('sec-phone');
-      return; // الجلسة منتهية، الزر يبقى "تسجيل الدخول" الافتراضي
-    }
-    session.ts = Date.now(); // تجديد النافذة من آخر نشاط فعلي
-    localStorage.setItem('sec-session', JSON.stringify(session));
-
-    const loginBtn = document.getElementById('loginBtn');
-    if(!loginBtn || !session.name) return;
-
-    loginBtn.textContent = session.name.split(' ')[0];
-    loginBtn.setAttribute('href', 'member.html');
-
-    const logoutBtn = document.createElement('button');
-    logoutBtn.title = 'تسجيل الخروج';
-    logoutBtn.setAttribute('aria-label', 'تسجيل الخروج');
-    logoutBtn.style.cssText = 'width:34px;height:34px;border-radius:50%;border:1px solid var(--border-strong);background:var(--bg-card);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-secondary);flex-shrink:0;transition:border-color .2s';
-    logoutBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>';
-    logoutBtn.addEventListener('mouseenter', ()=>logoutBtn.style.borderColor='var(--teal)');
-    logoutBtn.addEventListener('mouseleave', ()=>logoutBtn.style.borderColor='var(--border-strong)');
-    logoutBtn.addEventListener('click', ()=>{
-      if(confirm('تسجيل الخروج؟')){
-        localStorage.removeItem('sec-session');
-        localStorage.removeItem('sec-phone');
-        location.reload();
-      }
-    });
-    loginBtn.parentElement.insertBefore(logoutBtn, loginBtn.nextSibling);
-  }catch(e){}
-})();
-
-themeToggle.addEventListener('click', ()=>{
-  const cur = document.body.getAttribute('data-theme');
-  const next = cur === 'dark' ? 'light' : 'dark';
-  document.body.setAttribute('data-theme', next);
-  localStorage.setItem('sec-theme', next);
-  updateGlobeColors();
-});
-
-/* ===== الكرة الأرضية Three.js — محصورة بحدود globeStage فقط ===== */
-const canvas = document.getElementById('globe-canvas');
-const stageEl = document.getElementById('globeStage');
-const scene = new THREE.Scene();
-function stageSize(){
-  return { w: stageEl.clientWidth, h: stageEl.clientHeight };
-}
-const camera = new THREE.PerspectiveCamera(50, stageSize().w/stageSize().h, 0.1, 1000);
-camera.position.z = 4.4;
-function applyResponsiveGlobeOffset(){
-  const { w } = stageSize();
-  if(w <= 420){ camera.position.z = 5.2; }
-  else if(w <= 600){ camera.position.z = 4.7; }
-  else { camera.position.z = 4.2; }
-}
-const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
-renderer.setSize(stageSize().w, stageSize().h);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-
-const globeGroup = new THREE.Group();
-scene.add(globeGroup);
-
-const wireGeo = new THREE.IcosahedronGeometry(1.5, 3);
-const wireMat = new THREE.MeshBasicMaterial({color:0x4DD6B5, wireframe:true, transparent:true, opacity:0.18});
-const wireSphere = new THREE.Mesh(wireGeo, wireMat);
-globeGroup.add(wireSphere);
-
-const ringGeo = new THREE.SphereGeometry(1.5, 24, 24);
-const ringMat = new THREE.MeshBasicMaterial({color:0x2E7DD1, wireframe:true, transparent:true, opacity:0.10});
-globeGroup.add(new THREE.Mesh(ringGeo, ringMat));
-
-function latLngToVec3(lat, lng, radius){
-  const phi = (90-lat)*(Math.PI/180);
-  const theta = (lng+180)*(Math.PI/180);
-  return new THREE.Vector3(
-    -radius*Math.sin(phi)*Math.cos(theta),
-    radius*Math.cos(phi),
-    radius*Math.sin(phi)*Math.sin(theta)
-  );
-}
-
-const demoPoints = [];
-for(let i=0;i<46;i++){
-  demoPoints.push({lat:(Math.random()*160)-80, lng:(Math.random()*360)-180});
-}
-const pointsGroup = new THREE.Group();
-const pointGeo = new THREE.SphereGeometry(0.022, 8, 8);
-let pointMat = new THREE.MeshBasicMaterial({color:0x4DD6B5});
-demoPoints.forEach(p=>{
-  const m = new THREE.Mesh(pointGeo, pointMat);
-  const v = latLngToVec3(p.lat, p.lng, 1.52);
-  m.position.copy(v);
-  pointsGroup.add(m);
-});
-globeGroup.add(pointsGroup);
-
-function updateGlobeColors(){
-  const dark = document.body.getAttribute('data-theme')==='dark';
-  wireMat.color.set(dark?0x4DD6B5:0x1FAE8C);
-  ringMat.color.set(dark?0x2E7DD1:0x1B4D8C);
-  pointMat.color.set(dark?0x4DD6B5:0x1FAE8C);
-  wireMat.opacity = dark ? 0.18 : 0.32;
-  ringMat.opacity = dark ? 0.10 : 0.20;
-}
-updateGlobeColors();
-
-let rotSpeed = 0.0016;
-function animate(){
-  requestAnimationFrame(animate);
-  globeGroup.rotation.y += rotSpeed;
-  globeGroup.rotation.x = 0.15;
-  renderer.render(scene, camera);
-}
-animate();
-
-function syncRendererToStage(){
-  const { w, h } = stageSize();
-  if(w === 0 || h === 0) return;
-  camera.aspect = w/h;
-  applyResponsiveGlobeOffset();
-  camera.updateProjectionMatrix();
-  renderer.setSize(w, h);
-  if(leafletMap) leafletMap.invalidateSize();
-}
-new ResizeObserver(syncRendererToStage).observe(stageEl);
-window.addEventListener('resize', syncRendererToStage);
-applyResponsiveGlobeOffset();
-
-/* ===== البحث + الخريطة ===== */
-const searchLens = document.getElementById('searchLens');
-const searchInput = document.getElementById('searchInput');
-const searchHint = document.getElementById('searchHint');
-const heroContent = document.getElementById('heroContent');
-const mapContainer = document.getElementById('map-container');
-const backBtn = document.getElementById('backBtn');
-const stationTable = document.getElementById('stationTable');
-
-document.getElementById('searchLensIcon').addEventListener('click', (e)=>{
-  if(searchLens.classList.contains('open') && searchInput.value.trim()){
-    e.stopPropagation();
-    performSearch();
-  }
-});
-
-searchLens.addEventListener('click', (e)=>{
-  if(!searchLens.classList.contains('open')){
-    searchLens.classList.add('open');
-    setTimeout(()=>searchInput.focus(), 200);
-  }
-});
-document.addEventListener('click', (e)=>{
-  if(!searchLens.contains(e.target) && searchInput.value==='' && !mapContainer.classList.contains('active')){
-    searchLens.classList.remove('open');
-  }
-});
-
-function normalizeDigits(str){
-  const arabicIndic = '٠١٢٣٤٥٦٧٨٩';
-  return str.replace(/[٠-٩]/g, d=>arabicIndic.indexOf(d));
-}
-
-function hasValidSession(){
-  const raw = localStorage.getItem('sec-session');
-  if(!raw) return false;
-  try{
-    const session = JSON.parse(raw);
-    return (Date.now() - (session.ts || 0)) <= SESSION_MAX_AGE_MS;
-  }catch(e){ return false; }
-}
-
-if(!hasValidSession()){
-  document.body.classList.add('guest-mode');
-}
-
-async function performSearch(){
-  const raw = searchInput.value.trim();
-  if(!raw) return;
-
-  if(!hasValidSession()){
-    searchHint.innerHTML = 'سجّل دخول للحصول على النتيجة — <a href="auth.html" style="color:var(--teal);font-weight:500;text-decoration:underline">تسجيل الدخول</a>';
-    searchHint.className = 'search-hint err';
-    return;
-  }
-
-  searchHint.textContent = 'جاري البحث...';
-  searchHint.className = 'search-hint';
-  try{
-    const result = await callBackend('searchStation', { query: raw });
-    if(result.found){
-      searchHint.textContent = '';
-      goToStation({
-        id: result.id, name: result.name, type: result.type,
-        lat: result.lat, lng: result.lng,
-        region: result.region, feeder: result.feeder,
-        googleMapLink: result.googleMapLink
-      });
-    } else {
-      searchHint.textContent = 'رقم المحطة غير موجود، تحقق من الرقم وحاول مجددًا';
-      searchHint.className = 'search-hint err';
-    }
+    const res = await callBackend('updateMemberProfile', {phone, name: document.getElementById('nameInput').value.trim(), email: document.getElementById('emailInput').value.trim()});
+    clearInterval(tick);
+    saveFill.style.width='100%'; savePct.textContent='100%';
+    if(!res.success) throw new Error(res.error || 'فشل الحفظ');
+    document.getElementById('successBanner').classList.add('show');
+    session.name = name; localStorage.setItem('sec-session', JSON.stringify(session));
   }catch(err){
-    searchHint.textContent = 'تعذّر الاتصال بالخادم، حاول مرة أخرى';
-    searchHint.className = 'search-hint err';
+    saveBtn.classList.add('error');
+    showError(err.message);
+  }finally{
+    setTimeout(()=>{
+      savingNow=false; saveBtn.disabled=false; saveBtn.classList.remove('error');
+      saveLabel.style.display='inline'; savePct.style.display='none'; saveFill.style.width='0%';
+    }, 500);
   }
-}
-
-searchInput.addEventListener('keydown', (e)=>{
-  if(e.key==='Enter') performSearch();
-});
-
-let leafletMap = null, currentTileLayer = null, marker = null;
-const TILE_URL = 'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-
-function initMap(){
-  leafletMap = L.map('map-container', {zoomControl:false, attributionControl:false}).setView([21.54,39.19], 12);
-  currentTileLayer = L.tileLayer(TILE_URL, {maxZoom:19}).addTo(leafletMap);
-  L.control.zoom({position:'bottomleft'}).addTo(leafletMap);
-  setTimeout(()=>leafletMap.invalidateSize(), 50);
-  setTimeout(()=>leafletMap.invalidateSize(), 400);
-}
-
-const teal = ()=> document.body.getAttribute('data-theme')==='dark' ? '#4DD6B5':'#1FAE8C';
-
-let currentStation = null;
-function goToStation(s){
-  currentStation = s;
-  if(!leafletMap) initMap();
-  searchLens.classList.remove('open');
-  document.getElementById('heroContent').classList.add('hidden');
-  rotSpeed = 0;
-  let scale = 1;
-  const expand = setInterval(()=>{
-    scale += 0.06;
-    globeGroup.scale.set(scale,scale,scale);
-    wireMat.opacity = Math.max(0, 0.18-(scale-1)*0.1);
-    ringMat.opacity = Math.max(0, 0.10-(scale-1)*0.06);
-    if(scale>2.4){
-      clearInterval(expand);
-      mapContainer.classList.add('active');
-      backBtn.classList.add('show');
-      setTimeout(()=>{
-        leafletMap.invalidateSize();
-        leafletMap.flyTo([s.lat, s.lng], 16, {duration:1.4});
-        if(marker) leafletMap.removeLayer(marker);
-        marker = L.circleMarker([s.lat,s.lng], {radius:9, color:teal(), fillColor:teal(), fillOpacity:0.9, weight:2}).addTo(leafletMap);
-
-        const mapsUrl = s.googleMapLink || `https://www.google.com/maps?q=${s.lat},${s.lng}`;
-        stationTable.innerHTML = `
-          <div class="st-name">${s.name}</div>
-          <table>
-            <tr><td>رقم المحطة</td><td class="v">${s.id}</td></tr>
-            ${s.region ? `<tr><td>المنطقة</td><td class="v" style="font-family:inherit;direction:rtl">${s.region}</td></tr>` : ''}
-            ${s.feeder ? `<tr><td>المغذي</td><td class="v" style="font-family:inherit;direction:rtl">${s.feeder}</td></tr>` : ''}
-          </table>
-          <div class="st-actions">
-            <a class="st-btn primary" href="${mapsUrl}" target="_blank" rel="noopener">انتقال لقوقل ماب</a>
-            <button class="st-btn" id="openEditBtn">تعديل</button>
-          </div>`;
-        stationTable.classList.add('show');
-        document.getElementById('openEditBtn').addEventListener('click', openEditForm);
-      }, 200);
-    }
-  }, 16);
-}
-
-/* ============================================================
- *  نموذج تعديل المحطة (مغذي/منطقة/موقع) — يفتح فوق الجدول
- * ============================================================ */
-let editPreviewMap = null, editPreviewMarker = null;
-
-function openEditForm(){
-  if(!hasValidSession()){
-    searchHint.innerHTML = 'سجّل دخول للتعديل — <a href="auth.html" style="color:var(--teal);font-weight:500;text-decoration:underline">تسجيل الدخول</a>';
-    searchHint.className = 'search-hint err';
-    return;
-  }
-  const s = currentStation;
-  const isDistribution = s.type === 'توزيع';
-
-  stationTable.innerHTML = `
-    <div class="st-name">تعديل: ${s.name}</div>
-    <div id="editError" style="display:none;font-size:11px;color:#E0654F;margin-bottom:8px;"></div>
-    ${isDistribution ? `
-    <div style="margin-bottom:8px;">
-      <label style="font-size:10.5px;color:var(--text-secondary)">المغذي</label>
-      <input id="editFeeder" class="edit-input" value="${s.feeder || ''}">
-    </div>
-    <div style="margin-bottom:8px;">
-      <label style="font-size:10.5px;color:var(--text-secondary)">المنطقة</label>
-      <input id="editRegion" class="edit-input" value="${s.region || ''}">
-    </div>` : ''}
-    <div style="display:flex;gap:6px;margin-bottom:8px;">
-      <input id="editLat" class="edit-input" placeholder="خط العرض" value="${s.lat.toFixed(6)}">
-      <input id="editLng" class="edit-input" placeholder="خط الطول" value="${s.lng.toFixed(6)}">
-    </div>
-    <button id="useGpsBtn" type="button" style="width:100%;font-size:11px;padding:6px;border-radius:7px;border:1px solid var(--border-strong);background:var(--bg);color:var(--teal);cursor:pointer;margin-bottom:8px;">📍 استخدام موقعي الحالي</button>
-    <div id="editPreviewMap" style="width:100%;height:120px;border-radius:8px;overflow:hidden;margin-bottom:8px;"></div>
-    <div class="st-actions">
-      <button class="st-btn primary" id="saveEditBtn">حفظ التعديل</button>
-      <button class="st-btn" id="cancelEditBtn">إلغاء</button>
-    </div>`;
-
-  const styleTag = document.createElement('style');
-  styleTag.textContent = `.edit-input{width:100%;height:34px;background:var(--bg);border:1px solid var(--border-strong);border-radius:7px;color:var(--text-primary);font-size:11.5px;padding:0 10px;font-family:'JetBrains Mono',monospace;direction:ltr;text-align:right;}`;
-  stationTable.appendChild(styleTag);
-
-  setTimeout(()=>{
-    if(editPreviewMap){ editPreviewMap.remove(); editPreviewMap = null; }
-    editPreviewMap = L.map('editPreviewMap', {zoomControl:false, attributionControl:false, dragging:true}).setView([s.lat, s.lng], 15);
-    L.tileLayer(TILE_URL, {maxZoom:19}).addTo(editPreviewMap);
-    editPreviewMarker = L.marker([s.lat, s.lng], {draggable:true}).addTo(editPreviewMap);
-    editPreviewMarker.on('dragend', ()=>{
-      const pos = editPreviewMarker.getLatLng();
-      document.getElementById('editLat').value = pos.lat.toFixed(6);
-      document.getElementById('editLng').value = pos.lng.toFixed(6);
-    });
-    setTimeout(()=>editPreviewMap.invalidateSize(), 100);
-
-    document.getElementById('editLat').addEventListener('input', syncPreviewFromInputs);
-    document.getElementById('editLng').addEventListener('input', syncPreviewFromInputs);
-  }, 50);
-
-  function syncPreviewFromInputs(){
-    const lat = parseFloat(document.getElementById('editLat').value);
-    const lng = parseFloat(document.getElementById('editLng').value);
-    if(!isNaN(lat) && !isNaN(lng) && editPreviewMap){
-      editPreviewMarker.setLatLng([lat,lng]);
-      editPreviewMap.setView([lat,lng]);
-    }
-  }
-
-  document.getElementById('useGpsBtn').addEventListener('click', ()=>{
-    if(!navigator.geolocation){ alert('المتصفح لا يدعم تحديد الموقع'); return; }
-    navigator.geolocation.getCurrentPosition(pos=>{
-      document.getElementById('editLat').value = pos.coords.latitude.toFixed(6);
-      document.getElementById('editLng').value = pos.coords.longitude.toFixed(6);
-      syncPreviewFromInputs();
-    }, ()=> alert('تعذّر الحصول على الموقع، تأكد من تفعيل صلاحية الموقع'));
-  });
-
-  document.getElementById('cancelEditBtn').addEventListener('click', ()=> goToStation(currentStation));
-
-  document.getElementById('saveEditBtn').addEventListener('click', async function(){
-    const btn = this;
-    if(btn.disabled) return;
-    const lat = parseFloat(document.getElementById('editLat').value);
-    const lng = parseFloat(document.getElementById('editLng').value);
-    const errEl = document.getElementById('editError');
-    if(isNaN(lat) || isNaN(lng)){
-      errEl.textContent = 'الرجاء إدخال إحداثية صحيحة'; errEl.style.display='block'; return;
-    }
-    errEl.style.display='none';
-    btn.disabled = true;
-    btn.textContent = 'جاري الحفظ...';
-
-    const session = JSON.parse(localStorage.getItem('sec-session') || '{}');
-    const opKey = 'edit_' + s.id + '_' + Date.now();
-    try{
-      const res = await callBackend('updateCoordinates', {
-        opKey, phone: session.phone, stationId: s.id, type: s.type,
-        lat, lng, method: 'يدوي/GPS',
-        feeder: isDistribution ? document.getElementById('editFeeder').value.trim() : undefined,
-        region: isDistribution ? document.getElementById('editRegion').value.trim() : undefined
-      });
-      if(!res.success) throw new Error(res.error || 'فشل الحفظ');
-
-      stationTable.innerHTML = `
-        <div style="text-align:center;padding:6px 0;">
-          <div style="color:var(--teal);font-weight:700;font-size:13px;margin-bottom:6px;">✓ تم حفظ التعديل بنجاح</div>
-          <div style="font-size:10.5px;color:var(--text-secondary);line-height:1.6;">
-            اضغط زر <b>"تحديث البيانات"</b> بأسفل الصفحة الرئيسية عشان التعديل يظهر بنتائج البحث.
-          </div>
-        </div>`;
-      currentStation.lat = lat; currentStation.lng = lng;
-      if(marker) marker.setLatLng([lat,lng]);
-    }catch(err){
-      errEl.textContent = err.message; errEl.style.display='block';
-      btn.disabled = false; btn.textContent = 'حفظ التعديل';
-    }
-  });
-}
-
-backBtn.addEventListener('click', ()=>{
-  mapContainer.classList.remove('active');
-  document.getElementById('heroContent').classList.remove('hidden');
-  backBtn.classList.remove('show');
-  stationTable.classList.remove('show');
-  searchInput.value='';
-  searchHint.textContent='';
-  globeGroup.scale.set(1,1,1);
-  wireMat.opacity = document.body.getAttribute('data-theme')==='dark' ? 0.18 : 0.32;
-  ringMat.opacity = document.body.getAttribute('data-theme')==='dark' ? 0.10 : 0.20;
-  rotSpeed = 0.0016;
 });
 </script>
 </body>
