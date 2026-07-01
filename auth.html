@@ -415,7 +415,7 @@ mainBtn.addEventListener('click', async ()=>{
       }
       if(result && result.success){
         await new Promise(r=>setTimeout(r, 700));
-        window.location.href = result.role === 'admin' ? 'admin.html' : 'index.html';
+        window.location.href = 'index.html'; // الجميع يدخل الرئيسية أولاً؛ المدير يفتح لوحته من القائمة عند الحاجة
       }
       return result;
     });
@@ -606,4 +606,3 @@ window.addEventListener('load', ()=>{
 </script>
 </body>
 </html>
-
