@@ -158,8 +158,7 @@ saveBtn.addEventListener('click', async ()=>{
     saveFill.style.width='100%'; savePct.textContent='100%';
     if(!res.success) throw new Error(res.error || 'فشل الحفظ');
     document.getElementById('successBanner').classList.add('show');
-    session.name = document.getElementById('nameInput').value.trim();
-    localStorage.setItem('sec-session', JSON.stringify(session));
+    session.name = name; localStorage.setItem('sec-session', JSON.stringify(session));
   }catch(err){
     saveBtn.classList.add('error');
     showError(err.message);
