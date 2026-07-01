@@ -8,9 +8,9 @@
 <style>
 :root{--blue-deep:#1B4D8C;--blue-mid:#2E7DD1;--teal:#1FAE8C;--teal-light:#4DD6B5;}
 [data-theme="dark"]{--bg:#060B14;--bg-elev:#101D2E;--bg-card:#0D1826;--text-primary:#EAF1F7;--text-secondary:#8FA3B8;--border:rgba(255,255,255,0.08);--border-strong:rgba(255,255,255,0.16);
-  --morning:#1FAE8C;--morning-bg:rgba(31,174,140,0.16);--evening:#4A86E8;--evening-bg:rgba(74,134,232,0.16);--rest:#5A6B7D;--rest-bg:rgba(90,107,125,0.16);}
+  --morning:#38BDF8;--morning-bg:rgba(56,189,248,0.16);--evening:#C0784A;--evening-bg:rgba(192,120,74,0.18);--rest:#2ECC71;--rest-bg:rgba(46,204,113,0.14);}
 [data-theme="light"]{--bg:#EAF1F6;--bg-elev:#F4F8FB;--bg-card:#FFFFFF;--text-primary:#102035;--text-secondary:#52647A;--border:rgba(16,32,53,0.10);--border-strong:rgba(16,32,53,0.20);
-  --morning:#1FAE8C;--morning-bg:rgba(31,174,140,0.12);--evening:#2E7DD1;--evening-bg:rgba(46,125,209,0.12);--rest:#8494A3;--rest-bg:rgba(132,148,163,0.12);}
+  --morning:#0EA5E9;--morning-bg:rgba(14,165,233,0.12);--evening:#A9632F;--evening-bg:rgba(169,99,47,0.13);--rest:#16A34A;--rest-bg:rgba(22,163,74,0.12);}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;padding-bottom:60px;transition:background .3s,color .3s;}
 header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;}
@@ -48,14 +48,17 @@ header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px s
 .legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-secondary);}
 .legend-dot{width:10px;height:10px;border-radius:3px;}
 
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
-.cal-dow{text-align:center;font-size:11.5px;color:var(--text-secondary);font-weight:600;padding-bottom:4px;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;}
+.cal-dow{text-align:center;font-size:10.5px;color:var(--text-secondary);font-weight:600;padding-bottom:4px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .cal-day{
-  aspect-ratio:1;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  font-size:14px;font-weight:600;position:relative;border:1px solid transparent;
+  min-width:0;overflow:hidden;
+  min-height:64px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  padding:4px 2px;position:relative;border:1px solid transparent;
 }
 .cal-day.empty{visibility:hidden;}
-.cal-day .hijri-small{font-size:9px;font-weight:400;color:var(--text-secondary);margin-top:1px;}
+.cal-day .day-num{font-size:14px;font-weight:700;line-height:1;}
+.cal-day .hijri-mid{font-size:9.5px;font-weight:500;opacity:.85;line-height:1;}
+.cal-day .shift-icon{width:14px;height:14px;flex-shrink:0;}
 .cal-day.morning{background:var(--morning-bg);color:var(--morning);}
 .cal-day.evening{background:var(--evening-bg);color:var(--evening);}
 .cal-day.rest{background:var(--rest-bg);color:var(--rest);}
@@ -64,7 +67,11 @@ header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px s
 .info-note{margin-top:24px;font-size:11.5px;color:var(--text-secondary);line-height:1.8;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
 @media (max-width:480px){
   .content{padding:20px 12px;}
-  .cal-day{font-size:12px;}
+  .cal-day{min-height:52px;padding:3px 1px;gap:1px;}
+  .cal-day .day-num{font-size:12px;}
+  .cal-day .hijri-mid{font-size:8px;}
+  .cal-day .shift-icon{width:11px;height:11px;}
+  .cal-grid{gap:3px;}
   .today-grid{grid-template-columns:repeat(2,1fr);}
 }
 </style>
@@ -133,6 +140,11 @@ function cycleDayFor(group, dateUTCms){
   const ref = GROUP_REF_CYCLE[group];
   return ((ref - 1 + daysSince) % 8 + 8) % 8 + 1; // نتيجة دائماً بين 1 و8
 }
+const SHIFT_ICONS = {
+  morning: `<svg class="shift-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.2" y1="4.2" x2="5.6" y2="5.6"/><line x1="18.4" y1="18.4" x2="19.8" y2="19.8"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.2" y1="19.8" x2="5.6" y2="18.4"/><line x1="18.4" y1="5.6" x2="19.8" y2="4.2"/></svg>`,
+  evening: `<svg class="shift-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.5A8.5 8.5 0 1 1 11.5 3 6.8 6.8 0 0 0 21 12.5z"/></svg>`,
+  rest: `<svg class="shift-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>`
+};
 function shiftInfoFor(cycleDay){
   if(cycleDay <= 2) return { cls:'morning', label:'صباحي' };
   if(cycleDay <= 4) return { cls:'evening', label:'مسائي' };
@@ -214,7 +226,7 @@ function renderCalendar(){
     const isToday = new Date(dUTC).toISOString().slice(0,10) === todayStr;
     const cell = document.createElement('div');
     cell.className = `cal-day ${info.cls}${isToday ? ' today' : ''}`;
-    cell.innerHTML = `${day}<span class="hijri-small">${hijriShort(dUTC).split('/')[0]}</span>`;
+    cell.innerHTML = `<span class="day-num">${day}</span><span class="hijri-mid">${hijriShort(dUTC).split('/')[0]}</span>${SHIFT_ICONS[info.cls]}`;
     cell.title = info.label;
     grid.appendChild(cell);
   }
