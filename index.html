@@ -14,7 +14,7 @@
   --teal-light:#4DD6B5;
 }
 [data-theme="dark"]{
-  --bg:#0A1420;
+  --bg:#060B14;
   --bg-elev:#101D2E;
   --bg-card:#0D1826;
   --text-primary:#EAF1F7;
@@ -43,6 +43,13 @@ body{
   color:var(--text-primary);
   overflow-x:hidden;
   transition:background .4s ease,color .4s ease;
+}
+[data-theme="dark"] body{
+  background-image:
+    linear-gradient(rgba(77,214,181,0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(77,214,181,0.045) 1px, transparent 1px);
+  background-size:42px 42px;
+  background-position:center;
 }
 header{
   position:fixed;top:0;right:0;left:0;z-index:50;
@@ -126,6 +133,11 @@ header{
   overflow:hidden;
   background:transparent;
 }
+[data-theme="dark"] .globe-stage::before{
+  content:'';
+  position:absolute;inset:-8%;z-index:0;pointer-events:none;
+  background:radial-gradient(circle at center, rgba(77,214,181,0.16) 0%, rgba(46,125,209,0.07) 38%, transparent 68%);
+}
 #globe-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:1;}
 #map-container{
   position:absolute;inset:0;width:100%;height:100%;z-index:2;
@@ -173,12 +185,17 @@ h1{
   text-align:center;
   line-height:1.3;
   text-shadow:0 2px 14px rgba(0,0,0,0.55);
-}
-.h1-accent{
-  background:linear-gradient(90deg, var(--blue-mid), var(--teal));
+  background:linear-gradient(90deg, #ffffff, var(--teal-light));
   -webkit-background-clip:text;
   background-clip:text;
   -webkit-text-fill-color:transparent;
+}
+[data-theme="light"] h1{
+  background:linear-gradient(90deg, var(--text-primary), var(--teal));
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  text-shadow:none;
 }
 .subtitle{
   position:absolute;top:63%;left:50%;transform:translate(-50%,-50%);
@@ -219,11 +236,17 @@ h1{
   background:rgba(255,255,255,0.12);
   -webkit-backdrop-filter:blur(14px);
   backdrop-filter:blur(14px);
-  border:2px solid var(--teal);
+  border:1px solid rgba(77,214,181,0.5);
   justify-content:flex-start;padding:0 18px;gap:10px;
-  box-shadow:0 8px 28px rgba(31,174,140,0.2), 0 2px 10px rgba(0,0,0,0.16);
+  box-shadow:0 8px 24px rgba(0,0,0,0.18);
+  transition:width .45s cubic-bezier(.25,.8,.3,1),border-radius .45s,background .3s,border-color .25s,box-shadow .25s;
 }
-[data-theme="light"] .search-lens.open{background:rgba(255,255,255,0.55);}
+.search-lens.open:focus-within{
+  border-color:var(--teal-light);
+  box-shadow:0 0 0 3px rgba(77,214,181,0.14), 0 8px 24px rgba(0,0,0,0.18);
+}
+[data-theme="light"] .search-lens.open{background:rgba(255,255,255,0.55);border-color:rgba(31,174,140,0.4);}
+[data-theme="light"] .search-lens.open:focus-within{border-color:var(--teal);}
 @supports not (backdrop-filter: blur(1px)){
   .search-lens.open{background:var(--bg-card);}
 }
@@ -514,7 +537,7 @@ footer{
     <img class="logo-mark" src="assets/logo-icon.png" alt="شعار الشركة السعودية للطاقة">
     <div>
       <div class="logo-text">الشركة السعودية للطاقة</div>
-      <div class="logo-sub">محطات التوزيع — منصة الإحداثيات</div>
+      <div class="logo-sub">نظام الإحداثيات الجغرافية</div>
     </div>
   </div>
   <div class="header-actions" id="headerActions">
@@ -548,12 +571,12 @@ footer{
 
     <div class="hero-content" id="heroContent">
       <div class="eyebrow">SEC // DISTRIBUTION NETWORK</div>
-      <h1>ابحث عن <span class="h1-accent">إحداثيات</span> محطتك</h1>
+      <h1>ابحث عن محطات التوزيع والتحويل</h1>
       <p class="subtitle">أدخل رقم محطة التوزيع أو محطة التحويل لعرض موقعها بدقة على الخريطة</p>
       <div class="search-wrap">
         <div class="search-lens" id="searchLens">
           <svg id="searchLensIcon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          <input id="searchInput" type="text" placeholder="مثال: T-014 أو ١٤" inputmode="text">
+          <input id="searchInput" type="text" placeholder="مثال: 39070 أو ABN" inputmode="text">
         </div>
         <div class="search-hint" id="searchHint"></div>
         <div class="search-progress" id="searchProgress">
@@ -874,11 +897,13 @@ globeGroup.add(pointsGroup);
 
 function updateGlobeColors(){
   const dark = document.body.getAttribute('data-theme')==='dark';
-  wireMat.color.set(dark?0x4DD6B5:0x1FAE8C);
-  ringMat.color.set(dark?0x2E7DD1:0x1B4D8C);
-  pointMat.color.set(dark?0x4DD6B5:0x1FAE8C);
-  wireMat.opacity = dark ? 0.18 : 0.32;
-  ringMat.opacity = dark ? 0.10 : 0.20;
+  // الوضع الداكن: خطوط فيروزية + توهج أزرق + نقاط خضراء
+  // الوضع الفاتح: خطوط أزرق فاتح + نقاط خضراء داكنة + توهج خفيف جداً
+  wireMat.color.set(dark ? 0x4DD6B5 : 0x6D9EEB);
+  ringMat.color.set(dark ? 0x4A86E8 : 0x4A86E8);
+  pointMat.color.set(dark ? 0x2ECC71 : 0x0B804B);
+  wireMat.opacity = dark ? 0.20 : 0.30;
+  ringMat.opacity = dark ? 0.13 : 0.07;
 }
 updateGlobeColors();
 
