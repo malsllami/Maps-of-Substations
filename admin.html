@@ -13,9 +13,13 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;padding-bottom:48px;transition:background .3s,color .3s;}
 header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--border);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;}
-.brand{display:flex;align-items:center;gap:10px;}
-.brand-mark{width:28px;height:28px;border-radius:50%;background:conic-gradient(from 200deg,var(--blue-deep),var(--blue-mid),var(--teal),var(--teal-light),var(--blue-deep));flex-shrink:0;}
-.brand-text{font-size:14px;font-weight:700;}
+.brand{display:flex;align-items:center;gap:10px;cursor:pointer;text-decoration:none;}
+.brand-mark{transition:transform .2s;}
+.brand-text{transition:color .2s;}
+.brand-mark{height:32px;width:auto;flex-shrink:0;display:block;object-fit:contain;}
+.brand-text{font-size:15px;font-weight:700;letter-spacing:.3px;white-space:nowrap;}
+.brand:hover .brand-mark{transform:scale(1.06);}
+.brand:hover .brand-text{color:var(--teal);}
 .brand-sub{font-size:11px;color:var(--text-secondary);}
 .header-actions{display:flex;align-items:center;gap:8px;}
 .btn-sm{text-decoration:none;font-size:12.5px;padding:7px 14px;border-radius:8px;border:1px solid var(--border-strong);background:var(--bg-card);color:var(--text-primary);cursor:pointer;font-family:inherit;transition:.2s;}
@@ -75,8 +79,8 @@ header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px s
 </script>
 
 <header>
-  <div class="brand">
-    <div class="brand-mark"></div>
+  <div class="brand" id="brandLink" style="cursor:pointer">
+    <img class="brand-mark" src="assets/logo-icon.png" alt="شعار الشركة السعودية للطاقة">
     <div>
       <div class="brand-text">لوحة المدير</div>
       <div class="brand-sub">الشركة السعودية للطاقة — محطات التوزيع</div>
@@ -134,6 +138,8 @@ document.getElementById('themeBtn').addEventListener('click', ()=>{
 });
 
 /* ===== خروج ===== */
+document.getElementById('brandLink').addEventListener('click', ()=>{ location.href = 'index.html'; });
+
 document.getElementById('logoutBtn').addEventListener('click', ()=>{
   if(confirm('تسجيل الخروج؟')){
     localStorage.removeItem('sec-session');
