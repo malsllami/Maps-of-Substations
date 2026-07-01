@@ -128,8 +128,8 @@ header{
 }
 .globe-stage{
   position:relative;
-  width:min(1100px, 94vw);
-  height:clamp(580px, 58vh, 620px);
+  height:min(75vh, 94vw);
+  width:min(75vh, 94vw);
   overflow:hidden;
   background:transparent;
 }
@@ -137,18 +137,6 @@ header{
   content:'';
   position:absolute;inset:-8%;z-index:0;pointer-events:none;
   background:radial-gradient(circle at center, rgba(77,214,181,0.16) 0%, rgba(46,125,209,0.07) 38%, transparent 68%);
-}
-@media (max-width:1199px) and (min-width:768px){
-  .globe-stage{
-    width:min(720px, 92vw);
-    height:clamp(420px, 62vh, 480px);
-  }
-}
-@media (max-width:767px){
-  .globe-stage{
-    width:99vw;
-    height:clamp(300px, 70vh, 360px);
-  }
 }
 #globe-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:1;}
 #map-container{
@@ -159,12 +147,6 @@ header{
 #map-container.active{opacity:1;pointer-events:auto;}
 [data-theme="dark"] .leaflet-tile-pane{filter:invert(0.92) hue-rotate(180deg) brightness(0.95) contrast(0.9);}
 [data-theme="dark"] #map-container.satellite-active .leaflet-tile-pane{filter:none;}
-.leaflet-control-zoom a{cursor:pointer;}
-@media (max-width:600px){
-  /* رفع أزرار التكبير عن الحافة السفلية للجوال — المنطقة تتداخل غالباً مع شريط تحكم المتصفح فتصبح غير قابلة للنقر فعلياً حتى لو ظاهرة */
-  .leaflet-bottom.leaflet-left{margin-bottom:max(20px, env(safe-area-inset-bottom, 0px)) !important;bottom:56px !important;}
-  .leaflet-control-zoom a{width:36px !important;height:36px !important;line-height:36px !important;font-size:19px !important;}
-}
 .hero-content{
   position:absolute;inset:0;z-index:5;
   padding:0 30px;pointer-events:none;
@@ -384,6 +366,20 @@ h1{
 }
 .map-tool-btn:hover{border-color:var(--teal);color:var(--teal);}
 .map-tool-btn.active{background:var(--teal);border-color:var(--teal);color:#fff;}
+.zoom-controls{
+  position:absolute;bottom:14px;left:14px;z-index:6;
+  display:flex;flex-direction:column;
+  border-radius:10px;overflow:hidden;
+  border:1px solid var(--border);box-shadow:0 4px 14px rgba(0,0,0,.25);
+}
+.zoom-btn{
+  width:36px;height:36px;background:var(--bg-card);color:var(--text-primary);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  transition:background .15s;
+}
+.zoom-btn:first-child{border-bottom:1px solid var(--border);}
+.zoom-btn:hover{background:var(--bg-elev);}
+.zoom-btn:active{background:var(--teal);color:#fff;}
 .nearby-panel{
   position:absolute;top:54px;left:14px;z-index:6;
   display:none;flex-direction:column;gap:6px;
@@ -448,13 +444,7 @@ body.guest-mode .station-table{width:min(1300px,96vw);}
   display:flex;flex-direction:column;align-items:center;
 }
 body.guest-mode #cardsSection{display:none;}
-body.guest-mode .globe-stage{width:min(1300px,96vw);height:clamp(650px, 64vh, 700px);}
-@media (max-width:1199px) and (min-width:768px){
-  body.guest-mode .globe-stage{width:min(820px,94vw);height:clamp(460px, 68vh, 520px);}
-}
-@media (max-width:767px){
-  body.guest-mode .globe-stage{width:99vw;height:clamp(330px, 76vh, 380px);}
-}
+body.guest-mode .globe-stage{height:min(82vh, 96vw);width:min(82vh, 96vw);}
 .cards-row{
   display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;max-width:760px;width:100%;
   align-items:start;
@@ -632,6 +622,14 @@ footer{
       <button class="nearby-opt" data-mode="feeder">🔌 كامل محطات المغذي</button>
     </div>
     <div class="map-tool-hint" id="mapToolHint"></div>
+    <div class="zoom-controls" id="zoomControls">
+      <div class="zoom-btn" id="zoomInBtn" title="تكبير">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+      <div class="zoom-btn" id="zoomOutBtn" title="تصغير">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+    </div>
   </div>
   <div class="station-table" id="stationTable"></div>
 </section>
@@ -978,6 +976,8 @@ const satelliteToggleBtn = document.getElementById('satelliteToggleBtn');
 const measureToggleBtn = document.getElementById('measureToggleBtn');
 const routeToggleBtn = document.getElementById('routeToggleBtn');
 const nearbyToggleBtn = document.getElementById('nearbyToggleBtn');
+document.getElementById('zoomInBtn').addEventListener('click', ()=>{ if(leafletMap) leafletMap.zoomIn(); });
+document.getElementById('zoomOutBtn').addEventListener('click', ()=>{ if(leafletMap) leafletMap.zoomOut(); });
 const nearbyPanel = document.getElementById('nearbyPanel');
 
 document.getElementById('searchLensIcon').addEventListener('click', (e)=>{
@@ -1105,7 +1105,6 @@ let isSatelliteView = false;
 function initMap(){
   leafletMap = L.map('map-container', {zoomControl:false, attributionControl:false}).setView([21.54,39.19], 12);
   currentTileLayer = L.tileLayer(TILE_URL, {maxZoom:19}).addTo(leafletMap);
-  L.control.zoom({position:'bottomleft'}).addTo(leafletMap);
   leafletMap.on('click', (e)=>{
     if(measureActive) handleMeasureClick(e.latlng);
     else if(routeActive) handleRouteClick(e.latlng);
@@ -1252,7 +1251,7 @@ function handleRouteClick(latlng){
   routePoints.push(latlng);
   const idx = routePoints.length;
   const m = L.marker(latlng, {
-    icon: L.divIcon({className:'', html:`<div style="width:22px;height:22px;border-radius:50%;background:${teal()};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;box-shadow:0 2px 6px rgba(0,0,0,.3)">${idx}</div>`, iconSize:[22,22], iconAnchor:[11,11]})
+    icon: L.divIcon({className:'', html:`<div style="width:22px;height:22px;border-radius:50%;background:${teal()};border:2px solid #fff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;box-shadow:0 2px 6px rgba(0,0,0,.5)">${idx}</div>`, iconSize:[22,22], iconAnchor:[11,11]})
   }).addTo(leafletMap);
   routeMarkers.push(m);
 
@@ -1292,6 +1291,15 @@ document.addEventListener('click', (e)=>{
   if(!nearbyToggleBtn.contains(e.target) && !nearbyPanel.contains(e.target)) nearbyPanel.classList.remove('show');
 });
 
+/* شارة صغيرة تعرض رقم المحطة نصاً، بحدود بيضاء تضمن وضوحها فوق أي خلفية (خصوصاً صور الأقمار الصناعية) */
+function nearbyBadgeIcon(id, color){
+  return L.divIcon({
+    className:'',
+    html:`<div style="width:44px;height:22px;border-radius:11px;background:${color};border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#fff;overflow:hidden;white-space:nowrap">${id}</div>`,
+    iconSize:[44,22], iconAnchor:[22,11]
+  });
+}
+
 document.querySelectorAll('.nearby-opt').forEach(btn=>{
   btn.addEventListener('click', async ()=>{
     nearbyPanel.classList.remove('show');
@@ -1311,19 +1319,36 @@ document.querySelectorAll('.nearby-opt').forEach(btn=>{
       }
       if(!res.success || !res.stations) throw new Error(res.error || 'الميزة غير متاحة من الخادم بعد');
 
+      const bounds = [[currentStation.lat, currentStation.lng]];
+
       res.stations.forEach(s=>{
         if(String(s.id) === String(currentStation.id)) return;
-        let marker;
-        if(mode === 'coords'){
-          marker = L.circleMarker([s.lat,s.lng], {radius:6, color:'#C8A24E', fillColor:'#C8A24E', fillOpacity:0.9, weight:2})
-            .bindPopup(`<b>${s.id}</b><br>${s.lat.toFixed(5)}, ${s.lng.toFixed(5)}`);
-        } else {
-          marker = L.circleMarker([s.lat,s.lng], {radius:7, color:teal(), fillColor:teal(), fillOpacity:0.85, weight:2})
-            .bindPopup(`<b>${s.name || s.id}</b><br>رقم: ${s.id}${s.feeder ? '<br>المغذي: '+s.feeder : ''}`);
-        }
+        const dist = haversineKm(currentStation.lat, currentStation.lng, s.lat, s.lng).toFixed(2);
+        const gmapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}&travelmode=driving`;
+
+        let color;
+        if(mode === 'coords') color = '#C8A24E';
+        else color = s.type === 'تحويل' ? '#8B6DD6' : teal(); // محطات التحويل دائماً لون مختلف عن التوزيع
+
+        const marker = L.marker([s.lat, s.lng], { icon: nearbyBadgeIcon(s.id, color) });
+        marker.bindPopup(`
+          <div style="font-family:'IBM Plex Sans Arabic',sans-serif;direction:rtl;min-width:160px;font-size:13px">
+            <b>${s.name || s.id}</b><br>
+            رقم: ${s.id}<br>
+            ${s.feeder ? 'المغذي: ' + s.feeder + '<br>' : ''}
+            المسافة من محطتك: <b>${dist} كم</b>
+            <a href="${gmapsUrl}" target="_blank" rel="noopener" style="display:block;text-align:center;background:${teal()};color:#fff;padding:7px;border-radius:6px;text-decoration:none;font-size:12px;margin-top:8px;font-weight:600">الانتقال إليها بقوقل ماب</a>
+          </div>`);
+        marker.bindTooltip(`${s.id} — ${dist} كم`, {direction:'top', offset:[0,-12]});
         marker.addTo(leafletMap);
         nearbyMarkers.push(marker);
+        bounds.push([s.lat, s.lng]);
       });
+
+      // تكبير/تصغير تلقائي يلائم كل النقاط دفعة واحدة، بدل مستوى تكبير ثابت يكدّس النقاط
+      if(bounds.length > 1){
+        leafletMap.fitBounds(bounds, {padding:[50,50], maxZoom:17});
+      }
 
       const label = mode==='feeder' ? `محطات المغذي "${currentStation.feeder}"` : (mode==='coords' ? 'محطات قريبة (إحداثيات)' : 'محطات قريبة (٢ كم)');
       mapToolHint.textContent = `${label} — ${res.stations.length} محطة`;
