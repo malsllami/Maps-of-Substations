@@ -86,8 +86,8 @@ header{
 }
 .globe-stage{
   position:relative;
-  width:min(680px, 92vw);
-  height:min(520px, 60vh);
+  width:min(1100px, 94vw);
+  height:min(720px, 74vh);
   overflow:hidden;
   background:transparent;
 }
@@ -173,6 +173,29 @@ h1{
 .search-hint{font-size:12px;color:var(--text-secondary);min-height:16px;text-align:center;}
 .search-hint.err{color:#E0654F;}
 .search-hint.ok{color:var(--teal);}
+.search-progress{
+  display:none;flex-direction:column;gap:6px;
+  width:min(300px,88vw);
+}
+.search-progress.show{display:flex;}
+.search-progress-track{
+  width:100%;height:8px;border-radius:5px;
+  background:rgba(255,255,255,0.12);
+  overflow:hidden;
+}
+[data-theme="light"] .search-progress-track{background:rgba(16,32,53,0.12);}
+.search-progress-fill{
+  height:100%;width:0%;border-radius:5px;
+  background:linear-gradient(90deg, var(--blue-mid), var(--teal-light));
+  box-shadow:0 0 10px rgba(77,214,181,0.7);
+  transition:width .25s ease-out;
+}
+.search-progress-label{
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:11.5px;color:var(--teal-light);font-weight:600;
+  font-family:'JetBrains Mono',monospace;
+}
+.search-progress-label span:first-child{font-family:'IBM Plex Sans Arabic',sans-serif;font-weight:500;}
 .recent-panel{
   display:none;flex-direction:column;gap:8px;
   width:min(340px,88vw);margin-top:4px;
@@ -286,9 +309,9 @@ h1{
   display:flex;flex-direction:column;align-items:center;
 }
 body.guest-mode #cardsSection{display:none;}
-body.guest-mode .globe-stage{width:min(900px,94vw);height:min(720px,80vh);}
+body.guest-mode .globe-stage{width:min(1300px,96vw);height:min(820px,82vh);}
 @media (max-width:600px){
-  body.guest-mode .globe-stage{height:min(620px,74vh);}
+  body.guest-mode .globe-stage{height:min(700px,80vh);}
 }
 .cards-row{
   display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;max-width:760px;width:100%;
@@ -343,8 +366,8 @@ footer{
   .header-actions{gap:6px;}
   .login-btn{padding:7px 12px;font-size:12px;}
   .theme-toggle{width:34px;height:34px;}
-  .hero{padding-top:100px;}
-  .globe-stage{height:min(600px, 70vh);width:94vw;}
+  .hero{padding:100px 6px 40px;}
+  .globe-stage{height:min(660px, 76vh);width:99vw;}
   .cards-row{gap:6px;}
   .stat-card{padding:10px 8px;border-right-width:2px;}
   .stat-card .label{font-size:10.5px;line-height:1.3;}
@@ -402,6 +425,10 @@ footer{
           <input id="searchInput" type="text" placeholder="مثال: T-014 أو ١٤" inputmode="text">
         </div>
         <div class="search-hint" id="searchHint"></div>
+        <div class="search-progress" id="searchProgress">
+          <div class="search-progress-track"><div class="search-progress-fill" id="searchProgressFill"></div></div>
+          <div class="search-progress-label"><span>جاري البحث عن المحطة...</span><span id="searchProgressPct">0%</span></div>
+        </div>
         <div class="recent-panel" id="recentPanel">
           <div class="recent-panel-head">
             <span>محطاتك الأخيرة</span>
@@ -591,12 +618,12 @@ function stageSize(){
   return { w: stageEl.clientWidth, h: stageEl.clientHeight };
 }
 const camera = new THREE.PerspectiveCamera(50, stageSize().w/stageSize().h, 0.1, 1000);
-camera.position.z = 4.4;
+camera.position.z = 4.1;
 function applyResponsiveGlobeOffset(){
   const { w } = stageSize();
-  if(w <= 420){ camera.position.z = 5.2; }
-  else if(w <= 600){ camera.position.z = 4.7; }
-  else { camera.position.z = 4.2; }
+  if(w <= 420){ camera.position.z = 4.9; }
+  else if(w <= 600){ camera.position.z = 4.5; }
+  else { camera.position.z = 3.9; }
 }
 const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
 renderer.setSize(stageSize().w, stageSize().h);
@@ -725,6 +752,7 @@ applyResponsiveGlobeOffset();
 const searchLens = document.getElementById('searchLens');
 const searchInput = document.getElementById('searchInput');
 const searchHint = document.getElementById('searchHint');
+const searchLensIcon = document.getElementById('searchLensIcon');
 const heroContent = document.getElementById('heroContent');
 const mapContainer = document.getElementById('map-container');
 const backBtn = document.getElementById('backBtn');
@@ -772,7 +800,42 @@ if(!hasValidSession()){
   document.body.classList.add('guest-mode');
 }
 
+let isSearching = false;
+function setSearchProgress(active){
+  const progress = document.getElementById('searchProgress');
+  const fill = document.getElementById('searchProgressFill');
+  const pct = document.getElementById('searchProgressPct');
+  if(!active){
+    progress.classList.remove('show');
+    fill.style.width = '0%';
+    pct.textContent = '0%';
+    return null;
+  }
+  progress.classList.add('show');
+  let p = 0;
+  fill.style.width = '0%';
+  pct.textContent = '0%';
+  const timer = setInterval(()=>{
+    p = Math.min(p + Math.random()*10, 92);
+    fill.style.width = p + '%';
+    pct.textContent = Math.round(p) + '%';
+  }, 150);
+  return {
+    finish(){
+      clearInterval(timer);
+      fill.style.width = '100%';
+      pct.textContent = '100%';
+      setTimeout(()=> setSearchProgress(false), 250);
+    },
+    stop(){
+      clearInterval(timer);
+      setSearchProgress(false);
+    }
+  };
+}
+
 async function performSearch(){
+  if(isSearching) return; // منع الضغط المتكرر أثناء البحث الجاري
   const raw = searchInput.value.trim();
   if(!raw) return;
 
@@ -782,12 +845,16 @@ async function performSearch(){
     return;
   }
 
-  searchHint.textContent = 'جاري البحث...';
+  isSearching = true;
+  searchLensIcon.style.opacity = '0.5';
+  searchHint.textContent = '';
   searchHint.className = 'search-hint';
+  const progress = setSearchProgress(true);
+
   try{
     const result = await callBackend('searchStation', { query: raw });
     if(result.found){
-      searchHint.textContent = '';
+      progress.finish();
       goToStation({
         id: result.id, name: result.name, type: result.type,
         lat: result.lat, lng: result.lng,
@@ -795,12 +862,17 @@ async function performSearch(){
         googleMapLink: result.googleMapLink
       });
     } else {
+      progress.stop();
       searchHint.textContent = 'رقم المحطة غير موجود، تحقق من الرقم وحاول مجددًا';
       searchHint.className = 'search-hint err';
     }
   }catch(err){
+    progress.stop();
     searchHint.textContent = 'تعذّر الاتصال بالخادم، حاول مرة أخرى';
     searchHint.className = 'search-hint err';
+  }finally{
+    isSearching = false;
+    searchLensIcon.style.opacity = '';
   }
 }
 
