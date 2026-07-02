@@ -532,13 +532,20 @@ h1{
 .station-table{
   position:relative;z-index:6;
   width:min(1100px, 94vw);
-  margin-top:10px;
+  margin-top:calc(min(78vh, 820px) + 85px + 16px);
+  margin-top:calc(min(78svh, 820px) + 85px + 16px);
   background:var(--bg-card);border:1px solid var(--border-strong);
   border-radius:16px;
   padding:0;
   display:none;
   max-height:none;overflow:visible;
   box-shadow:0 10px 24px rgba(0,0,0,.22);
+}
+@media (max-width:767px){
+  .station-table{
+    margin-top:calc(min(78vh, 820px) + 64px + 16px);
+    margin-top:calc(min(78svh, 820px) + 64px + 16px);
+  }
 }
 body.guest-mode .station-table{width:min(1300px,96vw);}
 .station-table.show{display:block;}
