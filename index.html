@@ -122,11 +122,12 @@ header{
 .theme-toggle:active{transform:scale(0.92);}
 .hero{
   position:relative;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:0;
   padding:85px 20px 100px;
 }
 .globe-stage{
-  position:relative;
+  position:absolute;top:85px;left:50%;transform:translateX(-50%);
+  z-index:1;
   width:clamp(320px, 85vw, 680px);
   aspect-ratio:1;
   overflow:visible;
@@ -153,6 +154,7 @@ header{
 }
 @media (max-width:767px){
   .globe-stage{
+    top:64px;
     width:clamp(320px, min(94vw, 66vh), 480px);
     width:clamp(320px, min(94vw, 66svh), 480px);
   }
@@ -171,15 +173,17 @@ header{
 #map-container.active{opacity:1;pointer-events:auto;}
 [data-theme="dark"] .leaflet-tile-pane{filter:invert(0.92) hue-rotate(180deg) brightness(0.95) contrast(0.9);}
 [data-theme="dark"] #map-container.satellite-active .leaflet-tile-pane{filter:none;}
+.hero.map-active{
+  min-height:calc(min(78vh, 820px) + 100px);
+  min-height:calc(min(78svh, 820px) + 100px);
+}
 .hero-content{
-  position:absolute;inset:0;z-index:5;
+  position:relative;z-index:5;width:100%;
   display:flex;flex-direction:column;align-items:center;
-  padding:24% 30px 0;
-  pointer-events:none;
+  padding:20px 30px 0;
   transition:opacity .4s ease;
 }
-.hero-content .search-wrap{pointer-events:auto;}
-.hero-content.hidden{opacity:0;pointer-events:none;}
+.hero-content.hidden{display:none;}
 .hero-heading{
   display:flex;flex-direction:column;align-items:center;gap:14px;
   width:100%;
@@ -708,51 +712,6 @@ footer{
     <canvas id="globe-canvas"></canvas>
     <div id="map-container"></div>
 
-    <div class="hero-content" id="heroContent">
-      <div class="hero-heading">
-        <div class="eyebrow">SEC // DISTRIBUTION NETWORK</div>
-        <h1>ابحث عن محطات التوزيع والتحويل</h1>
-      </div>
-      <div class="search-wrap">
-        <div class="search-lens" id="searchLens">
-          <svg id="searchLensIcon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          <input id="searchInput" type="text" placeholder="مثال: 39070 أو ABN" inputmode="text">
-        </div>
-        <div class="search-hint" id="searchHint"></div>
-        <div class="search-progress" id="searchProgress">
-          <div class="search-progress-track"><div class="search-progress-fill" id="searchProgressFill"></div></div>
-          <div class="search-progress-label"><span>جاري البحث عن المحطة...</span><span id="searchProgressPct">0%</span></div>
-        </div>
-        <div class="recent-panel" id="recentPanel">
-          <div class="recent-panel-head">
-            <span>محطاتك الأخيرة</span>
-            <button class="recent-clear-btn" id="recentClearBtn">مسح الذاكرة</button>
-          </div>
-          <div class="recent-chips" id="recentChips"></div>
-        </div>
-        <button class="add-station-toggle" id="addStationToggle">+ إضافة محطة جديدة</button>
-        <div class="add-station-panel" id="addStationPanel">
-          <div class="add-station-title">إضافة محطة جديدة</div>
-          <div class="add-station-type">
-            <button class="type-btn active" data-type="توزيع">توزيع</button>
-            <button class="type-btn" data-type="تحويل">تحويل</button>
-          </div>
-          <input id="newStationId" class="edit-input" placeholder="رقم المحطة (لازم يكون محجوز أصلاً بالشيت)">
-          <div id="feederRegionRow" style="display:flex;gap:6px;">
-            <input id="newStationFeeder" class="edit-input" placeholder="المغذي">
-            <input id="newStationRegion" class="edit-input" placeholder="المنطقة">
-          </div>
-          <div style="display:flex;gap:6px;">
-            <input id="newStationLat" class="edit-input" placeholder="خط العرض">
-            <input id="newStationLng" class="edit-input" placeholder="خط الطول">
-          </div>
-          <button class="use-gps-btn" id="newStationGpsBtn" type="button">📍 استخدام موقعي الحالي</button>
-          <div id="addStationError" class="add-station-error"></div>
-          <button class="add-station-submit" id="addStationSubmitBtn">حفظ المحطة</button>
-        </div>
-      </div>
-    </div>
-
     <div class="back-btn" id="backBtn">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
       رجوع للبحث
@@ -796,6 +755,52 @@ footer{
       </div>
     </div>
   </div>
+
+  <div class="hero-content" id="heroContent">
+    <div class="hero-heading">
+      <div class="eyebrow">SEC // DISTRIBUTION NETWORK</div>
+      <h1>ابحث عن محطات التوزيع والتحويل</h1>
+    </div>
+    <div class="search-wrap">
+      <div class="search-lens" id="searchLens">
+        <svg id="searchLensIcon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input id="searchInput" type="text" placeholder="مثال: 39070 أو ABN" inputmode="text">
+      </div>
+      <div class="search-hint" id="searchHint"></div>
+      <div class="search-progress" id="searchProgress">
+        <div class="search-progress-track"><div class="search-progress-fill" id="searchProgressFill"></div></div>
+        <div class="search-progress-label"><span>جاري البحث عن المحطة...</span><span id="searchProgressPct">0%</span></div>
+      </div>
+      <div class="recent-panel" id="recentPanel">
+        <div class="recent-panel-head">
+          <span>محطاتك الأخيرة</span>
+          <button class="recent-clear-btn" id="recentClearBtn">مسح الذاكرة</button>
+        </div>
+        <div class="recent-chips" id="recentChips"></div>
+      </div>
+      <button class="add-station-toggle" id="addStationToggle">+ إضافة محطة جديدة</button>
+      <div class="add-station-panel" id="addStationPanel">
+        <div class="add-station-title">إضافة محطة جديدة</div>
+        <div class="add-station-type">
+          <button class="type-btn active" data-type="توزيع">توزيع</button>
+          <button class="type-btn" data-type="تحويل">تحويل</button>
+        </div>
+        <input id="newStationId" class="edit-input" placeholder="رقم المحطة (لازم يكون محجوز أصلاً بالشيت)">
+        <div id="feederRegionRow" style="display:flex;gap:6px;">
+          <input id="newStationFeeder" class="edit-input" placeholder="المغذي">
+          <input id="newStationRegion" class="edit-input" placeholder="المنطقة">
+        </div>
+        <div style="display:flex;gap:6px;">
+          <input id="newStationLat" class="edit-input" placeholder="خط العرض">
+          <input id="newStationLng" class="edit-input" placeholder="خط الطول">
+        </div>
+        <button class="use-gps-btn" id="newStationGpsBtn" type="button">📍 استخدام موقعي الحالي</button>
+        <div id="addStationError" class="add-station-error"></div>
+        <button class="add-station-submit" id="addStationSubmitBtn">حفظ المحطة</button>
+      </div>
+    </div>
+  </div>
+
   <div class="station-table" id="stationTable"></div>
 </section>
 
@@ -989,6 +994,7 @@ themeToggle.addEventListener('click', ()=>{
 /* ===== الكرة الأرضية Three.js — محصورة بحدود globeStage فقط ===== */
 const canvas = document.getElementById('globe-canvas');
 const stageEl = document.getElementById('globeStage');
+const heroSection = document.getElementById('heroSection');
 const scene = new THREE.Scene();
 function stageSize(){
   return { w: stageEl.clientWidth, h: stageEl.clientHeight };
@@ -1810,6 +1816,7 @@ function startMorphExpand(s){
       clearInterval(expand);
       mapContainer.classList.add('active');
       stageEl.classList.add('map-active');
+      heroSection.classList.add('map-active');
       backBtn.classList.add('show');
       mapTools.classList.add('show');
       zoomControls.classList.add('show');
@@ -1970,6 +1977,7 @@ function openEditForm(){
 backBtn.addEventListener('click', ()=>{
   mapContainer.classList.remove('active');
   stageEl.classList.remove('map-active');
+  heroSection.classList.remove('map-active');
   document.getElementById('heroContent').classList.remove('hidden');
   backBtn.classList.remove('show');
   mapTools.classList.remove('show');
