@@ -689,7 +689,7 @@ footer{
   .login-btn{padding:7px 12px;font-size:12px;}
   .theme-toggle{width:34px;height:34px;}
   .hero{padding:64px 6px 90px;}
-  .station-table{width:99vw;margin-top:6px;}
+  .station-table{width:99vw;}
   .eyebrow{font-size:10px;padding:5px 12px;}
   h1{font-size:clamp(22px,6vw,32px);}
   .recent-panel{gap:6px;}
@@ -1917,6 +1917,7 @@ document.getElementById('addStationSubmitBtn').addEventListener('click', async f
 });
 
 document.getElementById('addStationReloadBtn').addEventListener('click', ()=>{
+  window.onbeforeunload = null;
   location.reload();
 });
 
@@ -2137,7 +2138,10 @@ function openEditForm(){
           </div>
           <button class="add-station-submit" id="editReloadBtn">تحديث الصفحة الآن</button>
         </div>`;
-      document.getElementById('editReloadBtn').addEventListener('click', ()=> location.reload());
+      document.getElementById('editReloadBtn').addEventListener('click', ()=>{
+        window.onbeforeunload = null;
+        location.reload();
+      });
       currentStation.lat = lat; currentStation.lng = lng;
       if(marker) marker.setLatLng([lat,lng]);
       // الواجهة تبقى مقفولة عمداً حتى يضغط زر التحديث
