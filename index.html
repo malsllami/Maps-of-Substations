@@ -142,21 +142,21 @@ header{
 }
 @media (min-width:1200px){
   .globe-stage{
-    width:clamp(400px, min(88vw, 74vh), 760px);
-    width:clamp(400px, min(88vw, 74svh), 760px);
+    width:clamp(460px, min(92vw, 82vh), 880px);
+    width:clamp(460px, min(92vw, 82svh), 880px);
   }
 }
 @media (max-width:1199px) and (min-width:768px){
   .globe-stage{
-    width:clamp(360px, min(90vw, 70vh), 620px);
-    width:clamp(360px, min(90vw, 70svh), 620px);
+    width:clamp(400px, min(94vw, 78vh), 700px);
+    width:clamp(400px, min(94vw, 78svh), 700px);
   }
 }
 @media (max-width:767px){
   .globe-stage{
     top:64px;
-    width:clamp(320px, min(94vw, 66vh), 480px);
-    width:clamp(320px, min(94vw, 66svh), 480px);
+    width:clamp(340px, min(96vw, 72vh), 560px);
+    width:clamp(340px, min(96vw, 72svh), 560px);
   }
 }
 [data-theme="dark"] .globe-stage::before{
@@ -460,6 +460,15 @@ h1{
 }
 .add-station-submit:hover{background:rgba(31,174,140,0.24);border-color:var(--teal);}
 .add-station-submit:disabled{opacity:.5;cursor:not-allowed;}
+.add-station-progress-track{
+  width:100%;height:8px;border-radius:5px;background:rgba(255,255,255,0.12);overflow:hidden;margin-top:10px;
+}
+[data-theme="light"] .add-station-progress-track{background:rgba(16,32,53,0.12);}
+.add-station-progress-fill{
+  height:100%;width:0%;border-radius:5px;
+  background:linear-gradient(90deg, var(--blue-mid), var(--teal-light));
+  transition:width .25s ease-out;
+}
 
 .outage-panel{
   position:absolute;top:54px;left:14px;z-index:6;
@@ -532,20 +541,14 @@ h1{
 .station-table{
   position:relative;z-index:6;
   width:min(1100px, 94vw);
-  margin-top:calc(min(78vh, 820px) + 85px + 16px);
-  margin-top:calc(min(78svh, 820px) + 85px + 16px);
+  margin-top:calc(min(78vh, 820px) + 16px);
+  margin-top:calc(min(78svh, 820px) + 16px);
   background:var(--bg-card);border:1px solid var(--border-strong);
   border-radius:16px;
   padding:0;
   display:none;
   max-height:none;overflow:visible;
   box-shadow:0 10px 24px rgba(0,0,0,.22);
-}
-@media (max-width:767px){
-  .station-table{
-    margin-top:calc(min(78vh, 820px) + 64px + 16px);
-    margin-top:calc(min(78svh, 820px) + 64px + 16px);
-  }
 }
 body.guest-mode .station-table{width:min(1300px,96vw);}
 .station-table.show{display:block;}
@@ -580,20 +583,21 @@ body.guest-mode .station-table{width:min(1300px,96vw);}
   display:flex;flex-direction:column;align-items:center;
 }
 body.guest-mode #cardsSection{display:none;}
+body.guest-mode .search-wrap{display:none;}
 body.guest-mode .globe-stage{
-  width:clamp(440px, min(90vw, 78vh), 800px);
-  width:clamp(440px, min(90vw, 78svh), 800px);
+  width:clamp(500px, min(94vw, 86vh), 920px);
+  width:clamp(500px, min(94vw, 86svh), 920px);
 }
 @media (max-width:1199px) and (min-width:768px){
   body.guest-mode .globe-stage{
-    width:clamp(380px, min(92vw, 74vh), 660px);
-    width:clamp(380px, min(92vw, 74svh), 660px);
+    width:clamp(420px, min(96vw, 82vh), 740px);
+    width:clamp(420px, min(96vw, 82svh), 740px);
   }
 }
 @media (max-width:767px){
   body.guest-mode .globe-stage{
-    width:clamp(340px, min(96vw, 70vh), 520px);
-    width:clamp(340px, min(96vw, 70svh), 520px);
+    width:clamp(360px, min(98vw, 76vh), 600px);
+    width:clamp(360px, min(98vw, 76svh), 600px);
   }
 }
 .cards-row{
@@ -637,7 +641,7 @@ body.guest-mode .globe-stage{
 .stat-panel-row .v{font-family:'JetBrains Mono',monospace;color:var(--teal);direction:ltr;}
 .legend-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-left:6px;}
 footer{
-  text-align:center;padding:24px;font-size:11px;color:var(--text-secondary);
+  text-align:center;padding:12px 20px;font-size:10px;color:var(--text-secondary);opacity:.7;
   border-top:1px solid var(--border);
 }
 @media (max-width:600px){
@@ -795,29 +799,42 @@ footer{
       <button class="add-station-toggle" id="addStationToggle">+ إضافة محطة جديدة</button>
       <div class="add-station-panel" id="addStationPanel">
         <div class="add-station-title">إضافة محطة جديدة</div>
-        <div class="add-station-type">
-          <button class="type-btn active" data-type="توزيع">توزيع</button>
-          <button class="type-btn" data-type="تحويل">تحويل</button>
-        </div>
-        <input id="newStationId" class="edit-input" placeholder="رقم المحطة (لازم يكون محجوز أصلاً بالشيت)">
-        <div id="feederRegionRow" style="display:flex;gap:6px;">
-          <input id="newStationFeeder" class="edit-input" placeholder="المغذي">
-          <input id="newStationRegion" class="edit-input" placeholder="المنطقة">
-        </div>
-        <div style="display:flex;gap:6px;">
-          <input id="newStationLat" class="edit-input" placeholder="خط العرض">
-          <input id="newStationLng" class="edit-input" placeholder="خط الطول">
-        </div>
-        <button class="use-gps-btn" id="newStationGpsBtn" type="button">📍 استخدام موقعي الحالي</button>
-        <div class="paste-coord-row">
-          <span class="paste-coord-label">أو الصق الإحداثية مباشرة</span>
-          <div style="display:flex;gap:6px;">
-            <input id="newStationPasteCoord" class="edit-input" placeholder="21.5234,39.1876" style="flex:1">
-            <button type="button" class="paste-apply-btn" id="newStationPasteApply">تطبيق</button>
+        <div id="addStationFormBody">
+          <div class="add-station-type">
+            <button class="type-btn active" data-type="توزيع">توزيع</button>
+            <button class="type-btn" data-type="تحويل">تحويل</button>
           </div>
+          <input id="newStationId" class="edit-input" placeholder="رقم المحطة (يجب ألا يكون موجوداً بالشيت)">
+          <div id="feederRegionRow" style="display:flex;gap:6px;">
+            <input id="newStationFeeder" class="edit-input" placeholder="المغذي (اختياري)">
+            <input id="newStationRegion" class="edit-input" placeholder="المنطقة *">
+          </div>
+          <div style="display:flex;gap:6px;">
+            <input id="newStationLat" class="edit-input" placeholder="خط العرض *">
+            <input id="newStationLng" class="edit-input" placeholder="خط الطول *">
+          </div>
+          <button class="use-gps-btn" id="newStationGpsBtn" type="button">📍 استخدام موقعي الحالي</button>
+          <div class="paste-coord-row">
+            <span class="paste-coord-label">أو الصق الإحداثية مباشرة</span>
+            <div style="display:flex;gap:6px;">
+              <input id="newStationPasteCoord" class="edit-input" placeholder="21.5234,39.1876" style="flex:1">
+              <button type="button" class="paste-apply-btn" id="newStationPasteApply">تطبيق</button>
+            </div>
+          </div>
+          <div id="addStationError" class="add-station-error"></div>
+          <button class="add-station-submit" id="addStationSubmitBtn">
+            <span id="addStationBtnLabel">حفظ المحطة</span>
+            <span id="addStationBtnPct" style="display:none"></span>
+          </button>
         </div>
-        <div id="addStationError" class="add-station-error"></div>
-        <button class="add-station-submit" id="addStationSubmitBtn">حفظ المحطة</button>
+        <div class="add-station-progress-track" id="addStationProgressTrack" style="display:none">
+          <div class="add-station-progress-fill" id="addStationProgressFill"></div>
+        </div>
+        <div id="addStationSuccess" style="display:none;text-align:center;padding:6px 0;">
+          <div style="color:var(--teal);font-weight:700;font-size:14px;margin-bottom:6px;">✓ تمت إضافة المحطة بنجاح</div>
+          <div style="font-size:11px;color:var(--text-secondary);margin-bottom:12px;">لازم تحدّث الصفحة أول قبل تقدر تبحث، عشان المحطة الجديدة تظهر بنتائج البحث</div>
+          <button class="add-station-submit" id="addStationReloadBtn">تحديث الصفحة الآن</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1786,51 +1803,81 @@ document.getElementById('newStationPasteApply').addEventListener('click', ()=>{
   errEl.textContent = '';
 });
 
+/* ===== قفل التنقل أثناء عمليات الحفظ الحرجة (إضافة/تعديل) — يمنع تكرار المحطات بسبب الاستعجال ===== */
+function lockNavigationDuringSave(){
+  backBtn.style.pointerEvents = 'none';
+  backBtn.style.opacity = '0.4';
+  searchInput.disabled = true;
+  searchLensIcon.style.pointerEvents = 'none';
+  searchLensIcon.style.opacity = '0.4';
+  window.onbeforeunload = ()=> 'عملية الحفظ لسه ما خلصت';
+}
+function unlockNavigationAfterSave(){
+  backBtn.style.pointerEvents = '';
+  backBtn.style.opacity = '';
+  searchInput.disabled = false;
+  searchLensIcon.style.pointerEvents = '';
+  searchLensIcon.style.opacity = '';
+  window.onbeforeunload = null;
+}
+
 document.getElementById('addStationSubmitBtn').addEventListener('click', async function(){
-  const btn = this;
   const errEl = document.getElementById('addStationError');
+  errEl.style.color = '#E0654F';
   errEl.textContent = '';
 
-  if(!hasValidSession()){
-    errEl.textContent = 'سجّل دخول أولاً لإضافة محطة';
-    return;
-  }
+  if(!hasValidSession()){ errEl.textContent = 'سجّل دخول أولاً لإضافة محطة'; return; }
+
   const stationId = document.getElementById('newStationId').value.trim();
+  const region = document.getElementById('newStationRegion').value.trim();
   const lat = parseFloat(document.getElementById('newStationLat').value);
   const lng = parseFloat(document.getElementById('newStationLng').value);
-  if(!stationId){ errEl.textContent = 'أدخل رقم المحطة'; return; }
-  if(isNaN(lat) || isNaN(lng)){ errEl.textContent = 'أدخل إحداثية صحيحة (يدوياً أو GPS)'; return; }
 
-  btn.disabled = true;
-  btn.textContent = 'جاري الحفظ...';
+  if(!stationId){ errEl.textContent = 'رقم المحطة مطلوب'; return; }
+  if(newStationType === 'توزيع' && !region){ errEl.textContent = 'المنطقة مطلوبة'; return; }
+  if(isNaN(lat) || isNaN(lng)){
+    errEl.textContent = 'الإحداثية إجبارية — حدّد موقعك أو أدخلها يدوياً قبل الحفظ';
+    return;
+  }
+
+  lockNavigationDuringSave();
+  document.getElementById('addStationFormBody').style.display = 'none';
+  const progressTrack = document.getElementById('addStationProgressTrack');
+  const progressFill = document.getElementById('addStationProgressFill');
+  progressTrack.style.display = 'block';
+  progressFill.style.width = '0%';
+  let p = 0;
+  const tick = setInterval(()=>{ p = Math.min(p + Math.random()*12, 90); progressFill.style.width = p+'%'; }, 150);
 
   const session = JSON.parse(localStorage.getItem('sec-session') || '{}');
-  const opKey = 'add_' + stationId + '_' + Date.now();
+  const opKey = 'addnew_' + stationId + '_' + Date.now();
   try{
-    const res = await callBackend('updateCoordinates', {
+    const res = await callBackend('addNewStation', {
       opKey, phone: session.phone, stationId, type: newStationType,
-      lat, lng, method: 'إضافة يدوي/GPS', isNewOnly: true,
+      lat, lng,
       feeder: newStationType === 'توزيع' ? document.getElementById('newStationFeeder').value.trim() : undefined,
-      region: newStationType === 'توزيع' ? document.getElementById('newStationRegion').value.trim() : undefined
+      region: newStationType === 'توزيع' ? region : undefined
     });
-    if(!res.success){
-      // نفس رسالة الباك إند حرفياً — لو الرقم غير محجوز أصلاً بالشيت، هذا يكشفه فوراً بدل فشل صامت
-      throw new Error(res.error || 'فشل الحفظ');
-    }
-    errEl.style.color = 'var(--teal)';
-    errEl.textContent = '✓ تم حفظ المحطة بنجاح';
-    document.getElementById('newStationId').value = '';
-    document.getElementById('newStationFeeder').value = '';
-    document.getElementById('newStationRegion').value = '';
-    document.getElementById('newStationLat').value = '';
-    document.getElementById('newStationLng').value = '';
+    clearInterval(tick);
+    if(!res.success){ throw new Error(res.error || 'فشل الحفظ'); }
+
+    progressFill.style.width = '100%';
+    setTimeout(()=>{
+      progressTrack.style.display = 'none';
+      document.getElementById('addStationSuccess').style.display = 'block';
+      // الواجهة تبقى مقفولة عمداً — الخروج الوحيد المتاح هو زر التحديث الإجباري
+    }, 300);
   }catch(err){
-    errEl.style.color = '#E0654F';
+    clearInterval(tick);
+    progressTrack.style.display = 'none';
+    document.getElementById('addStationFormBody').style.display = 'block';
     errEl.textContent = err.message;
-  }finally{
-    btn.disabled = false;
-    btn.textContent = 'حفظ المحطة';
+    unlockNavigationAfterSave();
   }
+});
+
+document.getElementById('addStationReloadBtn').addEventListener('click', ()=>{
+  location.reload();
 });
 
 let currentStation = null;
@@ -2006,6 +2053,7 @@ function openEditForm(){
     errEl.style.display='none';
     btn.disabled = true;
     btn.textContent = 'جاري الحفظ...';
+    lockNavigationDuringSave();
 
     const session = JSON.parse(localStorage.getItem('sec-session') || '{}');
     const opKey = 'edit_' + s.id + '_' + Date.now();
@@ -2021,15 +2069,19 @@ function openEditForm(){
       stationTable.innerHTML = `
         <div class="sb-inner" style="text-align:center;">
           <div style="color:var(--teal);font-weight:700;font-size:13px;margin-bottom:6px;">✓ تم حفظ التعديل بنجاح</div>
-          <div style="font-size:10.5px;color:var(--text-secondary);line-height:1.6;">
-            اضغط زر <b>"تحديث البيانات"</b> بأسفل الصفحة الرئيسية عشان التعديل يظهر بنتائج البحث.
+          <div style="font-size:10.5px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px;">
+            لازم تحدّث الصفحة أول قبل تقدر تبحث، عشان التعديل يظهر بنتائج البحث.
           </div>
+          <button class="add-station-submit" id="editReloadBtn">تحديث الصفحة الآن</button>
         </div>`;
+      document.getElementById('editReloadBtn').addEventListener('click', ()=> location.reload());
       currentStation.lat = lat; currentStation.lng = lng;
       if(marker) marker.setLatLng([lat,lng]);
+      // الواجهة تبقى مقفولة عمداً حتى يضغط زر التحديث
     }catch(err){
       errEl.textContent = err.message; errEl.style.display='block';
       btn.disabled = false; btn.textContent = 'حفظ التعديل';
+      unlockNavigationAfterSave();
     }
   });
 }
