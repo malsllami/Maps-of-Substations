@@ -416,6 +416,40 @@ h1{
 }
 .nearby-opt:hover{background:var(--bg-elev);}
 
+.edit-input{width:100%;height:34px;background:var(--bg);border:1px solid var(--border-strong);border-radius:7px;color:var(--text-primary);font-size:11.5px;padding:0 10px;font-family:'JetBrains Mono',monospace;direction:ltr;text-align:right;}
+
+/* ===== إضافة محطة جديدة — خارج نطاق الخريطة كلياً، جزء من شاشة البحث ===== */
+.add-station-toggle{
+  background:transparent;border:none;color:var(--teal-light);font-size:12px;
+  cursor:pointer;font-family:inherit;text-decoration:underline;margin-top:4px;
+  text-shadow:0 1px 4px rgba(0,0,0,0.6);
+}
+[data-theme="light"] .add-station-toggle{color:var(--teal);text-shadow:none;}
+.add-station-panel{
+  display:none;flex-direction:column;gap:8px;
+  width:min(300px,88vw);background:var(--bg-card);border:1px solid var(--border-strong);
+  border-radius:14px;padding:14px;margin-top:8px;box-shadow:0 10px 28px rgba(0,0,0,.35);
+}
+.add-station-panel.show{display:flex;}
+.add-station-title{font-size:12.5px;font-weight:700;color:var(--text-primary);margin-bottom:2px;}
+.add-station-type{display:flex;gap:6px;}
+.type-btn{
+  flex:1;padding:8px;border-radius:7px;border:1px solid var(--border-strong);background:var(--bg);
+  color:var(--text-secondary);font-size:11.5px;cursor:pointer;font-family:inherit;transition:.2s;
+}
+.type-btn.active{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:600;}
+.use-gps-btn{
+  width:100%;font-size:11px;padding:8px;border-radius:7px;border:1px solid var(--border-strong);
+  background:var(--bg);color:var(--teal);cursor:pointer;font-family:inherit;
+}
+.add-station-error{font-size:11px;color:#E0654F;min-height:14px;}
+.add-station-submit{
+  background:rgba(31,174,140,0.14);color:var(--teal-light);border:1px solid rgba(77,214,181,0.45);
+  border-radius:8px;padding:9px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:.2s;
+}
+.add-station-submit:hover{background:rgba(31,174,140,0.24);border-color:var(--teal);}
+.add-station-submit:disabled{opacity:.5;cursor:not-allowed;}
+
 .outage-panel{
   position:absolute;top:54px;left:14px;z-index:6;
   display:none;flex-direction:column;gap:8px;
@@ -695,6 +729,26 @@ footer{
             <button class="recent-clear-btn" id="recentClearBtn">مسح الذاكرة</button>
           </div>
           <div class="recent-chips" id="recentChips"></div>
+        </div>
+        <button class="add-station-toggle" id="addStationToggle">+ إضافة محطة جديدة</button>
+        <div class="add-station-panel" id="addStationPanel">
+          <div class="add-station-title">إضافة محطة جديدة</div>
+          <div class="add-station-type">
+            <button class="type-btn active" data-type="توزيع">توزيع</button>
+            <button class="type-btn" data-type="تحويل">تحويل</button>
+          </div>
+          <input id="newStationId" class="edit-input" placeholder="رقم المحطة (لازم يكون محجوز أصلاً بالشيت)">
+          <div id="feederRegionRow" style="display:flex;gap:6px;">
+            <input id="newStationFeeder" class="edit-input" placeholder="المغذي">
+            <input id="newStationRegion" class="edit-input" placeholder="المنطقة">
+          </div>
+          <div style="display:flex;gap:6px;">
+            <input id="newStationLat" class="edit-input" placeholder="خط العرض">
+            <input id="newStationLng" class="edit-input" placeholder="خط الطول">
+          </div>
+          <button class="use-gps-btn" id="newStationGpsBtn" type="button">📍 استخدام موقعي الحالي</button>
+          <div id="addStationError" class="add-station-error"></div>
+          <button class="add-station-submit" id="addStationSubmitBtn">حفظ المحطة</button>
         </div>
       </div>
     </div>
@@ -1654,6 +1708,85 @@ function renderRecentPanel(){
 }
 document.getElementById('recentClearBtn').addEventListener('click', clearRecentStations);
 renderRecentPanel();
+
+/* ===== إضافة محطة جديدة — تستخدم updateCoordinates الموجودة أصلاً بافتراض أن رقم المحطة محجوز كصف فارغ بالشيت ===== */
+const addStationToggle = document.getElementById('addStationToggle');
+const addStationPanel = document.getElementById('addStationPanel');
+let newStationType = 'توزيع';
+
+addStationToggle.addEventListener('click', ()=>{
+  addStationPanel.classList.toggle('show');
+});
+
+document.querySelectorAll('#addStationPanel .type-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('#addStationPanel .type-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    newStationType = btn.dataset.type;
+    document.getElementById('feederRegionRow').style.display = newStationType === 'توزيع' ? 'flex' : 'none';
+  });
+});
+
+document.getElementById('newStationGpsBtn').addEventListener('click', ()=>{
+  const errEl = document.getElementById('addStationError');
+  if(!navigator.geolocation){ errEl.textContent = 'المتصفح لا يدعم تحديد الموقع'; return; }
+  errEl.textContent = 'جاري تحديد موقعك...';
+  navigator.geolocation.getCurrentPosition(
+    pos=>{
+      document.getElementById('newStationLat').value = pos.coords.latitude.toFixed(6);
+      document.getElementById('newStationLng').value = pos.coords.longitude.toFixed(6);
+      errEl.textContent = '';
+    },
+    ()=>{ errEl.textContent = 'تعذّر تحديد الموقع، تأكد من صلاحية الوصول للموقع'; }
+  );
+});
+
+document.getElementById('addStationSubmitBtn').addEventListener('click', async function(){
+  const btn = this;
+  const errEl = document.getElementById('addStationError');
+  errEl.textContent = '';
+
+  if(!hasValidSession()){
+    errEl.textContent = 'سجّل دخول أولاً لإضافة محطة';
+    return;
+  }
+  const stationId = document.getElementById('newStationId').value.trim();
+  const lat = parseFloat(document.getElementById('newStationLat').value);
+  const lng = parseFloat(document.getElementById('newStationLng').value);
+  if(!stationId){ errEl.textContent = 'أدخل رقم المحطة'; return; }
+  if(isNaN(lat) || isNaN(lng)){ errEl.textContent = 'أدخل إحداثية صحيحة (يدوياً أو GPS)'; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'جاري الحفظ...';
+
+  const session = JSON.parse(localStorage.getItem('sec-session') || '{}');
+  const opKey = 'add_' + stationId + '_' + Date.now();
+  try{
+    const res = await callBackend('updateCoordinates', {
+      opKey, phone: session.phone, stationId, type: newStationType,
+      lat, lng, method: 'إضافة يدوي/GPS',
+      feeder: newStationType === 'توزيع' ? document.getElementById('newStationFeeder').value.trim() : undefined,
+      region: newStationType === 'توزيع' ? document.getElementById('newStationRegion').value.trim() : undefined
+    });
+    if(!res.success){
+      // نفس رسالة الباك إند حرفياً — لو الرقم غير محجوز أصلاً بالشيت، هذا يكشفه فوراً بدل فشل صامت
+      throw new Error(res.error || 'فشل الحفظ');
+    }
+    errEl.style.color = 'var(--teal)';
+    errEl.textContent = '✓ تم حفظ المحطة بنجاح';
+    document.getElementById('newStationId').value = '';
+    document.getElementById('newStationFeeder').value = '';
+    document.getElementById('newStationRegion').value = '';
+    document.getElementById('newStationLat').value = '';
+    document.getElementById('newStationLng').value = '';
+  }catch(err){
+    errEl.style.color = '#E0654F';
+    errEl.textContent = err.message;
+  }finally{
+    btn.disabled = false;
+    btn.textContent = 'حفظ المحطة';
+  }
+});
 
 let currentStation = null;
 function goToStation(s){
