@@ -12,7 +12,8 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;padding-bottom:24px;transition:background .3s,color .3s;}
 /* ===== هيدر موحّد مطابق لبقية الصفحات (الرئيسية ولوحة المدير) ===== */
-header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--border);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;}
+header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--border);display:flex;flex-direction:column;}
+.header-row-main{display:flex;align-items:center;justify-content:space-between;padding:16px 28px;}
 .brand{display:flex;align-items:center;gap:10px;cursor:pointer;text-decoration:none;}
 .brand-mark{height:32px;width:auto;flex-shrink:0;display:block;object-fit:contain;transition:transform .2s;}
 .brand:hover .brand-mark{transform:scale(1.06);}
@@ -52,11 +53,10 @@ header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px s
 .theme-switch.on{background:var(--teal);}
 .theme-switch-knob{position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.3);}
 .theme-switch.on .theme-switch-knob{transform:translateX(19px);}
-/* شريط حالة الاتصال + آخر تحديث / Connection status + last-update bar */
-.status-bar{
-  position:sticky;top:65px;z-index:19;
+/* شريط حالة الاتصال + آخر تحديث — جزء بنيوي فعلي من الهيدر، لا عنصر شقيق منفصل / Connection status bar — structural part of header, not a separate sibling */
+.header-row-status{
   display:flex;align-items:center;justify-content:space-between;
-  background:var(--bg-elev);border-bottom:1px solid var(--border);
+  background:var(--bg-elev);border-top:1px solid var(--border);
   padding:6px 28px;font-size:11px;color:var(--text-secondary);
 }
 .status-bar-item{display:flex;align-items:center;gap:6px;}
@@ -64,9 +64,9 @@ header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px s
 .conn-dot.online{background:#2ECC71;box-shadow:0 0 6px rgba(46,204,113,.6);}
 .conn-dot.offline{background:#E0654F;box-shadow:0 0 6px rgba(224,101,79,.6);}
 @media(max-width:600px){
-  header{padding:12px 14px;}
+  .header-row-main{padding:12px 14px;}
   .brand-sub{display:none;}
-  .status-bar{padding:6px 12px;font-size:10px;}
+  .header-row-status{padding:6px 12px;font-size:10px;}
 }
 .wrap{max-width:480px;margin:0 auto;padding:24px 24px 0;}
 .card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:16px;}
@@ -103,44 +103,45 @@ h2{font-size:17px;font-weight:700;margin-bottom:4px;}
 </script>
 
 <header>
-  <div class="brand" id="brandLink" style="cursor:pointer">
-    <img class="brand-mark" src="assets/logo-icon.png" alt="شعار الشركة السعودية للطاقة">
-    <div>
-      <div class="brand-text">حسابي</div>
-      <div class="brand-sub">الشركة السعودية للطاقة — محطات التوزيع</div>
+  <div class="header-row-main">
+    <div class="brand" id="brandLink" style="cursor:pointer">
+      <img class="brand-mark" src="assets/logo-icon.png" alt="شعار الشركة السعودية للطاقة">
+      <div>
+        <div class="brand-text">حسابي</div>
+        <div class="brand-sub">الشركة السعودية للطاقة — محطات التوزيع</div>
+      </div>
     </div>
-  </div>
-  <div class="header-actions" id="headerActions">
-    <div class="mobile-user-menu" id="mobileUserMenu">
-      <button class="mobile-menu-trigger" id="mobileMenuTrigger">
-        <span id="mobileMenuName">القائمة</span>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-      </button>
-      <div class="mobile-menu-panel" id="mobileMenuPanel">
-        <div class="mobile-menu-row">
-          <span>الوضع الداكن</span>
-          <button class="theme-switch" id="themeSwitchMobile" aria-label="تبديل الوضع الداكن"><span class="theme-switch-knob"></span></button>
+    <div class="header-actions" id="headerActions">
+      <div class="mobile-user-menu" id="mobileUserMenu">
+        <button class="mobile-menu-trigger" id="mobileMenuTrigger">
+          <span id="mobileMenuName">القائمة</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="mobile-menu-panel" id="mobileMenuPanel">
+          <div class="mobile-menu-row">
+            <span>الوضع الداكن</span>
+            <button class="theme-switch" id="themeSwitchMobile" aria-label="تبديل الوضع الداكن"><span class="theme-switch-knob"></span></button>
+          </div>
+          <a href="admin.html" class="mobile-menu-link" id="mobileAdminLink" style="display:none">لوحة المدير</a>
+          <a href="index.html" class="mobile-menu-link">الصفحة الرئيسية</a>
+          <button class="mobile-menu-logout" id="mobileLogoutBtn">تسجيل الخروج</button>
         </div>
-        <a href="admin.html" class="mobile-menu-link" id="mobileAdminLink" style="display:none">لوحة المدير</a>
-        <a href="index.html" class="mobile-menu-link">الصفحة الرئيسية</a>
-        <button class="mobile-menu-logout" id="mobileLogoutBtn">تسجيل الخروج</button>
       </div>
     </div>
   </div>
+  <!-- شريط حالة الاتصال + آخر تحديث — جزء بنيوي فعلي من الهيدر / Connection status — structural part of header -->
+  <div class="header-row-status" id="statusBar">
+    <div class="status-bar-item">
+      <span class="conn-dot" id="connDot"></span>
+      <span id="connLabel">جاري التحقق...</span>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+    </div>
+    <div class="status-bar-item">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span id="lastUpdateLabel">آخر تحديث: —</span>
+    </div>
+  </div>
 </header>
-
-<!-- شريط حالة الاتصال + آخر تحديث / Connection status + last-update bar -->
-<div class="status-bar" id="statusBar">
-  <div class="status-bar-item">
-    <span class="conn-dot" id="connDot"></span>
-    <span id="connLabel">جاري التحقق...</span>
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
-  </div>
-  <div class="status-bar-item">
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-    <span id="lastUpdateLabel">آخر تحديث: —</span>
-  </div>
-</div>
 
 <div class="wrap">
   <div class="card" id="profileCard">
