@@ -51,8 +51,9 @@ body{
   background-size:42px 42px;
   background-position:center;
 }
+.fixed-top-wrap{position:fixed;top:0;left:0;right:0;z-index:50;}
 header{
-  position:fixed;top:0;right:0;left:0;z-index:50;
+  position:relative;
   display:flex;align-items:center;justify-content:space-between;
   padding:16px 32px;
   background:linear-gradient(to bottom, var(--bg) 65%, transparent);
@@ -68,7 +69,7 @@ header{
 .logo-sub{font-size:11px;color:var(--text-secondary);margin-top:1px;white-space:nowrap;}
 /* شريط حالة الاتصال + آخر تحديث / Connection status + last-update bar */
 .status-bar{
-  position:fixed;top:68px;left:0;right:0;z-index:49;
+  position:relative;
   display:flex;align-items:center;justify-content:space-between;
   background:var(--bg-elev);border-bottom:1px solid var(--border);
   padding:6px 24px;font-size:11px;color:var(--text-secondary);
@@ -82,7 +83,7 @@ header{
 .conn-dot.online{background:#2ECC71;box-shadow:0 0 6px rgba(46,204,113,.6);}
 .conn-dot.offline{background:#E0654F;box-shadow:0 0 6px rgba(224,101,79,.6);}
 @media (max-width:600px){
-  .status-bar{padding:6px 12px;font-size:10px;top:50px;}
+  .status-bar{padding:6px 12px;font-size:10px;}
 }
 .header-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
 .mobile-user-menu{display:none;position:relative;}
@@ -159,22 +160,6 @@ header{
   .hero{
     min-height:calc(min(88vw, 56vh, 420px) + 132px);
     min-height:calc(min(88vw, 56svh, 420px) + 132px);
-  }
-}
-body.guest-mode .hero{
-  min-height:calc(min(82vw, 70vh, 660px) + 153px);
-  min-height:calc(min(82vw, 70svh, 660px) + 153px);
-}
-@media (max-width:1199px) and (min-width:768px){
-  body.guest-mode .hero{
-    min-height:calc(min(86vw, 66vh, 580px) + 153px);
-    min-height:calc(min(86vw, 66svh, 580px) + 153px);
-  }
-}
-@media (max-width:767px){
-  body.guest-mode .hero{
-    min-height:calc(min(92vw, 60vh, 460px) + 132px);
-    min-height:calc(min(92vw, 60svh, 460px) + 132px);
   }
 }
 .globe-stage{
@@ -640,20 +625,23 @@ body.guest-mode .station-table{width:min(1300px,96vw);}
   display:flex;gap:10px;width:100%;max-width:520px;
 }
 .action-pill{
-  flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
-  border-radius:22px;font-size:12.5px;font-weight:600;padding:11px 14px;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  border-radius:22px;font-weight:600;
   cursor:pointer;font-family:inherit;border:1.3px solid;transition:.2s;
 }
 .pill-add{
-  flex:1.4; /* أوسع من البقية لأنها الفعل الأهم وصارت 3 أزرار فقط بدل 4 */
+  flex:1.9; /* الفعل الأهم — أوضح وأكبر من البقية */
+  font-size:14px;padding:14px 16px;
   background:rgba(31,174,140,0.14);color:var(--teal-light);border-color:rgba(77,214,181,0.5);
 }
 .pill-add:hover{background:rgba(31,174,140,0.24);border-color:var(--teal);}
 .pill-recent{
+  flex:1;font-size:11.5px;padding:9px 10px;
   background:rgba(46,125,209,0.14);color:#6FA8E8;border-color:rgba(46,125,209,0.5);
 }
 .pill-recent:hover{background:rgba(46,125,209,0.24);border-color:var(--blue-mid);}
 .pill-refresh{
+  flex:1;font-size:11.5px;padding:9px 10px;
   background:rgba(200,162,78,0.14);color:#D8B564;border-color:rgba(200,162,78,0.5);
 }
 .pill-refresh:hover{background:rgba(200,162,78,0.24);border-color:#C8A24E;}
@@ -662,9 +650,10 @@ body.guest-mode .station-table{width:min(1300px,96vw);}
 [data-theme="light"] .pill-refresh{color:#A9803A;}
 
 .dashboard-label{
-  width:100%;max-width:760px;font-size:13px;font-weight:700;color:var(--text-primary);
-  display:flex;align-items:center;gap:6px;margin-top:6px;
+  width:100%;max-width:760px;display:flex;align-items:center;gap:10px;margin-top:6px;
+  font-size:12.5px;font-weight:700;color:var(--text-secondary);
 }
+.dashboard-label::before,.dashboard-label::after{content:'';flex:1;height:1px;background:var(--border-strong);}
 
 /* ===== شريط الذاكرة المستخدمة ===== */
 .storage-row{
@@ -683,22 +672,6 @@ body.guest-mode .station-table{width:min(1300px,96vw);}
 
 body.guest-mode #cardsSection{display:none;}
 body.guest-mode .search-wrap{display:none;}
-body.guest-mode .globe-stage{
-  width:clamp(420px, min(82vw, 70vh), 660px);
-  width:clamp(420px, min(82vw, 70svh), 660px);
-}
-@media (max-width:1199px) and (min-width:768px){
-  body.guest-mode .globe-stage{
-    width:clamp(380px, min(86vw, 66vh), 580px);
-    width:clamp(380px, min(86vw, 66svh), 580px);
-  }
-}
-@media (max-width:767px){
-  body.guest-mode .globe-stage{
-    width:clamp(320px, min(92vw, 60vh), 460px);
-    width:clamp(320px, min(92vw, 60svh), 460px);
-  }
-}
 .cards-row{
   display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;max-width:760px;width:100%;
   align-items:start;
@@ -751,7 +724,7 @@ footer{
   .logo{grid-column:2;justify-self:center;}
   .header-actions{grid-column:3;justify-self:end;gap:6px;}
   .logo-sub{display:none;}
-  .logo-text{font-size:13px;}
+  .logo-text{font-size:11px;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .logo-mark{height:26px;}
   .login-btn{padding:7px 12px;font-size:12px;}
   .theme-toggle{width:34px;height:34px;}
@@ -786,6 +759,7 @@ footer{
 })();
 </script>
 
+<div class="fixed-top-wrap">
 <header>
   <div class="logo">
     <img class="logo-mark" src="assets/logo-icon.png" alt="شعار الشركة السعودية للطاقة">
@@ -834,6 +808,7 @@ footer{
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
     <span id="lastUpdateLabel">آخر تحديث: —</span>
   </div>
+</div>
 </div>
 
 <section class="hero" id="heroSection">
@@ -995,11 +970,11 @@ footer{
   </div>
 
   <div class="storage-row">
-    <button class="storage-clear-btn" id="clearStorageBtn">🗑️ مسح الذاكرة <span id="cacheSize">— MB</span></button>
+    <button class="storage-clear-btn" id="clearStorageBtn">🗑️ مسح التخزين المؤقت</button>
     <div class="storage-bar-wrap">
       <span>الذاكرة المستخدمة</span>
       <div class="storage-bar-track"><div class="storage-bar-fill" id="storageBarFill"></div></div>
-      <span id="storagePercent">—٪</span>
+      <span id="storageUsageLabel">0 MB / 50 MB</span>
     </div>
   </div>
 </section>
@@ -1044,7 +1019,16 @@ function refreshLastUpdateLabel(){
     ? `آخر تحديث: ${formatRelativeTime(lastSuccessfulCheckAt)}`
     : 'آخر تحديث: —';
 }
-setInterval(refreshLastUpdateLabel, 30 * 1000);
+// نفس منطق "آخر تحديث" لكن داخل البطاقات الثلاث المتوسّعة، بلا بادئة "آخر تحديث:"
+// Same relative-time logic reused inside the three expandable cards, without the label prefix
+function refreshPanelUpdateLabels(){
+  const txt = lastStatsFetch ? formatRelativeTime(new Date(lastStatsFetch)) : '—';
+  ['panelStationsUpdate','panelAdditionsUpdate','panelEditsUpdate'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.textContent = txt;
+  });
+}
+setInterval(()=>{ refreshLastUpdateLabel(); refreshPanelUpdateLabels(); }, 30 * 1000);
 
 async function checkConnection(){
   try{
@@ -1089,11 +1073,17 @@ async function loadStats(){
     document.getElementById('countEdits').textContent = stats.edits;
     document.getElementById('panelStations').innerHTML = `
       <div class="stat-panel-row"><span><span class="legend-dot" style="background:var(--teal)"></span>محطات توزيع</span><span class="v">${stats.distribution}</span></div>
-      <div class="stat-panel-row"><span><span class="legend-dot" style="background:var(--blue-mid)"></span>محطات تحويل</span><span class="v">${stats.substations}</span></div>`;
+      <div class="stat-panel-row"><span><span class="legend-dot" style="background:var(--blue-mid)"></span>محطات تحويل</span><span class="v">${stats.substations}</span></div>
+      <div class="stat-panel-row"><span>آخر تحديث</span><span class="v" id="panelStationsUpdate">—</span></div>`;
     document.getElementById('panelAdditions').innerHTML = `
-      <div class="stat-panel-row"><span>قيد التطوير</span><span class="v">—</span></div>`;
+      <div class="stat-panel-row"><span><span class="legend-dot" style="background:var(--teal)"></span>توزيع</span><span class="v">${stats.additionsDistribution}</span></div>
+      <div class="stat-panel-row"><span><span class="legend-dot" style="background:var(--blue-mid)"></span>تحويل</span><span class="v">${stats.additionsSubstations}</span></div>
+      <div class="stat-panel-row"><span>آخر تحديث</span><span class="v" id="panelAdditionsUpdate">—</span></div>`;
     document.getElementById('panelEdits').innerHTML = `
-      <div class="stat-panel-row"><span>آخر 30 يومًا</span><span class="v">${stats.edits}</span></div>`;
+      <div class="stat-panel-row"><span><span class="legend-dot" style="background:var(--teal)"></span>توزيع</span><span class="v">${stats.editsDistribution}</span></div>
+      <div class="stat-panel-row"><span><span class="legend-dot" style="background:var(--blue-mid)"></span>تحويل</span><span class="v">${stats.editsSubstations}</span></div>
+      <div class="stat-panel-row"><span>آخر تحديث</span><span class="v" id="panelEditsUpdate">—</span></div>`;
+    refreshPanelUpdateLabels();
   }catch(e){ console.error('فشل تحميل الإحصائيات', e); }
 }
 loadStats();
@@ -1127,10 +1117,10 @@ refreshBtn.addEventListener('click', async ()=>{
 /* ============================================================
  *  شريط الذاكرة المستخدمة محلياً (localStorage)
  *  Local storage usage bar — reflects real browser storage bytes
- *  ملاحظة: النسبة محسوبة على سقف افتراضي 5MB (سعة نموذجية للمتصفحات)
- *  Note: percentage assumes a 5MB typical browser cap, adjustable
+ *  السقف 50 ميجا كما حُدِّد صراحة — ليس RAM الجهاز، بل مساحة التخزين المحلي للمتصفح
+ *  Cap explicitly set to 50MB — not device RAM, just browser local storage
  * ============================================================ */
-const ASSUMED_STORAGE_CAP_MB = 5;
+const ASSUMED_STORAGE_CAP_MB = 50;
 function updateStorageDisplay(){
   let totalBytes = 0;
   for(let i=0; i<localStorage.length; i++){
@@ -1140,8 +1130,7 @@ function updateStorageDisplay(){
   }
   const totalMB = totalBytes / (1024*1024);
   const percent = Math.min(100, Math.round((totalMB / ASSUMED_STORAGE_CAP_MB) * 100));
-  document.getElementById('cacheSize').textContent = `${totalMB.toFixed(2)} MB`;
-  document.getElementById('storagePercent').textContent = percent + '٪';
+  document.getElementById('storageUsageLabel').textContent = `${totalMB.toFixed(2)} MB / ${ASSUMED_STORAGE_CAP_MB} MB`;
   document.getElementById('storageBarFill').style.width = percent + '%';
 }
 updateStorageDisplay();
