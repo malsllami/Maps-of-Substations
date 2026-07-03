@@ -153,20 +153,13 @@ header{
 .hero{
   position:relative;
   display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:0;
-  padding:113px 20px 100px;
-  min-height:calc(min(78vw, 66vh, 620px) + 153px);
-  min-height:calc(min(78vw, 66svh, 620px) + 153px);
-}
-@media (max-width:1199px) and (min-width:768px){
-  .hero{
-    min-height:calc(min(82vw, 62vh, 540px) + 153px);
-    min-height:calc(min(82vw, 62svh, 540px) + 153px);
-  }
+  padding:90px 20px 24px;
+  min-height:calc(var(--globe-size) + 230px);
 }
 @media (max-width:767px){
   .hero{
-    min-height:calc(min(88vw, 56vh, 420px) + 132px);
-    min-height:calc(min(88vw, 56svh, 420px) + 132px);
+    padding:70px 20px 18px;
+    min-height:calc(var(--globe-size) + 200px);
   }
 }
 /* ===== متغير حجم الكرة الموحّد — يُستخدم في تكبير الكرة وحساب موضع العدسة/زر الدخول أسفلها بنفس الوقت ===== */
@@ -175,19 +168,19 @@ header{
   --globe-size: clamp(360px, 92vw, 760px);
   /* ارتفاع الشريط الثابت أعلى الخريطة (صف نوع الخريطة+رجوع، ثم صف أدوات القياس) — قيمة واحدة تُستخدم بكل الحسابات المرتبطة بارتفاع الخريطة */
   /* Fixed toolbar-bar height above the map (mode+back row, then tools row) — single source of truth for every map-height-related calculation */
-  --map-toolbar-h: 98px;
+  --map-toolbar-h: 108px;
 }
 @media (min-width:1200px){
-  :root{ --globe-size: clamp(460px, min(84vw, 74vh), 820px); }
+  :root{ --globe-size: clamp(500px, min(88vw, 78vh), 880px); }
 }
 @media (max-width:1199px) and (min-width:768px){
-  :root{ --globe-size: clamp(420px, min(88vw, 68vh), 640px); }
+  :root{ --globe-size: clamp(460px, min(92vw, 72vh), 680px); }
 }
 @media (max-width:767px){
-  :root{ --globe-size: clamp(340px, min(94vw, 60vh), 480px); }
+  :root{ --globe-size: clamp(370px, min(98vw, 64vh), 520px); }
 }
 .globe-stage{
-  position:absolute;top:90px;left:50%;transform:translateX(-50%);
+  position:absolute;top:110px;left:50%;transform:translateX(-50%);
   z-index:1;
   width:var(--globe-size);
   aspect-ratio:1;
@@ -196,6 +189,7 @@ header{
   transition:width .5s cubic-bezier(.4,0,.2,1), height .5s cubic-bezier(.4,0,.2,1);
 }
 .globe-stage.map-active{
+  top:26px;
   width:min(1400px, 96vw);
   aspect-ratio:auto;
   height:calc(min(42vh, 460px) + var(--map-toolbar-h));
@@ -204,8 +198,13 @@ header{
   display:flex;flex-direction:column;
 }
 @media (max-width:767px){
+  .globe-stage.map-active{
+    top:18px;
+  }
+}
+@media (max-width:767px){
   .globe-stage{
-    top:70px;
+    top:82px;
   }
 }
 [data-theme="dark"] .globe-stage::before{
@@ -280,9 +279,8 @@ body.guest-mode h1{
   text-shadow:none;
 }
 /* ترسو العدسة أو زر الدخول عند قاع الكرة تلقائيًا مهما تغيّر حجمها / Anchors the lens or the login button to the globe's bottom edge, regardless of its size */
-.globe-bottom-anchor{
-  margin-top:calc(var(--globe-size) - 108px);
-}
+/* هامش العدسة/زر الدخول أسفل الكرة يُحسب فعليًا بجافاسكربت (دالة alignHeroBelowGlobe) بدل قيمة CSS تقديرية، لأن القماش ثلاثي الأبعاد لا يملأ صندوقه بشكل متطابق دائمًا عبر كل الشاشات */
+/* The lens/login-button margin below the globe is computed via real JS measurement (alignHeroBelowGlobe), not an estimated CSS value, since the 3D canvas doesn't fill its box identically across all screens */
 .search-wrap{
   width:100%;
   pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:10px;
@@ -452,7 +450,7 @@ body.guest-mode h1{
 /* ===== Fixed toolbar bar above the map — a real structural element that pushes the map down, not floating buttons over it ===== */
 .map-toolbar-bar{
   display:none;flex-direction:column;flex-shrink:0;width:100%;
-  position:relative;z-index:3;
+  position:relative;z-index:3;margin-bottom:10px;
   background:var(--bg-card);border-bottom:1px solid var(--border);
 }
 .globe-stage.map-active .map-toolbar-bar{display:flex;}
@@ -717,7 +715,7 @@ body.guest-mode .station-search-hint{width:min(1300px,96vw);}
 .station-table{
   position:relative;z-index:6;
   width:min(1100px, 94vw);
-  margin-top:10px;
+  margin-top:0;
   background:var(--bg-card);border:1px solid var(--border-strong);
   border-radius:16px;
   padding:0;
@@ -1593,10 +1591,32 @@ function syncRendererToStage(){
   camera.updateProjectionMatrix();
   renderer.setSize(w, h);
   if(leafletMap) leafletMap.invalidateSize();
+  alignHeroBelowGlobe();
 }
 new ResizeObserver(syncRendererToStage).observe(stageEl);
 window.addEventListener('resize', syncRendererToStage);
 applyResponsiveGlobeOffset();
+
+/* ============================================================
+ *  محاذاة العدسة/زر الدخول بأسفل الكرة عبر قياس حقيقي — لا حسابات CSS تقديرية
+ *  Aligns the lens/login button to the globe's real bottom edge via actual measurement — no estimated CSS math
+ * ============================================================ */
+function alignHeroBelowGlobe(){
+  const heading = document.querySelector('.hero-heading');
+  const globe = document.getElementById('globeStage');
+  if(!heading || !globe || globe.classList.contains('map-active')) return;
+  const headingBottom = heading.getBoundingClientRect().bottom;
+  const globeBottom = globe.getBoundingClientRect().bottom;
+  const extraGap = Math.max(0, globeBottom - headingBottom);
+  const searchWrap = document.querySelector('.search-wrap');
+  const guestCta = document.querySelector('.guest-login-cta');
+  if(searchWrap) searchWrap.style.marginTop = (extraGap + 10) + 'px';
+  if(guestCta) guestCta.style.marginTop = (extraGap + 32) + 'px';
+}
+// إعادة القياس بعد استقرار الخطوط والتخطيط الكامل، لأن القياس الأول عند التحميل قد يسبق اكتمال الخطوط / Re-measure after fonts and layout fully settle, since the first measurement on load may precede font completion
+window.addEventListener('load', alignHeroBelowGlobe);
+setTimeout(alignHeroBelowGlobe, 400);
+setTimeout(alignHeroBelowGlobe, 1200);
 
 /* ===== البحث + الخريطة ===== */
 const searchLens = document.getElementById('searchLens');
@@ -2799,4 +2819,3 @@ backBtn.addEventListener('click', ()=>{
 </script>
 </body>
 </html>
-
