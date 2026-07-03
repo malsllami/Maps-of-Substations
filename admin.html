@@ -96,6 +96,18 @@ header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px s
 .refresh-btn{background:transparent;border:none;cursor:pointer;color:var(--teal);font-size:12px;display:flex;align-items:center;gap:4px;font-family:inherit;padding:4px 8px;border-radius:6px;border:1px solid var(--border);}
 .refresh-btn:hover{background:var(--bg-elev);}
 .err-msg{text-align:center;color:#E0654F;font-size:13px;padding:40px;background:var(--bg-card);border-radius:8px;}
+/* شريط حالة الاتصال + آخر تحديث / Connection status + last-update bar */
+.status-bar{
+  position:sticky;top:65px;z-index:19;
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--bg-elev);border-bottom:1px solid var(--border);
+  padding:6px 28px;font-size:11px;color:var(--text-secondary);
+}
+.status-bar-item{display:flex;align-items:center;gap:6px;}
+.conn-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:#8FA3B8;transition:background .3s;}
+.conn-dot.online{background:#2ECC71;box-shadow:0 0 6px rgba(46,204,113,.6);}
+.conn-dot.offline{background:#E0654F;box-shadow:0 0 6px rgba(224,101,79,.6);}
+@media(max-width:600px){.status-bar{padding:6px 12px;font-size:10px;}}
 @media(max-width:600px){
   .content{padding:16px 12px;}
   header{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;}
@@ -145,6 +157,19 @@ header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px s
   </div>
 </header>
 
+<!-- شريط حالة الاتصال + آخر تحديث / Connection status + last-update bar -->
+<div class="status-bar" id="statusBar">
+  <div class="status-bar-item">
+    <span class="conn-dot" id="connDot"></span>
+    <span id="connLabel">جاري التحقق...</span>
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+  </div>
+  <div class="status-bar-item">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    <span id="lastUpdateLabel">آخر تحديث: —</span>
+  </div>
+</div>
+
 <div class="content">
   <div class="page-title">لوحة التحكم</div>
   <div class="page-sub" id="greetLine">مرحبًا...</div>
@@ -173,9 +198,57 @@ header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px s
 
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyxZUSLZNa6UlZLINsfAEe8CmQPoNGJbpnNtUDxP019TfL8uLh_5fuP0e5HE6daP8dh1w/exec';
+
+/* ============================================================
+ *  فحص حالة الاتصال بالخادم — نفس منطق index.html بالضبط
+ *  Server connection health check — mirrors index.html exactly
+ * ============================================================ */
+async function pingBackend(){
+  const res = await fetch(API_URL, { method:'POST', body: JSON.stringify({ action:'ping' }) });
+  return await res.json();
+}
+const connDot = document.getElementById('connDot');
+const connLabel = document.getElementById('connLabel');
+const statusBarEl = document.getElementById('statusBar');
+const lastUpdateLabel = document.getElementById('lastUpdateLabel');
+let lastSuccessfulCheckAt = null;
+function formatRelativeTime(date){
+  const diffSec = Math.floor((Date.now() - date.getTime()) / 1000);
+  if(diffSec < 15) return 'الآن';
+  if(diffSec < 60) return `قبل ${diffSec} ثانية`;
+  const diffMin = Math.floor(diffSec / 60);
+  if(diffMin < 60) return diffMin === 1 ? 'قبل دقيقة' : `قبل ${diffMin} دقائق`;
+  const diffHour = Math.floor(diffMin / 60);
+  return diffHour === 1 ? 'قبل ساعة' : `قبل ${diffHour} ساعات`;
+}
+function refreshLastUpdateLabel(){
+  lastUpdateLabel.textContent = lastSuccessfulCheckAt ? `آخر تحديث: ${formatRelativeTime(lastSuccessfulCheckAt)}` : 'آخر تحديث: —';
+}
+setInterval(refreshLastUpdateLabel, 30 * 1000);
+async function checkConnection(){
+  try{
+    const res = await Promise.race([
+      pingBackend(),
+      new Promise((_, reject)=> setTimeout(()=> reject(new Error('timeout')), 15000))
+    ]);
+    if(res && res.success){
+      connDot.className = 'conn-dot online';
+      connLabel.textContent = 'متصل';
+      lastSuccessfulCheckAt = new Date();
+      refreshLastUpdateLabel();
+    } else { throw new Error('backend-error'); }
+  }catch(err){
+    connDot.className = 'conn-dot offline';
+    connLabel.textContent = 'بدون اتصال';
+  }
+}
+setTimeout(checkConnection, 1500);
+setInterval(checkConnection, 60 * 1000);
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') checkConnection(); });
 const session = JSON.parse(localStorage.getItem('sec-session') || '{}');
 let chartInstance = null;
 let fetching = false;
+
 document.getElementById('greetLine').textContent = 'مرحبًا ' + (session.name || 'المدير') + ' — ' + new Date().toLocaleDateString('ar-SA', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
 
 /* ===== ثيم ===== */
