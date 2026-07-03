@@ -7,13 +7,68 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--blue-deep:#1B4D8C;--blue-mid:#2E7DD1;--teal:#1FAE8C;--teal-light:#4DD6B5;}
-[data-theme="dark"]{--bg:#0A1420;--bg-card:#0D1826;--text-primary:#EAF1F7;--text-secondary:#8FA3B8;--border:rgba(255,255,255,0.08);--border-strong:rgba(255,255,255,0.16);--danger:#E0654F;--danger-bg:rgba(224,101,79,0.1);}
-[data-theme="light"]{--bg:#EAF1F6;--bg-card:#FFFFFF;--text-primary:#102035;--text-secondary:#52647A;--border:rgba(16,32,53,0.10);--border-strong:rgba(16,32,53,0.20);--danger:#C8412C;--danger-bg:rgba(200,65,44,0.08);}
+[data-theme="dark"]{--bg:#0A1420;--bg-elev:#101D2E;--bg-card:#0D1826;--text-primary:#EAF1F7;--text-secondary:#8FA3B8;--border:rgba(255,255,255,0.08);--border-strong:rgba(255,255,255,0.16);--danger:#E0654F;--danger-bg:rgba(224,101,79,0.1);}
+[data-theme="light"]{--bg:#EAF1F6;--bg-elev:#F4F8FB;--bg-card:#FFFFFF;--text-primary:#102035;--text-secondary:#52647A;--border:rgba(16,32,53,0.10);--border-strong:rgba(16,32,53,0.20);--danger:#C8412C;--danger-bg:rgba(200,65,44,0.08);}
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;padding:24px;transition:background .3s,color .3s;}
-.wrap{max-width:480px;margin:0 auto;}
-.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
-.back-link{font-size:13px;color:var(--text-secondary);text-decoration:none;display:flex;align-items:center;gap:6px;}
+body{font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;padding-bottom:24px;transition:background .3s,color .3s;}
+/* ===== هيدر موحّد مطابق لبقية الصفحات (الرئيسية ولوحة المدير) ===== */
+header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--border);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;}
+.brand{display:flex;align-items:center;gap:10px;cursor:pointer;text-decoration:none;}
+.brand-mark{height:32px;width:auto;flex-shrink:0;display:block;object-fit:contain;transition:transform .2s;}
+.brand:hover .brand-mark{transform:scale(1.06);}
+.brand-text{font-size:15px;font-weight:700;letter-spacing:.3px;white-space:nowrap;transition:color .2s;}
+.brand:hover .brand-text{color:var(--teal);}
+.brand-sub{font-size:11px;color:var(--text-secondary);}
+.header-actions{display:flex;align-items:center;gap:8px;}
+.mobile-user-menu{position:relative;}
+.mobile-menu-trigger{
+  display:flex;align-items:center;gap:5px;
+  background:var(--bg-card);border:1px solid var(--border-strong);border-radius:20px;
+  padding:8px 14px;font-size:12.5px;font-weight:500;color:var(--text-primary);
+  cursor:pointer;font-family:inherit;
+}
+.mobile-menu-trigger:hover{border-color:var(--teal);}
+.mobile-menu-trigger svg{transition:transform .2s;flex-shrink:0;}
+.mobile-user-menu.open .mobile-menu-trigger svg{transform:rotate(180deg);}
+.mobile-menu-panel{
+  position:absolute;top:calc(100% + 8px);left:0;
+  background:var(--bg-card);border:1px solid var(--border-strong);border-radius:14px;
+  min-width:190px;box-shadow:0 10px 28px rgba(0,0,0,.35);
+  padding:8px;display:none;z-index:60;
+}
+.mobile-user-menu.open .mobile-menu-panel{display:block;}
+.mobile-menu-row{display:flex;align-items:center;justify-content:space-between;padding:9px 10px;font-size:12.5px;color:var(--text-primary);}
+.mobile-menu-link{display:block;padding:10px 10px;font-size:12.5px;color:var(--text-primary);text-decoration:none;border-radius:8px;}
+.mobile-menu-link:hover{background:var(--bg-elev);}
+.mobile-menu-logout{
+  width:100%;text-align:right;padding:10px 10px;font-size:12.5px;color:#E0654F;
+  background:transparent;border:none;border-top:1px solid var(--border);margin-top:4px;
+  cursor:pointer;font-family:inherit;
+}
+.theme-switch{
+  width:42px;height:23px;border-radius:12px;position:relative;flex-shrink:0;
+  background:var(--border-strong);border:none;cursor:pointer;transition:background .2s;padding:0;
+}
+.theme-switch.on{background:var(--teal);}
+.theme-switch-knob{position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.3);}
+.theme-switch.on .theme-switch-knob{transform:translateX(19px);}
+/* شريط حالة الاتصال + آخر تحديث / Connection status + last-update bar */
+.status-bar{
+  position:sticky;top:65px;z-index:19;
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--bg-elev);border-bottom:1px solid var(--border);
+  padding:6px 28px;font-size:11px;color:var(--text-secondary);
+}
+.status-bar-item{display:flex;align-items:center;gap:6px;}
+.conn-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:#8FA3B8;transition:background .3s;}
+.conn-dot.online{background:#2ECC71;box-shadow:0 0 6px rgba(46,204,113,.6);}
+.conn-dot.offline{background:#E0654F;box-shadow:0 0 6px rgba(224,101,79,.6);}
+@media(max-width:600px){
+  header{padding:12px 14px;}
+  .brand-sub{display:none;}
+  .status-bar{padding:6px 12px;font-size:10px;}
+}
+.wrap{max-width:480px;margin:0 auto;padding:24px 24px 0;}
 .card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:16px;}
 .avatar{width:56px;height:56px;border-radius:50%;background:conic-gradient(from 200deg,var(--blue-deep),var(--blue-mid),var(--teal),var(--teal-light),var(--blue-deep));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:20px;margin-bottom:14px;}
 h2{font-size:17px;font-weight:700;margin-bottom:4px;}
@@ -47,11 +102,47 @@ h2{font-size:17px;font-weight:700;margin-bottom:4px;}
 })();
 </script>
 
-<div class="wrap">
-  <div class="topbar">
-    <a href="index.html" class="back-link">→ رجوع للصفحة الرئيسية</a>
+<header>
+  <div class="brand" id="brandLink" style="cursor:pointer">
+    <img class="brand-mark" src="assets/logo-icon.png" alt="شعار الشركة السعودية للطاقة">
+    <div>
+      <div class="brand-text">حسابي</div>
+      <div class="brand-sub">الشركة السعودية للطاقة — محطات التوزيع</div>
+    </div>
   </div>
+  <div class="header-actions" id="headerActions">
+    <div class="mobile-user-menu" id="mobileUserMenu">
+      <button class="mobile-menu-trigger" id="mobileMenuTrigger">
+        <span id="mobileMenuName">القائمة</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <div class="mobile-menu-panel" id="mobileMenuPanel">
+        <div class="mobile-menu-row">
+          <span>الوضع الداكن</span>
+          <button class="theme-switch" id="themeSwitchMobile" aria-label="تبديل الوضع الداكن"><span class="theme-switch-knob"></span></button>
+        </div>
+        <a href="admin.html" class="mobile-menu-link" id="mobileAdminLink" style="display:none">لوحة المدير</a>
+        <a href="index.html" class="mobile-menu-link">الصفحة الرئيسية</a>
+        <button class="mobile-menu-logout" id="mobileLogoutBtn">تسجيل الخروج</button>
+      </div>
+    </div>
+  </div>
+</header>
 
+<!-- شريط حالة الاتصال + آخر تحديث / Connection status + last-update bar -->
+<div class="status-bar" id="statusBar">
+  <div class="status-bar-item">
+    <span class="conn-dot" id="connDot"></span>
+    <span id="connLabel">جاري التحقق...</span>
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+  </div>
+  <div class="status-bar-item">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    <span id="lastUpdateLabel">آخر تحديث: —</span>
+  </div>
+</div>
+
+<div class="wrap">
   <div class="card" id="profileCard">
     <div class="avatar" id="avatarInitial">-</div>
     <h2 id="profileName">...</h2>
@@ -114,6 +205,92 @@ async function callBackend(action, payload){
 const session = JSON.parse(localStorage.getItem('sec-session') || '{}');
 const phone = session.phone;
 
+/* ============================================================
+ *  منطق الهيدر الموحّد (قائمة منسدلة + ثيم + خروج)
+ *  Unified header logic (dropdown menu + theme + logout) — same pattern as admin.html
+ * ============================================================ */
+function setTheme(mode){
+  document.body.setAttribute('data-theme', mode);
+  localStorage.setItem('sec-theme', mode);
+  syncThemeSwitch();
+}
+function syncThemeSwitch(){
+  const isDark = document.body.getAttribute('data-theme') === 'dark';
+  const sw = document.getElementById('themeSwitchMobile');
+  if(sw) sw.classList.toggle('on', isDark);
+}
+syncThemeSwitch();
+document.getElementById('themeSwitchMobile').addEventListener('click', ()=>{
+  setTheme(document.body.getAttribute('data-theme')==='dark' ? 'light' : 'dark');
+});
+
+document.getElementById('mobileMenuName').textContent = (session.name || 'حسابي').split(' ')[0];
+if(session.role === 'admin'){
+  document.getElementById('mobileAdminLink').style.display = 'block';
+}
+
+const mobileUserMenu = document.getElementById('mobileUserMenu');
+document.getElementById('mobileMenuTrigger').addEventListener('click', (e)=>{
+  e.stopPropagation();
+  mobileUserMenu.classList.toggle('open');
+});
+document.addEventListener('click', (e)=>{
+  if(!mobileUserMenu.contains(e.target)) mobileUserMenu.classList.remove('open');
+});
+
+function doLogout(){
+  localStorage.removeItem('sec-session');
+  location.href = 'auth.html';
+}
+document.getElementById('mobileLogoutBtn').addEventListener('click', doLogout);
+document.getElementById('brandLink').addEventListener('click', ()=> location.href='index.html');
+
+/* ============================================================
+ *  فحص حالة الاتصال — نفس منطق index.html وadmin.html بالضبط
+ *  Server connection health check — mirrors index.html / admin.html exactly
+ * ============================================================ */
+async function pingBackend(){
+  const res = await fetch(API_URL, { method:'POST', body: JSON.stringify({ action:'ping' }) });
+  return await res.json();
+}
+const connDot = document.getElementById('connDot');
+const connLabel = document.getElementById('connLabel');
+const lastUpdateLabel = document.getElementById('lastUpdateLabel');
+let lastSuccessfulCheckAt = null;
+function formatRelativeTime(date){
+  const diffSec = Math.floor((Date.now() - date.getTime()) / 1000);
+  if(diffSec < 15) return 'الآن';
+  if(diffSec < 60) return `قبل ${diffSec} ثانية`;
+  const diffMin = Math.floor(diffSec / 60);
+  if(diffMin < 60) return diffMin === 1 ? 'قبل دقيقة' : `قبل ${diffMin} دقائق`;
+  const diffHour = Math.floor(diffMin / 60);
+  return diffHour === 1 ? 'قبل ساعة' : `قبل ${diffHour} ساعات`;
+}
+function refreshLastUpdateLabel(){
+  lastUpdateLabel.textContent = lastSuccessfulCheckAt ? `آخر تحديث: ${formatRelativeTime(lastSuccessfulCheckAt)}` : 'آخر تحديث: —';
+}
+setInterval(refreshLastUpdateLabel, 30 * 1000);
+async function checkConnection(){
+  try{
+    const res = await Promise.race([
+      pingBackend(),
+      new Promise((_, reject)=> setTimeout(()=> reject(new Error('timeout')), 15000))
+    ]);
+    if(res && res.success){
+      connDot.className = 'conn-dot online';
+      connLabel.textContent = 'متصل';
+      lastSuccessfulCheckAt = new Date();
+      refreshLastUpdateLabel();
+    } else { throw new Error('backend-error'); }
+  }catch(err){
+    connDot.className = 'conn-dot offline';
+    connLabel.textContent = 'بدون اتصال';
+  }
+}
+setTimeout(checkConnection, 1500);
+setInterval(checkConnection, 60 * 1000);
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') checkConnection(); });
+
 function showError(msg){ const el=document.getElementById('errorBanner'); el.textContent=msg; el.classList.add('show'); document.getElementById('successBanner').classList.remove('show'); }
 function hideMsgs(){ document.getElementById('errorBanner').classList.remove('show'); document.getElementById('successBanner').classList.remove('show'); }
 
@@ -158,7 +335,8 @@ saveBtn.addEventListener('click', async ()=>{
     saveFill.style.width='100%'; savePct.textContent='100%';
     if(!res.success) throw new Error(res.error || 'فشل الحفظ');
     document.getElementById('successBanner').classList.add('show');
-    session.name = name; localStorage.setItem('sec-session', JSON.stringify(session));
+    session.name = document.getElementById('nameInput').value.trim();
+    localStorage.setItem('sec-session', JSON.stringify(session));
   }catch(err){
     saveBtn.classList.add('error');
     showError(err.message);
