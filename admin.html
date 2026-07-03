@@ -22,7 +22,7 @@ header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px s
 .brand:hover .brand-text{color:var(--teal);}
 .brand-sub{font-size:11px;color:var(--text-secondary);}
 .header-actions{display:flex;align-items:center;gap:8px;}
-.mobile-user-menu{display:none;position:relative;}
+.mobile-user-menu{display:block;position:relative;}
 .mobile-menu-trigger{
   display:flex;align-items:center;gap:5px;
   background:var(--bg-card);border:1px solid var(--border-strong);border-radius:20px;
@@ -101,8 +101,6 @@ header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px s
   header{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;}
   .brand{grid-column:2;justify-self:center;}
   .header-actions{grid-column:3;justify-self:end;gap:6px;}
-  .header-actions .btn-sm, .header-actions .theme-btn{display:none;}
-  .mobile-user-menu{display:block;}
 }
 </style>
 </head>
@@ -129,12 +127,6 @@ header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px s
     </div>
   </div>
   <div class="header-actions" id="headerActions">
-    <a href="index.html" class="btn-sm">الصفحة الرئيسية</a>
-    <button class="btn-sm" id="logoutBtn">خروج</button>
-    <button class="theme-btn" id="themeBtn" aria-label="تبديل الوضع">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.07" y2="4.93"/></svg>
-    </button>
-
     <div class="mobile-user-menu" id="mobileUserMenu">
       <button class="mobile-menu-trigger" id="mobileMenuTrigger">
         <span id="mobileMenuName">القائمة</span>
@@ -145,6 +137,7 @@ header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px s
           <span>الوضع الداكن</span>
           <button class="theme-switch" id="themeSwitchMobile" aria-label="تبديل الوضع الداكن"><span class="theme-switch-knob"></span></button>
         </div>
+        <a href="member.html" class="mobile-menu-link">لوحة العضو</a>
         <a href="index.html" class="mobile-menu-link">الصفحة الرئيسية</a>
         <button class="mobile-menu-logout" id="mobileLogoutBtn">تسجيل الخروج</button>
       </div>
@@ -193,10 +186,6 @@ function setTheme(next){
   if(chartInstance) updateChartColors();
   syncThemeSwitch();
 }
-document.getElementById('themeBtn').addEventListener('click', ()=>{
-  setTheme(document.body.getAttribute('data-theme')==='dark' ? 'light' : 'dark');
-});
-
 const themeSwitchMobile = document.getElementById('themeSwitchMobile');
 function syncThemeSwitch(){
   themeSwitchMobile.classList.toggle('on', document.body.getAttribute('data-theme')==='dark');
@@ -216,7 +205,6 @@ function doLogout(){
     location.href = 'auth.html';
   }
 }
-document.getElementById('logoutBtn').addEventListener('click', doLogout);
 document.getElementById('mobileLogoutBtn').addEventListener('click', doLogout);
 
 /* ===== القائمة المنسدلة بالجوال ===== */
@@ -270,6 +258,7 @@ function renderCards(d){
       </div>
       <div class="sc-num" id="cardActive">${d.activeNow}</div>
       <div class="sc-label">متواجدون الآن <span style="font-size:10px;color:var(--text-secondary)">(آخر 4 أيام)</span></div>
+      <div id="cardActiveNames" style="font-size:10px;color:var(--text-secondary);margin-top:6px;line-height:1.6;word-break:break-word;">${(d.activeNames||[]).join('، ') || '—'}</div>
     </div>
     <div class="stat-card c-gold">
       <div class="sc-icon">
