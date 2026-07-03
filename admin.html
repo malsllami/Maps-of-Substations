@@ -1,1 +1,353 @@
 
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة المدير | محطات التوزيع</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--blue-deep:#1B4D8C;--blue-mid:#2E7DD1;--teal:#1FAE8C;--teal-light:#4DD6B5;}
+[data-theme="dark"]{--bg:#0A1420;--bg-elev:#101D2E;--bg-card:#0D1826;--text-primary:#EAF1F7;--text-secondary:#8FA3B8;--border:rgba(255,255,255,0.08);--border-strong:rgba(255,255,255,0.16);}
+[data-theme="light"]{--bg:#EAF1F6;--bg-elev:#F4F8FB;--bg-card:#FFFFFF;--text-primary:#102035;--text-secondary:#52647A;--border:rgba(16,32,53,0.10);--border-strong:rgba(16,32,53,0.20);}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;padding-bottom:48px;transition:background .3s,color .3s;}
+header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--border);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;}
+.brand{display:flex;align-items:center;gap:10px;cursor:pointer;text-decoration:none;}
+.brand-mark{transition:transform .2s;}
+.brand-text{transition:color .2s;}
+.brand-mark{height:32px;width:auto;flex-shrink:0;display:block;object-fit:contain;}
+.brand-text{font-size:15px;font-weight:700;letter-spacing:.3px;white-space:nowrap;}
+.brand:hover .brand-mark{transform:scale(1.06);}
+.brand:hover .brand-text{color:var(--teal);}
+.brand-sub{font-size:11px;color:var(--text-secondary);}
+.header-actions{display:flex;align-items:center;gap:8px;}
+.mobile-user-menu{display:block;position:relative;}
+.mobile-menu-trigger{
+  display:flex;align-items:center;gap:5px;
+  background:var(--bg-card);border:1px solid var(--border-strong);border-radius:20px;
+  padding:8px 14px;font-size:12.5px;font-weight:500;color:var(--text-primary);
+  cursor:pointer;font-family:inherit;
+}
+.mobile-menu-trigger:hover{border-color:var(--teal);}
+.mobile-menu-trigger svg{transition:transform .2s;flex-shrink:0;}
+.mobile-user-menu.open .mobile-menu-trigger svg{transform:rotate(180deg);}
+.mobile-menu-panel{
+  position:absolute;top:calc(100% + 8px);left:0;
+  background:var(--bg-card);border:1px solid var(--border-strong);border-radius:14px;
+  min-width:190px;box-shadow:0 10px 28px rgba(0,0,0,.35);
+  padding:8px;display:none;z-index:60;
+}
+.mobile-user-menu.open .mobile-menu-panel{display:block;}
+.mobile-menu-row{display:flex;align-items:center;justify-content:space-between;padding:9px 10px;font-size:12.5px;color:var(--text-primary);}
+.mobile-menu-link{display:block;padding:10px 10px;font-size:12.5px;color:var(--text-primary);text-decoration:none;border-radius:8px;}
+.mobile-menu-link:hover{background:var(--bg-elev);}
+.mobile-menu-logout{
+  width:100%;text-align:right;padding:10px 10px;font-size:12.5px;color:#E0654F;
+  background:transparent;border:none;border-top:1px solid var(--border);margin-top:4px;
+  cursor:pointer;font-family:inherit;
+}
+.theme-switch{
+  width:42px;height:23px;border-radius:12px;position:relative;flex-shrink:0;
+  background:var(--border-strong);border:none;cursor:pointer;transition:background .2s;padding:0;
+}
+.theme-switch.on{background:var(--teal);}
+.theme-switch-knob{
+  position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;
+  background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.3);
+}
+.theme-switch.on .theme-switch-knob{transform:translateX(19px);}
+.btn-sm{text-decoration:none;font-size:12.5px;padding:7px 14px;border-radius:8px;border:1px solid var(--border-strong);background:var(--bg-card);color:var(--text-primary);cursor:pointer;font-family:inherit;transition:.2s;}
+.btn-sm:hover{border-color:var(--teal);}
+.theme-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--border-strong);background:var(--bg-card);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-primary);transition:.2s;}
+.theme-btn:hover{border-color:var(--teal);}
+.content{max-width:1000px;margin:0 auto;padding:28px 20px;}
+.page-title{font-size:20px;font-weight:700;margin-bottom:4px;}
+.page-sub{font-size:13px;color:var(--text-secondary);margin-bottom:24px;}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:28px;}
+.stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:4px;padding:18px 20px;position:relative;overflow:hidden;}
+.stat-card::before{content:'';position:absolute;right:0;top:0;bottom:0;width:3px;}
+.stat-card.c-teal::before{background:var(--teal);}
+.stat-card.c-blue::before{background:var(--blue-mid);}
+.stat-card.c-gold::before{background:#C8A24E;}
+.stat-card.c-purple::before{background:#8B6DD6;}
+.stat-card .sc-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;opacity:.85;}
+.stat-card.c-teal .sc-icon{background:rgba(31,174,140,.15);}
+.stat-card.c-blue .sc-icon{background:rgba(46,125,209,.15);}
+.stat-card.c-gold .sc-icon{background:rgba(200,162,78,.15);}
+.stat-card.c-purple .sc-icon{background:rgba(139,109,214,.15);}
+.stat-card .sc-num{font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:700;line-height:1;margin-bottom:4px;}
+.stat-card.c-teal .sc-num{color:var(--teal);}
+.stat-card.c-blue .sc-num{color:var(--blue-mid);}
+.stat-card.c-gold .sc-num{color:#C8A24E;}
+.stat-card.c-purple .sc-num{color:#8B6DD6;}
+.stat-card .sc-label{font-size:12.5px;color:var(--text-secondary);}
+.chart-card{background:var(--bg-card);border:1px solid var(--border);border-radius:4px;padding:20px;border-right:3px solid var(--blue-mid);}
+.chart-title{font-size:14px;font-weight:600;margin-bottom:4px;}
+.chart-sub{font-size:11.5px;color:var(--text-secondary);margin-bottom:18px;}
+.chart-wrap{position:relative;height:240px;}
+.loading-overlay{display:flex;align-items:center;justify-content:center;height:240px;color:var(--text-secondary);font-size:13px;gap:8px;}
+.spinner{width:18px;height:18px;border:2px solid var(--border-strong);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.live-dot{width:8px;height:8px;border-radius:50%;background:#2ECC71;display:inline-block;animation:pulse-dot 1.4s ease-in-out infinite;}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+.refresh-row{display:flex;align-items:center;gap:8px;margin-bottom:16px;font-size:12px;color:var(--text-secondary);}
+#lastRefresh{font-family:'JetBrains Mono',monospace;}
+.refresh-btn{background:transparent;border:none;cursor:pointer;color:var(--teal);font-size:12px;display:flex;align-items:center;gap:4px;font-family:inherit;padding:4px 8px;border-radius:6px;border:1px solid var(--border);}
+.refresh-btn:hover{background:var(--bg-elev);}
+.err-msg{text-align:center;color:#E0654F;font-size:13px;padding:40px;background:var(--bg-card);border-radius:8px;}
+@media(max-width:600px){
+  .content{padding:16px 12px;}
+  header{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;}
+  .brand{grid-column:2;justify-self:center;}
+  .header-actions{grid-column:3;justify-self:end;gap:6px;}
+}
+</style>
+</head>
+<body data-theme="dark" id="bodyEl">
+<script>
+(function(){
+  var t = localStorage.getItem('sec-theme');
+  if(t==='light'||t==='dark') document.getElementById('bodyEl').setAttribute('data-theme',t);
+  var s = localStorage.getItem('sec-session');
+  if(!s){ location.href='auth.html'; return; }
+  try{
+    var session = JSON.parse(s);
+    if(session.role !== 'admin'){ location.href='index.html'; }
+  }catch(e){ location.href='auth.html'; }
+})();
+</script>
+
+<header>
+  <div class="brand" id="brandLink" style="cursor:pointer">
+    <img class="brand-mark" src="assets/logo-icon.png" alt="شعار الشركة السعودية للطاقة">
+    <div>
+      <div class="brand-text">لوحة المدير</div>
+      <div class="brand-sub">الشركة السعودية للطاقة — محطات التوزيع</div>
+    </div>
+  </div>
+  <div class="header-actions" id="headerActions">
+    <div class="mobile-user-menu" id="mobileUserMenu">
+      <button class="mobile-menu-trigger" id="mobileMenuTrigger">
+        <span id="mobileMenuName">القائمة</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <div class="mobile-menu-panel" id="mobileMenuPanel">
+        <div class="mobile-menu-row">
+          <span>الوضع الداكن</span>
+          <button class="theme-switch" id="themeSwitchMobile" aria-label="تبديل الوضع الداكن"><span class="theme-switch-knob"></span></button>
+        </div>
+        <a href="member.html" class="mobile-menu-link">لوحة العضو</a>
+        <a href="index.html" class="mobile-menu-link">الصفحة الرئيسية</a>
+        <button class="mobile-menu-logout" id="mobileLogoutBtn">تسجيل الخروج</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="content">
+  <div class="page-title">لوحة التحكم</div>
+  <div class="page-sub" id="greetLine">مرحبًا...</div>
+
+  <div class="refresh-row">
+    <span class="live-dot"></span>
+    <span>آخر تحديث: <span id="lastRefresh">—</span></span>
+    <button class="refresh-btn" id="refreshBtn">
+      <svg id="refreshIcon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+      تحديث
+    </button>
+  </div>
+
+  <div class="cards-grid" id="cardsGrid">
+    <div class="loading-overlay"><div class="spinner"></div> جاري التحميل...</div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title">نشاط المحطات — آخر 14 يومًا</div>
+    <div class="chart-sub">تعديلات الإحداثيات المسجّلة يوميًا</div>
+    <div class="chart-wrap" id="chartWrap">
+      <div class="loading-overlay"><div class="spinner"></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_URL = 'https://script.google.com/macros/s/AKfycbyxZUSLZNa6UlZLINsfAEe8CmQPoNGJbpnNtUDxP019TfL8uLh_5fuP0e5HE6daP8dh1w/exec';
+const session = JSON.parse(localStorage.getItem('sec-session') || '{}');
+let chartInstance = null;
+let fetching = false;
+
+document.getElementById('greetLine').textContent = 'مرحبًا ' + (session.name || 'المدير') + ' — ' + new Date().toLocaleDateString('ar-SA', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+
+/* ===== ثيم ===== */
+function setTheme(next){
+  document.body.setAttribute('data-theme', next);
+  localStorage.setItem('sec-theme', next);
+  if(chartInstance) updateChartColors();
+  syncThemeSwitch();
+}
+const themeSwitchMobile = document.getElementById('themeSwitchMobile');
+function syncThemeSwitch(){
+  themeSwitchMobile.classList.toggle('on', document.body.getAttribute('data-theme')==='dark');
+}
+syncThemeSwitch();
+themeSwitchMobile.addEventListener('click', ()=>{
+  setTheme(document.body.getAttribute('data-theme')==='dark' ? 'light' : 'dark');
+});
+
+/* ===== خروج ===== */
+document.getElementById('brandLink').addEventListener('click', ()=>{ location.href = 'index.html'; });
+
+function doLogout(){
+  if(confirm('تسجيل الخروج؟')){
+    localStorage.removeItem('sec-session');
+    localStorage.removeItem('sec-phone');
+    location.href = 'auth.html';
+  }
+}
+document.getElementById('mobileLogoutBtn').addEventListener('click', doLogout);
+
+/* ===== القائمة المنسدلة بالجوال ===== */
+document.getElementById('mobileMenuName').textContent = (session.name || 'المدير').split(' ')[0];
+const mobileUserMenu = document.getElementById('mobileUserMenu');
+document.getElementById('mobileMenuTrigger').addEventListener('click', (e)=>{
+  e.stopPropagation();
+  mobileUserMenu.classList.toggle('open');
+});
+document.addEventListener('click', (e)=>{
+  if(!mobileUserMenu.contains(e.target)) mobileUserMenu.classList.remove('open');
+});
+
+/* ===== جلب البيانات ===== */
+async function loadDashboard(){
+  if(fetching) return;
+  fetching = true;
+  document.getElementById('refreshIcon').style.animation = 'spin .7s linear infinite';
+
+  try{
+    const res = await fetch(API_URL, {method:'POST', body: JSON.stringify({action:'getAdminDashboard', phone: session.phone})});
+    const data = await res.json();
+
+    if(!data.success){ throw new Error(data.error || 'خطأ غير معروف'); }
+
+    renderCards(data);
+    renderChart(data.chart);
+    document.getElementById('lastRefresh').textContent = new Date().toLocaleTimeString('ar-SA');
+
+  }catch(err){
+    document.getElementById('cardsGrid').innerHTML = `<div class="err-msg">تعذّر تحميل البيانات: ${err.message}</div>`;
+    document.getElementById('chartWrap').innerHTML = '';
+  }finally{
+    fetching = false;
+    document.getElementById('refreshIcon').style.animation = '';
+  }
+}
+
+function renderCards(d){
+  document.getElementById('cardsGrid').innerHTML = `
+    <div class="stat-card c-teal">
+      <div class="sc-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1FAE8C" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div class="sc-num">${d.totalMembers}</div>
+      <div class="sc-label">إجمالي الأعضاء</div>
+    </div>
+    <div class="stat-card c-blue">
+      <div class="sc-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2E7DD1" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div class="sc-num" id="cardActive">${d.activeNow}</div>
+      <div class="sc-label">متواجدون الآن <span style="font-size:10px;color:var(--text-secondary)">(آخر 4 أيام)</span></div>
+      <div id="cardActiveNames" style="font-size:10px;color:var(--text-secondary);margin-top:6px;line-height:1.6;word-break:break-word;">${(d.activeNames||[]).join('، ') || '—'}</div>
+    </div>
+    <div class="stat-card c-gold">
+      <div class="sc-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C8A24E" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </div>
+      <div class="sc-num">${d.reqToday}</div>
+      <div class="sc-label">طلبات اليوم</div>
+    </div>
+    <div class="stat-card c-purple">
+      <div class="sc-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8B6DD6" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <div class="sc-num">${d.reqWeek}</div>
+      <div class="sc-label">طلبات آخر 7 أيام</div>
+    </div>`;
+}
+
+function getChartColors(){
+  const dark = document.body.getAttribute('data-theme')==='dark';
+  return {
+    grid: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.07)',
+    text: dark ? '#8FA3B8' : '#52647A',
+    editColor: '#2E7DD1',
+    editFill: 'rgba(46,125,209,0.18)',
+  };
+}
+
+function renderChart(chartData){
+  const days = Object.keys(chartData);
+  const labels = days.map(d => {
+    const dt = new Date(d + 'T00:00:00');
+    return dt.toLocaleDateString('ar-SA', {month:'short', day:'numeric'});
+  });
+  const edits = days.map(d => chartData[d].edits);
+  const colors = getChartColors();
+
+  document.getElementById('chartWrap').innerHTML = '<canvas id="activityChart"></canvas>';
+  const ctx = document.getElementById('activityChart').getContext('2d');
+
+  chartInstance = new Chart(ctx, {
+    type: 'bar',
+    data:{
+      labels,
+      datasets:[{
+        label: 'تعديلات الإحداثيات',
+        data: edits,
+        backgroundColor: colors.editFill,
+        borderColor: colors.editColor,
+        borderWidth: 1.5,
+        borderRadius: 4,
+      }]
+    },
+    options:{
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins:{
+        legend:{ labels:{ color: colors.text, font:{ family:"'IBM Plex Sans Arabic', sans-serif", size:12 } } },
+        tooltip:{ rtl:true, bodyFont:{ family:"'JetBrains Mono', monospace" } }
+      },
+      scales:{
+        x:{ ticks:{ color: colors.text, font:{ size:10 }, maxRotation:45 }, grid:{ color: colors.grid } },
+        y:{ ticks:{ color: colors.text, precision:0 }, grid:{ color: colors.grid }, beginAtZero:true }
+      }
+    }
+  });
+}
+
+function updateChartColors(){
+  if(!chartInstance) return;
+  const colors = getChartColors();
+  chartInstance.data.datasets[0].backgroundColor = colors.editFill;
+  chartInstance.data.datasets[0].borderColor = colors.editColor;
+  chartInstance.options.scales.x.ticks.color = colors.text;
+  chartInstance.options.scales.x.grid.color = colors.grid;
+  chartInstance.options.scales.y.ticks.color = colors.text;
+  chartInstance.options.scales.y.grid.color = colors.grid;
+  chartInstance.options.plugins.legend.labels.color = colors.text;
+  chartInstance.update();
+}
+
+/* ===== تحديث تلقائي عند رجوع التبويب ===== */
+let lastFetch = 0;
+const STALE = 3 * 60 * 1000;
+loadDashboard();
+document.getElementById('refreshBtn').addEventListener('click', ()=>{ lastFetch=0; loadDashboard(); });
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState==='visible' && (Date.now()-lastFetch)>STALE){ loadDashboard(); }
+});
+</script>
+</body>
+</html>
