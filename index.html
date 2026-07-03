@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -87,6 +86,10 @@ header{
 }
 .header-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
 .mobile-user-menu{display:none;position:relative;}
+#headerActions.logged-in .login-btn,
+#headerActions.logged-in .theme-toggle,
+#headerActions.logged-in #logoutBtnDesktop{display:none;}
+#headerActions.logged-in .mobile-user-menu{display:block;}
 .mobile-menu-trigger{
   display:flex;align-items:center;gap:5px;
   background:var(--bg-card);border:1px solid var(--border-strong);border-radius:20px;
@@ -358,35 +361,31 @@ h1{
 }
 .search-progress-label span:first-child{font-family:'IBM Plex Sans Arabic',sans-serif;font-weight:500;}
 .recent-panel{
-  display:none;flex-direction:column;gap:8px;
-  width:min(340px,88vw);margin-top:4px;
+  display:none;flex-direction:column;gap:10px;
+  width:100%;max-width:760px;
+  background:var(--bg-card);border:1px solid var(--border);border-radius:12px;
+  padding:14px 16px;
 }
 .recent-panel.show{display:flex;}
 .recent-panel-head{
   display:flex;justify-content:space-between;align-items:center;
-  font-size:11px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,0.6);
+  font-size:12px;font-weight:600;color:var(--text-primary);
 }
-[data-theme="light"] .recent-panel-head{color:var(--text-primary);text-shadow:none;}
 .recent-clear-btn{
-  background:transparent;border:none;color:#fff;opacity:.75;
+  background:transparent;border:none;color:var(--text-secondary);
   font-size:10.5px;cursor:pointer;text-decoration:underline;
-  font-family:inherit;padding:2px;text-shadow:0 1px 4px rgba(0,0,0,0.6);
+  font-family:inherit;padding:2px;
 }
-[data-theme="light"] .recent-clear-btn{color:var(--text-secondary);text-shadow:none;}
-.recent-clear-btn:hover{color:#E0654F;opacity:1;}
-.recent-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;}
+.recent-clear-btn:hover{color:#E0654F;}
+.recent-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-start;}
 .recent-chip{
-  background:rgba(5,15,25,0.5);
-  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  background:var(--bg-elev);
   border:1px solid var(--border-strong);
   border-radius:16px;padding:6px 12px;font-size:11.5px;
-  color:#fff;cursor:pointer;transition:.2s;
+  color:var(--text-primary);cursor:pointer;transition:.2s;
   font-family:'JetBrains Mono',monospace;direction:ltr;
-  text-shadow:0 1px 3px rgba(0,0,0,0.5);
 }
-[data-theme="light"] .recent-chip{background:rgba(255,255,255,0.7);color:var(--text-primary);text-shadow:none;}
-.recent-chip:hover{border-color:var(--teal);color:var(--teal-light);}
-[data-theme="light"] .recent-chip:hover{color:var(--teal);}
+.recent-chip:hover{border-color:var(--teal);color:var(--teal);}
 
 /* ===== الشاشة الافتتاحية (Intro Splash) ===== */
 #introOverlay{
@@ -485,8 +484,8 @@ h1{
 [data-theme="light"] .add-station-toggle{color:var(--teal);text-shadow:none;}
 .add-station-panel{
   display:none;flex-direction:column;gap:8px;
-  width:min(300px,88vw);background:var(--bg-card);border:1px solid var(--border-strong);
-  border-radius:14px;padding:14px;margin-top:8px;box-shadow:0 10px 28px rgba(0,0,0,.35);
+  width:min(460px,92vw);background:var(--bg-card);border:1px solid var(--border-strong);
+  border-radius:14px;padding:16px;margin-top:0;box-shadow:0 10px 28px rgba(0,0,0,.2);
 }
 .add-station-panel.show{display:flex;}
 .add-station-title{font-size:12.5px;font-weight:700;color:var(--text-primary);margin-bottom:2px;}
@@ -634,8 +633,54 @@ body.guest-mode .station-table{width:min(1300px,96vw);}
 .cards-section{
   position:relative;z-index:5;
   padding:0 32px 30px;
-  display:flex;flex-direction:column;align-items:center;
+  display:flex;flex-direction:column;align-items:center;gap:14px;
 }
+/* ===== صف الأزرار الرئيسية — إضافة/آخر المحطات/تحديث، كل زر بلون مختلف ===== */
+.action-pills-row{
+  display:flex;gap:10px;width:100%;max-width:520px;
+}
+.action-pill{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+  border-radius:22px;font-size:12.5px;font-weight:600;padding:11px 14px;
+  cursor:pointer;font-family:inherit;border:1.3px solid;transition:.2s;
+}
+.pill-add{
+  flex:1.4; /* أوسع من البقية لأنها الفعل الأهم وصارت 3 أزرار فقط بدل 4 */
+  background:rgba(31,174,140,0.14);color:var(--teal-light);border-color:rgba(77,214,181,0.5);
+}
+.pill-add:hover{background:rgba(31,174,140,0.24);border-color:var(--teal);}
+.pill-recent{
+  background:rgba(46,125,209,0.14);color:#6FA8E8;border-color:rgba(46,125,209,0.5);
+}
+.pill-recent:hover{background:rgba(46,125,209,0.24);border-color:var(--blue-mid);}
+.pill-refresh{
+  background:rgba(200,162,78,0.14);color:#D8B564;border-color:rgba(200,162,78,0.5);
+}
+.pill-refresh:hover{background:rgba(200,162,78,0.24);border-color:#C8A24E;}
+[data-theme="light"] .pill-add{color:var(--teal);}
+[data-theme="light"] .pill-recent{color:var(--blue-mid);}
+[data-theme="light"] .pill-refresh{color:#A9803A;}
+
+.dashboard-label{
+  width:100%;max-width:760px;font-size:13px;font-weight:700;color:var(--text-primary);
+  display:flex;align-items:center;gap:6px;margin-top:6px;
+}
+
+/* ===== شريط الذاكرة المستخدمة ===== */
+.storage-row{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  width:100%;max-width:760px;padding:10px 16px;
+  background:var(--bg-card);border:1px solid var(--border);border-radius:12px;
+}
+.storage-clear-btn{
+  background:transparent;border:none;color:var(--text-secondary);font-size:11.5px;
+  cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;
+}
+.storage-clear-btn:hover{color:#E0654F;}
+.storage-bar-wrap{display:flex;align-items:center;gap:8px;font-size:10.5px;color:var(--text-secondary);flex:1;min-width:160px;}
+.storage-bar-track{flex:1;height:6px;border-radius:4px;background:var(--bg-elev);overflow:hidden;}
+.storage-bar-fill{height:100%;width:0%;border-radius:4px;background:linear-gradient(90deg, var(--blue-mid), var(--teal-light));transition:width .4s ease;}
+
 body.guest-mode #cardsSection{display:none;}
 body.guest-mode .search-wrap{display:none;}
 body.guest-mode .globe-stage{
@@ -662,27 +707,29 @@ body.guest-mode .globe-stage{
   min-width:0;
   background:var(--bg-card);
   border:1px solid var(--border);
-  border-radius:4px;
+  border-radius:10px;
   border-right:3px solid var(--teal);
-  padding:14px 14px;
+  padding:14px;
   cursor:pointer;
-  transition:border-color .2s, transform .2s, padding .35s ease;
+  transition:border-color .2s, transform .2s;
 }
-.stat-card:nth-child(2){border-right-color:var(--blue-mid);}
-.stat-card:nth-child(3){border-right-color:#C8A24E;}
+.stat-card.sc-orange{border-right-color:#C8A24E;}
+.stat-card.sc-blue{border-right-color:var(--blue-mid);}
+.stat-card.sc-green{border-right-color:var(--teal);}
 .stat-card:hover{transform:translateY(-2px);}
-.stat-card .top{display:flex;justify-content:space-between;align-items:center;}
-.stat-card .num{
-  font-family:'JetBrains Mono',monospace;font-size:30px;font-weight:700;
-  direction:ltr;display:block;text-align:right;
-  max-height:0;opacity:0;overflow:hidden;
-  transition:max-height .4s cubic-bezier(.25,.8,.3,1), opacity .3s ease, margin-bottom .4s ease;
-  margin-bottom:0;
+.stat-card .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.stat-card .sc-icon{
+  width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+  font-size:16px;background:rgba(255,255,255,0.06);
 }
-.stat-card.expanded .num{max-height:44px;opacity:1;margin-bottom:2px;}
-.stat-card.expanded{padding:18px 20px;}
-.stat-card .label{font-size:13px;color:var(--text-secondary);transition:font-size .3s ease;}
-.stat-card.expanded .label{font-size:12px;}
+.stat-card.sc-orange .sc-icon{background:rgba(200,162,78,0.14);}
+.stat-card.sc-blue .sc-icon{background:rgba(46,125,209,0.14);}
+.stat-card.sc-green .sc-icon{background:rgba(31,174,140,0.14);}
+.stat-card .num{
+  font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;
+  direction:ltr;display:block;text-align:right;margin-bottom:2px;
+}
+.stat-card .label{font-size:12px;color:var(--text-secondary);}
 .stat-card .chev{color:var(--text-secondary);transition:transform .3s;font-size:14px;}
 .stat-card.expanded .chev{transform:rotate(180deg);}
 .stat-panel{
@@ -706,10 +753,6 @@ footer{
   .logo-sub{display:none;}
   .logo-text{font-size:13px;}
   .logo-mark{height:26px;}
-  #headerActions.logged-in .login-btn,
-  #headerActions.logged-in .theme-toggle,
-  #headerActions.logged-in #logoutBtnDesktop{display:none;}
-  #headerActions.logged-in .mobile-user-menu{display:block;}
   .login-btn{padding:7px 12px;font-size:12px;}
   .theme-toggle{width:34px;height:34px;}
   .hero{padding:92px 6px 90px;}
@@ -771,6 +814,7 @@ footer{
           <button class="theme-switch" id="themeSwitchMobile" aria-label="تبديل الوضع الداكن"><span class="theme-switch-knob"></span></button>
         </div>
         <a href="admin.html" class="mobile-menu-link" id="mobileAdminLink" style="display:none">لوحة المدير</a>
+        <a href="member.html" class="mobile-menu-link">حسابي</a>
         <a href="shifts.html" class="mobile-menu-link">تقويم دوام الورديات</a>
         <a href="index.html" class="mobile-menu-link">الصفحة الرئيسية</a>
         <button class="mobile-menu-logout" id="mobileLogoutBtn" style="display:none">تسجيل الخروج</button>
@@ -856,52 +900,6 @@ footer{
         <div class="search-progress-track"><div class="search-progress-fill" id="searchProgressFill"></div></div>
         <div class="search-progress-label"><span>جاري البحث عن المحطة...</span><span id="searchProgressPct">0%</span></div>
       </div>
-      <div class="recent-panel" id="recentPanel">
-        <div class="recent-panel-head">
-          <span>محطاتك الأخيرة</span>
-          <button class="recent-clear-btn" id="recentClearBtn">مسح الذاكرة</button>
-        </div>
-        <div class="recent-chips" id="recentChips"></div>
-      </div>
-      <button class="add-station-toggle" id="addStationToggle">+ إضافة محطة جديدة</button>
-      <div class="add-station-panel" id="addStationPanel">
-        <div class="add-station-title">إضافة محطة جديدة</div>
-        <div id="addStationFormBody">
-          <div class="add-station-type">
-            <button class="type-btn active" data-type="توزيع">توزيع</button>
-            <button class="type-btn" data-type="تحويل">تحويل</button>
-          </div>
-          <input id="newStationId" class="edit-input" placeholder="رقم المحطة (يجب ألا يكون موجوداً بالشيت)">
-          <div id="feederRegionRow" style="display:flex;gap:6px;">
-            <input id="newStationFeeder" class="edit-input" placeholder="المغذي (اختياري)">
-            <input id="newStationRegion" class="edit-input" placeholder="المنطقة *">
-          </div>
-          <div style="display:flex;gap:6px;">
-            <input id="newStationLat" class="edit-input" placeholder="خط العرض *">
-            <input id="newStationLng" class="edit-input" placeholder="خط الطول *">
-          </div>
-          <button class="use-gps-btn" id="newStationGpsBtn" type="button">📍 استخدام موقعي الحالي</button>
-          <div class="paste-coord-row">
-            <span class="paste-coord-label">أو الصق الإحداثية مباشرة</span>
-            <div style="display:flex;gap:6px;">
-              <input id="newStationPasteCoord" class="edit-input" placeholder="21.5234,39.1876" style="flex:1">
-              <button type="button" class="paste-apply-btn" id="newStationPasteApply">تطبيق</button>
-            </div>
-          </div>
-          <input id="newStationReason" class="edit-input" placeholder="السبب (مثال: محطة جديدة)">
-          <div id="addStationError" class="add-station-error"></div>
-          <button class="add-station-submit" id="addStationSubmitBtn">حفظ المحطة</button>
-        </div>
-        <div class="add-station-progress-track" id="addStationProgressTrack" style="display:none">
-          <div class="add-station-progress-fill" id="addStationProgressFill"></div>
-        </div>
-        <div id="addStationProgressLabel" style="display:none;text-align:center;font-size:11px;color:var(--text-secondary);margin-top:4px;font-family:'JetBrains Mono',monospace;">0%</div>
-        <div id="addStationSuccess" style="display:none;text-align:center;padding:6px 0;">
-          <div style="color:var(--teal);font-weight:700;font-size:14px;margin-bottom:6px;">✓ تمت إضافة المحطة بنجاح</div>
-          <div style="font-size:11px;color:var(--text-secondary);margin-bottom:12px;">لازم تحدّث الصفحة أول قبل تقدر تبحث، عشان المحطة الجديدة تظهر بنتائج البحث</div>
-          <button class="add-station-submit" id="addStationReloadBtn">تحديث الصفحة الآن</button>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -909,33 +907,99 @@ footer{
 </section>
 
 <section class="cards-section" id="cardsSection">
-  <div style="display:flex;justify-content:center;margin-bottom:8px;width:100%;max-width:760px">
-    <button id="refreshStatsBtn" style="background:rgba(31,174,140,0.14);border:1.3px solid rgba(77,214,181,0.5);border-radius:14px;color:var(--teal-light);font-size:11.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;padding:7px 14px;font-family:'IBM Plex Sans Arabic',sans-serif" aria-label="تحديث الإحصائيات">
-      <svg id="refreshIcon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"></path></svg>
+  <div class="action-pills-row">
+    <button class="action-pill pill-add" id="addStationToggle">+ إضافة محطة</button>
+    <button class="action-pill pill-recent" id="recentToggleBtn">🕐 آخر المحطات</button>
+    <button class="action-pill pill-refresh" id="refreshStatsBtn" aria-label="تحديث الإحصائيات">
+      <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"></path></svg>
       تحديث
     </button>
   </div>
-  <div class="cards-row">
-    <div class="stat-card" data-card="stations">
-      <div class="top">
-        <div><span class="num" id="countStations">0</span><div class="label">إجمالي المحطات</div></div>
-        <span class="chev">▾</span>
-      </div>
-      <div class="stat-panel"><div class="stat-panel-inner" id="panelStations"></div></div>
+
+  <div class="recent-panel" id="recentPanel">
+    <div class="recent-panel-head">
+      <span>محطاتك الأخيرة</span>
+      <button class="recent-clear-btn" id="recentClearBtn">مسح السجل</button>
     </div>
-    <div class="stat-card" data-card="additions">
+    <div class="recent-chips" id="recentChips"></div>
+  </div>
+
+  <div class="add-station-panel" id="addStationPanel">
+    <div class="add-station-title">إضافة محطة جديدة</div>
+    <div id="addStationFormBody">
+      <div class="add-station-type">
+        <button class="type-btn active" data-type="توزيع">توزيع</button>
+        <button class="type-btn" data-type="تحويل">تحويل</button>
+      </div>
+      <input id="newStationId" class="edit-input" placeholder="رقم المحطة (يجب ألا يكون موجوداً بالشيت)">
+      <div id="feederRegionRow" style="display:flex;gap:6px;">
+        <input id="newStationFeeder" class="edit-input" placeholder="المغذي (اختياري)">
+        <input id="newStationRegion" class="edit-input" placeholder="المنطقة *">
+      </div>
+      <div style="display:flex;gap:6px;">
+        <input id="newStationLat" class="edit-input" placeholder="خط العرض *">
+        <input id="newStationLng" class="edit-input" placeholder="خط الطول *">
+      </div>
+      <button class="use-gps-btn" id="newStationGpsBtn" type="button">📍 استخدام موقعي الحالي</button>
+      <div class="paste-coord-row">
+        <span class="paste-coord-label">أو الصق الإحداثية مباشرة</span>
+        <div style="display:flex;gap:6px;">
+          <input id="newStationPasteCoord" class="edit-input" placeholder="21.5234,39.1876" style="flex:1">
+          <button type="button" class="paste-apply-btn" id="newStationPasteApply">تطبيق</button>
+        </div>
+      </div>
+      <input id="newStationReason" class="edit-input" placeholder="السبب (مثال: محطة جديدة)">
+      <div id="addStationError" class="add-station-error"></div>
+      <button class="add-station-submit" id="addStationSubmitBtn">حفظ المحطة</button>
+    </div>
+    <div class="add-station-progress-track" id="addStationProgressTrack" style="display:none">
+      <div class="add-station-progress-fill" id="addStationProgressFill"></div>
+    </div>
+    <div id="addStationProgressLabel" style="display:none;text-align:center;font-size:11px;color:var(--text-secondary);margin-top:4px;font-family:'JetBrains Mono',monospace;">0%</div>
+    <div id="addStationSuccess" style="display:none;text-align:center;padding:6px 0;">
+      <div style="color:var(--teal);font-weight:700;font-size:14px;margin-bottom:6px;">✓ تمت إضافة المحطة بنجاح</div>
+      <div style="font-size:11px;color:var(--text-secondary);margin-bottom:12px;">لازم تحدّث الصفحة أول قبل تقدر تبحث، عشان المحطة الجديدة تظهر بنتائج البحث</div>
+      <button class="add-station-submit" id="addStationReloadBtn">تحديث الصفحة الآن</button>
+    </div>
+  </div>
+
+  <div class="dashboard-label">📊 لوحة المعلومات</div>
+  <div class="cards-row">
+    <div class="stat-card sc-orange" data-card="edits">
       <div class="top">
-        <div><span class="num" id="countAdditions">0</span><div class="label">إضافات</div></div>
+        <div class="sc-icon">✏️</div>
         <span class="chev">▾</span>
       </div>
+      <span class="num" id="countEdits">0</span>
+      <div class="label">تعديلات اليوم</div>
+      <div class="stat-panel"><div class="stat-panel-inner" id="panelEdits"></div></div>
+    </div>
+    <div class="stat-card sc-blue" data-card="additions">
+      <div class="top">
+        <div class="sc-icon">➕</div>
+        <span class="chev">▾</span>
+      </div>
+      <span class="num" id="countAdditions">0</span>
+      <div class="label">إضافات اليوم</div>
       <div class="stat-panel"><div class="stat-panel-inner" id="panelAdditions"></div></div>
     </div>
-    <div class="stat-card" data-card="edits">
+    <div class="stat-card sc-green" data-card="stations">
       <div class="top">
-        <div><span class="num" id="countEdits">0</span><div class="label">تعديلات</div></div>
+        <div class="sc-icon">🏢</div>
         <span class="chev">▾</span>
       </div>
-      <div class="stat-panel"><div class="stat-panel-inner" id="panelEdits"></div></div>
+      <span class="num" id="countStations">0</span>
+      <div class="label">إجمالي المحطات</div>
+      <div class="stat-panel"><div class="stat-panel-inner" id="panelStations"></div></div>
+    </div>
+  </div>
+
+  <div class="storage-row">
+    <button class="storage-clear-btn" id="clearStorageBtn">🗑️ مسح الذاكرة <span id="cacheSize">— MB</span></button>
+    <div class="storage-bar-wrap">
+      <span>الذاكرة المستخدمة</span>
+      <div class="storage-bar-track"><div class="storage-bar-fill" id="storageBarFill"></div></div>
+      <span id="storagePercent">—٪</span>
     </div>
   </div>
 </section>
@@ -1058,6 +1122,41 @@ refreshBtn.addEventListener('click', async ()=>{
     refreshIcon.style.transform = 'rotate(0deg)';
     refreshBtn.disabled = false;
   }, 600);
+});
+
+/* ============================================================
+ *  شريط الذاكرة المستخدمة محلياً (localStorage)
+ *  Local storage usage bar — reflects real browser storage bytes
+ *  ملاحظة: النسبة محسوبة على سقف افتراضي 5MB (سعة نموذجية للمتصفحات)
+ *  Note: percentage assumes a 5MB typical browser cap, adjustable
+ * ============================================================ */
+const ASSUMED_STORAGE_CAP_MB = 5;
+function updateStorageDisplay(){
+  let totalBytes = 0;
+  for(let i=0; i<localStorage.length; i++){
+    const key = localStorage.key(i);
+    const value = localStorage.getItem(key) || '';
+    totalBytes += (key.length + value.length) * 2; // تقدير UTF-16 تقريبي / rough UTF-16 byte estimate
+  }
+  const totalMB = totalBytes / (1024*1024);
+  const percent = Math.min(100, Math.round((totalMB / ASSUMED_STORAGE_CAP_MB) * 100));
+  document.getElementById('cacheSize').textContent = `${totalMB.toFixed(2)} MB`;
+  document.getElementById('storagePercent').textContent = percent + '٪';
+  document.getElementById('storageBarFill').style.width = percent + '%';
+}
+updateStorageDisplay();
+
+document.getElementById('clearStorageBtn').addEventListener('click', ()=>{
+  if(!confirm('مسح البيانات المؤقتة المحفوظة بجهازك (المحطات الأخيرة وغيرها)؟ لن يمسّ هذا جلستك الحالية ولا بيانات الشيت.')) return;
+  // نحافظ على الجلسة وتفضيل الثيم عمداً — "مسح الذاكرة" يعني بيانات مؤقتة، لا تسجيل الخروج
+  // Preserve session + theme preference deliberately — "clear cache" ≠ logout
+  const preserve = ['sec-session', 'sec-phone', 'sec-theme'];
+  const preserved = {};
+  preserve.forEach(k=>{ const v = localStorage.getItem(k); if(v!==null) preserved[k]=v; });
+  localStorage.clear();
+  Object.entries(preserved).forEach(([k,v])=> localStorage.setItem(k,v));
+  updateStorageDisplay();
+  renderRecentPanel();
 });
 
 document.querySelectorAll('.stat-card').forEach(card=>{
@@ -1861,11 +1960,12 @@ function clearRecentStations(){
 function renderRecentPanel(){
   const recent = getRecentStations();
   const ids = Object.keys(recent);
-  const panel = document.getElementById('recentPanel');
   const chips = document.getElementById('recentChips');
-  if(ids.length === 0){ panel.classList.remove('show'); return; }
-  panel.classList.add('show');
   chips.innerHTML = '';
+  if(ids.length === 0){
+    chips.innerHTML = '<span style="font-size:11.5px;color:var(--text-secondary)">ما فيه محطات زرتها مؤخراً بعد</span>';
+    return;
+  }
   ids.sort((a,b)=> recent[b].visitedAt - recent[a].visitedAt).forEach(id=>{
     const s = recent[id];
     const chip = document.createElement('div');
@@ -1876,7 +1976,14 @@ function renderRecentPanel(){
     chips.appendChild(chip);
   });
 }
-document.getElementById('recentClearBtn').addEventListener('click', clearRecentStations);
+document.getElementById('recentClearBtn').addEventListener('click', ()=>{
+  clearRecentStations();
+  renderRecentPanel();
+});
+document.getElementById('recentToggleBtn').addEventListener('click', ()=>{
+  addStationPanel.classList.remove('show'); // إغلاق متبادل — لوحة واحدة مفتوحة بالوقت الواحد
+  document.getElementById('recentPanel').classList.toggle('show');
+});
 renderRecentPanel();
 
 /* ===== إضافة محطة جديدة — تستخدم updateCoordinates الموجودة أصلاً بافتراض أن رقم المحطة محجوز كصف فارغ بالشيت ===== */
@@ -1885,6 +1992,7 @@ const addStationPanel = document.getElementById('addStationPanel');
 let newStationType = 'توزيع';
 
 addStationToggle.addEventListener('click', ()=>{
+  document.getElementById('recentPanel').classList.remove('show'); // إغلاق متبادل
   addStationPanel.classList.toggle('show');
 });
 
