@@ -65,28 +65,6 @@ header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px s
 .content{max-width:1000px;margin:0 auto;padding:28px 20px;}
 .page-title{font-size:20px;font-weight:700;margin-bottom:4px;}
 .page-sub{font-size:13px;color:var(--text-secondary);margin-bottom:24px;}
-.cards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:28px;}
-.stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:4px;padding:18px 20px;position:relative;overflow:hidden;}
-.stat-card::before{content:'';position:absolute;right:0;top:0;bottom:0;width:3px;}
-.stat-card.c-teal::before{background:var(--teal);}
-.stat-card.c-blue::before{background:var(--blue-mid);}
-.stat-card.c-gold::before{background:#C8A24E;}
-.stat-card.c-purple::before{background:#8B6DD6;}
-.stat-card .sc-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;opacity:.85;}
-.stat-card.c-teal .sc-icon{background:rgba(31,174,140,.15);}
-.stat-card.c-blue .sc-icon{background:rgba(46,125,209,.15);}
-.stat-card.c-gold .sc-icon{background:rgba(200,162,78,.15);}
-.stat-card.c-purple .sc-icon{background:rgba(139,109,214,.15);}
-.stat-card .sc-num{font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:700;line-height:1;margin-bottom:4px;}
-.stat-card.c-teal .sc-num{color:var(--teal);}
-.stat-card.c-blue .sc-num{color:var(--blue-mid);}
-.stat-card.c-gold .sc-num{color:#C8A24E;}
-.stat-card.c-purple .sc-num{color:#8B6DD6;}
-.stat-card .sc-label{font-size:12.5px;color:var(--text-secondary);}
-.chart-card{background:var(--bg-card);border:1px solid var(--border);border-radius:4px;padding:20px;border-right:3px solid var(--blue-mid);}
-.chart-title{font-size:14px;font-weight:600;margin-bottom:4px;}
-.chart-sub{font-size:11.5px;color:var(--text-secondary);margin-bottom:18px;}
-.chart-wrap{position:relative;height:240px;}
 .loading-overlay{display:flex;align-items:center;justify-content:center;height:240px;color:var(--text-secondary);font-size:13px;gap:8px;}
 .spinner{width:18px;height:18px;border:2px solid var(--border-strong);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -97,6 +75,103 @@ header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px s
 .refresh-btn{background:transparent;border:none;cursor:pointer;color:var(--teal);font-size:12px;display:flex;align-items:center;gap:4px;font-family:inherit;padding:4px 8px;border-radius:6px;border:1px solid var(--border);}
 .refresh-btn:hover{background:var(--bg-elev);}
 .err-msg{text-align:center;color:#E0654F;font-size:13px;padding:40px;background:var(--bg-card);border-radius:8px;}
+
+/* ===== غرفة العمليات — Phase 2 (الواجهة) ===== */
+/* ===== Operations room — Phase 2 (frontend) ===== */
+.alert-strip{display:flex;gap:7px;overflow-x:auto;padding-bottom:2px;margin-bottom:16px;}
+.alert-chip{
+  flex-shrink:0;display:flex;align-items:center;gap:6px;
+  background:rgba(224,101,79,.12);border:1px solid rgba(224,101,79,.35);color:#E0654F;
+  font-size:11.5px;font-weight:600;padding:7px 13px;border-radius:20px;white-space:nowrap;
+}
+.ops-status-card{
+  background:var(--bg-card);border:1px solid var(--border);border-radius:14px;
+  padding:18px 20px;margin-bottom:14px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+}
+.ops-status-ring{flex-shrink:0;}
+.ops-status-info{flex:1;min-width:180px;}
+.ops-status-title{font-size:13.5px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:7px;}
+.ops-status-sub{font-size:11.5px;color:var(--text-secondary);}
+.ops-row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.ops-pill{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:14px 10px;text-align:center;}
+.ops-pill b{display:block;font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:800;margin-bottom:3px;}
+.ops-pill span{font-size:11px;color:var(--text-secondary);}
+.acc-item{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden;}
+.acc-head{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:14px 16px;cursor:pointer;user-select:none;
+}
+.acc-head-title{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;}
+.acc-head-badge{font-size:11px;color:var(--text-secondary);}
+.acc-chev{transition:transform .25s;color:var(--text-secondary);flex-shrink:0;}
+.acc-item.open .acc-chev{transform:rotate(180deg);}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+.acc-item.open .acc-body{max-height:600px;}
+.acc-body-inner{padding:0 16px 16px;font-size:12.5px;color:var(--text-secondary);}
+.acc-body-inner table{width:100%;border-collapse:collapse;font-size:12px;}
+.acc-body-inner th{background:var(--bg-elev);color:var(--text-primary);font-weight:700;font-size:12px;text-align:center;padding:8px 6px;border-radius:6px 6px 0 0;}
+.acc-body-inner td{text-align:center;padding:7px 6px;border-bottom:1px solid var(--border);color:var(--text-primary);}
+.coming-soon{text-align:center;padding:24px 10px;color:var(--text-secondary);font-size:12px;}
+.chart-box{position:relative;height:200px;}
+.heatmap-grid{display:grid;grid-template-columns:34px repeat(24,1fr);gap:2px;font-size:8.5px;color:var(--text-secondary);}
+.heatmap-cell{aspect-ratio:1;border-radius:3px;}
+.heatmap-label{display:flex;align-items:center;justify-content:flex-end;padding-left:4px;font-size:9px;}
+.heatmap-peak-note{margin-top:10px;font-size:11.5px;color:var(--text-primary);text-align:center;}
+.region-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.region-bar-label{width:90px;flex-shrink:0;font-size:11.5px;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.region-bar-track{flex:1;height:16px;background:var(--bg-elev);border-radius:6px;overflow:hidden;}
+.region-bar-fill{height:100%;background:linear-gradient(90deg,var(--blue-mid),var(--teal));border-radius:6px;}
+.region-bar-count{width:26px;flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:11px;text-align:center;}
+
+/* ===== الصفحات المنبثقة الكاملة للتفاصيل — المرحلة 4 ===== */
+/* ===== Full detail popup pages — Phase 4 ===== */
+.detail-modal-overlay{
+  display:none;position:fixed;inset:0;z-index:100;
+  background:rgba(2,5,8,.6);backdrop-filter:blur(2px);
+  align-items:flex-end;justify-content:center;
+}
+.detail-modal-overlay.show{display:flex;}
+.detail-modal{
+  width:100%;max-width:720px;max-height:92vh;
+  background:var(--bg);border-radius:20px 20px 0 0;
+  display:flex;flex-direction:column;overflow:hidden;
+  animation:modalSlideUp .25s ease-out;
+}
+@keyframes modalSlideUp{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
+.detail-modal-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 18px;border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.detail-modal-title{font-size:15px;font-weight:700;}
+.detail-modal-close{
+  width:32px;height:32px;border-radius:50%;background:var(--bg-card);border:1px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-primary);
+}
+.detail-modal-filters{padding:14px 18px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;gap:10px;}
+.detail-filter-row{display:flex;gap:8px;flex-wrap:wrap;}
+.detail-filter-row input, .detail-filter-row select{
+  flex:1;min-width:120px;background:var(--bg-card);border:1px solid var(--border-strong);border-radius:10px;
+  padding:9px 12px;font-size:12.5px;color:var(--text-primary);font-family:inherit;
+}
+.detail-hijri-note{font-size:10.5px;color:var(--text-secondary);}
+.detail-filter-actions{display:flex;gap:8px;}
+.detail-btn{
+  flex:1;padding:9px 12px;border-radius:10px;font-size:12.5px;font-weight:600;
+  border:1px solid var(--border-strong);background:var(--bg-card);color:var(--text-primary);
+  cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.detail-btn.primary{background:rgba(31,174,140,.15);border-color:rgba(31,174,140,.4);color:var(--teal-light);}
+.detail-btn.primary:hover{background:rgba(31,174,140,.25);}
+.detail-modal-body{flex:1;overflow-y:auto;padding:14px 18px 24px;}
+.detail-modal-body table{width:100%;border-collapse:collapse;font-size:12px;}
+.detail-modal-body th{background:var(--bg-elev);color:var(--text-primary);font-weight:700;font-size:12px;text-align:center;padding:9px 6px;position:sticky;top:0;}
+.detail-modal-body td{text-align:center;padding:8px 6px;border-bottom:1px solid var(--border);color:var(--text-primary);font-size:12px;}
+.detail-count-badge{font-size:11.5px;color:var(--text-secondary);margin-bottom:10px;}
+.detail-preview-link{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  margin-top:8px;padding:9px;border-radius:10px;background:var(--bg-elev);
+  color:var(--teal-light);font-size:12px;font-weight:600;cursor:pointer;border:1px dashed var(--border-strong);
+}
 /* شريط حالة الاتصال + آخر تحديث — جزء بنيوي فعلي من الهيدر، لا عنصر شقيق منفصل / Connection status bar — structural part of header, not a separate sibling */
 .header-row-status{
   display:flex;align-items:center;justify-content:space-between;
@@ -172,7 +247,7 @@ header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px s
 </header>
 
 <div class="content">
-  <div class="page-title">لوحة التحكم</div>
+  <div class="page-title">لوحة العمليات</div>
   <div class="page-sub" id="greetLine">مرحبًا...</div>
 
   <div class="refresh-row">
@@ -184,15 +259,47 @@ header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px s
     </button>
   </div>
 
-  <div class="cards-grid" id="cardsGrid">
+  <!-- شريط التنبيهات — يظهر فقط عند وجود تنبيهات فعلية، لا عنصر وهمي دائم الظهور -->
+  <div class="alert-strip" id="alertStrip" style="display:none"></div>
+
+  <div id="opsMain">
     <div class="loading-overlay"><div class="spinner"></div> جاري التحميل...</div>
   </div>
+</div>
 
-  <div class="chart-card">
-    <div class="chart-title">نشاط المحطات — آخر 14 يومًا</div>
-    <div class="chart-sub">تعديلات الإحداثيات المسجّلة يوميًا</div>
-    <div class="chart-wrap" id="chartWrap">
-      <div class="loading-overlay"><div class="spinner"></div></div>
+<!-- النافذة المنبثقة الكاملة الموحّدة — تُستخدم للمتواجدين والإضافات والتعديلات معًا -->
+<!-- Unified full detail popup — shared by present-users, additions, and edits -->
+<div class="detail-modal-overlay" id="detailModalOverlay">
+  <div class="detail-modal">
+    <div class="detail-modal-head">
+      <div class="detail-modal-title" id="detailModalTitle">التفاصيل</div>
+      <div class="detail-modal-close" id="detailModalClose">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </div>
+    </div>
+    <div class="detail-modal-filters">
+      <div class="detail-filter-row">
+        <input type="text" id="detailSearchInput" placeholder="بحث برقم المحطة أو الاسم أو الجوال...">
+      </div>
+      <div class="detail-filter-row">
+        <input type="date" id="detailDateFrom">
+        <input type="date" id="detailDateTo">
+      </div>
+      <div class="detail-hijri-note" id="detailHijriNote"></div>
+      <div class="detail-filter-actions">
+        <button class="detail-btn primary" id="detailApplyBtn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          تطبيق
+        </button>
+        <button class="detail-btn" id="detailExportBtn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          تصدير CSV
+        </button>
+      </div>
+    </div>
+    <div class="detail-modal-body">
+      <div class="detail-count-badge" id="detailCountBadge"></div>
+      <div id="detailTableWrap"><div class="loading-overlay"><div class="spinner"></div></div></div>
     </div>
   </div>
 </div>
@@ -247,7 +354,6 @@ setTimeout(checkConnection, 1500);
 setInterval(checkConnection, 60 * 1000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') checkConnection(); });
 const session = JSON.parse(localStorage.getItem('sec-session') || '{}');
-let chartInstance = null;
 let fetching = false;
 
 document.getElementById('greetLine').textContent = 'مرحبًا ' + (session.name || 'المدير') + ' — ' + new Date().toLocaleDateString('ar-SA', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
@@ -256,7 +362,6 @@ document.getElementById('greetLine').textContent = 'مرحبًا ' + (session.na
 function setTheme(next){
   document.body.setAttribute('data-theme', next);
   localStorage.setItem('sec-theme', next);
-  if(chartInstance) updateChartColors();
   syncThemeSwitch();
 }
 const themeSwitchMobile = document.getElementById('themeSwitchMobile');
@@ -291,125 +396,440 @@ document.addEventListener('click', (e)=>{
   if(!mobileUserMenu.contains(e.target)) mobileUserMenu.classList.remove('open');
 });
 
-/* ===== جلب البيانات ===== */
-async function loadDashboard(){
-  if(fetching) return;
-  fetching = true;
-  document.getElementById('refreshIcon').style.animation = 'spin .7s linear infinite';
+/* ============================================================
+ *  غرفة العمليات — Phase 2 (الواجهة)
+ *  Operations room — Phase 2 (frontend)
+ * ============================================================ */
 
-  try{
-    const res = await fetch(API_URL, {method:'POST', body: JSON.stringify({action:'getAdminDashboard', phone: session.phone})});
-    const data = await res.json();
+/* لون المؤشر حسب النسبة ونوعه: quota (الأعلى أسوأ) أو quality (الأعلى أفضل) */
+/* Indicator color by percentage and type: quota (higher = worse) or quality (higher = better) */
+function gaugeColor(pct, type){
+  const isGood = type === 'quality' ? pct >= 90 : pct <= 60;
+  const isWarn = type === 'quality' ? (pct >= 70 && pct < 90) : (pct > 60 && pct <= 85);
+  if(isGood) return '#2ECC71';
+  if(isWarn) return '#C8A24E';
+  return '#E0654F';
+}
+/* مؤشر دائري تفاعلي — يتغيّر لونه فعليًا حسب النسبة، لا لون ثابت واحد / Interactive ring gauge — color genuinely changes with the percentage, not a single fixed color */
+function renderRing(pct, type, size){
+  const color = gaugeColor(pct, type);
+  const r = (size/2) - 7;
+  const c = 2*Math.PI*r;
+  const offset = c - (Math.min(100,Math.max(0,pct))/100)*c;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--border-strong)" stroke-width="7"/>
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${color}" stroke-width="7"
+      stroke-dasharray="${c}" stroke-dashoffset="${offset}" stroke-linecap="round"
+      transform="rotate(-90 ${size/2} ${size/2})" style="transition:stroke-dashoffset .6s ease, stroke .4s ease"/>
+    <text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" font-size="${Math.round(size*0.2)}" font-weight="800" fill="${color}" font-family="'JetBrains Mono',monospace">${pct}%</text>
+  </svg>`;
+}
 
-    if(!data.success){ throw new Error(data.error || 'خطأ غير معروف'); }
+const ALERT_CATEGORY_ICON = {
+  'فشل تحديث بيانات': '⚠️',
+  'محاولة دخول خاطئة': '🔒',
+  'مشاكل اتصال': '📡',
+  'تنبيهات': 'ℹ️'
+};
 
-    renderCards(data);
-    renderChart(data.chart);
-    document.getElementById('lastRefresh').textContent = new Date().toLocaleTimeString('ar-SA');
-
-  }catch(err){
-    document.getElementById('cardsGrid').innerHTML = `<div class="err-msg">تعذّر تحميل البيانات: ${err.message}</div>`;
-    document.getElementById('chartWrap').innerHTML = '';
-  }finally{
-    fetching = false;
-    document.getElementById('refreshIcon').style.animation = '';
+function renderAlertStrip(alertsSummary){
+  const chips = Object.keys(alertsSummary)
+    .filter(cat => alertsSummary[cat] > 0)
+    .map(cat => `<div class="alert-chip">${ALERT_CATEGORY_ICON[cat]||'⚠️'} ${alertsSummary[cat]} ${cat}</div>`)
+    .join('');
+  const strip = document.getElementById('alertStrip');
+  if(chips){
+    strip.innerHTML = chips;
+    strip.style.display = 'flex';
+  } else {
+    strip.style.display = 'none';
   }
 }
 
-function renderCards(d){
-  document.getElementById('cardsGrid').innerHTML = `
-    <div class="stat-card c-teal">
-      <div class="sc-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1FAE8C" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+function renderOpsMain(d){
+  const quotaPct = Math.min(100, Math.round((d.dailyRequests / d.dailyRequestLimit) * 100));
+  const qualityPct = d.dataQualityPct;
+
+  document.getElementById('opsMain').innerHTML = `
+    <div class="ops-status-card">
+      <div class="ops-status-ring">${renderRing(quotaPct, 'quota', 84)}</div>
+      <div class="ops-status-info">
+        <div class="ops-status-title">⚡ طلبات اليوم على السكربت</div>
+        <div class="ops-status-sub">${d.dailyRequests.toLocaleString('ar-SA')} من ${d.dailyRequestLimit.toLocaleString('ar-SA')} طلب — ${d.currentShiftLabel}</div>
       </div>
-      <div class="sc-num">${d.totalMembers}</div>
-      <div class="sc-label">إجمالي الأعضاء</div>
     </div>
-    <div class="stat-card c-blue">
-      <div class="sc-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2E7DD1" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      </div>
-      <div class="sc-num" id="cardActive">${d.activeNow}</div>
-      <div class="sc-label">متواجدون الآن <span style="font-size:10px;color:var(--text-secondary)">(آخر 4 أيام)</span></div>
-      <div id="cardActiveNames" style="font-size:10px;color:var(--text-secondary);margin-top:6px;line-height:1.6;word-break:break-word;">${(d.activeNames||[]).join('، ') || '—'}</div>
+
+    <div class="ops-row3">
+      <div class="ops-pill"><b style="color:var(--teal)">${d.additionsToday}</b><span>إضافات اليوم</span></div>
+      <div class="ops-pill"><b style="color:var(--blue-mid)">${d.editsToday}</b><span>تعديلات اليوم</span></div>
+      <div class="ops-pill"><b>${d.totalStations.toLocaleString('ar-SA')}</b><span>إجمالي المحطات</span></div>
     </div>
-    <div class="stat-card c-gold">
-      <div class="sc-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C8A24E" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+
+    <div class="acc-item" data-section="present">
+      <div class="acc-head">
+        <div class="acc-head-title">👥 المتواجدون</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="acc-head-badge">اليوم ${d.activeUsersToday} — الوردية ${d.activeUsersShift}</span>
+          <svg class="acc-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </div>
       </div>
-      <div class="sc-num">${d.reqToday}</div>
-      <div class="sc-label">طلبات اليوم</div>
+      <div class="acc-body"><div class="acc-body-inner" id="accPresentBody"><div class="coming-soon">جاري التحميل عند الفتح...</div></div></div>
     </div>
-    <div class="stat-card c-purple">
-      <div class="sc-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8B6DD6" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+
+    <div class="acc-item" data-section="additions">
+      <div class="acc-head">
+        <div class="acc-head-title">+ الإضافات</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="acc-head-badge">${d.additionsToday} اليوم</span>
+          <svg class="acc-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </div>
       </div>
-      <div class="sc-num">${d.reqWeek}</div>
-      <div class="sc-label">طلبات آخر 7 أيام</div>
-    </div>`;
+      <div class="acc-body"><div class="acc-body-inner" id="accAdditionsBody"><div class="coming-soon">جاري التحميل عند الفتح...</div></div></div>
+    </div>
+
+    <div class="acc-item" data-section="edits">
+      <div class="acc-head">
+        <div class="acc-head-title">✎ التعديلات</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="acc-head-badge">${d.editsToday} اليوم</span>
+          <svg class="acc-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </div>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner" id="accEditsBody"><div class="coming-soon">جاري التحميل عند الفتح...</div></div></div>
+    </div>
+
+    <div class="acc-item" data-section="charts">
+      <div class="acc-head">
+        <div class="acc-head-title">📈 زوار آخر 7 أيام</div>
+        <svg class="acc-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner" id="accChartsBody"><div class="coming-soon">جاري التحميل عند الفتح...</div></div></div>
+    </div>
+
+    <div class="acc-item" data-section="peak">
+      <div class="acc-head">
+        <div class="acc-head-title">🔥 أوقات الذروة</div>
+        <svg class="acc-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner" id="accPeakBody"><div class="coming-soon">جاري التحميل عند الفتح...</div></div></div>
+    </div>
+
+    <div class="acc-item" data-section="regions">
+      <div class="acc-head">
+        <div class="acc-head-title">🗺️ نشاط المناطق</div>
+        <svg class="acc-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner" id="accRegionsBody"><div class="coming-soon">جاري التحميل عند الفتح...</div></div></div>
+    </div>
+
+    <div class="acc-item" data-section="quality">
+      <div class="acc-head">
+        <div class="acc-head-title">⭐ جودة البيانات</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="acc-head-badge" style="color:${gaugeColor(qualityPct,'quality')}">${qualityPct}%</span>
+          <svg class="acc-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </div>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:8px">
+          ${renderRing(qualityPct, 'quality', 60)}
+          <div>${d.stationsNeedingReview} محطة تحتاج مراجعة (إحداثية ناقصة) من أصل ${d.totalStations}</div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="acc-item" data-section="log">
+      <div class="acc-head">
+        <div class="acc-head-title">⚠️ سجل النظام</div>
+        <svg class="acc-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        ${Object.keys(d.alertsSummary).map(cat => `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span>${ALERT_CATEGORY_ICON[cat]||''} ${cat}</span><b style="color:var(--text-primary)">${d.alertsSummary[cat]}</b></div>`).join('')}
+      </div></div>
+    </div>
+  `;
+
+  renderAlertStrip(d.alertsSummary);
+  wireAccordion();
+}
+
+/* فتح/طي الأقسام — وتحميل المعاينات المصغّرة كسلًا فقط عند أول فتح لكل قسم / Accordion open/close — lazy-loads compact previews only on first open */
+let presentLoaded = false, additionsLoaded = false, editsLoaded = false, chartsLoaded = false, peakLoaded = false, regionsLoaded = false;
+function wireAccordion(){
+  document.querySelectorAll('.acc-head').forEach(head=>{
+    head.addEventListener('click', ()=>{
+      const item = head.closest('.acc-item');
+      const wasOpen = item.classList.contains('open');
+      document.querySelectorAll('.acc-item.open').forEach(el=> el.classList.remove('open'));
+      if(!wasOpen){
+        item.classList.add('open');
+        const section = item.dataset.section;
+        if(section === 'present' && !presentLoaded) loadPresentPreview();
+        if(section === 'additions' && !additionsLoaded) loadAdditionsPreview();
+        if(section === 'edits' && !editsLoaded) loadEditsPreview();
+        if(section === 'charts' && !chartsLoaded) loadVisitorsChart();
+        if(section === 'peak' && !peakLoaded) loadPeakHeatmap();
+        if(section === 'regions' && !regionsLoaded) loadRegionActivity();
+      }
+    });
+  });
+}
+
+/* معاينة مصغّرة (أول 5 صفوف فقط) داخل الأكورديون + رابط لفتح الصفحة المنبثقة الكاملة بفلاترها وتصديرها */
+/* Compact preview (first 5 rows only) inside the accordion + a link opening the full popup page with its filters and export */
+async function loadPresentPreview(){
+  presentLoaded = true;
+  try{
+    const res = await fetch(API_URL, {method:'POST', body: JSON.stringify({action:'getActiveUsersDetail', period:'today'})});
+    const data = await res.json();
+    const rows = (data.users||[]).slice(0,5).map(u => `<tr><td>${u.name}</td><td dir="ltr">${u.phone}</td><td>${u.shift||'—'}</td><td>${u.lastActivity}</td></tr>`).join('');
+    document.getElementById('accPresentBody').innerHTML = (data.users && data.users.length
+      ? `<table><tr><th>الاسم</th><th>الجوال</th><th>الوردية</th><th>آخر نشاط</th></tr>${rows}</table>`
+      : '<div class="coming-soon">لا يوجد نشاط اليوم بعد</div>')
+      + `<div class="detail-preview-link" onclick="openDetailModal('present')">عرض التفاصيل الكاملة والتصدير ←</div>`;
+  }catch(e){
+    document.getElementById('accPresentBody').innerHTML = '<div class="coming-soon">تعذّر التحميل</div>';
+    presentLoaded = false;
+  }
+}
+async function loadAdditionsPreview(){
+  additionsLoaded = true;
+  try{
+    const res = await fetch(API_URL, {method:'POST', body: JSON.stringify({action:'getChangesLog', type:'إضافة_محطة_جديدة', limit:5})});
+    const data = await res.json();
+    const rows = (data.changes||[]).map(c => `<tr><td>${c.stationId}</td><td>${c.memberName}</td><td>${c.date}</td></tr>`).join('');
+    document.getElementById('accAdditionsBody').innerHTML = (data.changes && data.changes.length
+      ? `<table><tr><th>المحطة</th><th>العضو</th><th>التاريخ</th></tr>${rows}</table>`
+      : '<div class="coming-soon">لا توجد إضافات مسجّلة بعد</div>')
+      + `<div class="detail-preview-link" onclick="openDetailModal('additions')">عرض التفاصيل الكاملة والتصدير ←</div>`;
+  }catch(e){
+    document.getElementById('accAdditionsBody').innerHTML = '<div class="coming-soon">تعذّر التحميل</div>';
+    additionsLoaded = false;
+  }
+}
+async function loadEditsPreview(){
+  editsLoaded = true;
+  try{
+    const res = await fetch(API_URL, {method:'POST', body: JSON.stringify({action:'getChangesLog', type:'تعديل_إحداثية', limit:5})});
+    const data = await res.json();
+    const rows = (data.changes||[]).map(c => `<tr><td>${c.stationId}</td><td>${c.memberName}</td><td>${c.date}</td></tr>`).join('');
+    document.getElementById('accEditsBody').innerHTML = (data.changes && data.changes.length
+      ? `<table><tr><th>المحطة</th><th>العضو</th><th>التاريخ</th></tr>${rows}</table>`
+      : '<div class="coming-soon">لا توجد تعديلات مسجّلة بعد</div>')
+      + `<div class="detail-preview-link" onclick="openDetailModal('edits')">عرض التفاصيل الكاملة والتصدير ←</div>`;
+  }catch(e){
+    document.getElementById('accEditsBody').innerHTML = '<div class="coming-soon">تعذّر التحميل</div>';
+    editsLoaded = false;
+  }
+}
+
+/* ============================================================
+ *  الصفحة المنبثقة الكاملة الموحّدة — المتواجدون / الإضافات / التعديلات
+ *  Unified full detail popup — present users / additions / edits
+ * ============================================================ */
+const DETAIL_MODAL_CONFIG = {
+  present:   { title:'👥 المتواجدون — التفاصيل الكاملة',  columns:['الاسم','الجوال','الوردية','آخر نشاط'] },
+  additions: { title:'+ الإضافات — التفاصيل الكاملة',      columns:['المحطة','العضو','الجوال','الوردية','التاريخ','الوقت'] },
+  edits:     { title:'✎ التعديلات — التفاصيل الكاملة',     columns:['المحطة','العضو','الجوال','الوردية','التاريخ','الوقت'] }
+};
+let currentDetailKind = null;
+let currentDetailRows = [];
+
+/* تحويل تاريخ ميلادي لهجري للعرض فقط — بدون مكتبة خارجية، عبر واجهة المتصفح القياسية / Gregorian→Hijri display only, via the browser's built-in API, no external library */
+const hijriFormatter = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura-nu-latn', {day:'numeric', month:'long', year:'numeric'});
+function hijriOf(dateStr){
+  try{ return hijriFormatter.format(new Date(dateStr + 'T00:00:00')); }catch(e){ return ''; }
+}
+function updateHijriNote(){
+  const from = document.getElementById('detailDateFrom').value;
+  const to = document.getElementById('detailDateTo').value;
+  const note = document.getElementById('detailHijriNote');
+  note.textContent = (from && to) ? `📅 هجري: من ${hijriOf(from)} إلى ${hijriOf(to)}` : '';
+}
+
+function openDetailModal(kind){
+  currentDetailKind = kind;
+  const cfg = DETAIL_MODAL_CONFIG[kind];
+  document.getElementById('detailModalTitle').textContent = cfg.title;
+  document.getElementById('detailSearchInput').value = '';
+  const today = new Date();
+  const weekAgo = new Date(Date.now() - 6*24*3600000);
+  document.getElementById('detailDateTo').value = Utilities_formatLocalDate(today);
+  document.getElementById('detailDateFrom').value = Utilities_formatLocalDate(weekAgo);
+  updateHijriNote();
+  document.getElementById('detailModalOverlay').classList.add('show');
+  fetchAndRenderDetail();
+}
+function Utilities_formatLocalDate(d){
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function closeDetailModal(){
+  document.getElementById('detailModalOverlay').classList.remove('show');
+}
+document.getElementById('detailModalClose').addEventListener('click', closeDetailModal);
+document.getElementById('detailModalOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'detailModalOverlay') closeDetailModal();
+});
+document.getElementById('detailDateFrom').addEventListener('change', updateHijriNote);
+document.getElementById('detailDateTo').addEventListener('change', updateHijriNote);
+document.getElementById('detailApplyBtn').addEventListener('click', fetchAndRenderDetail);
+document.getElementById('detailExportBtn').addEventListener('click', exportDetailCsv);
+
+async function fetchAndRenderDetail(){
+  const wrap = document.getElementById('detailTableWrap');
+  wrap.innerHTML = '<div class="loading-overlay"><div class="spinner"></div></div>';
+  const search = document.getElementById('detailSearchInput').value.trim();
+  const dateFrom = document.getElementById('detailDateFrom').value;
+  const dateTo = document.getElementById('detailDateTo').value;
+
+  try{
+    let rows = [];
+    if(currentDetailKind === 'present'){
+      const res = await fetch(API_URL, {method:'POST', body: JSON.stringify({action:'getActiveUsersDetail', dateFrom, dateTo, search})});
+      const data = await res.json();
+      rows = (data.users||[]).map(u => ({cells:[u.name, u.phone, u.shift||'—', u.lastActivity], raw:u}));
+    } else {
+      const type = currentDetailKind === 'additions' ? 'إضافة_محطة_جديدة' : 'تعديل_إحداثية';
+      const res = await fetch(API_URL, {method:'POST', body: JSON.stringify({action:'getChangesLog', type, dateFrom, dateTo, search, limit:500})});
+      const data = await res.json();
+      rows = (data.changes||[]).map(c => ({cells:[c.stationId, c.memberName, c.phone, c.shift||'—', c.date, c.time], raw:c}));
+    }
+    currentDetailRows = rows;
+    const cfg = DETAIL_MODAL_CONFIG[currentDetailKind];
+    document.getElementById('detailCountBadge').textContent = `${rows.length} نتيجة`;
+    if(!rows.length){
+      wrap.innerHTML = '<div class="coming-soon">لا توجد نتائج ضمن هذا النطاق</div>';
+      return;
+    }
+    const headHtml = '<tr>' + cfg.columns.map(c=>`<th>${c}</th>`).join('') + '</tr>';
+    const bodyHtml = rows.map(r => '<tr>' + r.cells.map(v => `<td dir="${/^\+?\d[\d\s]*$/.test(String(v))?'ltr':'rtl'}">${v}</td>`).join('') + '</tr>').join('');
+    wrap.innerHTML = `<table>${headHtml}${bodyHtml}</table>`;
+  }catch(e){
+    wrap.innerHTML = '<div class="coming-soon">تعذّر تحميل التفاصيل</div>';
+  }
+}
+
+/* تصدير النتائج الحالية إلى CSV — من نفس البيانات المعروضة، بدون طلب إضافي للخادم / Exports the currently displayed results to CSV — from the same rendered data, no extra server call */
+function exportDetailCsv(){
+  if(!currentDetailRows.length){ alert('لا توجد بيانات للتصدير'); return; }
+  const cfg = DETAIL_MODAL_CONFIG[currentDetailKind];
+  const lines = [cfg.columns.join(',')];
+  currentDetailRows.forEach(r => lines.push(r.cells.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')));
+  const csv = '\uFEFF' + lines.join('\n'); // BOM لدعم عرض العربي بشكل صحيح داخل Excel / BOM so Arabic renders correctly in Excel
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `${currentDetailKind}-${Utilities_formatLocalDate(new Date())}.csv`;
+  link.click();
 }
 
 function getChartColors(){
   const dark = document.body.getAttribute('data-theme')==='dark';
   return {
     grid: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.07)',
-    text: dark ? '#8FA3B8' : '#52647A',
-    editColor: '#2E7DD1',
-    editFill: 'rgba(46,125,209,0.18)',
+    text: dark ? '#8FA3B8' : '#52647A'
   };
 }
 
-function renderChart(chartData){
-  const days = Object.keys(chartData);
-  const labels = days.map(d => {
-    const dt = new Date(d + 'T00:00:00');
-    return dt.toLocaleDateString('ar-SA', {month:'short', day:'numeric'});
-  });
-  const edits = days.map(d => chartData[d].edits);
-  const colors = getChartColors();
-
-  document.getElementById('chartWrap').innerHTML = '<canvas id="activityChart"></canvas>';
-  const ctx = document.getElementById('activityChart').getContext('2d');
-
-  chartInstance = new Chart(ctx, {
-    type: 'bar',
-    data:{
-      labels,
-      datasets:[{
-        label: 'تعديلات الإحداثيات',
-        data: edits,
-        backgroundColor: colors.editFill,
-        borderColor: colors.editColor,
-        borderWidth: 1.5,
-        borderRadius: 4,
-      }]
-    },
-    options:{
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins:{
-        legend:{ labels:{ color: colors.text, font:{ family:"'IBM Plex Sans Arabic', sans-serif", size:12 } } },
-        tooltip:{ rtl:true, bodyFont:{ family:"'JetBrains Mono', monospace" } }
-      },
-      scales:{
-        x:{ ticks:{ color: colors.text, font:{ size:10 }, maxRotation:45 }, grid:{ color: colors.grid } },
-        y:{ ticks:{ color: colors.text, precision:0 }, grid:{ color: colors.grid }, beginAtZero:true }
+/* ===== ١) رسم نشاط آخر ٧ أيام ===== */
+async function loadVisitorsChart(){
+  chartsLoaded = true;
+  try{
+    const res = await fetch(API_URL, {method:'POST', body: JSON.stringify({action:'getVisitorsChart'})});
+    const data = await res.json();
+    document.getElementById('accChartsBody').innerHTML = '<div class="chart-box"><canvas id="visitorsCanvas"></canvas></div>';
+    const colors = getChartColors();
+    new Chart(document.getElementById('visitorsCanvas').getContext('2d'), {
+      type: 'line',
+      data:{ labels: data.labels, datasets:[{
+        label:'أحداث النشاط', data: data.values,
+        borderColor:'#1FAE8C', backgroundColor:'rgba(31,174,140,.15)',
+        fill:true, tension:.35, pointRadius:3, pointBackgroundColor:'#1FAE8C'
+      }]},
+      options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{display:false}, tooltip:{rtl:true, bodyFont:{family:"'JetBrains Mono', monospace"}} },
+        scales:{
+          x:{ ticks:{color:colors.text, font:{size:10}}, grid:{color:colors.grid} },
+          y:{ ticks:{color:colors.text, precision:0}, grid:{color:colors.grid}, beginAtZero:true }
+        }
       }
-    }
-  });
+    });
+  }catch(e){
+    document.getElementById('accChartsBody').innerHTML = '<div class="coming-soon">تعذّر تحميل الرسم</div>';
+    chartsLoaded = false;
+  }
 }
 
-function updateChartColors(){
-  if(!chartInstance) return;
-  const colors = getChartColors();
-  chartInstance.data.datasets[0].backgroundColor = colors.editFill;
-  chartInstance.data.datasets[0].borderColor = colors.editColor;
-  chartInstance.options.scales.x.ticks.color = colors.text;
-  chartInstance.options.scales.x.grid.color = colors.grid;
-  chartInstance.options.scales.y.ticks.color = colors.text;
-  chartInstance.options.scales.y.grid.color = colors.grid;
-  chartInstance.options.plugins.legend.labels.color = colors.text;
-  chartInstance.update();
+/* ===== ٢) خريطة أوقات الذروة الحرارية ===== */
+async function loadPeakHeatmap(){
+  peakLoaded = true;
+  try{
+    const res = await fetch(API_URL, {method:'POST', body: JSON.stringify({action:'getPeakHoursHeatmap'})});
+    const data = await res.json();
+    const maxCount = Math.max(1, ...data.matrix.flat());
+    let grid = '<div class="heatmap-grid">';
+    grid += '<div></div>' + Array.from({length:24}, (_,h)=> `<div style="text-align:center">${h%3===0?h:''}</div>`).join('');
+    data.matrix.forEach((row, d)=>{
+      grid += `<div class="heatmap-label">${data.weekdayLabels[d]}</div>`;
+      row.forEach(count=>{
+        const intensity = count / maxCount;
+        const bg = intensity === 0 ? 'var(--bg-elev)' : `rgba(31,174,140,${0.15 + intensity*0.85})`;
+        grid += `<div class="heatmap-cell" style="background:${bg}" title="${count}"></div>`;
+      });
+    });
+    grid += '</div>';
+    if(data.peak){
+      grid += `<div class="heatmap-peak-note">🔥 أكثر وقت نشاطًا: <b>${data.peak.day} — الساعة ${data.peak.hour}:00</b> (${data.peak.count} حدث)</div>`;
+    }
+    document.getElementById('accPeakBody').innerHTML = grid;
+  }catch(e){
+    document.getElementById('accPeakBody').innerHTML = '<div class="coming-soon">تعذّر تحميل الخريطة</div>';
+    peakLoaded = false;
+  }
+}
+
+/* ===== ٣) نشاط المناطق ===== */
+async function loadRegionActivity(){
+  regionsLoaded = true;
+  try{
+    const res = await fetch(API_URL, {method:'POST', body: JSON.stringify({action:'getRegionActivity'})});
+    const data = await res.json();
+    if(!data.regions || !data.regions.length){
+      document.getElementById('accRegionsBody').innerHTML = '<div class="coming-soon">لا توجد بيانات نشاط كافية آخر 30 يومًا</div>';
+      return;
+    }
+    const maxCount = Math.max(...data.regions.map(r=>r.count));
+    document.getElementById('accRegionsBody').innerHTML = data.regions.map(r => `
+      <div class="region-bar-row">
+        <div class="region-bar-label">${r.region}</div>
+        <div class="region-bar-track"><div class="region-bar-fill" style="width:${Math.round((r.count/maxCount)*100)}%"></div></div>
+        <div class="region-bar-count">${r.count}</div>
+      </div>`).join('');
+  }catch(e){
+    document.getElementById('accRegionsBody').innerHTML = '<div class="coming-soon">تعذّر التحميل</div>';
+    regionsLoaded = false;
+  }
+}
+
+/* ===== جلب بيانات لوحة العمليات الرئيسية ===== */
+async function loadDashboard(){
+  if(fetching) return;
+  fetching = true;
+  document.getElementById('refreshIcon').style.animation = 'spin .7s linear infinite';
+  presentLoaded = false; changesLoaded = false; chartsLoaded = false; peakLoaded = false; regionsLoaded = false;
+
+  try{
+    const res = await fetch(API_URL, {method:'POST', body: JSON.stringify({action:'getOperationsDashboard', phone: session.phone})});
+    const data = await res.json();
+    if(!data.success){ throw new Error(data.error || 'خطأ غير معروف'); }
+    renderOpsMain(data);
+    document.getElementById('lastRefresh').textContent = new Date().toLocaleTimeString('ar-SA');
+  }catch(err){
+    document.getElementById('opsMain').innerHTML = `<div class="err-msg">تعذّر تحميل البيانات: ${err.message}</div>`;
+  }finally{
+    fetching = false;
+    document.getElementById('refreshIcon').style.animation = '';
+  }
 }
 
 /* ===== تحديث تلقائي عند رجوع التبويب ===== */
