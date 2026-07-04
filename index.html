@@ -76,6 +76,15 @@ header{
   padding:6px 24px;font-size:11px;color:var(--text-secondary);
 }
 .status-bar-item{display:flex;align-items:center;gap:6px;}
+.status-refresh-btn{
+  margin-right:auto;display:flex;align-items:center;gap:5px;
+  background:transparent;border:1px solid var(--border-strong);border-radius:20px;
+  padding:4px 10px;font-size:10.5px;color:var(--text-secondary);cursor:pointer;
+  font-family:inherit;transition:.2s;
+}
+.status-refresh-btn:hover{border-color:var(--teal);color:var(--teal);}
+.status-refresh-btn.spinning #dataRefreshIcon{animation:spin .7s linear infinite;}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 .conn-dot{
   width:8px;height:8px;border-radius:50%;flex-shrink:0;
   background:#8FA3B8; /* رمادي = جاري الفحص / gray = checking */
@@ -982,6 +991,10 @@ footer{
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       <span id="lastUpdateLabel">آخر تحديث: —</span>
     </div>
+    <button class="status-refresh-btn" id="dataRefreshBtn" title="تحديث بيانات المحطات — لو لاحظت نتائج بحث غير محدّثة">
+      <svg id="dataRefreshIcon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+      تحديث البيانات
+    </button>
   </div>
 </header>
 
@@ -1213,7 +1226,19 @@ footer{
 const API_URL = 'https://script.google.com/macros/s/AKfycbyxZUSLZNa6UlZLINsfAEe8CmQPoNGJbpnNtUDxP019TfL8uLh_5fuP0e5HE6daP8dh1w/exec';
 async function callBackend(action, payload){
   const res = await fetch(API_URL, { method:'POST', body: JSON.stringify({ action, ...(payload||{}) }) });
+  renewSessionActivity_(); // كل نشاط فعلي يجدد نافذة الوردية (12 ساعة) من جديد
   return await res.json();
+}
+/* يجدد وقت آخر نشاط بالجلسة المحفوظة محليًا — لا ينشئ جلسة جديدة، فقط يحدّث الطابع الزمني إذا كانت موجودة أصلاً */
+/* Renews the locally-stored session's last-activity timestamp — never creates a new session, only bumps the timestamp if one already exists */
+function renewSessionActivity_(){
+  const raw = localStorage.getItem('sec-session');
+  if(!raw) return;
+  try{
+    const session = JSON.parse(raw);
+    session.ts = Date.now();
+    localStorage.setItem('sec-session', JSON.stringify(session));
+  }catch(e){}
 }
 
 /* تعقيم أي نص يكتبه المستخدم قبل حقنه داخل innerHTML — حماية من الحقن / Sanitizes user-typed text before injecting into innerHTML — XSS protection */
@@ -1287,6 +1312,23 @@ async function checkConnection(){
 }
 setTimeout(checkConnection, 1500); // تأخير بسيط كي لا يتزاحم مع طلبات تحميل الصفحة الأولى
 setInterval(checkConnection, CONN_CHECK_INTERVAL_MS);
+
+/* زر تحديث البيانات اليدوي — شبكة أمان اختيارية، يمسح الكاش المؤقت فورًا عند الحاجة فقط / Manual data-refresh button — optional safety net, clears the cache instantly only when needed */
+document.getElementById('dataRefreshBtn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('dataRefreshBtn');
+  const session = JSON.parse(localStorage.getItem('sec-session') || '{}');
+  if(!session.phone){
+    alert('سجّل دخول أولًا لاستخدام تحديث البيانات');
+    return;
+  }
+  btn.classList.add('spinning');
+  btn.disabled = true;
+  try{
+    await callBackend('clearSearchCache', { phone: session.phone });
+  }catch(e){}
+  btn.classList.remove('spinning');
+  btn.disabled = false;
+});
 document.addEventListener('visibilitychange', ()=>{
   if(document.visibilityState === 'visible') checkConnection();
 });
@@ -1391,8 +1433,24 @@ document.querySelectorAll('.stat-card').forEach(card=>{
 const themeToggle = document.getElementById('themeToggle');
 const headerActions = document.getElementById('headerActions');
 const mobileUserMenu = document.getElementById('mobileUserMenu');
-/* ===== حالة تسجيل الدخول بالهيدر — جلسة متجددة 4 أيام من آخر نشاط ===== */
-const SESSION_MAX_AGE_MS = 4 * 24 * 60 * 60 * 1000;
+/* ===== حالة تسجيل الدخول بالهيدر — جلسة متجددة بمدة وردية كاملة (12 ساعة) من آخر نشاط فعلي ===== */
+/* Header login state — session renews for a full shift duration (12h) from the last real activity */
+const SESSION_MAX_AGE_MS = 12 * 60 * 60 * 1000;
+function forceLogoutExpiredSession_(){
+  localStorage.removeItem('sec-session');
+  localStorage.removeItem('sec-phone');
+  if(location.pathname.indexOf('auth.html') === -1) location.href = 'auth.html';
+}
+/* فحص دوري يفرض الخروج فعليًا حتى لو التبويب بقي مفتوحًا بدون إعادة تحميل طوال الوردية / Periodic check that enforces logout even if the tab stays open without reload for the whole shift */
+setInterval(function(){
+  const raw = localStorage.getItem('sec-session');
+  if(!raw) return;
+  try{
+    const session = JSON.parse(raw);
+    if(Date.now() - (session.ts || 0) > SESSION_MAX_AGE_MS) forceLogoutExpiredSession_();
+  }catch(e){}
+}, 5 * 60 * 1000);
+
 (function(){
   const raw = localStorage.getItem('sec-session');
   if(!raw) return;
@@ -1823,7 +1881,8 @@ async function performSearch(){
       goToStation({
         id: result.id, name: result.name, type: result.type,
         lat: result.lat, lng: result.lng,
-        region: result.region, feeder: result.feeder
+        region: result.region, feeder: result.feeder,
+        _cacheDebug: result['تشخيص وقت بناء الكاش']
       });
     } else {
       progress.stop();
@@ -1872,7 +1931,8 @@ async function performStationPageSearch(){
       goToStation({
         id: result.id, name: result.name, type: result.type,
         lat: result.lat, lng: result.lng,
-        region: result.region, feeder: result.feeder
+        region: result.region, feeder: result.feeder,
+        _cacheDebug: result['تشخيص وقت بناء الكاش']
       });
     } else {
       progress.stop();
@@ -2662,6 +2722,7 @@ function renderStationOnMap(s){
           <button class="st-btn" id="openEditBtn">تعديل</button>
         </div>
       </div>
+      ${s._cacheDebug ? `<div style="font-size:9.5px;color:var(--text-secondary);text-align:center;margin-top:8px;opacity:.7">🔧 تشخيص مؤقت — آخر بناء لبيانات البحث: ${new Date(s._cacheDebug).toLocaleString('ar-SA')}</div>` : ''}
     </div>`;
   stationTable.classList.add('show');
   stationSearchBar.classList.add('show');
@@ -2822,19 +2883,13 @@ function openEditForm(){
 
       stationTable.innerHTML = `
         <div class="sb-inner" style="text-align:center;">
-          <div style="color:var(--teal);font-weight:700;font-size:13px;margin-bottom:6px;">✓ تم حفظ التعديل بنجاح</div>
-          <div style="font-size:10.5px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px;">
-            لازم تحدّث الصفحة أول قبل تقدر تبحث، عشان التعديل يظهر بنتائج البحث.
-          </div>
-          <button class="add-station-submit" id="editReloadBtn">تحديث الصفحة الآن</button>
+          <div style="color:var(--teal);font-weight:700;font-size:13px;margin-bottom:10px;">✓ تم حفظ التعديل بنجاح — يمكنك البحث مباشرة</div>
+          <button class="add-station-submit" id="editDoneBtn">حسنًا</button>
         </div>`;
-      document.getElementById('editReloadBtn').addEventListener('click', ()=>{
-        window.onbeforeunload = null;
-        location.reload();
-      });
+      document.getElementById('editDoneBtn').addEventListener('click', ()=> goToStation(currentStation));
       currentStation.lat = lat; currentStation.lng = lng;
       if(marker) marker.setLatLng([lat,lng]);
-      // الواجهة تبقى مقفولة عمداً حتى يضغط زر التحديث
+      unlockNavigationAfterSave();
     }catch(err){
       clearInterval(tick);
       progressTrack.style.display = 'none';
