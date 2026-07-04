@@ -836,7 +836,11 @@ async function loadDashboard(){
 let lastFetch = 0;
 const STALE = 3 * 60 * 1000;
 loadDashboard();
-document.getElementById('refreshBtn').addEventListener('click', ()=>{ lastFetch=0; loadDashboard(); });
+document.getElementById('refreshBtn').addEventListener('click', async ()=>{
+  lastFetch = 0;
+  try{ await fetch(API_URL, {method:'POST', body: JSON.stringify({action:'clearSearchCache', phone: session.phone})}); }catch(e){}
+  loadDashboard();
+});
 document.addEventListener('visibilitychange', ()=>{
   if(document.visibilityState==='visible' && (Date.now()-lastFetch)>STALE){ loadDashboard(); }
 });
