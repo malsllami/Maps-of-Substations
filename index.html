@@ -153,13 +153,13 @@ header{
 .hero{
   position:relative;
   display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:0;
-  padding:90px 20px 8px;
-  min-height:calc(var(--globe-size) + 268px);
+  padding:90px 20px 4px;
+  min-height:calc(var(--globe-size) + 288px);
 }
 @media (max-width:767px){
   .hero{
-    padding:70px 20px 6px;
-    min-height:calc(var(--globe-size) + 226px);
+    padding:70px 20px 3px;
+    min-height:calc(var(--globe-size) + 240px);
   }
 }
 /* ===== متغير حجم الكرة الموحّد — يُستخدم في تكبير الكرة وحساب موضع العدسة/زر الدخول أسفلها بنفس الوقت ===== */
@@ -188,7 +188,7 @@ body.guest-mode{
   body.guest-mode{ --globe-size: clamp(410px, min(104vw, 72vh), 580px); }
 }
 .globe-stage{
-  position:absolute;top:148px;left:50%;transform:translateX(-50%);
+  position:absolute;top:168px;left:50%;transform:translateX(-50%);
   z-index:1;
   width:var(--globe-size);
   aspect-ratio:1;
@@ -197,22 +197,17 @@ body.guest-mode{
   transition:width .5s cubic-bezier(.4,0,.2,1), height .5s cubic-bezier(.4,0,.2,1);
 }
 .globe-stage.map-active{
-  top:56px;
+  top:calc(var(--header-h, 90px) + 18px);
   width:min(1400px, 96vw);
   aspect-ratio:auto;
-  height:calc(min(45vh, 490px) + var(--map-toolbar-h));
-  height:calc(min(45svh, 490px) + var(--map-toolbar-h));
+  height:calc(min(48vh, 520px) + var(--map-toolbar-h));
+  height:calc(min(48svh, 520px) + var(--map-toolbar-h));
   min-height:calc(280px + var(--map-toolbar-h));
   display:flex;flex-direction:column;
 }
 @media (max-width:767px){
-  .globe-stage.map-active{
-    top:40px;
-  }
-}
-@media (max-width:767px){
   .globe-stage{
-    top:108px;
+    top:122px;
   }
 }
 [data-theme="dark"] .globe-stage::before{
@@ -229,11 +224,11 @@ body.guest-mode{
 #map-container.active{opacity:1;pointer-events:auto;}
 .globe-stage.map-active #map-container{
   position:relative;inset:auto;width:100%;height:auto;
-  flex:1 1 auto;min-height:0;
+  flex:1 1 auto;min-height:0;border-radius:0 0 16px 16px;overflow:hidden;
 }
 .hero.map-active{
-  min-height:calc(min(45vh, 490px) + var(--map-toolbar-h) + 100px);
-  min-height:calc(min(45svh, 490px) + var(--map-toolbar-h) + 100px);
+  min-height:calc(var(--header-h, 90px) + 18px + min(48vh, 520px) + var(--map-toolbar-h) + 40px);
+  min-height:calc(var(--header-h, 90px) + 18px + min(48svh, 520px) + var(--map-toolbar-h) + 40px);
 }
 .hero-content{
   position:relative;z-index:5;width:100%;
@@ -459,7 +454,9 @@ body.guest-mode h1{
 .map-toolbar-bar{
   display:none;flex-direction:column;flex-shrink:0;width:100%;
   position:relative;z-index:3;
-  background:var(--bg-card);border-bottom:1px solid var(--border);
+  background:var(--bg-card);border:1px solid var(--border-strong);
+  border-radius:16px 16px 0 0;
+  box-shadow:0 4px 14px rgba(0,0,0,.18);
 }
 .globe-stage.map-active .map-toolbar-bar{display:flex;}
 .map-toolbar-row1{
@@ -474,7 +471,7 @@ body.guest-mode h1{
   pointer-events:auto;display:none;
   align-items:center;gap:6px;
   font-size:12.5px;color:var(--text-secondary);
-  background:var(--bg-elev);border:1px solid var(--border);
+  background:var(--bg);border:1px solid var(--border-strong);
   padding:7px 14px;border-radius:20px;cursor:pointer;
 }
 .back-btn.show{display:flex;}
@@ -485,9 +482,10 @@ body.guest-mode h1{
 .map-tools.show{display:flex;}
 .map-tool-btn{
   width:34px;height:34px;border-radius:50%;
-  background:var(--bg-elev);border:1px solid var(--border);
+  background:var(--bg);border:1px solid var(--border-strong);
   display:flex;align-items:center;justify-content:center;
   cursor:pointer;color:var(--text-secondary);transition:.2s;
+  box-shadow:0 1px 4px rgba(0,0,0,.18);
 }
 .map-tool-btn:hover{border-color:var(--teal);color:var(--teal);}
 .map-tool-btn.active{background:var(--teal);border-color:var(--teal);color:#fff;}
@@ -497,9 +495,9 @@ body.guest-mode h1{
 .map-mode-chip{
   pointer-events:auto;display:none;
   align-items:center;gap:7px;
-  background:var(--bg-elev);border:1px solid var(--border-strong);border-radius:20px;
+  background:var(--bg);border:1px solid var(--border-strong);border-radius:20px;
   padding:8px 12px;cursor:pointer;font-size:12px;font-weight:600;color:var(--text-primary);
-  transition:border-color .2s;
+  transition:border-color .2s;box-shadow:0 1px 4px rgba(0,0,0,.18);
 }
 .map-mode-chip.show{display:flex;}
 .map-mode-chip:hover{border-color:var(--border-strong);}
@@ -691,21 +689,23 @@ body.guest-mode h1{
   align-items:center;gap:10px;
   width:min(1100px, 94vw);
   position:relative;z-index:6;
-  margin-top:calc(min(45vh, 490px) + var(--map-toolbar-h));
-  margin-top:calc(min(45svh, 490px) + var(--map-toolbar-h));
-  background:var(--bg-elev);border:1px solid var(--border);
-  border-radius:0 0 20px 20px;padding:12px 20px 12px 9px;
+  margin-top:calc(var(--header-h, 90px) + 18px + min(48vh, 520px) + var(--map-toolbar-h) + 6px);
+  margin-top:calc(var(--header-h, 90px) + 18px + min(48svh, 520px) + var(--map-toolbar-h) + 6px);
+  background:var(--bg-elev);border:1.5px solid rgba(31,174,140,0.35);
+  border-radius:20px;padding:12px 20px 12px 9px;
   box-shadow:0 10px 22px rgba(0,0,0,.24);
   transition:border-color .2s, box-shadow .2s;
 }
 .station-search-bar.show{display:flex;}
-.station-search-bar:focus-within{border-color:var(--teal);box-shadow:0 6px 18px rgba(31,174,140,.16);}
+.station-search-bar:focus-within{border-color:var(--teal);box-shadow:0 6px 18px rgba(31,174,140,.24);}
 .station-search-bar .ssb-icon{
   flex-shrink:0;width:30px;height:30px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
   background:rgba(31,174,140,0.14);color:var(--teal);
   box-shadow:0 2px 6px rgba(31,174,140,.2);
+  cursor:pointer;transition:.2s;
 }
+.station-search-bar .ssb-icon:hover{background:var(--teal);color:#fff;}
 .station-search-bar:focus-within .ssb-icon{background:var(--teal);color:#fff;}
 .station-search-bar input{
   flex:1;min-width:0;background:transparent;border:none;outline:none;
@@ -714,6 +714,12 @@ body.guest-mode h1{
 }
 .station-search-bar input::placeholder{color:var(--text-secondary);font-family:'IBM Plex Sans Arabic',sans-serif;}
 body.guest-mode .station-search-bar{width:min(1300px,96vw);}
+.station-search-progress{
+  display:none;flex-direction:column;gap:6px;
+  width:min(1100px, 94vw);margin-top:8px;
+}
+.station-search-progress.show{display:flex;}
+body.guest-mode .station-search-progress{width:min(1300px,96vw);}
 .station-search-hint{
   width:min(1100px, 94vw);font-size:12px;color:var(--text-secondary);
   min-height:16px;padding:6px 4px 0;
@@ -723,7 +729,7 @@ body.guest-mode .station-search-hint{width:min(1300px,96vw);}
 .station-table{
   position:relative;z-index:6;
   width:min(1100px, 94vw);
-  margin-top:0;
+  margin-top:8px;
   background:var(--bg-card);border:1px solid var(--border-strong);
   border-radius:16px;
   padding:0;
@@ -1088,10 +1094,14 @@ footer{
   </div>
 
   <div class="station-search-bar" id="stationSearchBar">
-    <span class="ssb-icon">
+    <span class="ssb-icon" id="stationSearchLensIcon">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
     </span>
     <input id="stationSearchInput" type="text" placeholder="ابحث عن محطة أخرى..." inputmode="text">
+  </div>
+  <div class="station-search-progress" id="stationSearchProgress">
+    <div class="search-progress-track"><div class="search-progress-fill" id="stationSearchProgressFill"></div></div>
+    <div class="search-progress-label"><span>جاري البحث عن المحطة...</span><span id="stationSearchProgressPct">0%</span></div>
   </div>
   <div class="station-search-hint" id="stationSearchHint"></div>
   <div class="station-table" id="stationTable"></div>
@@ -1599,6 +1609,7 @@ function syncRendererToStage(){
   camera.updateProjectionMatrix();
   renderer.setSize(w, h);
   if(leafletMap) leafletMap.invalidateSize();
+  syncHeaderHeight();
   alignHeroBelowGlobe();
 }
 new ResizeObserver(syncRendererToStage).observe(stageEl);
@@ -1609,6 +1620,21 @@ applyResponsiveGlobeOffset();
  *  محاذاة العدسة/زر الدخول بأسفل الكرة عبر قياس حقيقي — لا حسابات CSS تقديرية
  *  Aligns the lens/login button to the globe's real bottom edge via actual measurement — no estimated CSS math
  * ============================================================ */
+/* ============================================================
+ *  قياس فعلي لارتفاع الهيدر الثابت (position:fixed) — يمنع أي عنصر تحته من الاختفاء خلفه
+ *  Real measurement of the fixed header's height — prevents anything beneath it from hiding behind it
+ * ============================================================ */
+function syncHeaderHeight(){
+  const header = document.querySelector('header');
+  if(!header) return;
+  const h = header.getBoundingClientRect().height;
+  document.documentElement.style.setProperty('--header-h', h + 'px');
+}
+window.addEventListener('load', syncHeaderHeight);
+window.addEventListener('resize', syncHeaderHeight);
+setTimeout(syncHeaderHeight, 300); // إعادة قياس بعد استقرار الخطوط والشعار / Re-measure after fonts and logo settle
+syncHeaderHeight();
+
 function alignHeroBelowGlobe(){
   const heading = document.querySelector('.hero-heading');
   const globe = document.getElementById('globeStage');
@@ -1694,10 +1720,11 @@ if(!hasValidSession()){
 }
 
 let isSearching = false;
-function setSearchProgress(active){
-  const progress = document.getElementById('searchProgress');
-  const fill = document.getElementById('searchProgressFill');
-  const pct = document.getElementById('searchProgressPct');
+function setSearchProgress(active, prefix){
+  prefix = prefix || 'search';
+  const progress = document.getElementById(prefix + 'Progress');
+  const fill = document.getElementById(prefix + 'ProgressFill');
+  const pct = document.getElementById(prefix + 'ProgressPct');
   if(!active){
     progress.classList.remove('show');
     fill.style.width = '0%';
@@ -1718,11 +1745,11 @@ function setSearchProgress(active){
       clearInterval(timer);
       fill.style.width = '100%';
       pct.textContent = '100%';
-      setTimeout(()=> setSearchProgress(false), 250);
+      setTimeout(()=> setSearchProgress(false, prefix), 250);
     },
     stop(){
       clearInterval(timer);
-      setSearchProgress(false);
+      setSearchProgress(false, prefix);
     }
   };
 }
@@ -1835,10 +1862,12 @@ async function performStationPageSearch(){
   isStationPageSearching = true;
   stationSearchHint.textContent = '';
   stationSearchHint.className = 'station-search-hint';
+  const progress = setSearchProgress(true, 'stationSearch');
 
   try{
     const result = await callBackend('searchStation', { query: raw });
     if(result.found){
+      progress.finish();
       stationSearchInput.value = '';
       goToStation({
         id: result.id, name: result.name, type: result.type,
@@ -1846,9 +1875,11 @@ async function performStationPageSearch(){
         region: result.region, feeder: result.feeder
       });
     } else {
+      progress.stop();
       renderNotFoundCard(stationSearchHint, raw, retryStationSearch);
     }
   }catch(err){
+    progress.stop();
     stationSearchHint.textContent = 'تعذّر الاتصال بالخادم، حاول مرة أخرى';
     stationSearchHint.className = 'station-search-hint err';
   }finally{
@@ -1858,6 +1889,7 @@ async function performStationPageSearch(){
 stationSearchInput.addEventListener('keydown', (e)=>{
   if(e.key==='Enter') performStationPageSearch();
 });
+document.getElementById('stationSearchLensIcon').addEventListener('click', performStationPageSearch);
 
 let leafletMap = null, currentTileLayer = null, marker = null;
 
@@ -1867,7 +1899,7 @@ let leafletMap = null, currentTileLayer = null, marker = null;
  *  الأوضاع الأربعة: تلقائي / نهاري / ليلي / أقمار صناعية
  *  التلقائي هو الافتراضي دائمًا حتى يبدّله المستخدم يدويًا، وبعدها يبقى على اختياره
  * ============================================================ */
-const TILE_URL_LIGHT = 'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+const TILE_URL_LIGHT = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 const TILE_URL_DARK = 'https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
 const SATELLITE_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
 const MAP_MODE_STORAGE_KEY = 'sec-map-mode';
@@ -2820,6 +2852,7 @@ backBtn.addEventListener('click', ()=>{
   stationSearchBar.classList.remove('show');
   stationSearchInput.value = '';
   stationSearchHint.textContent = '';
+  setSearchProgress(false, 'stationSearch');
   searchInput.value='';
   searchHint.textContent='';
   globeGroup.scale.set(1,1,1);
