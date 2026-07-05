@@ -729,10 +729,11 @@ body.guest-mode h1{
 /* الحاوية الموحّدة لكل ما يظهر أسفل الخريطة — الإزاحة الصحيحة الوحيدة، بدل تكرارها بكل عنصر على حدة (وهذا كان سبب مشكلة التغطية سابقًا) */
 /* The single unified wrapper for everything below the map — the one correct offset, instead of repeating it per element (this was the root cause of the earlier overlap bug) */
 .below-map-area{
-  display:flex;flex-direction:column;align-items:center;gap:8px;
+  display:none;flex-direction:column;align-items:center;gap:8px;
   width:100%;
   margin-top:calc(var(--header-h, 90px) + 8px + min(44vh, 480px) + var(--map-toolbar-h) + 10px);
 }
+.hero.map-active .below-map-area{display:flex;}
 @supports (height: 100svh){
   .below-map-area{margin-top:calc(var(--header-h, 90px) + 8px + min(44svh, 480px) + var(--map-toolbar-h) + 10px);}
 }
