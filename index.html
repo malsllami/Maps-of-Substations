@@ -65,25 +65,25 @@ header{
 .logo:hover .logo-mark{transform:scale(1.06);}
 .logo:hover .logo-text{color:var(--teal);}
 .logo-mark{
-  height:36px;width:auto;flex-shrink:0;display:block;object-fit:contain;
+  height:42px;width:auto;flex-shrink:0;display:block;object-fit:contain;
 }
-.logo-text{font-size:15px;font-weight:700;letter-spacing:.3px;white-space:nowrap;transition:color .2s;}
-.logo-sub{font-size:11px;color:var(--text-secondary);margin-top:1px;white-space:nowrap;}
-/* صف حالة الاتصال — نفس خلفية الهيدر تمامًا، لا لون منفصل ولا فراغ، سطر ثانٍ حقيقي بنفس العنصر / Same header background exactly, no separate color, no gap — a real second line of the same element */
+.logo-text{font-size:16.5px;font-weight:700;letter-spacing:.3px;white-space:nowrap;transition:color .2s;}
+.logo-sub{font-size:11.5px;color:var(--text-secondary);margin-top:2px;white-space:nowrap;}
+/* صف حالة الاتصال — شريط ممتد على كامل عرض الهيدر بإطار واحد واضح، لا شارة صغيرة وسطية / Connection status row — a single bar spanning the header's full width with one clear frame, not a small centered chip */
 .header-row-status{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 32px 12px;font-size:11px;color:var(--text-secondary);
+  padding:0 32px 12px;
 }
 .conn-status-pill{
-  display:flex;align-items:center;gap:10px;
-  border:1px solid var(--border-strong);border-radius:20px;
-  padding:6px 14px;background:var(--bg-card);
+  display:flex;align-items:center;gap:14px;width:100%;
+  border:1px solid var(--border-strong);border-radius:14px;
+  padding:9px 16px;background:var(--bg-card);
+  font-size:11.5px;color:var(--text-primary);
 }
 .status-bar-item{display:flex;align-items:center;gap:6px;}
 .conn-pill-div{width:1px;height:14px;background:var(--border-strong);}
 .status-refresh-btn{
   display:flex;align-items:center;justify-content:center;
-  width:22px;height:22px;flex-shrink:0;
+  width:24px;height:24px;flex-shrink:0;margin-right:auto;
   background:transparent;border:none;border-radius:50%;
   color:var(--text-secondary);cursor:pointer;transition:.2s;
 }
@@ -99,7 +99,8 @@ header{
 .conn-dot.online{background:#2ECC71;box-shadow:0 0 6px rgba(46,204,113,.6);}
 .conn-dot.offline{background:#E0654F;box-shadow:0 0 6px rgba(224,101,79,.6);}
 @media (max-width:600px){
-  .header-row-status{padding:6px 12px;font-size:10px;}
+  .header-row-status{padding:0 16px 10px;}
+  .conn-status-pill{padding:8px 12px;font-size:10.5px;gap:10px;flex-wrap:wrap;}
 }
 .header-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
 .mobile-user-menu{display:none;position:relative;}
@@ -114,9 +115,9 @@ header{
 #headerActions.logged-in #logoutBtnDesktop{display:none;}
 #headerActions.logged-in .mobile-user-menu{display:block;}
 .mobile-menu-trigger{
-  display:flex;align-items:center;gap:5px;
-  background:var(--bg-card);border:1px solid var(--border-strong);border-radius:20px;
-  padding:8px 14px;font-size:12.5px;font-weight:500;color:var(--text-primary);
+  display:flex;align-items:center;gap:6px;
+  background:var(--bg-card);border:1px solid var(--border-strong);border-radius:22px;
+  padding:9px 16px;font-size:13px;font-weight:600;color:var(--text-primary);
   cursor:pointer;font-family:inherit;
 }
 .mobile-menu-trigger:hover{border-color:var(--teal);}
@@ -130,8 +131,13 @@ header{
 }
 .mobile-user-menu.open .mobile-menu-panel{display:block;}
 .mobile-menu-row{display:flex;align-items:center;justify-content:space-between;padding:9px 10px;font-size:12.5px;color:var(--text-primary);}
-.mobile-menu-link{display:block;padding:10px 10px;font-size:12.5px;color:var(--text-primary);text-decoration:none;border-radius:8px;}
+.mobile-menu-link{display:block;padding:10px 10px;font-size:12.5px;color:var(--text-primary);text-decoration:none;border-radius:8px;border:1px solid transparent;}
 .mobile-menu-link:hover{background:var(--bg-elev);}
+.mobile-menu-link.current-page{
+  background:rgba(31,174,140,0.12);border-color:rgba(31,174,140,0.4);
+  color:var(--teal-light);font-weight:700;
+}
+[data-theme="light"] .mobile-menu-link.current-page{color:var(--teal);}
 .mobile-menu-logout{
   width:100%;text-align:right;padding:10px 10px;font-size:12.5px;color:#E0654F;
   background:transparent;border:none;border-top:1px solid var(--border);margin-top:4px;
@@ -168,12 +174,12 @@ header{
 .hero{
   position:relative;
   display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:0;
-  padding:90px 20px 4px;
+  padding:calc(var(--header-h, 90px) + 10px) 20px 4px;
   min-height:calc(var(--globe-size) + 288px);
 }
 @media (max-width:767px){
   .hero{
-    padding:70px 20px 3px;
+    padding:calc(var(--header-h, 90px) + 8px) 20px 3px;
     min-height:calc(var(--globe-size) + 240px);
   }
 }
@@ -203,7 +209,7 @@ body.guest-mode{
   body.guest-mode{ --globe-size: clamp(410px, min(104vw, 72vh), 580px); }
 }
 .globe-stage{
-  position:absolute;top:168px;left:50%;transform:translateX(-50%);
+  position:absolute;top:calc(var(--header-h, 90px) + 78px);left:50%;transform:translateX(-50%);
   z-index:1;
   width:var(--globe-size);
   aspect-ratio:1;
@@ -222,7 +228,7 @@ body.guest-mode{
 }
 @media (max-width:767px){
   .globe-stage{
-    top:122px;
+    top:calc(var(--header-h, 90px) + 52px);
   }
 }
 [data-theme="dark"] .globe-stage::before{
@@ -579,13 +585,34 @@ body.guest-mode h1{
 .add-station-toggle:hover{background:rgba(31,174,140,0.24);border-color:var(--teal);}
 [data-theme="light"] .add-station-toggle{color:var(--teal);}
 [data-theme="light"] .add-station-toggle{color:var(--teal);text-shadow:none;}
-.add-station-panel{
-  display:none;flex-direction:column;gap:10px;
-  width:min(560px,94vw);background:var(--bg-card);border:1px solid var(--border-strong);
-  border-radius:16px;padding:22px;margin-top:0;box-shadow:0 10px 28px rgba(0,0,0,.2);
+/* ===== صفحة النموذج الكاملة الموحّدة — تُستخدم لكل من الإضافة والتعديل، بأنيميشن دخول أنيق بدل مجرد بطاقة مكبّرة ===== */
+/* ===== Unified full-page form — shared by both add and edit, with a smooth entrance animation instead of just a bigger card ===== */
+.fullpage-form-overlay{
+  display:none;position:fixed;inset:0;z-index:200;
+  background:var(--bg);overflow-y:auto;
 }
-.add-station-panel.show{display:flex;}
-.add-station-title{font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:4px;}
+.fullpage-form-overlay.show{display:block;animation:fullpageFadeIn .35s cubic-bezier(.4,0,.2,1);}
+@keyframes fullpageFadeIn{
+  from{opacity:0;transform:translateY(18px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.fullpage-form-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 24px;border-bottom:1px solid var(--border);
+  position:sticky;top:0;background:var(--bg);z-index:2;
+}
+.fullpage-form-title{font-size:17px;font-weight:700;}
+.fullpage-form-close{
+  width:38px;height:38px;border-radius:50%;background:var(--bg-card);border:1px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-primary);transition:.2s;flex-shrink:0;
+}
+.fullpage-form-close:hover{border-color:var(--teal);color:var(--teal);}
+.fullpage-form-body{padding:26px 24px 60px;max-width:760px;margin:0 auto;}
+.add-station-panel{
+  display:flex;flex-direction:column;gap:12px;
+  width:100%;
+}
+.add-station-title{display:none;} /* العنوان انتقل لرأس الصفحة الثابت بدل تكراره بالمحتوى */
 .add-station-type{display:flex;gap:8px;}
 .type-btn{
   flex:1;padding:12px;border-radius:9px;border:1px solid var(--border-strong);background:var(--bg);
@@ -1002,9 +1029,9 @@ footer{
             <button class="theme-switch" id="themeSwitchMobile" aria-label="تبديل الوضع الداكن"><span class="theme-switch-knob"></span></button>
           </div>
           <a href="admin.html" class="mobile-menu-link" id="mobileAdminLink" style="display:none">لوحة المدير</a>
-          <a href="member.html" class="mobile-menu-link">حسابي</a>
-          <a href="shifts.html" class="mobile-menu-link">تقويم دوام الورديات</a>
-          <a href="index.html" class="mobile-menu-link" id="homeMenuLink">الصفحة الرئيسية</a>
+          <a href="member.html" class="mobile-menu-link" id="menuLinkAccount">حسابي</a>
+          <a href="shifts.html" class="mobile-menu-link" id="menuLinkShifts">تقويم دوام الورديات</a>
+          <a href="index.html" class="mobile-menu-link current-page" id="homeMenuLink">الصفحة الرئيسية</a>
           <button class="mobile-menu-logout" id="mobileLogoutBtn" style="display:none">تسجيل الخروج</button>
         </div>
       </div>
@@ -1167,42 +1194,61 @@ footer{
     <div class="recent-chips" id="recentChips"></div>
   </div>
 
-  <div class="add-station-panel" id="addStationPanel">
-    <div class="add-station-title">إضافة محطة جديدة</div>
-    <div id="addStationFormBody">
-      <div class="add-station-type">
-        <button class="type-btn active" data-type="توزيع">توزيع</button>
-        <button class="type-btn" data-type="تحويل">تحويل</button>
+  <div class="fullpage-form-overlay" id="addStationOverlay">
+    <div class="fullpage-form-header">
+      <div class="fullpage-form-title">+ إضافة محطة جديدة</div>
+      <div class="fullpage-form-close" id="addStationCloseBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </div>
-      <input id="newStationId" class="edit-input" placeholder="مثال: 39070">
-      <div id="feederRegionRow" style="display:flex;gap:6px;">
-        <input id="newStationFeeder" class="edit-input" placeholder="مثال: SNB38 (اختياري)">
-        <input id="newStationRegion" class="edit-input" placeholder="مثال: القرينية">
-      </div>
-      <div style="display:flex;gap:6px;">
-        <input id="newStationLat" class="edit-input" placeholder="مثال: 21.523456">
-        <input id="newStationLng" class="edit-input" placeholder="مثال: 39.187654">
-      </div>
-      <button class="use-gps-btn" id="newStationGpsBtn" type="button">📍 استخدام موقعي الحالي</button>
-      <div class="paste-coord-row">
-        <span class="paste-coord-label">أو الصق الإحداثية مباشرة</span>
-        <div style="display:flex;gap:6px;">
-          <input id="newStationPasteCoord" class="edit-input" placeholder="مثال: 21.5234,39.1876" style="flex:1">
-          <button type="button" class="paste-apply-btn" id="newStationPasteApply">تطبيق</button>
+    </div>
+    <div class="fullpage-form-body">
+      <div class="add-station-panel" id="addStationPanel">
+        <div id="addStationFormBody">
+          <div class="add-station-type">
+            <button class="type-btn active" data-type="توزيع">توزيع</button>
+            <button class="type-btn" data-type="تحويل">تحويل</button>
+          </div>
+          <input id="newStationId" class="edit-input" placeholder="مثال: 39070">
+          <div id="feederRegionRow" style="display:flex;gap:6px;">
+            <input id="newStationFeeder" class="edit-input" placeholder="مثال: SNB38 (اختياري)">
+            <input id="newStationRegion" class="edit-input" placeholder="مثال: القرينية">
+          </div>
+          <div style="display:flex;gap:6px;">
+            <input id="newStationLat" class="edit-input" placeholder="مثال: 21.523456">
+            <input id="newStationLng" class="edit-input" placeholder="مثال: 39.187654">
+          </div>
+          <button class="use-gps-btn" id="newStationGpsBtn" type="button">📍 استخدام موقعي الحالي</button>
+          <div class="paste-coord-row">
+            <span class="paste-coord-label">أو الصق الإحداثية مباشرة</span>
+            <div style="display:flex;gap:6px;">
+              <input id="newStationPasteCoord" class="edit-input" placeholder="مثال: 21.5234,39.1876" style="flex:1">
+              <button type="button" class="paste-apply-btn" id="newStationPasteApply">تطبيق</button>
+            </div>
+          </div>
+          <input id="newStationReason" class="edit-input" placeholder="مثال: محطة جديدة بحي القرينية">
+          <div id="addStationError" class="add-station-error"></div>
+          <button class="add-station-submit" id="addStationSubmitBtn">حفظ المحطة</button>
+        </div>
+        <div class="add-station-progress-track" id="addStationProgressTrack" style="display:none">
+          <div class="add-station-progress-fill" id="addStationProgressFill"></div>
+        </div>
+        <div id="addStationProgressLabel" style="display:none;text-align:center;font-size:11px;color:var(--text-secondary);margin-top:4px;font-family:'JetBrains Mono',monospace;">0%</div>
+        <div id="addStationSuccess" style="display:none;text-align:center;padding:10px 0;">
+          <div style="color:var(--teal);font-weight:700;font-size:14px;margin-bottom:10px;">✓ تمت إضافة المحطة بنجاح — يمكنك البحث عنها مباشرة</div>
+          <button class="add-station-submit" id="addStationDoneBtn">حسنًا</button>
         </div>
       </div>
-      <input id="newStationReason" class="edit-input" placeholder="مثال: محطة جديدة بحي القرينية">
-      <div id="addStationError" class="add-station-error"></div>
-      <button class="add-station-submit" id="addStationSubmitBtn">حفظ المحطة</button>
     </div>
-    <div class="add-station-progress-track" id="addStationProgressTrack" style="display:none">
-      <div class="add-station-progress-fill" id="addStationProgressFill"></div>
+  </div>
+
+  <div class="fullpage-form-overlay" id="editStationOverlay">
+    <div class="fullpage-form-header">
+      <div class="fullpage-form-title" id="editStationTitle">تعديل المحطة</div>
+      <div class="fullpage-form-close" id="editStationCloseBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </div>
     </div>
-    <div id="addStationProgressLabel" style="display:none;text-align:center;font-size:11px;color:var(--text-secondary);margin-top:4px;font-family:'JetBrains Mono',monospace;">0%</div>
-    <div id="addStationSuccess" style="display:none;text-align:center;padding:10px 0;">
-      <div style="color:var(--teal);font-weight:700;font-size:14px;margin-bottom:10px;">✓ تمت إضافة المحطة بنجاح — يمكنك البحث عنها مباشرة</div>
-      <button class="add-station-submit" id="addStationDoneBtn">حسنًا</button>
-    </div>
+    <div class="fullpage-form-body" id="editStationBody"></div>
   </div>
 
   <div class="dashboard-label">📊 لوحة المعلومات</div>
@@ -1343,7 +1389,9 @@ async function checkConnection(){
 /* عرض التاريخ الميلادي بشارة الحالة أعلى الصفحة — يتحدّث تلقائيًا إذا بقي الموقع مفتوحًا عبر منتصف الليل / Displays the Gregorian date in the top status pill — auto-updates if the site stays open past midnight */
 function renderHeaderDate(){
   const el = document.getElementById('headerDateLine');
-  if(el) el.textContent = new Date().toLocaleDateString('ar-SA', {day:'numeric', month:'long', year:'numeric'});
+  // نُجبر التقويم الميلادي صراحة — منطقة ar-SA تستخدم الهجري افتراضيًا بمعظم المتصفحات ما لم نحدد التقويم
+  // Explicitly force the Gregorian calendar — the ar-SA locale defaults to Hijri in most browsers unless specified
+  if(el) el.textContent = new Date().toLocaleDateString('ar-SA-u-ca-gregory', {day:'numeric', month:'long', year:'numeric'});
 }
 renderHeaderDate();
 setInterval(renderHeaderDate, 60 * 60 * 1000);
@@ -2605,32 +2653,30 @@ document.getElementById('recentClearBtn').addEventListener('click', ()=>{
   renderRecentPanel();
 });
 document.getElementById('recentToggleBtn').addEventListener('click', ()=>{
-  addStationPanel.classList.remove('show'); // إغلاق متبادل — لوحة واحدة مفتوحة بالوقت الواحد
   document.getElementById('recentPanel').classList.toggle('show');
 });
 renderRecentPanel();
 
-/* ===== إضافة محطة جديدة — تستخدم updateCoordinates الموجودة أصلاً بافتراض أن رقم المحطة محجوز كصف فارغ بالشيت ===== */
+/* ===== إضافة محطة جديدة — صفحة كاملة الآن بدل بطاقة صغيرة، تستخدم updateCoordinates الموجودة أصلاً بافتراض أن رقم المحطة محجوز كصف فارغ بالشيت ===== */
 const addStationToggle = document.getElementById('addStationToggle');
 const addStationPanel = document.getElementById('addStationPanel');
+const addStationOverlay = document.getElementById('addStationOverlay');
 let newStationType = 'توزيع';
 
-/* فتح لوحة إضافة محطة، مع إمكانية تعبئة رقم المحطة مسبقًا (تُستخدم من الزر الرئيسي ومن بطاقة "غير موجودة") */
-/* Opens the add-station panel, optionally pre-filling the station id (used by the main button and the "not found" card) */
+/* فتح صفحة إضافة محطة الكاملة، مع إمكانية تعبئة رقم المحطة مسبقًا (تُستخدم من الزر الرئيسي ومن بطاقة "غير موجودة") */
+/* Opens the full add-station page, optionally pre-filling the station id (used by the main button and the "not found" card) */
 function openAddStationPanel(prefillId){
-  document.getElementById('recentPanel').classList.remove('show'); // إغلاق متبادل
-  addStationPanel.classList.add('show');
+  document.getElementById('recentPanel').classList.remove('show');
+  addStationOverlay.classList.add('show');
   if(prefillId !== undefined && prefillId !== null){
     document.getElementById('newStationId').value = prefillId;
   }
 }
-addStationToggle.addEventListener('click', ()=>{
-  if(addStationPanel.classList.contains('show')){
-    addStationPanel.classList.remove('show');
-  } else {
-    openAddStationPanel();
-  }
-});
+function closeAddStationPanel(){
+  addStationOverlay.classList.remove('show');
+}
+addStationToggle.addEventListener('click', ()=> openAddStationPanel());
+document.getElementById('addStationCloseBtn').addEventListener('click', closeAddStationPanel);
 
 document.querySelectorAll('#addStationPanel .type-btn').forEach(btn=>{
   btn.addEventListener('click', ()=>{
@@ -2759,7 +2805,7 @@ document.getElementById('addStationSubmitBtn').addEventListener('click', async f
 });
 
 document.getElementById('addStationDoneBtn').addEventListener('click', ()=>{
-  addStationPanel.classList.remove('show');
+  closeAddStationPanel();
   document.getElementById('addStationSuccess').style.display = 'none';
   document.getElementById('addStationFormBody').style.display = 'block';
   document.getElementById('newStationId').value = '';
@@ -2867,10 +2913,10 @@ function openEditForm(){
   }
   const s = currentStation;
   const isDistribution = s.type === 'توزيع';
+  document.getElementById('editStationTitle').textContent = 'تعديل: ' + s.name;
 
-  stationTable.innerHTML = `
+  document.getElementById('editStationBody').innerHTML = `
     <div class="sb-inner">
-      <div class="st-name" style="margin-bottom:14px;font-size:15px">تعديل: ${s.name}</div>
       <div id="editError" style="display:none;font-size:12px;color:#E0654F;margin-bottom:10px;"></div>
       <div class="edit-grid">
         <div>
@@ -2911,6 +2957,7 @@ function openEditForm(){
         <button class="st-btn" id="cancelEditBtn">إلغاء</button>
       </div>
     </div>`;
+  document.getElementById('editStationOverlay').classList.add('show');
 
   let editPreviewTileLayer = null, editPreviewIsSat = false;
   setTimeout(()=>{
@@ -2968,7 +3015,8 @@ function openEditForm(){
     syncPreviewFromInputs();
   });
 
-  document.getElementById('cancelEditBtn').addEventListener('click', ()=> goToStation(currentStation));
+  document.getElementById('cancelEditBtn').addEventListener('click', ()=> document.getElementById('editStationOverlay').classList.remove('show'));
+  document.getElementById('editStationCloseBtn').onclick = ()=> document.getElementById('editStationOverlay').classList.remove('show');
 
   document.getElementById('saveEditBtn').addEventListener('click', async function(){
     const btn = this;
@@ -3013,14 +3061,15 @@ function openEditForm(){
       progressFill.style.width = '100%';
       progressLabel.textContent = '100%';
 
-      stationTable.innerHTML = `
+      document.getElementById('editStationBody').innerHTML = `
         <div class="sb-inner" style="text-align:center;">
-          <div style="color:var(--teal);font-weight:700;font-size:13px;margin-bottom:10px;">✓ تم حفظ التعديل بنجاح — يمكنك البحث مباشرة</div>
+          <div style="color:var(--teal);font-weight:700;font-size:13px;margin-bottom:10px;">✓ تم حفظ التعديل بنجاح</div>
           <button class="add-station-submit" id="editDoneBtn">حسنًا</button>
         </div>`;
-      document.getElementById('editDoneBtn').addEventListener('click', ()=> goToStation(currentStation));
       currentStation.lat = lat; currentStation.lng = lng;
       if(marker) marker.setLatLng([lat,lng]);
+      renderStationOnMap(currentStation); // تحديث بطاقة المحطة الظاهرة أسفل صفحة التعديل بالإحداثية الجديدة فورًا
+      document.getElementById('editDoneBtn').addEventListener('click', ()=> document.getElementById('editStationOverlay').classList.remove('show'));
       unlockNavigationAfterSave();
     }catch(err){
       clearInterval(tick);
@@ -3036,6 +3085,8 @@ function openEditForm(){
 
 /* الرجوع للبحث — كانت زرًا مستقلاً بجانب صندوق البحث، أصبحت الآن دالة موحّدة يستدعيها رابط "الصفحة الرئيسية" بالقائمة المنسدلة فقط / Back-to-search — used to be its own button beside the search box, now a unified function called only by the "Home" dropdown-menu link */
 function goBackToSearch(){
+  document.getElementById('addStationOverlay').classList.remove('show');
+  document.getElementById('editStationOverlay').classList.remove('show');
   mapContainer.classList.remove('active');
   stageEl.classList.remove('map-active');
   heroSection.classList.remove('map-active');
