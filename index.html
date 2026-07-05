@@ -1302,6 +1302,7 @@ footer{
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyxZUSLZNa6UlZLINsfAEe8CmQPoNGJbpnNtUDxP019TfL8uLh_5fuP0e5HE6daP8dh1w/exec';
 async function callBackend(action, payload){
@@ -1324,6 +1325,96 @@ function renewSessionActivity_(){
 /* تعقيم أي نص يكتبه المستخدم قبل حقنه داخل innerHTML — حماية من الحقن / Sanitizes user-typed text before injecting into innerHTML — XSS protection */
 function escapeHtml(str){
   return String(str).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+
+/* ============================================================
+ *  البحث المحلي بالمتصفح — الفهرس يُحمَّل مرة واحدة ويُخزَّن مضغوطًا بجهاز المستخدم
+ *  بدل قراءة/فلترة الشيت مع كل عملية بحث — ضروري بحجم بيانات كبير (٤٩ ألف صف فأكثر)
+ *  Client-side local search — the index loads once and is stored compressed on the user's device
+ *  instead of reading/filtering the sheet on every search — essential at this large data scale
+ * ============================================================ */
+const STATIONS_CACHE_KEY = 'sec-stations-cache-v1';
+const STATIONS_VERSION_KEY = 'sec-stations-version-v1';
+let allStationsLocal = [];
+let isStationsLoaded = false;
+
+/* ضغط/فك ضغط البيانات عبر LZString قبل التخزين — يقلّص حجم الفهرس بما يكفي ليدخل بحدود localStorage رغم كِبر عدد المحطات */
+/* Compress/decompress via LZString before storing — shrinks the index enough to fit localStorage's limits despite the large station count */
+function compressStationsData_(data){ return LZString.compress(JSON.stringify(data)); }
+function decompressStationsData_(compressed){
+  try{
+    const json = LZString.decompress(compressed);
+    return json ? JSON.parse(json) : null;
+  }catch(e){ return null; }
+}
+function saveStationsToLocalCache_(stations){
+  try{
+    localStorage.setItem(STATIONS_CACHE_KEY, compressStationsData_(stations));
+    return true;
+  }catch(e){ return false; } // مساحة localStorage ممتلئة أو غير متاحة — البحث يستمر بالذاكرة الحالية فقط بدون تعطّل
+}
+function loadStationsFromLocalCache_(){
+  try{
+    const compressed = localStorage.getItem(STATIONS_CACHE_KEY);
+    return compressed ? decompressStationsData_(compressed) : null;
+  }catch(e){ return null; }
+}
+
+/* التحميل الأول — يُستدعى مرة واحدة بعد تأكد الجلسة، يقرأ الكاش المحلي فورًا للسرعة، ثم يتحقق من الإصدار الحقيقي بصمت بالخلفية */
+/* First load — called once after session confirmation; reads the local cache instantly for speed, then silently verifies the real version in the background */
+async function initStationsLocalSearch(){
+  const cachedVersion = localStorage.getItem(STATIONS_VERSION_KEY);
+  const cachedStations = loadStationsFromLocalCache_();
+
+  if(cachedStations && cachedStations.length && cachedVersion){
+    allStationsLocal = cachedStations;
+    isStationsLoaded = true; // نستخدم النسخة المحلية فورًا بدون انتظار الشبكة
+  }
+
+  // فحص صامت تلقائي للإصدار — هذا يسدّ الثغرة الأساسية لو الاعتماد كان فقط على زر تحديث يدوي:
+  // أي تعديل من أي مستخدم آخر يظهر تلقائيًا بأول فتح للصفحة، بدون أي تدخّل يدوي
+  // Silent automatic version check — this closes the core gap of relying on a manual refresh button only:
+  // any other user's edit surfaces automatically on the next page load, with zero manual action
+  try{
+    const versionRes = await callBackend('getDataVersion');
+    if(versionRes.success && versionRes.version !== cachedVersion){
+      await refreshStationsLocalCache_();
+    } else if(!isStationsLoaded){
+      await refreshStationsLocalCache_();
+    }
+  }catch(e){
+    // تعذّر فحص الإصدار (لا اتصال مثلاً) — نكتفي بالنسخة المحلية الموجودة إن وُجدت
+    if(!isStationsLoaded){
+      document.getElementById('lastUpdateLabel').textContent = 'آخر تحديث: تعذّر التحميل الأول';
+    }
+  }
+}
+
+/* إعادة تحميل الفهرس الكامل من الخادم وتحديث الكاش المحلي — تُستدعى تلقائيًا عند تغيّر الإصدار، أو يدويًا من زر التحديث */
+/* Reloads the full index from the server and refreshes the local cache — called automatically when the version changes, or manually via the refresh button */
+async function refreshStationsLocalCache_(){
+  const res = await callBackend('getAllStations');
+  if(!res.success || !res.stations) return false;
+  allStationsLocal = res.stations;
+  isStationsLoaded = true;
+  saveStationsToLocalCache_(allStationsLocal);
+  localStorage.setItem(STATIONS_VERSION_KEY, res.version);
+  return true;
+}
+
+/* البحث المحلي الفوري — يطابق نفس شكل استجابة searchStation بالباك إند تمامًا، ليبقى الكود المستخدِم له بدون أي تغيير */
+/* Instant local search — mirrors the exact same response shape as the backend's searchStation, so calling code needs zero changes */
+function searchStationLocal(query){
+  if(!query) return { found:false };
+  const q = String(query).trim().toUpperCase();
+  if(!q) return { found:false };
+  const st = allStationsLocal.find(s => String(s.id).toUpperCase() === q);
+  if(!st) return { found:false };
+  return {
+    found:true, id:st.id, type:st.type,
+    name:(st.type === 'توزيع' ? 'محطة توزيع ' : 'محطة تحويل ') + st.id + (st.region ? ' — ' + st.region : ''),
+    lat:st.lat, lng:st.lng, region:st.region, feeder:st.feeder
+  };
 }
 
 /* ============================================================
@@ -1416,6 +1507,7 @@ document.getElementById('dataRefreshBtn').addEventListener('click', async ()=>{
   btn.disabled = true;
   try{
     await callBackend('clearSearchCache', { phone: session.phone });
+    await refreshStationsLocalCache_(); // تحديث فهرس البحث المحلي فعليًا — هذا هو مصدر البحث الأساسي الآن
   }catch(e){}
   btn.classList.remove('spinning');
   btn.disabled = false;
@@ -1868,6 +1960,15 @@ function hasValidSession(){
 
 if(!hasValidSession()){
   document.body.classList.add('guest-mode');
+} else {
+  initStationsLocalSearch(); // تحميل فهرس البحث المحلي فقط للمستخدمين المسجّلين دخولهم فعليًا
+}
+
+/* بحث ذكي — يستخدم الفهرس المحلي فورًا إذا كان جاهزًا، وإلا يرجع تلقائيًا للخادم كخطة احتياطية آمنة (مثلاً أثناء التحميل الأول قبل اكتماله) */
+/* Smart search — uses the local index instantly if ready, otherwise safely falls back to the server (e.g., during the first load before it finishes) */
+async function searchStationSmart(query){
+  if(isStationsLoaded) return searchStationLocal(query);
+  return await callBackend('searchStation', { query });
 }
 
 let isSearching = false;
@@ -1968,7 +2069,7 @@ async function performSearch(){
   const progress = setSearchProgress(true);
 
   try{
-    const result = await callBackend('searchStation', { query: raw });
+    const result = await searchStationSmart(raw);
     if(result.found){
       progress.finish();
       goToStation({
@@ -2017,7 +2118,7 @@ async function performStationPageSearch(){
   const progress = setSearchProgress(true, 'stationSearch');
 
   try{
-    const result = await callBackend('searchStation', { query: raw });
+    const result = await searchStationSmart(raw);
     if(result.found){
       progress.finish();
       stationSearchInput.value = '';
@@ -2547,7 +2648,7 @@ document.getElementById('outageSubmitBtn').addEventListener('click', async ()=>{
   mapToolHint.classList.add('show');
   mapToolHint.textContent = 'جاري البحث عن المحطات...';
 
-  const results = await Promise.all(ids.map(id => callBackend('searchStation', { query: id })));
+  const results = await Promise.all(ids.map(id => searchStationSmart(id)));
 
   const found = [];
   const notFound = [];
