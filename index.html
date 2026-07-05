@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -1438,9 +1437,11 @@ async function refreshStationsLocalCache_(onProgress){
 /* Instant local search — mirrors the exact same response shape as the backend's searchStation, so calling code needs zero changes */
 function searchStationLocal(query){
   if(!query) return { found:false };
-  const q = String(query).trim().toUpperCase();
+  // تطبيع الأرقام العربية للإنجليزية قبل المقارنة — كان مفقودًا هنا، وهذا سبب فشل البحث بالأرقام العربية تحديدًا
+  // Normalize Arabic-Indic digits to Western digits before comparing — this was missing here, causing Arabic-numeral searches to fail
+  const q = normalizeDigits(String(query).trim()).toUpperCase();
   if(!q) return { found:false };
-  const st = allStationsLocal.find(s => String(s.id).toUpperCase() === q);
+  const st = allStationsLocal.find(s => normalizeDigits(String(s.id)).toUpperCase() === q);
   if(!st) return { found:false };
   return {
     found:true, id:st.id, type:st.type,
