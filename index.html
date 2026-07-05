@@ -564,7 +564,7 @@ body.guest-mode h1{
 }
 .nearby-opt:hover{background:var(--bg-elev);}
 
-.edit-input{width:100%;height:34px;background:var(--bg);border:1px solid var(--border-strong);border-radius:7px;color:var(--text-primary);font-size:11.5px;padding:0 10px;font-family:'JetBrains Mono',monospace;direction:ltr;text-align:right;}
+.edit-input{width:100%;height:44px;background:var(--bg);border:1px solid var(--border-strong);border-radius:9px;color:var(--text-primary);font-size:13.5px;padding:0 12px;font-family:'JetBrains Mono',monospace;direction:ltr;text-align:right;}
 
 /* ===== إضافة محطة جديدة — خارج نطاق الخريطة كلياً، جزء من شاشة البحث ===== */
 .add-station-toggle{
@@ -579,33 +579,33 @@ body.guest-mode h1{
 [data-theme="light"] .add-station-toggle{color:var(--teal);}
 [data-theme="light"] .add-station-toggle{color:var(--teal);text-shadow:none;}
 .add-station-panel{
-  display:none;flex-direction:column;gap:8px;
-  width:min(460px,92vw);background:var(--bg-card);border:1px solid var(--border-strong);
-  border-radius:14px;padding:16px;margin-top:0;box-shadow:0 10px 28px rgba(0,0,0,.2);
+  display:none;flex-direction:column;gap:10px;
+  width:min(560px,94vw);background:var(--bg-card);border:1px solid var(--border-strong);
+  border-radius:16px;padding:22px;margin-top:0;box-shadow:0 10px 28px rgba(0,0,0,.2);
 }
 .add-station-panel.show{display:flex;}
-.add-station-title{font-size:12.5px;font-weight:700;color:var(--text-primary);margin-bottom:2px;}
-.add-station-type{display:flex;gap:6px;}
+.add-station-title{font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:4px;}
+.add-station-type{display:flex;gap:8px;}
 .type-btn{
-  flex:1;padding:8px;border-radius:7px;border:1px solid var(--border-strong);background:var(--bg);
-  color:var(--text-secondary);font-size:11.5px;cursor:pointer;font-family:inherit;transition:.2s;
+  flex:1;padding:12px;border-radius:9px;border:1px solid var(--border-strong);background:var(--bg);
+  color:var(--text-secondary);font-size:13px;cursor:pointer;font-family:inherit;transition:.2s;
 }
 .type-btn.active{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:600;}
-.paste-coord-row{display:flex;flex-direction:column;gap:5px;margin-top:2px;}
-.paste-coord-label{font-size:10.5px;color:var(--text-secondary);}
+.paste-coord-row{display:flex;flex-direction:column;gap:6px;margin-top:4px;}
+.paste-coord-label{font-size:11.5px;color:var(--text-secondary);}
 .paste-apply-btn{
   background:rgba(31,174,140,0.14);color:var(--teal-light);border:1px solid rgba(77,214,181,0.45);
-  border-radius:7px;padding:0 14px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;
+  border-radius:9px;padding:0 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;
   transition:.2s;flex-shrink:0;
 }
 .paste-apply-btn:hover{background:rgba(31,174,140,0.24);border-color:var(--teal);}
 .use-gps-btn{
-  width:100%;font-size:11px;padding:8px;border-radius:7px;border:1px solid var(--border-strong);
+  width:100%;font-size:13px;padding:12px;border-radius:9px;border:1px solid var(--border-strong);
   background:var(--bg);color:var(--teal);cursor:pointer;font-family:inherit;
 }
 .add-station-submit{
   background:rgba(31,174,140,0.14);color:var(--teal-light);border:1px solid rgba(77,214,181,0.45);
-  border-radius:8px;padding:9px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:.2s;
+  border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:.2s;
 }
 .add-station-submit:hover{background:rgba(31,174,140,0.24);border-color:var(--teal);}
 .add-station-submit:disabled{opacity:.5;cursor:not-allowed;}
@@ -789,7 +789,21 @@ body.guest-mode .station-table{width:min(1300px,96vw);}
 }
 .station-table .st-btn:hover{border-color:var(--teal);}
 .station-table .st-btn.primary{background:var(--teal);border-color:var(--teal);color:#fff;}
-.edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;}
+.edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;}
+.edit-map-wrap{position:relative;width:100%;height:220px;border-radius:10px;overflow:hidden;border:1px solid var(--border-strong);}
+#editPreviewMap{width:100%;height:100%;}
+.edit-map-sat-btn{
+  position:absolute;top:8px;left:8px;z-index:5;
+  width:34px;height:34px;border-radius:50%;
+  background:var(--bg-card);border:1px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;
+  box-shadow:0 2px 8px rgba(0,0,0,.3);
+}
+.edit-map-sat-btn.active{background:var(--teal);border-color:var(--teal);}
+@media (max-width:600px){
+  .edit-grid{grid-template-columns:1fr;}
+  .edit-map-wrap{height:180px;}
+}
 @media (max-width:700px){
   .sb-row{flex-direction:column;align-items:stretch;}
   .sb-info{flex-direction:column;align-items:flex-start;gap:6px;}
@@ -1171,24 +1185,24 @@ footer{
         <button class="type-btn active" data-type="توزيع">توزيع</button>
         <button class="type-btn" data-type="تحويل">تحويل</button>
       </div>
-      <input id="newStationId" class="edit-input" placeholder="رقم المحطة (يجب ألا يكون موجوداً بالشيت)">
+      <input id="newStationId" class="edit-input" placeholder="مثال: 39070">
       <div id="feederRegionRow" style="display:flex;gap:6px;">
-        <input id="newStationFeeder" class="edit-input" placeholder="المغذي (اختياري)">
-        <input id="newStationRegion" class="edit-input" placeholder="المنطقة *">
+        <input id="newStationFeeder" class="edit-input" placeholder="مثال: SNB38 (اختياري)">
+        <input id="newStationRegion" class="edit-input" placeholder="مثال: القرينية">
       </div>
       <div style="display:flex;gap:6px;">
-        <input id="newStationLat" class="edit-input" placeholder="خط العرض *">
-        <input id="newStationLng" class="edit-input" placeholder="خط الطول *">
+        <input id="newStationLat" class="edit-input" placeholder="مثال: 21.523456">
+        <input id="newStationLng" class="edit-input" placeholder="مثال: 39.187654">
       </div>
       <button class="use-gps-btn" id="newStationGpsBtn" type="button">📍 استخدام موقعي الحالي</button>
       <div class="paste-coord-row">
         <span class="paste-coord-label">أو الصق الإحداثية مباشرة</span>
         <div style="display:flex;gap:6px;">
-          <input id="newStationPasteCoord" class="edit-input" placeholder="21.5234,39.1876" style="flex:1">
+          <input id="newStationPasteCoord" class="edit-input" placeholder="مثال: 21.5234,39.1876" style="flex:1">
           <button type="button" class="paste-apply-btn" id="newStationPasteApply">تطبيق</button>
         </div>
       </div>
-      <input id="newStationReason" class="edit-input" placeholder="السبب (مثال: محطة جديدة)">
+      <input id="newStationReason" class="edit-input" placeholder="مثال: محطة جديدة بحي القرينية">
       <div id="addStationError" class="add-station-error"></div>
       <button class="add-station-submit" id="addStationSubmitBtn">حفظ المحطة</button>
     </div>
@@ -1196,10 +1210,9 @@ footer{
       <div class="add-station-progress-fill" id="addStationProgressFill"></div>
     </div>
     <div id="addStationProgressLabel" style="display:none;text-align:center;font-size:11px;color:var(--text-secondary);margin-top:4px;font-family:'JetBrains Mono',monospace;">0%</div>
-    <div id="addStationSuccess" style="display:none;text-align:center;padding:6px 0;">
-      <div style="color:var(--teal);font-weight:700;font-size:14px;margin-bottom:6px;">✓ تمت إضافة المحطة بنجاح</div>
-      <div style="font-size:11px;color:var(--text-secondary);margin-bottom:12px;">لازم تحدّث الصفحة أول قبل تقدر تبحث، عشان المحطة الجديدة تظهر بنتائج البحث</div>
-      <button class="add-station-submit" id="addStationReloadBtn">تحديث الصفحة الآن</button>
+    <div id="addStationSuccess" style="display:none;text-align:center;padding:10px 0;">
+      <div style="color:var(--teal);font-weight:700;font-size:14px;margin-bottom:10px;">✓ تمت إضافة المحطة بنجاح — يمكنك البحث عنها مباشرة</div>
+      <button class="add-station-submit" id="addStationDoneBtn">حسنًا</button>
     </div>
   </div>
 
@@ -2745,7 +2758,7 @@ document.getElementById('addStationSubmitBtn').addEventListener('click', async f
       progressTrack.style.display = 'none';
       progressLabel.style.display = 'none';
       document.getElementById('addStationSuccess').style.display = 'block';
-      // الواجهة تبقى مقفولة عمداً — الخروج الوحيد المتاح هو زر التحديث الإجباري
+      unlockNavigationAfterSave(); // الكاش انبطل تلقائيًا وقت الحفظ، لا حاجة لأي قفل أو إعادة تحميل
     }, 300);
   }catch(err){
     clearInterval(tick);
@@ -2757,9 +2770,18 @@ document.getElementById('addStationSubmitBtn').addEventListener('click', async f
   }
 });
 
-document.getElementById('addStationReloadBtn').addEventListener('click', ()=>{
-  window.onbeforeunload = null;
-  location.reload();
+document.getElementById('addStationDoneBtn').addEventListener('click', ()=>{
+  addStationPanel.classList.remove('show');
+  document.getElementById('addStationSuccess').style.display = 'none';
+  document.getElementById('addStationFormBody').style.display = 'block';
+  document.getElementById('newStationId').value = '';
+  document.getElementById('newStationFeeder').value = '';
+  document.getElementById('newStationRegion').value = '';
+  document.getElementById('newStationLat').value = '';
+  document.getElementById('newStationLng').value = '';
+  document.getElementById('newStationPasteCoord').value = '';
+  document.getElementById('newStationReason').value = '';
+  document.getElementById('addStationError').textContent = '';
 });
 
 let currentStation = null;
@@ -2860,53 +2882,53 @@ function openEditForm(){
 
   stationTable.innerHTML = `
     <div class="sb-inner">
-      <div class="st-name" style="margin-bottom:10px">تعديل: ${s.name}</div>
-      <div id="editError" style="display:none;font-size:11px;color:#E0654F;margin-bottom:8px;"></div>
+      <div class="st-name" style="margin-bottom:14px;font-size:15px">تعديل: ${s.name}</div>
+      <div id="editError" style="display:none;font-size:12px;color:#E0654F;margin-bottom:10px;"></div>
       <div class="edit-grid">
         <div>
           ${isDistribution ? `
-          <div style="margin-bottom:8px;">
-            <label style="font-size:10.5px;color:var(--text-secondary)">المغذي</label>
-            <input id="editFeeder" class="edit-input" value="${s.feeder || ''}">
+          <div style="margin-bottom:10px;">
+            <label style="font-size:12px;color:var(--text-secondary)">المغذي</label>
+            <input id="editFeeder" class="edit-input" value="${s.feeder || ''}" placeholder="مثال: SNB38">
           </div>
-          <div style="margin-bottom:8px;">
-            <label style="font-size:10.5px;color:var(--text-secondary)">المنطقة</label>
-            <input id="editRegion" class="edit-input" value="${s.region || ''}">
+          <div style="margin-bottom:10px;">
+            <label style="font-size:12px;color:var(--text-secondary)">المنطقة</label>
+            <input id="editRegion" class="edit-input" value="${s.region || ''}" placeholder="مثال: القرينية">
           </div>` : ''}
-          <div style="display:flex;gap:6px;margin-bottom:8px;">
-            <input id="editLat" class="edit-input" placeholder="خط العرض" value="${s.lat.toFixed(6)}">
-            <input id="editLng" class="edit-input" placeholder="خط الطول" value="${s.lng.toFixed(6)}">
+          <div style="display:flex;gap:8px;margin-bottom:10px;">
+            <input id="editLat" class="edit-input" placeholder="مثال: 21.523456" value="${s.lat.toFixed(6)}">
+            <input id="editLng" class="edit-input" placeholder="مثال: 39.187654" value="${s.lng.toFixed(6)}">
           </div>
-          <button id="useGpsBtn" type="button" style="width:100%;font-size:11px;padding:8px;border-radius:7px;border:1px solid var(--border-strong);background:var(--bg);color:var(--teal);cursor:pointer;">📍 استخدام موقعي الحالي</button>
+          <button id="useGpsBtn" type="button" style="width:100%;font-size:13px;padding:12px;border-radius:9px;border:1px solid var(--border-strong);background:var(--bg);color:var(--teal);cursor:pointer;">📍 استخدام موقعي الحالي</button>
           <div class="paste-coord-row">
             <span class="paste-coord-label">أو الصق الإحداثية مباشرة</span>
-            <div style="display:flex;gap:6px;">
-              <input id="editPasteCoord" class="edit-input" placeholder="21.5234,39.1876" style="flex:1">
+            <div style="display:flex;gap:8px;">
+              <input id="editPasteCoord" class="edit-input" placeholder="مثال: 21.5234,39.1876" style="flex:1">
               <button type="button" class="paste-apply-btn" id="editPasteApply">تطبيق</button>
             </div>
           </div>
         </div>
-        <div id="editPreviewMap" style="width:100%;height:150px;border-radius:8px;overflow:hidden;"></div>
+        <div class="edit-map-wrap">
+          <div id="editPreviewMap"></div>
+          <button type="button" class="edit-map-sat-btn" id="editMapSatBtn" title="تبديل القمر الصناعي">🛰️</button>
+        </div>
       </div>
-      <input id="editReason" class="edit-input" placeholder="السبب (مثال: تصحيح موقع)" style="margin-top:8px;">
+      <input id="editReason" class="edit-input" placeholder="مثال: تصحيح موقع المحطة على الخريطة" style="margin-top:10px;">
       <div class="add-station-progress-track" id="editProgressTrack" style="display:none;margin-top:8px;">
         <div class="add-station-progress-fill" id="editProgressFill"></div>
       </div>
       <div id="editProgressLabel" style="display:none;text-align:center;font-size:11px;color:var(--text-secondary);margin-top:4px;font-family:'JetBrains Mono',monospace;">0%</div>
-      <div class="st-actions" style="margin-top:12px">
+      <div class="st-actions" style="margin-top:14px">
         <button class="st-btn primary" id="saveEditBtn">حفظ التعديل</button>
         <button class="st-btn" id="cancelEditBtn">إلغاء</button>
       </div>
     </div>`;
 
-  const styleTag = document.createElement('style');
-  styleTag.textContent = `.edit-input{width:100%;height:34px;background:var(--bg);border:1px solid var(--border-strong);border-radius:7px;color:var(--text-primary);font-size:11.5px;padding:0 10px;font-family:'JetBrains Mono',monospace;direction:ltr;text-align:right;}`;
-  stationTable.appendChild(styleTag);
-
+  let editPreviewTileLayer = null, editPreviewIsSat = false;
   setTimeout(()=>{
     if(editPreviewMap){ editPreviewMap.remove(); editPreviewMap = null; }
     editPreviewMap = L.map('editPreviewMap', {zoomControl:false, attributionControl:false, dragging:true}).setView([s.lat, s.lng], 17);
-    L.tileLayer(TILE_URL_LIGHT, {maxZoom:19}).addTo(editPreviewMap);
+    editPreviewTileLayer = L.tileLayer(TILE_URL_LIGHT, {maxZoom:19}).addTo(editPreviewMap);
     editPreviewMarker = L.marker([s.lat, s.lng], {draggable:true}).addTo(editPreviewMap);
     editPreviewMarker.on('dragend', ()=>{
       const pos = editPreviewMarker.getLatLng();
@@ -2917,6 +2939,13 @@ function openEditForm(){
 
     document.getElementById('editLat').addEventListener('input', syncPreviewFromInputs);
     document.getElementById('editLng').addEventListener('input', syncPreviewFromInputs);
+
+    document.getElementById('editMapSatBtn').addEventListener('click', (btnEvent)=>{
+      editPreviewIsSat = !editPreviewIsSat;
+      btnEvent.currentTarget.classList.toggle('active', editPreviewIsSat);
+      editPreviewMap.removeLayer(editPreviewTileLayer);
+      editPreviewTileLayer = L.tileLayer(editPreviewIsSat ? SATELLITE_URL : TILE_URL_LIGHT, {maxZoom:19}).addTo(editPreviewMap);
+    });
   }, 50);
 
   function syncPreviewFromInputs(){
