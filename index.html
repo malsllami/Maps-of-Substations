@@ -1,0 +1,3295 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>محطات التوزيع | الشركة السعودية للطاقة</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{
+  --blue-deep:#1B4D8C;
+  --blue-mid:#2E7DD1;
+  --teal:#1FAE8C;
+  --teal-light:#4DD6B5;
+}
+[data-theme="dark"]{
+  --bg:#060B14;
+  --bg-elev:#101D2E;
+  --bg-card:#0D1826;
+  --text-primary:#EAF1F7;
+  --text-secondary:#8FA3B8;
+  --border:rgba(255,255,255,0.08);
+  --border-strong:rgba(255,255,255,0.16);
+  --globe-line:rgba(77,214,181,0.35);
+  --globe-point:#4DD6B5;
+}
+[data-theme="light"]{
+  --bg:#EAF1F6;
+  --bg-elev:#F4F8FB;
+  --bg-card:#FFFFFF;
+  --text-primary:#102035;
+  --text-secondary:#52647A;
+  --border:rgba(16,32,53,0.12);
+  --border-strong:rgba(16,32,53,0.22);
+  --globe-line:rgba(27,77,140,0.45);
+  --globe-point:#1FAE8C;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  font-family:'IBM Plex Sans Arabic',sans-serif;
+  background:var(--bg);
+  color:var(--text-primary);
+  overflow-x:hidden;
+  transition:background .4s ease,color .4s ease;
+}
+[data-theme="dark"] body{
+  background-image:
+    linear-gradient(rgba(77,214,181,0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(77,214,181,0.045) 1px, transparent 1px);
+  background-size:42px 42px;
+  background-position:center;
+}
+header{
+  position:fixed;top:0;right:0;left:0;z-index:50;
+  display:flex;flex-direction:column;
+  background:var(--bg);border-bottom:1px solid var(--border);
+}
+.header-row-main{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:14px 32px 8px;
+}
+@media (max-width:600px){
+  .header-row-main{padding:12px 14px 6px;}
+}
+.logo{display:flex;align-items:center;gap:9px;min-width:0;flex-shrink:1;overflow:hidden;}
+.logo-mark{transition:transform .2s;}
+.logo:hover .logo-mark{transform:scale(1.06);}
+.logo:hover .logo-text{color:var(--teal);}
+.logo-mark{
+  height:38px;width:auto;flex-shrink:0;display:block;object-fit:contain;
+}
+.logo-text{font-size:14.5px;font-weight:700;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .2s;}
+.logo-sub{font-size:11px;color:var(--text-secondary);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+/* صف حالة الاتصال — شريط ممتد على كامل عرض الهيدر بإطار واحد واضح، لا شارة صغيرة وسطية / Connection status row — a single bar spanning the header's full width with one clear frame, not a small centered chip */
+.header-row-status{
+  padding:0 32px 12px;
+}
+.conn-status-pill{
+  display:flex;align-items:center;gap:14px;width:100%;
+  border:1px solid var(--border-strong);border-radius:14px;
+  padding:9px 16px;background:var(--bg-card);
+  font-size:11.5px;color:var(--text-primary);
+}
+.status-bar-item{display:flex;align-items:center;gap:6px;}
+.conn-refresh-group{display:flex;align-items:center;gap:8px;margin-right:auto;}
+.conn-pill-div{width:1px;height:14px;background:var(--border-strong);}
+.status-refresh-btn{
+  display:flex;align-items:center;justify-content:center;
+  width:20px;height:20px;flex-shrink:0;
+  background:transparent;border:none;border-radius:50%;
+  color:var(--text-secondary);cursor:pointer;transition:.2s;
+}
+.status-refresh-btn:hover{background:rgba(31,174,140,0.14);color:var(--teal);}
+.status-refresh-btn.spinning #dataRefreshIcon{animation:spin .7s linear infinite;}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.conn-dot{
+  width:8px;height:8px;border-radius:50%;flex-shrink:0;
+  background:#8FA3B8; /* رمادي = جاري الفحص / gray = checking */
+  transition:background .3s;
+}
+.conn-dot.checking{background:#C8A24E;box-shadow:0 0 6px rgba(200,162,78,.6);}
+.conn-dot.online{background:#2ECC71;box-shadow:0 0 6px rgba(46,204,113,.6);}
+.conn-dot.offline{background:#E0654F;box-shadow:0 0 6px rgba(224,101,79,.6);}
+@media (max-width:600px){
+  .header-row-status{padding:0 14px 10px;}
+  .conn-status-pill{padding:8px 12px;font-size:10.5px;gap:10px;flex-wrap:wrap;}
+}
+.header-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.mobile-user-menu{display:none;position:relative;}
+.logout-icon-btn{
+  width:34px;height:34px;border-radius:50%;border:1px solid var(--border-strong);
+  background:var(--bg-card);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--text-secondary);flex-shrink:0;transition:border-color .2s;
+}
+.logout-icon-btn:hover{border-color:var(--teal);}
+#headerActions.logged-in .login-btn,
+#headerActions.logged-in .theme-toggle,
+#headerActions.logged-in #logoutBtnDesktop{display:none;}
+#headerActions.logged-in .mobile-user-menu{display:block;}
+.mobile-menu-trigger{
+  display:flex;align-items:center;gap:6px;
+  background:var(--bg-card);border:1px solid var(--border-strong);border-radius:22px;
+  padding:9px 16px;font-size:13px;font-weight:600;color:var(--text-primary);
+  cursor:pointer;font-family:inherit;
+}
+.mobile-menu-trigger:hover{border-color:var(--teal);}
+.mobile-menu-trigger svg{transition:transform .2s;flex-shrink:0;}
+.mobile-user-menu.open .mobile-menu-trigger svg{transform:rotate(180deg);}
+.mobile-menu-panel{
+  position:absolute;top:calc(100% + 8px);left:0;
+  background:var(--bg-card);border:1px solid var(--border-strong);border-radius:14px;
+  min-width:190px;box-shadow:0 10px 28px rgba(0,0,0,.35);
+  padding:8px;display:none;z-index:60;
+}
+.mobile-user-menu.open .mobile-menu-panel{display:block;}
+.mobile-menu-row{display:flex;align-items:center;gap:10px;padding:9px 10px;font-size:12.5px;color:var(--text-primary);}
+.mobile-menu-link{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 10px;font-size:12.5px;color:var(--text-primary);
+  text-decoration:none;border-radius:8px;border:1px solid transparent;transition:.15s;
+}
+.mobile-menu-link:hover{background:var(--bg-elev);}
+.mobile-menu-link.current-page{
+  background:rgba(31,174,140,0.12);border-color:rgba(31,174,140,0.4);
+  color:var(--teal-light);font-weight:700;
+}
+[data-theme="light"] .mobile-menu-link.current-page{color:var(--teal);}
+.menu-icon{display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.mobile-menu-logout{
+  display:flex;align-items:center;gap:10px;width:100%;
+  text-align:right;padding:10px 10px;font-size:12.5px;color:#E0654F;
+  background:transparent;border:none;border-top:1px solid var(--border);margin-top:4px;
+  cursor:pointer;font-family:inherit;border-radius:8px;transition:.15s;
+}
+.mobile-menu-logout:hover{background:rgba(224,101,79,0.1);}
+.theme-switch{
+  width:42px;height:23px;border-radius:12px;position:relative;flex-shrink:0;
+  background:var(--border-strong);border:none;cursor:pointer;transition:background .2s;padding:0;
+}
+.theme-switch.on{background:var(--teal);}
+.theme-switch-knob{
+  position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;
+  background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.3);
+}
+.theme-switch.on .theme-switch-knob{transform:translateX(19px);}
+.login-btn{
+  text-decoration:none;font-size:13px;font-weight:500;color:var(--text-primary);
+  background:var(--bg-card);border:1px solid var(--border-strong);
+  padding:9px 16px;border-radius:8px;white-space:nowrap;
+  transition:border-color .2s, background .2s, transform .15s;
+}
+.login-btn:hover{border-color:var(--teal);background:var(--bg-elev);}
+.login-btn:active{transform:scale(0.97);}
+.theme-toggle{
+  width:38px;height:38px;border-radius:50%;flex-shrink:0;
+  border:1px solid var(--border-strong);
+  background:var(--bg-card);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--text-primary);
+  transition:border-color .2s, background .2s, transform .15s;
+}
+.theme-toggle:hover{border-color:var(--teal);background:var(--bg-elev);}
+.theme-toggle:active{transform:scale(0.92);}
+.hero{
+  position:relative;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:0;
+  padding:calc(var(--header-h, 90px) + 34px) 20px 4px;
+  min-height:calc(var(--globe-size) + 288px);
+}
+@media (max-width:767px){
+  .hero{
+    padding:calc(var(--header-h, 90px) + 28px) 20px 3px;
+    min-height:calc(var(--globe-size) + 240px);
+  }
+}
+/* ===== متغير حجم الكرة الموحّد — يُستخدم في تكبير الكرة وحساب موضع العدسة/زر الدخول أسفلها بنفس الوقت ===== */
+/* ===== Unified globe-size variable — used both to enlarge the globe and to sync the lens/login-button position below it ===== */
+:root{
+  --globe-size: clamp(360px, 92vw, 760px);
+  /* ارتفاع الشريط الثابت أعلى الخريطة (صف نوع الخريطة+رجوع، ثم صف أدوات القياس) — قيمة واحدة تُستخدم بكل الحسابات المرتبطة بارتفاع الخريطة */
+  /* Fixed toolbar-bar height above the map (mode+back row, then tools row) — single source of truth for every map-height-related calculation */
+  --map-toolbar-h: 45px;
+}
+/* وضع الزائر يحصل على كرة أكبر (شاشة تسويقية/ترحيبية) — بعد تسجيل الدخول الحجم الحالي ممتاز ولا يُغيَّر */
+/* Guest mode gets a larger globe (welcome/marketing screen) — after login the current size is excellent and stays untouched */
+body.guest-mode{
+  --globe-size: clamp(400px, 100vw, 860px);
+}
+@media (min-width:1200px){
+  :root{ --globe-size: clamp(500px, min(88vw, 78vh), 880px); }
+  body.guest-mode{ --globe-size: clamp(560px, min(94vw, 86vh), 980px); }
+}
+@media (max-width:1199px) and (min-width:768px){
+  :root{ --globe-size: clamp(460px, min(92vw, 72vh), 680px); }
+  body.guest-mode{ --globe-size: clamp(510px, min(97vw, 80vh), 760px); }
+}
+@media (max-width:767px){
+  :root{ --globe-size: clamp(370px, min(98vw, 64vh), 520px); }
+  body.guest-mode{ --globe-size: clamp(410px, min(104vw, 72vh), 580px); }
+}
+.globe-stage{
+  position:absolute;top:calc(var(--header-h, 90px) + 78px);left:50%;transform:translateX(-50%);
+  z-index:1;
+  width:var(--globe-size);
+  aspect-ratio:1;
+  overflow:visible;
+  background:transparent;
+  transition:width .5s cubic-bezier(.4,0,.2,1), height .5s cubic-bezier(.4,0,.2,1);
+}
+.globe-stage.map-active{
+  top:calc(var(--header-h, 90px) + 8px);
+  width:min(1400px, 96vw);
+  aspect-ratio:auto;
+  height:calc(min(44vh, 480px) + var(--map-toolbar-h));
+  height:calc(min(44svh, 480px) + var(--map-toolbar-h));
+  min-height:calc(280px + var(--map-toolbar-h));
+  display:flex;flex-direction:column;
+}
+@media (max-width:767px){
+  .globe-stage{
+    top:calc(var(--header-h, 90px) + 52px);
+  }
+}
+[data-theme="dark"] .globe-stage::before{
+  content:'';
+  position:absolute;inset:-8%;z-index:0;pointer-events:none;
+  background:radial-gradient(circle at center, rgba(77,214,181,0.16) 0%, rgba(46,125,209,0.07) 38%, transparent 68%);
+}
+#globe-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:1;}
+#map-container{
+  position:absolute;inset:0;width:100%;height:100%;z-index:2;
+  opacity:0;pointer-events:none;
+  transition:opacity .9s ease;
+}
+#map-container.active{opacity:1;pointer-events:auto;}
+.globe-stage.map-active #map-container{
+  position:relative;inset:auto;width:100%;height:auto;
+  flex:1 1 auto;min-height:0;border-radius:0 0 16px 16px;overflow:hidden;
+}
+.hero.map-active{
+  min-height:calc(var(--header-h, 90px) + 8px + min(44vh, 480px) + var(--map-toolbar-h) + 40px);
+  min-height:calc(var(--header-h, 90px) + 8px + min(44svh, 480px) + var(--map-toolbar-h) + 40px);
+}
+.hero-content{
+  position:relative;z-index:5;width:100%;
+  display:flex;flex-direction:column;align-items:center;
+  padding:6px 30px 0;
+  transition:opacity .4s ease;
+}
+.hero-content.hidden{display:none;}
+.hero-heading{
+  display:flex;flex-direction:column;align-items:center;gap:14px;
+  width:100%;
+}
+.eyebrow{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;letter-spacing:2px;color:var(--teal-light);
+  text-transform:uppercase;
+  text-align:center;
+  background:rgba(5,15,25,0.45);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  border-radius:20px;padding:6px 16px;
+  white-space:nowrap;
+  text-shadow:0 1px 4px rgba(0,0,0,0.5);
+}
+[data-theme="light"] .eyebrow{
+  color:var(--blue-deep);
+  background:rgba(255,255,255,0.65);
+  text-shadow:none;
+}
+h1{
+  width:min(700px,90%);
+  font-size:clamp(19px,3.2vw,32px);
+  font-weight:700;
+  text-align:center;
+  line-height:1.3;
+  margin:0;
+  text-shadow:0 2px 14px rgba(0,0,0,0.55);
+  background:linear-gradient(90deg, #ffffff, var(--teal-light));
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+/* وضع الزائر (قبل تسجيل الدخول) — عنوان أكبر بطابع تسويقي/ترحيبي / Guest mode (before login) — larger, marketing-style title */
+body.guest-mode h1{
+  font-size:clamp(24px,4vw,42px);
+}
+[data-theme="light"] h1{
+  background:linear-gradient(90deg, var(--text-primary), var(--teal));
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  text-shadow:none;
+}
+/* ترسو العدسة أو زر الدخول عند قاع الكرة تلقائيًا مهما تغيّر حجمها / Anchors the lens or the login button to the globe's bottom edge, regardless of its size */
+/* هامش العدسة/زر الدخول أسفل الكرة يُحسب فعليًا بجافاسكربت (دالة alignHeroBelowGlobe) بدل قيمة CSS تقديرية، لأن القماش ثلاثي الأبعاد لا يملأ صندوقه بشكل متطابق دائمًا عبر كل الشاشات */
+/* The lens/login-button margin below the globe is computed via real JS measurement (alignHeroBelowGlobe), not an estimated CSS value, since the 3D canvas doesn't fill its box identically across all screens */
+.search-wrap{
+  width:100%;
+  pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:10px;
+}
+.search-lens{
+  width:72px;height:72px;border-radius:50%;
+  background:rgba(5,15,25,0.6);
+  border:1.5px solid rgba(77,214,181,0.55);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:width .45s cubic-bezier(.25,.8,.3,1),border-radius .45s,background .3s,border-color .3s,box-shadow .3s;
+  overflow:visible;
+  position:relative;
+  box-shadow:0 4px 18px rgba(0,0,0,0.35), 0 0 26px rgba(77,214,181,0.28);
+}
+[data-theme="light"] .search-lens{
+  background:rgba(255,255,255,0.6);
+  border-color:rgba(31,174,140,0.4);
+  box-shadow:0 4px 14px rgba(0,0,0,0.12), 0 0 20px rgba(31,174,140,0.18);
+}
+.search-lens svg{
+  flex-shrink:0;width:34px;height:34px;stroke:var(--teal);
+  filter:drop-shadow(0 4px 10px rgba(31,174,140,0.45)) drop-shadow(0 2px 6px rgba(0,0,0,0.25));
+  transition:width .3s,height .3s;
+}
+.search-lens.open{
+  width:340px;border-radius:27px;
+  background:rgba(255,255,255,0.12);
+  -webkit-backdrop-filter:blur(14px);
+  backdrop-filter:blur(14px);
+  border:1px solid rgba(77,214,181,0.5);
+  justify-content:flex-start;padding:0 18px;gap:10px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.18);
+  transition:width .45s cubic-bezier(.25,.8,.3,1),border-radius .45s,background .3s,border-color .25s,box-shadow .25s;
+}
+.search-lens.open:focus-within{
+  border-color:var(--teal-light);
+  box-shadow:0 0 0 3px rgba(77,214,181,0.14), 0 8px 24px rgba(0,0,0,0.18);
+}
+[data-theme="light"] .search-lens.open{background:rgba(255,255,255,0.55);border-color:rgba(31,174,140,0.4);}
+[data-theme="light"] .search-lens.open:focus-within{border-color:var(--teal);}
+@supports not (backdrop-filter: blur(1px)){
+  .search-lens.open{background:var(--bg-card);}
+}
+.search-lens.open svg{
+  stroke:var(--text-primary);width:20px;height:20px;
+  filter:none;
+}
+.search-lens input{display:none;}
+.search-lens.open input{
+  display:block;
+  flex:1;background:transparent;border:none;outline:none;
+  color:var(--text-primary);font-family:'JetBrains Mono',monospace;font-size:14px;
+  direction:ltr;text-align:right;
+}
+.search-lens input::placeholder{color:var(--text-secondary);font-family:'IBM Plex Sans Arabic',sans-serif;}
+.search-hint{font-size:12px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,0.6);min-height:16px;text-align:center;}
+[data-theme="light"] .search-hint{color:var(--text-primary);text-shadow:none;}
+.search-hint.err{color:#FF8A75;text-shadow:0 1px 4px rgba(0,0,0,0.6);}
+[data-theme="light"] .search-hint.err{color:#C8412C;text-shadow:none;}
+.search-hint.ok{color:var(--teal-light);}
+
+/* ===== بطاقة "المحطة غير موجودة" — تظهر داخل مكان تلميح البحث نفسه (الرئيسي أو داخل صفحة المحطة) ===== */
+.not-found-card{
+  width:min(360px, 92vw);margin:8px auto 0;
+  background:var(--bg-card);border:1px solid var(--border-strong);
+  border-radius:16px;padding:18px 20px;text-align:center;
+  box-shadow:0 10px 24px rgba(0,0,0,.22);
+}
+.nfc-head{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  color:#C8A24E;font-weight:700;font-size:13.5px;margin-bottom:10px;
+}
+.nfc-id{font-size:12.5px;color:var(--text-secondary);margin-bottom:4px;}
+.nfc-id b{color:var(--text-primary);font-family:'JetBrains Mono',monospace;direction:ltr;display:inline-block;}
+.nfc-question{font-size:12.5px;color:var(--text-secondary);margin-bottom:14px;}
+.nfc-actions{display:flex;gap:8px;}
+.nfc-btn{
+  flex:1;font-size:12.5px;padding:10px 8px;border-radius:8px;
+  border:1px solid var(--border-strong);background:var(--bg);color:var(--text-primary);
+  cursor:pointer;font-family:inherit;transition:.2s;white-space:nowrap;
+}
+.nfc-btn:hover{border-color:var(--teal);}
+.nfc-btn.primary{background:rgba(31,174,140,0.14);color:var(--teal-light);border-color:rgba(77,214,181,0.5);}
+.nfc-btn.primary:hover{background:rgba(31,174,140,0.24);border-color:var(--teal);}
+[data-theme="light"] .nfc-btn.primary{color:var(--teal);}
+.search-progress{
+  display:none;flex-direction:column;gap:6px;
+  width:min(300px,88vw);
+}
+.search-progress.show{display:flex;}
+.search-progress-track{
+  width:100%;height:8px;border-radius:5px;
+  background:rgba(255,255,255,0.12);
+  overflow:hidden;
+}
+[data-theme="light"] .search-progress-track{background:rgba(16,32,53,0.12);}
+.search-progress-fill{
+  height:100%;width:0%;border-radius:5px;
+  background:linear-gradient(90deg, var(--blue-mid), var(--teal-light));
+  box-shadow:0 0 10px rgba(77,214,181,0.7);
+  transition:width .25s ease-out;
+}
+.search-progress-label{
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:11.5px;color:var(--teal-light);font-weight:600;
+  font-family:'JetBrains Mono',monospace;
+}
+.search-progress-label span:first-child{font-family:'IBM Plex Sans Arabic',sans-serif;font-weight:500;}
+.recent-panel{
+  display:none;flex-direction:column;gap:10px;
+  width:100%;max-width:760px;
+  background:var(--bg-card);border:1px solid var(--border);border-radius:12px;
+  padding:14px 16px;
+}
+.recent-panel.show{display:flex;}
+.recent-panel-head{
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:12px;font-weight:600;color:var(--text-primary);
+}
+.recent-clear-btn{
+  background:transparent;border:none;color:var(--text-secondary);
+  font-size:10.5px;cursor:pointer;text-decoration:underline;
+  font-family:inherit;padding:2px;
+}
+.recent-clear-btn:hover{color:#E0654F;}
+.recent-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-start;}
+.recent-chip{
+  background:var(--bg-elev);
+  border:1px solid var(--border-strong);
+  border-radius:16px;padding:6px 12px;font-size:11.5px;
+  color:var(--text-primary);cursor:pointer;transition:.2s;
+  font-family:'JetBrains Mono',monospace;direction:ltr;
+}
+.recent-chip:hover{border-color:var(--teal);color:var(--teal);}
+
+/* ===== الشاشة الافتتاحية (Intro Splash) ===== */
+#introOverlay{
+  position:fixed;inset:0;z-index:200;
+  background:#050a10;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:18px;
+  transition:opacity .45s ease;
+}
+#introOverlay.fade-out{opacity:0;pointer-events:none;}
+#introOverlay.hidden-done{display:none;}
+.intro-logo{
+  width:84px;height:auto;opacity:0;
+  filter:drop-shadow(0 0 0px rgba(77,214,181,0));
+  animation:introLogoIn .7s ease-out .15s forwards;
+}
+@keyframes introLogoIn{
+  0%{opacity:0;transform:scale(.85);filter:drop-shadow(0 0 0px rgba(77,214,181,0));}
+  60%{opacity:1;transform:scale(1.03);filter:drop-shadow(0 0 22px rgba(77,214,181,.65));}
+  100%{opacity:1;transform:scale(1);filter:drop-shadow(0 0 10px rgba(77,214,181,.4));}
+}
+.intro-text{
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;letter-spacing:3px;color:#4DD6B5;
+  opacity:0;text-align:center;
+  animation:introTextIn .5s ease-out .85s forwards;
+}
+@keyframes introTextIn{
+  from{opacity:0;transform:translateY(6px);}
+  to{opacity:1;transform:translateY(0);}
+}
+/* ===== الشريط الثابت أعلى الخريطة — عنصر بنيوي حقيقي يدفع الخريطة لأسفل، وليس أزرارًا عائمة فوقها ===== */
+/* ===== Fixed toolbar bar above the map — a real structural element that pushes the map down, not floating buttons over it ===== */
+.map-toolbar-bar{
+  display:none;flex-shrink:0;width:100%;
+  position:relative;z-index:3;
+  background:rgba(13,24,38,0.82);backdrop-filter:blur(10px);
+  border:1px solid var(--border-strong);
+  border-radius:16px 16px 0 0;
+  box-shadow:0 4px 14px rgba(0,0,0,.18);
+  overflow:hidden;
+}
+[data-theme="light"] .map-toolbar-bar{background:rgba(244,248,251,0.85);}
+.globe-stage.map-active .map-toolbar-bar{display:flex;}
+.toolbar-scroll{
+  display:flex;align-items:center;gap:4px;
+  padding:6px 10px;overflow-x:auto;scrollbar-width:none;white-space:nowrap;height:45px;box-sizing:border-box;
+}
+.toolbar-scroll::-webkit-scrollbar{display:none;}
+.tb-div{width:1px;height:20px;background:var(--border-strong);flex-shrink:0;margin:0 2px;}
+.toolbar-btn{
+  pointer-events:auto;flex-shrink:0;display:flex;align-items:center;gap:5px;
+  background:transparent;border:none;border-radius:12px;
+  padding:7px 11px;cursor:pointer;font-family:inherit;
+  color:var(--text-secondary);font-size:12px;font-weight:600;transition:.2s;
+}
+.toolbar-btn:hover{background:rgba(255,255,255,0.06);}
+.toolbar-btn.active{background:var(--teal);color:#04241c;}
+.toolbar-btn .tb-icon{font-size:13px;line-height:1;}
+
+/* ===== عنصر التحكم الموحّد بنوع الخريطة — رسومات/أقمار صناعية + ليلي/نهاري + تلقائي ===== */
+/* ===== Unified map-type control — graphic/satellite + night/day + auto ===== */
+.map-mode-chip{
+  pointer-events:auto;flex-shrink:0;display:flex;
+  align-items:center;gap:6px;
+  background:transparent;border:none;border-radius:12px;
+  padding:7px 11px;cursor:pointer;font-size:12px;font-weight:600;color:var(--text-primary);
+  transition:.2s;
+}
+.map-mode-chip:hover{background:rgba(255,255,255,0.06);}
+.map-mode-chip:hover{border-color:var(--border-strong);}
+.map-mode-chip .mm-icon{display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.map-mode-chip .mm-auto-badge{
+  font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:8px;
+  background:rgba(31,174,140,0.16);color:var(--teal);
+}
+.map-mode-chip .mm-chev{color:var(--text-secondary);transition:transform .2s;flex-shrink:0;}
+.map-mode-chip.open .mm-chev{transform:rotate(180deg);}
+.map-mode-panel{
+  position:absolute;top:calc(var(--map-toolbar-h) + 4px);left:14px;z-index:7;
+  display:none;flex-direction:column;gap:2px;
+  background:var(--bg-card);border:1px solid var(--border-strong);border-radius:12px;
+  padding:6px;box-shadow:0 10px 24px rgba(0,0,0,.3);min-width:210px;
+}
+.map-mode-panel.show{display:flex;}
+.map-mode-opt{
+  display:flex;align-items:center;gap:9px;text-align:right;background:transparent;border:none;
+  padding:9px 10px;border-radius:8px;font-size:12.5px;color:var(--text-primary);cursor:pointer;font-family:inherit;
+}
+.map-mode-opt:hover{background:var(--bg-elev);}
+.map-mode-opt.active{background:var(--bg-elev);font-weight:700;}
+.map-mode-opt .mm-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.map-mode-opt .mm-opt-icon{display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text-secondary);}
+.map-mode-opt .mm-check{margin-right:auto;color:var(--teal);display:none;flex-shrink:0;}
+.map-mode-opt.active .mm-check{display:flex;}
+.zoom-controls{
+  position:absolute;bottom:14px;left:14px;z-index:6;
+  display:none;flex-direction:column;
+  border-radius:10px;overflow:hidden;
+  border:1px solid var(--border);box-shadow:0 4px 14px rgba(0,0,0,.25);
+}
+.zoom-controls.show{display:flex;}
+.zoom-btn{
+  width:36px;height:36px;background:var(--bg-card);color:var(--text-primary);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  transition:background .15s;
+}
+.zoom-btn:first-child{border-bottom:1px solid var(--border);}
+.zoom-btn:hover{background:var(--bg-elev);}
+.zoom-btn:active{background:var(--teal);color:#fff;}
+/* توست تعليمي مؤقت — يظهر ثانيتين فقط أول تفعيل لكل وضع / Instructional toast — shown for 2 seconds only on each mode's first activation */
+.map-toast{
+  position:absolute;bottom:16px;left:50%;transform:translateX(-50%) translateY(10px);
+  background:rgba(31,174,140,0.95);color:#04241c;
+  border-radius:20px;padding:9px 18px;font-size:12px;font-weight:700;
+  box-shadow:0 6px 18px rgba(31,174,140,.4);white-space:nowrap;
+  z-index:8;opacity:0;pointer-events:none;transition:opacity .25s ease, transform .25s ease;
+}
+.map-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.more-panel{
+  position:absolute;top:calc(var(--map-toolbar-h) + 4px);left:14px;z-index:6;
+  display:none;flex-direction:column;gap:6px;
+  background:var(--bg-card);border:1px solid var(--border-strong);border-radius:12px;
+  padding:8px;box-shadow:0 10px 24px rgba(0,0,0,.3);min-width:220px;
+}
+.more-panel.show{display:flex;}
+.nearby-opt{
+  text-align:right;background:transparent;border:none;padding:9px 10px;border-radius:8px;
+  font-size:12px;color:var(--text-primary);cursor:pointer;font-family:inherit;
+}
+.nearby-opt:hover{background:var(--bg-elev);}
+
+.edit-input{width:100%;height:44px;background:var(--bg);border:1px solid var(--border-strong);border-radius:9px;color:var(--text-primary);font-size:13.5px;padding:0 12px;font-family:'JetBrains Mono',monospace;direction:ltr;text-align:right;}
+
+/* ===== إضافة محطة جديدة — خارج نطاق الخريطة كلياً، جزء من شاشة البحث ===== */
+.add-station-toggle{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(31,174,140,0.14);color:var(--teal-light);
+  border:1.3px solid rgba(77,214,181,0.5);border-radius:22px;
+  font-size:13px;font-weight:600;padding:10px 20px;
+  cursor:pointer;font-family:inherit;margin-top:10px;
+  transition:.2s;
+}
+.add-station-toggle:hover{background:rgba(31,174,140,0.24);border-color:var(--teal);}
+[data-theme="light"] .add-station-toggle{color:var(--teal);}
+[data-theme="light"] .add-station-toggle{color:var(--teal);text-shadow:none;}
+/* ===== صفحة النموذج الكاملة الموحّدة — تُستخدم لكل من الإضافة والتعديل، بأنيميشن دخول أنيق بدل مجرد بطاقة مكبّرة ===== */
+/* ===== Unified full-page form — shared by both add and edit, with a smooth entrance animation instead of just a bigger card ===== */
+.fullpage-form-overlay{
+  display:none;position:fixed;inset:0;z-index:200;
+  background:var(--bg);overflow-y:auto;
+}
+.fullpage-form-overlay.show{display:block;animation:fullpageFadeIn .35s cubic-bezier(.4,0,.2,1);}
+@keyframes fullpageFadeIn{
+  from{opacity:0;transform:translateY(18px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.fullpage-form-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 24px;border-bottom:1px solid var(--border);
+  position:sticky;top:0;background:var(--bg);z-index:2;
+}
+.fullpage-form-title{font-size:17px;font-weight:700;}
+.fullpage-form-close{
+  width:38px;height:38px;border-radius:50%;background:var(--bg-card);border:1px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-primary);transition:.2s;flex-shrink:0;
+}
+.fullpage-form-close:hover{border-color:var(--teal);color:var(--teal);}
+.fullpage-form-body{padding:26px 24px 60px;max-width:760px;margin:0 auto;}
+.add-station-panel{
+  display:flex;flex-direction:column;gap:12px;
+  width:100%;
+}
+.add-station-title{display:none;} /* العنوان انتقل لرأس الصفحة الثابت بدل تكراره بالمحتوى */
+.add-station-type{display:flex;gap:8px;}
+.type-btn{
+  flex:1;padding:12px;border-radius:9px;border:1px solid var(--border-strong);background:var(--bg);
+  color:var(--text-secondary);font-size:13px;cursor:pointer;font-family:inherit;transition:.2s;
+}
+.type-btn.active{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:600;}
+.paste-coord-row{display:flex;flex-direction:column;gap:6px;margin-top:4px;}
+.paste-coord-label{font-size:11.5px;color:var(--text-secondary);}
+.paste-apply-btn{
+  background:rgba(31,174,140,0.14);color:var(--teal-light);border:1px solid rgba(77,214,181,0.45);
+  border-radius:9px;padding:0 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;
+  transition:.2s;flex-shrink:0;
+}
+.paste-apply-btn:hover{background:rgba(31,174,140,0.24);border-color:var(--teal);}
+.use-gps-btn{
+  width:100%;font-size:13px;padding:12px;border-radius:9px;border:1px solid var(--border-strong);
+  background:var(--bg);color:var(--teal);cursor:pointer;font-family:inherit;
+}
+.add-station-submit{
+  background:rgba(31,174,140,0.14);color:var(--teal-light);border:1px solid rgba(77,214,181,0.45);
+  border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:.2s;
+}
+.add-station-submit:hover{background:rgba(31,174,140,0.24);border-color:var(--teal);}
+.add-station-submit:disabled{opacity:.5;cursor:not-allowed;}
+.add-station-progress-track{
+  width:100%;height:8px;border-radius:5px;background:rgba(255,255,255,0.12);overflow:hidden;margin-top:10px;
+}
+[data-theme="light"] .add-station-progress-track{background:rgba(16,32,53,0.12);}
+.add-station-progress-fill{
+  height:100%;width:0%;border-radius:5px;
+  background:linear-gradient(90deg, var(--blue-mid), var(--teal-light));
+  transition:width .25s ease-out;
+}
+
+.outage-panel{
+  display:none;flex-direction:column;gap:8px;
+  width:min(1100px, 94vw);margin:10px auto 0;position:relative;z-index:6;
+  background:var(--bg-card);border:1px solid var(--border-strong);border-radius:16px;
+  padding:16px;box-shadow:0 10px 24px rgba(0,0,0,.2);
+}
+.outage-panel.show{display:flex;}
+.outage-panel-title{font-size:11.5px;font-weight:600;color:var(--text-secondary);}
+.outage-panel textarea{
+  width:100%;min-height:70px;resize:vertical;
+  background:var(--bg);border:1px solid var(--border-strong);border-radius:8px;
+  padding:8px 10px;color:var(--text-primary);font-family:'JetBrains Mono',monospace;
+  font-size:12px;direction:ltr;text-align:right;outline:none;
+}
+.outage-panel textarea:focus{border-color:var(--teal);}
+.outage-panel textarea::placeholder{font-family:'IBM Plex Sans Arabic',sans-serif;font-size:11px;color:var(--text-secondary);}
+.outage-error{font-size:11px;color:#E0654F;min-height:14px;}
+.outage-submit-btn{
+  background:rgba(31,174,140,0.14);color:var(--teal-light);
+  border:1px solid rgba(77,214,181,0.45);border-radius:8px;
+  padding:9px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;
+  transition:.2s;
+}
+.outage-submit-btn:hover{background:rgba(31,174,140,0.24);border-color:var(--teal);}
+
+/* ===== علامة المحطة المحددة — دائرة خضراء متوهجة بنبض مستمر، فوق هالة زرقاء داكنة ===== */
+.selected-station-marker{position:relative;width:46px;height:46px;}
+.ssm-halo{
+  position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle, rgba(46,125,209,.5) 0%, rgba(46,125,209,.18) 55%, transparent 75%);
+}
+.ssm-pulse{
+  position:absolute;top:50%;left:50%;width:20px;height:20px;margin:-10px 0 0 -10px;
+  border-radius:50%;background:rgba(46,204,113,.55);
+  animation:ssmPulse 1.8s ease-out infinite;
+}
+@keyframes ssmPulse{0%{transform:scale(0.6);opacity:.9;}100%{transform:scale(2.8);opacity:0;}}
+.ssm-dot{
+  position:absolute;top:50%;left:50%;width:14px;height:14px;margin:-7px 0 0 -7px;
+  border-radius:50%;background:#2ECC71;border:2px solid #fff;
+  box-shadow:0 0 10px rgba(46,204,113,.9);
+}
+.ssm-label{
+  position:absolute;bottom:100%;left:50%;transform:translateX(-50%);
+  margin-bottom:5px;white-space:nowrap;
+  background:rgba(8,16,26,0.92);color:#fff;
+  border:1.3px solid #2ECC71;border-radius:11px;
+  padding:2px 9px;font-size:10.5px;font-weight:700;
+  font-family:'JetBrains Mono',monospace;
+}
+
+/* ===== بطاقات المحطات القريبة — شكل دبوس قوقل ماب (بطاقة + ذيل مثلث) ===== */
+.nearby-pin-wrap{display:flex;flex-direction:column;align-items:center;}
+.nearby-pin-card{
+  height:22px;padding:0 9px;border-radius:11px;
+  background:rgba(8,16,26,0.92);
+  border:1.3px solid;
+  color:#fff;font-size:10.5px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;gap:3px;
+  font-family:'JetBrains Mono',monospace;
+  white-space:nowrap;
+}
+.nearby-pin-tail{
+  width:0;height:0;margin-top:-1px;
+  border-left:4px solid transparent;border-right:4px solid transparent;
+  border-top:5px solid;
+}
+.map-tool-hint{
+  width:min(1100px, 94vw);margin:10px auto 0;position:relative;z-index:6;
+  background:var(--bg-card);border:1px solid var(--border-strong);
+  padding:10px 16px;border-radius:16px;font-size:12px;color:var(--text-secondary);
+  display:none;text-align:center;line-height:1.6;
+}
+.map-tool-hint a{pointer-events:auto;}
+.map-tool-hint.show{display:block;}
+.search-and-back-row{
+  display:none;align-items:center;gap:8px;
+  width:min(1100px, 94vw);
+  position:relative;z-index:6;
+  margin-top:calc(var(--header-h, 90px) + 8px + min(44vh, 480px) + var(--map-toolbar-h) + 10px);
+  margin-top:calc(var(--header-h, 90px) + 8px + min(44svh, 480px) + var(--map-toolbar-h) + 10px);
+}
+.search-and-back-row.show{display:flex;}
+body.guest-mode .search-and-back-row{width:min(1300px,96vw);}
+.station-search-bar{
+  display:flex;
+  align-items:center;gap:10px;
+  flex:1;min-width:0;height:55px;
+  position:relative;z-index:6;
+  background:var(--bg-elev);border:1.5px solid rgba(31,174,140,0.35);
+  border-radius:20px;padding:0 20px 0 9px;
+  box-shadow:0 10px 22px rgba(0,0,0,.24);
+  transition:border-color .2s, box-shadow .2s;
+}
+.station-search-bar:focus-within{border-color:var(--teal);box-shadow:0 6px 18px rgba(31,174,140,.24);}
+.station-search-bar .ssb-icon{
+  flex-shrink:0;width:38px;height:38px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(31,174,140,0.14);color:var(--teal);
+  box-shadow:0 2px 6px rgba(31,174,140,.2);
+  cursor:pointer;transition:.2s;
+}
+.station-search-bar .ssb-icon:hover{background:var(--teal);color:#fff;}
+.station-search-bar:focus-within .ssb-icon{background:var(--teal);color:#fff;}
+.station-search-bar input{
+  flex:1;min-width:0;background:transparent;border:none;outline:none;
+  color:var(--text-primary);font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;
+  direction:ltr;text-align:right;
+}
+.station-search-bar input::placeholder{color:var(--text-secondary);font-family:'IBM Plex Sans Arabic',sans-serif;font-weight:400;}
+body.guest-mode .station-search-bar{width:min(1300px,96vw);}
+.station-search-progress{
+  display:none;flex-direction:column;gap:6px;
+  width:min(1100px, 94vw);margin-top:8px;
+}
+.station-search-progress.show{display:flex;}
+/* ===== مؤشر آخر تحديث لبيانات المحطة من قاعدة البيانات — دائم، وليس أداة تشخيص مؤقتة ===== */
+/* ===== Last-refresh indicator for the station's data — permanent feature, not a temporary diagnostic ===== */
+.db-freshness-note{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  font-size:10.5px;color:var(--text-secondary);
+  margin-top:10px;padding-top:10px;border-top:1px solid var(--border);
+}
+.db-freshness-note svg{flex-shrink:0;color:var(--teal);}
+body.guest-mode .station-search-progress{width:min(1300px,96vw);}
+.station-search-hint{
+  width:min(1100px, 94vw);font-size:12px;color:var(--text-secondary);
+  min-height:16px;padding:6px 4px 0;
+}
+.station-search-hint.err{color:#E0654F;}
+body.guest-mode .station-search-hint{width:min(1300px,96vw);}
+.station-table{
+  position:relative;z-index:6;
+  width:min(1100px, 94vw);
+  margin-top:4px;
+  background:var(--bg-card);border:1px solid var(--border-strong);
+  border-radius:16px;
+  padding:0;
+  display:none;
+  max-height:none;overflow:visible;
+  box-shadow:0 10px 24px rgba(0,0,0,.22);
+}
+body.guest-mode .station-table{width:min(1300px,96vw);}
+.station-table.show{display:block;}
+.sb-inner{padding:14px 20px;}
+.sb-row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.sb-info{display:flex;align-items:center;gap:18px;flex-wrap:wrap;min-width:0;}
+.station-table .st-name{font-weight:700;font-size:13.5px;white-space:nowrap;}
+.sb-meta{display:flex;gap:16px;flex-wrap:wrap;font-size:11.5px;color:var(--text-secondary);}
+.sb-meta b{color:var(--text-primary);font-weight:600;font-family:'JetBrains Mono',monospace;direction:ltr;display:inline-block;}
+.station-table table{width:100%;border-collapse:collapse;font-size:11px;}
+.station-table td{padding:3px 0;color:var(--text-secondary);}
+.station-table td.v{color:var(--text-primary);font-weight:500;text-align:left;font-family:'JetBrains Mono',monospace;direction:ltr;}
+.station-table .st-actions{display:flex;gap:8px;flex-shrink:0;}
+.station-table .st-btn{
+  text-align:center;font-size:11.5px;padding:8px 16px;border-radius:8px;white-space:nowrap;
+  border:1px solid var(--border-strong);background:var(--bg);color:var(--text-primary);
+  text-decoration:none;cursor:pointer;transition:.2s;
+}
+.station-table .st-btn:hover{border-color:var(--teal);}
+.station-table .st-btn.primary{background:var(--teal);border-color:var(--teal);color:#fff;}
+.edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;}
+.edit-map-wrap{position:relative;width:100%;height:220px;border-radius:10px;overflow:hidden;border:1px solid var(--border-strong);}
+#editPreviewMap{width:100%;height:100%;}
+.edit-map-sat-btn{
+  position:absolute;top:8px;left:8px;z-index:5;
+  width:34px;height:34px;border-radius:50%;
+  background:var(--bg-card);border:1px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;
+  box-shadow:0 2px 8px rgba(0,0,0,.3);
+}
+.edit-map-sat-btn.active{background:var(--teal);border-color:var(--teal);}
+@media (max-width:600px){
+  .edit-grid{grid-template-columns:1fr;}
+  .edit-map-wrap{height:180px;}
+}
+@media (max-width:700px){
+  .sb-row{flex-direction:column;align-items:stretch;}
+  .sb-info{flex-direction:column;align-items:flex-start;gap:6px;}
+  .station-table .st-actions{width:100%;}
+  .station-table .st-btn{flex:1;}
+  .edit-grid{grid-template-columns:1fr;}
+}
+.cards-section{
+  position:relative;z-index:5;
+  padding:0 32px 30px;
+  display:flex;flex-direction:column;align-items:center;gap:14px;
+}
+/* ===== صف الأزرار الرئيسية — إضافة/آخر المحطات/تحديث، كل زر بلون مختلف ===== */
+.action-pills-row{
+  display:flex;gap:10px;width:100%;max-width:520px;
+}
+.action-pill{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  border-radius:22px;font-weight:600;
+  cursor:pointer;font-family:inherit;border:1.3px solid;transition:.2s;
+}
+.pill-add{
+  flex:1.9; /* الفعل الأهم — أوضح وأكبر من البقية */
+  font-size:14px;padding:14px 16px;
+  background:rgba(31,174,140,0.14);color:var(--teal-light);border-color:rgba(77,214,181,0.5);
+}
+.pill-add:hover{background:rgba(31,174,140,0.24);border-color:var(--teal);}
+.pill-recent{
+  flex:1;font-size:11.5px;padding:9px 10px;
+  background:rgba(46,125,209,0.14);color:#6FA8E8;border-color:rgba(46,125,209,0.5);
+}
+.pill-recent:hover{background:rgba(46,125,209,0.24);border-color:var(--blue-mid);}
+.pill-refresh{
+  flex:1;font-size:11.5px;padding:9px 10px;
+  background:rgba(200,162,78,0.14);color:#D8B564;border-color:rgba(200,162,78,0.5);
+}
+.pill-refresh:hover{background:rgba(200,162,78,0.24);border-color:#C8A24E;}
+[data-theme="light"] .pill-add{color:var(--teal);}
+[data-theme="light"] .pill-recent{color:var(--blue-mid);}
+[data-theme="light"] .pill-refresh{color:#A9803A;}
+
+.dashboard-label{
+  width:100%;max-width:760px;display:flex;align-items:center;gap:10px;margin-top:6px;
+  font-size:12.5px;font-weight:700;color:var(--text-secondary);
+}
+.dashboard-label::before,.dashboard-label::after{content:'';flex:1;height:1px;background:var(--border-strong);}
+
+/* ===== شريط الذاكرة المستخدمة ===== */
+.storage-row{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  width:100%;max-width:760px;padding:10px 16px;
+  background:var(--bg-card);border:1px solid var(--border);border-radius:12px;
+}
+.storage-clear-btn{
+  background:transparent;border:none;color:var(--text-secondary);font-size:11.5px;
+  cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;
+}
+.storage-clear-btn:hover{color:#E0654F;}
+.storage-bar-wrap{display:flex;align-items:center;gap:8px;font-size:10.5px;color:var(--text-secondary);flex:1;min-width:160px;}
+.storage-bar-track{flex:1;height:8px;border-radius:4px;background:var(--bg-elev);border:1px solid var(--border-strong);overflow:hidden;}
+.storage-bar-fill{height:100%;min-width:2px;border-radius:4px;background:linear-gradient(90deg, var(--blue-mid), var(--teal-light));transition:width .4s ease;}
+
+body.guest-mode #cardsSection{display:none;}
+.cards-section.hidden{display:none;}
+body.guest-mode .search-wrap{display:none;}
+
+/* ===== زر تسجيل الدخول الكبير المضيء أسفل الكرة — يظهر فقط لوضع الزائر بدل الزر الصغير بالهيدر ===== */
+/* ===== Large glowing login button below the globe — guest mode only, replacing the small header button ===== */
+.guest-login-cta{
+  display:none;
+  align-items:center;justify-content:center;gap:10px;
+  width:min(300px,80vw);
+  padding:17px 24px;border-radius:32px;
+  background:linear-gradient(135deg, var(--teal), var(--teal-light));
+  color:#052018;font-weight:700;font-size:16px;
+  text-decoration:none;
+  box-shadow:0 10px 30px rgba(31,174,140,0.5), 0 0 44px rgba(77,214,181,0.38);
+  transition:transform .2s ease, box-shadow .2s ease;
+  animation:guestCtaGlow 2.6s ease-in-out infinite;
+}
+.guest-login-cta:hover{transform:translateY(-2px);box-shadow:0 12px 34px rgba(31,174,140,0.6), 0 0 52px rgba(77,214,181,0.48);}
+@keyframes guestCtaGlow{
+  0%, 100%{box-shadow:0 10px 30px rgba(31,174,140,0.5), 0 0 40px rgba(77,214,181,0.32);}
+  50%{box-shadow:0 10px 30px rgba(31,174,140,0.6), 0 0 58px rgba(77,214,181,0.5);}
+}
+body.guest-mode .guest-login-cta{display:flex;}
+/* الزر الصغير بالهيدر يبقى فقط لحالة الدخول (يعرض اسم العضو)، ويختفي لوضع الزائر لأن الزر الكبير أسفل الكرة يغنيه */
+/* The small header button remains only for the logged-in state (shows the member's name); hidden in guest mode since the big button below the globe replaces it */
+body.guest-mode #loginBtn{display:none;}
+.cards-row{
+  display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;max-width:760px;width:100%;
+  align-items:start;
+}
+.stat-card{
+  min-width:0;
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:10px;
+  border-right:3px solid var(--teal);
+  padding:14px;
+  cursor:pointer;
+  transition:border-color .2s, transform .2s;
+}
+.stat-card.sc-orange{border-right-color:#C8A24E;}
+.stat-card.sc-blue{border-right-color:var(--blue-mid);}
+.stat-card.sc-green{border-right-color:var(--teal);}
+.stat-card:hover{transform:translateY(-2px);}
+.stat-card .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.stat-card .sc-icon{
+  width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+  font-size:16px;background:rgba(255,255,255,0.06);
+}
+.stat-card.sc-orange .sc-icon{background:rgba(200,162,78,0.14);}
+.stat-card.sc-blue .sc-icon{background:rgba(46,125,209,0.14);}
+.stat-card.sc-green .sc-icon{background:rgba(31,174,140,0.14);}
+.stat-card .num{
+  font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;
+  direction:ltr;display:block;text-align:right;margin-bottom:2px;
+}
+.stat-card .label{font-size:12px;color:var(--text-secondary);}
+.stat-card .chev{color:var(--text-secondary);transition:transform .3s;font-size:14px;}
+.stat-card.expanded .chev{transform:rotate(180deg);}
+.stat-panel{
+  max-height:0;overflow:hidden;
+  transition:max-height .45s cubic-bezier(.25,.8,.3,1), margin-top .45s;
+}
+.stat-card.expanded .stat-panel{max-height:160px;margin-top:14px;}
+.stat-panel-inner{border-top:1px solid var(--border);padding-top:12px;display:flex;flex-direction:column;gap:8px;}
+.stat-panel-row{display:flex;justify-content:space-between;font-size:12.5px;}
+.stat-panel-row .v{font-family:'JetBrains Mono',monospace;color:var(--teal);direction:ltr;}
+.legend-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-left:6px;}
+footer{
+  text-align:center;padding:12px 20px;font-size:10px;color:var(--text-secondary);opacity:.7;
+  border-top:1px solid var(--border);
+}
+@media (max-width:600px){
+  .search-lens.open{width:88vw;}
+  .header-row-main{padding:12px 14px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;}
+  .logo{grid-column:2;justify-self:center;}
+  .header-actions{grid-column:3;justify-self:end;gap:6px;}
+  .logo-sub{display:none;}
+  .logo-text{font-size:11px;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .logo-mark{height:26px;}
+  .login-btn{padding:7px 12px;font-size:12px;}
+  .theme-toggle{width:34px;height:34px;}
+  .hero{padding:92px 6px 90px;}
+  .station-table{width:99vw;}
+  .eyebrow{font-size:10px;padding:5px 12px;}
+  h1{font-size:clamp(22px,6vw,32px);}
+  .recent-panel{gap:6px;}
+  .cards-row{gap:6px;}
+  .stat-card{padding:10px 8px;border-right-width:2px;}
+  .stat-card .label{font-size:10.5px;line-height:1.3;}
+  .stat-card .num{font-size:20px;}
+  .cards-section{padding:0 12px 50px;}
+}
+@media (max-width:340px){
+  .logo-text{font-size:11px;}
+  .login-btn{padding:6px 9px;font-size:11px;}
+}
+</style>
+</head>
+<body data-theme="dark" id="bodyEl">
+<div id="introOverlay">
+  <img class="intro-logo" src="assets/logo-icon.png" alt="شعار الشركة السعودية للطاقة">
+  <div class="intro-text">محطات التوزيع الكهربائية</div>
+</div>
+<script>
+(function(){
+  var saved = localStorage.getItem('sec-theme');
+  if(saved === 'light' || saved === 'dark'){
+    document.getElementById('bodyEl').setAttribute('data-theme', saved);
+  }
+})();
+</script>
+
+<header>
+  <div class="header-row-main">
+    <div class="logo">
+      <img class="logo-mark" src="assets/logo-icon.png" alt="شعار الشركة السعودية للطاقة">
+      <div>
+        <div class="logo-text">الشركة السعودية للطاقة</div>
+        <div class="logo-sub">نظام الإحداثيات الجغرافية</div>
+      </div>
+    </div>
+    <div class="header-actions" id="headerActions">
+      <a href="auth.html" class="login-btn" id="loginBtn">تسجيل الدخول</a>
+      <a href="shifts.html" class="theme-toggle" title="تقويم دوام الورديات" aria-label="تقويم دوام الورديات">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </a>
+      <div class="theme-toggle" id="themeToggle" aria-label="تبديل الوضع الداكن والفاتح">
+        <svg id="themeIcon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"></circle><line x1="12" y1="2" x2="12" y2="4"></line><line x1="12" y1="20" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="6.34" y2="6.34"></line><line x1="17.66" y1="17.66" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="4" y2="12"></line><line x1="20" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="6.34" y2="17.66"></line><line x1="17.66" y1="6.34" x2="19.07" y2="4.93"></line></svg>
+      </div>
+
+      <div class="mobile-user-menu" id="mobileUserMenu">
+        <button class="mobile-menu-trigger" id="mobileMenuTrigger">
+          <span id="mobileMenuName">القائمة</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="mobile-menu-panel" id="mobileMenuPanel">
+          <div class="mobile-menu-row">
+            <span class="menu-icon" style="color:#8B6DD6">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v1M12 20v1M4.2 4.2l.7.7M18.4 18.4l.7.7M3 12h1M20 12h1M4.2 19.8l.7-.7M18.4 5.6l.7-.7"/><circle cx="12" cy="12" r="4"/></svg>
+            </span>
+            <span style="flex:1">الوضع الداكن</span>
+            <button class="theme-switch" id="themeSwitchMobile" aria-label="تبديل الوضع الداكن"><span class="theme-switch-knob"></span></button>
+          </div>
+          <a href="index.html" class="mobile-menu-link current-page" id="homeMenuLink">
+            <span class="menu-icon" style="color:#2ECC71"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg></span>
+            الصفحة الرئيسية
+          </a>
+          <a href="member.html" class="mobile-menu-link" id="menuLinkAccount">
+            <span class="menu-icon" style="color:#4A86E8"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+            حسابي
+          </a>
+          <a href="shifts.html" class="mobile-menu-link" id="menuLinkShifts">
+            <span class="menu-icon" style="color:#A479E2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+            تقويم دوام الورديات
+          </a>
+          <a href="admin.html" class="mobile-menu-link" id="mobileAdminLink" style="display:none">
+            <span class="menu-icon" style="color:#F0B429"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V9l2 2 5-6 5 6 2-2v11"/></svg></span>
+            لوحة المدير
+          </a>
+          <button class="mobile-menu-logout" id="mobileLogoutBtn" style="display:none">
+            <span class="menu-icon" style="color:#E0654F"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
+            تسجيل الخروج
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- صف حالة الاتصال — جزء فعلي من الهيدر نفسه الآن، لا عنصر منفصل يحتاج تنسيق ارتفاع يدوي -->
+  <div class="header-row-status" id="statusBar">
+    <div class="conn-status-pill">
+      <div class="status-bar-item">
+        <span class="conn-dot" id="connDot"></span>
+        <span id="connLabel">جاري التحقق...</span>
+      </div>
+      <div class="status-bar-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span id="lastUpdateLabel">آخر تحديث: —</span>
+      </div>
+      <div class="status-bar-item" id="headerDateLine"></div>
+      <div class="conn-refresh-group">
+        <div class="conn-pill-div"></div>
+        <button class="status-refresh-btn" id="dataRefreshBtn" title="تحديث بيانات المحطات — لو لاحظت نتائج بحث غير محدّثة">
+          <svg id="dataRefreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="hero" id="heroSection">
+  <div class="globe-stage" id="globeStage">
+    <canvas id="globe-canvas"></canvas>
+
+    <div class="map-toolbar-bar">
+      <div class="toolbar-scroll" id="toolbarScroll">
+        <div class="map-mode-chip" id="mapModeChip" title="نوع الخريطة">
+          <span class="mm-icon" id="mapModeChipIcon"></span>
+          <span id="mapModeChipLabel">تلقائي</span>
+          <span class="mm-auto-badge" id="mapModeAutoBadge">تلقائي</span>
+          <svg class="mm-chev" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </div>
+        <div class="tb-div"></div>
+        <button class="toolbar-btn" id="nearbyToggleBtn" title="محطات قريبة (٢ كم)">
+          <span class="tb-icon">📍</span><span class="tb-label" id="nearbyBtnLabel">قريب</span>
+        </button>
+        <button class="toolbar-btn" id="feederToggleBtn" title="محطات المغذي">
+          <span class="tb-icon">⚡</span><span class="tb-label" id="feederBtnLabel">مغذي</span>
+        </button>
+        <div class="tb-div"></div>
+        <button class="toolbar-btn" id="outageToggleBtn" title="محطات العطل (أكثر من محطة)">
+          <span class="tb-icon">⚠️</span><span class="tb-label">أعطال</span>
+        </button>
+        <button class="toolbar-btn" id="moreToggleBtn" title="أدوات إضافية">
+          <span class="tb-icon">⋯</span><span class="tb-label">المزيد</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="map-mode-panel" id="mapModePanel">
+      <button class="map-mode-opt" data-mode="auto">
+        <span class="mm-dot" style="background:#1FAE8C"></span>
+        <span class="mm-opt-icon" data-icon-mode="auto"></span>
+        تلقائي (حسب وقت الجهاز)
+        <svg class="mm-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      </button>
+      <button class="map-mode-opt" data-mode="light">
+        <span class="mm-dot" style="background:#C8A24E"></span>
+        <span class="mm-opt-icon" data-icon-mode="light"></span>
+        نهاري
+        <svg class="mm-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      </button>
+      <button class="map-mode-opt" data-mode="dark">
+        <span class="mm-dot" style="background:#2E7DD1"></span>
+        <span class="mm-opt-icon" data-icon-mode="dark"></span>
+        ليلي
+        <svg class="mm-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      </button>
+      <button class="map-mode-opt" data-mode="satellite">
+        <span class="mm-dot" style="background:#8B6DD6"></span>
+        <span class="mm-opt-icon" data-icon-mode="satellite"></span>
+        أقمار صناعية
+        <svg class="mm-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      </button>
+    </div>
+    <div class="more-panel" id="morePanel">
+      <button class="nearby-opt" id="measureToggleBtn">📐 قياس المسافة</button>
+      <button class="nearby-opt" id="routeToggleBtn">🔗 رسم مسار متعدد النقاط</button>
+    </div>
+
+    <div id="map-container"></div>
+
+    <div class="zoom-controls" id="zoomControls">
+      <div class="zoom-btn" id="zoomInBtn" title="تكبير">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+      <div class="zoom-btn" id="zoomOutBtn" title="تصغير">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="map-tool-hint" id="mapToolHint"></div>
+  <div class="outage-panel" id="outagePanel">
+    <div class="outage-panel-title">محطات العطل — أدخل الأرقام بالترتيب</div>
+    <textarea id="outageInput" placeholder="مثال: 39070-93080-ABN110&#10;افصل بينها بفاصلة أو / أو - أو سطر جديد"></textarea>
+    <div id="outageError" class="outage-error"></div>
+    <button class="outage-submit-btn" id="outageSubmitBtn">عرض على الخريطة</button>
+  </div>
+
+  <div class="hero-content" id="heroContent">
+    <div class="hero-heading">
+      <div class="eyebrow">SEC // DISTRIBUTION NETWORK</div>
+      <h1>ابحث عن محطات التوزيع والتحويل</h1>
+    </div>
+    <div class="search-wrap globe-bottom-anchor">
+      <div class="search-lens" id="searchLens">
+        <svg id="searchLensIcon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input id="searchInput" type="text" placeholder="مثال: 39070 أو ABN" inputmode="text">
+      </div>
+      <div class="search-hint" id="searchHint"></div>
+      <div class="search-progress" id="searchProgress">
+        <div class="search-progress-track"><div class="search-progress-fill" id="searchProgressFill"></div></div>
+        <div class="search-progress-label"><span>جاري البحث عن المحطة...</span><span id="searchProgressPct">0%</span></div>
+      </div>
+    </div>
+    <a href="auth.html" class="guest-login-cta globe-bottom-anchor">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      تسجيل الدخول
+    </a>
+  </div>
+
+  <div class="search-and-back-row" id="searchAndBackRow">
+    <div class="station-search-bar" id="stationSearchBar">
+      <span class="ssb-icon" id="stationSearchLensIcon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      </span>
+      <input id="stationSearchInput" type="text" placeholder="ابحث عن محطة أخرى..." inputmode="text">
+    </div>
+  </div>
+  <div class="station-search-progress" id="stationSearchProgress">
+    <div class="search-progress-track"><div class="search-progress-fill" id="stationSearchProgressFill"></div></div>
+    <div class="search-progress-label"><span>جاري البحث عن المحطة...</span><span id="stationSearchProgressPct">0%</span></div>
+  </div>
+  <div class="station-search-hint" id="stationSearchHint"></div>
+  <div class="station-table" id="stationTable"></div>
+</section>
+
+<section class="cards-section" id="cardsSection">
+  <div class="action-pills-row">
+    <button class="action-pill pill-add" id="addStationToggle">+ إضافة محطة</button>
+    <button class="action-pill pill-recent" id="recentToggleBtn">🕐 آخر المحطات</button>
+    <button class="action-pill pill-refresh" id="refreshStatsBtn" aria-label="تحديث الإحصائيات">
+      <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"></path></svg>
+      تحديث
+    </button>
+  </div>
+
+  <div class="recent-panel" id="recentPanel">
+    <div class="recent-panel-head">
+      <span>محطاتك الأخيرة</span>
+      <button class="recent-clear-btn" id="recentClearBtn">مسح السجل</button>
+    </div>
+    <div class="recent-chips" id="recentChips"></div>
+  </div>
+
+  <div class="fullpage-form-overlay" id="addStationOverlay">
+    <div class="fullpage-form-header">
+      <div class="fullpage-form-title">+ إضافة محطة جديدة</div>
+      <div class="fullpage-form-close" id="addStationCloseBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </div>
+    </div>
+    <div class="fullpage-form-body">
+      <div class="add-station-panel" id="addStationPanel">
+        <div id="addStationFormBody">
+          <div class="add-station-type">
+            <button class="type-btn active" data-type="توزيع">توزيع</button>
+            <button class="type-btn" data-type="تحويل">تحويل</button>
+          </div>
+          <input id="newStationId" class="edit-input" placeholder="مثال: 39070">
+          <div id="feederRegionRow" style="display:flex;gap:6px;">
+            <input id="newStationFeeder" class="edit-input" placeholder="مثال: SNB38 (اختياري)">
+            <input id="newStationRegion" class="edit-input" placeholder="مثال: القرينية">
+          </div>
+          <div style="display:flex;gap:6px;">
+            <input id="newStationLat" class="edit-input" placeholder="مثال: 21.523456">
+            <input id="newStationLng" class="edit-input" placeholder="مثال: 39.187654">
+          </div>
+          <button class="use-gps-btn" id="newStationGpsBtn" type="button">📍 استخدام موقعي الحالي</button>
+          <div class="paste-coord-row">
+            <span class="paste-coord-label">أو الصق الإحداثية مباشرة</span>
+            <div style="display:flex;gap:6px;">
+              <input id="newStationPasteCoord" class="edit-input" placeholder="مثال: 21.5234,39.1876" style="flex:1">
+              <button type="button" class="paste-apply-btn" id="newStationPasteApply">تطبيق</button>
+            </div>
+          </div>
+          <input id="newStationReason" class="edit-input" placeholder="مثال: محطة جديدة بحي القرينية">
+          <div id="addStationError" class="add-station-error"></div>
+          <button class="add-station-submit" id="addStationSubmitBtn">حفظ المحطة</button>
+        </div>
+        <div class="add-station-progress-track" id="addStationProgressTrack" style="display:none">
+          <div class="add-station-progress-fill" id="addStationProgressFill"></div>
+        </div>
+        <div id="addStationProgressLabel" style="display:none;text-align:center;font-size:11px;color:var(--text-secondary);margin-top:4px;font-family:'JetBrains Mono',monospace;">0%</div>
+        <div id="addStationSuccess" style="display:none;text-align:center;padding:10px 0;">
+          <div style="color:var(--teal);font-weight:700;font-size:14px;margin-bottom:10px;">✓ تمت إضافة المحطة بنجاح — يمكنك البحث عنها مباشرة</div>
+          <button class="add-station-submit" id="addStationDoneBtn">حسنًا</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="fullpage-form-overlay" id="editStationOverlay">
+    <div class="fullpage-form-header">
+      <div class="fullpage-form-title" id="editStationTitle">تعديل المحطة</div>
+      <div class="fullpage-form-close" id="editStationCloseBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </div>
+    </div>
+    <div class="fullpage-form-body" id="editStationBody"></div>
+  </div>
+
+  <div class="dashboard-label">📊 لوحة المعلومات</div>
+  <div class="cards-row">
+    <div class="stat-card sc-orange" data-card="edits">
+      <div class="top">
+        <div class="sc-icon">✏️</div>
+        <span class="chev">▾</span>
+      </div>
+      <span class="num" id="countEdits">0</span>
+      <div class="label">تعديلات اليوم</div>
+      <div class="stat-panel"><div class="stat-panel-inner" id="panelEdits"></div></div>
+    </div>
+    <div class="stat-card sc-blue" data-card="additions">
+      <div class="top">
+        <div class="sc-icon">➕</div>
+        <span class="chev">▾</span>
+      </div>
+      <span class="num" id="countAdditions">0</span>
+      <div class="label">إضافات اليوم</div>
+      <div class="stat-panel"><div class="stat-panel-inner" id="panelAdditions"></div></div>
+    </div>
+    <div class="stat-card sc-green" data-card="stations">
+      <div class="top">
+        <div class="sc-icon">🏢</div>
+        <span class="chev">▾</span>
+      </div>
+      <span class="num" id="countStations">0</span>
+      <div class="label">إجمالي المحطات</div>
+      <div class="stat-panel"><div class="stat-panel-inner" id="panelStations"></div></div>
+    </div>
+  </div>
+
+  <div class="storage-row">
+    <button class="storage-clear-btn" id="clearStorageBtn">🗑️ مسح التخزين المؤقت</button>
+    <div class="storage-bar-wrap">
+      <span>الذاكرة المستخدمة</span>
+      <div class="storage-bar-track"><div class="storage-bar-fill" id="storageBarFill"></div></div>
+      <span id="storageUsageLabel">0 MB / 50 MB</span>
+    </div>
+  </div>
+</section>
+
+<footer>© 2026 الشركة السعودية للطاقة — جميع الحقوق محفوظة</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
+<script>
+const API_URL = 'https://script.google.com/macros/s/AKfycbyxZUSLZNa6UlZLINsfAEe8CmQPoNGJbpnNtUDxP019TfL8uLh_5fuP0e5HE6daP8dh1w/exec';
+async function callBackend(action, payload){
+  const res = await fetch(API_URL, { method:'POST', body: JSON.stringify({ action, ...(payload||{}) }) });
+  renewSessionActivity_(); // كل نشاط فعلي يجدد نافذة الوردية (12 ساعة) من جديد
+  return await res.json();
+}
+/* يجدد وقت آخر نشاط بالجلسة المحفوظة محليًا — لا ينشئ جلسة جديدة، فقط يحدّث الطابع الزمني إذا كانت موجودة أصلاً */
+/* Renews the locally-stored session's last-activity timestamp — never creates a new session, only bumps the timestamp if one already exists */
+function renewSessionActivity_(){
+  const raw = localStorage.getItem('sec-session');
+  if(!raw) return;
+  try{
+    const session = JSON.parse(raw);
+    session.ts = Date.now();
+    localStorage.setItem('sec-session', JSON.stringify(session));
+  }catch(e){}
+}
+
+/* تعقيم أي نص يكتبه المستخدم قبل حقنه داخل innerHTML — حماية من الحقن / Sanitizes user-typed text before injecting into innerHTML — XSS protection */
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+
+/* ============================================================
+ *  البحث المحلي بالمتصفح — الفهرس يُحمَّل مرة واحدة ويُخزَّن مضغوطًا بجهاز المستخدم
+ *  بدل قراءة/فلترة الشيت مع كل عملية بحث — ضروري بحجم بيانات كبير (٤٩ ألف صف فأكثر)
+ *  Client-side local search — the index loads once and is stored compressed on the user's device
+ *  instead of reading/filtering the sheet on every search — essential at this large data scale
+ * ============================================================ */
+const STATIONS_CACHE_KEY = 'sec-stations-cache-v1';
+const STATIONS_VERSION_KEY = 'sec-stations-version-v1';
+let allStationsLocal = [];
+let isStationsLoaded = false;
+
+/* ضغط/فك ضغط البيانات عبر LZString قبل التخزين — يقلّص حجم الفهرس بما يكفي ليدخل بحدود localStorage رغم كِبر عدد المحطات */
+/* Compress/decompress via LZString before storing — shrinks the index enough to fit localStorage's limits despite the large station count */
+function compressStationsData_(data){ return LZString.compress(JSON.stringify(data)); }
+function decompressStationsData_(compressed){
+  try{
+    const json = LZString.decompress(compressed);
+    return json ? JSON.parse(json) : null;
+  }catch(e){ return null; }
+}
+function saveStationsToLocalCache_(stations){
+  try{
+    localStorage.setItem(STATIONS_CACHE_KEY, compressStationsData_(stations));
+    return true;
+  }catch(e){ return false; } // مساحة localStorage ممتلئة أو غير متاحة — البحث يستمر بالذاكرة الحالية فقط بدون تعطّل
+}
+function loadStationsFromLocalCache_(){
+  try{
+    const compressed = localStorage.getItem(STATIONS_CACHE_KEY);
+    return compressed ? decompressStationsData_(compressed) : null;
+  }catch(e){ return null; }
+}
+
+/* التحميل الأول — يُستدعى مرة واحدة بعد تأكد الجلسة، يقرأ الكاش المحلي فورًا للسرعة، ثم يتحقق من الإصدار الحقيقي بصمت بالخلفية */
+/* First load — called once after session confirmation; reads the local cache instantly for speed, then silently verifies the real version in the background */
+async function initStationsLocalSearch(){
+  const cachedVersion = localStorage.getItem(STATIONS_VERSION_KEY);
+  const cachedStations = loadStationsFromLocalCache_();
+
+  if(cachedStations && cachedStations.length && cachedVersion){
+    allStationsLocal = cachedStations;
+    isStationsLoaded = true; // نستخدم النسخة المحلية فورًا بدون انتظار الشبكة
+  }
+
+  // فحص صامت تلقائي للإصدار — هذا يسدّ الثغرة الأساسية لو الاعتماد كان فقط على زر تحديث يدوي:
+  // أي تعديل من أي مستخدم آخر يظهر تلقائيًا بأول فتح للصفحة، بدون أي تدخّل يدوي
+  // Silent automatic version check — this closes the core gap of relying on a manual refresh button only:
+  // any other user's edit surfaces automatically on the next page load, with zero manual action
+  try{
+    const versionRes = await callBackend('getDataVersion');
+    if(versionRes.success && versionRes.version !== cachedVersion){
+      await refreshStationsLocalCache_(showLoadProgress_);
+    } else if(!isStationsLoaded){
+      await refreshStationsLocalCache_(showLoadProgress_);
+    }
+  }catch(e){
+    // تعذّر فحص الإصدار (لا اتصال مثلاً) — نكتفي بالنسخة المحلية الموجودة إن وُجدت
+    if(!isStationsLoaded){
+      document.getElementById('lastUpdateLabel').textContent = 'آخر تحديث: تعذّر التحميل الأول';
+    }
+  }
+}
+/* مؤشر تقدم بصري بسيط أثناء تحميل الدفعات، يُعرض بشارة الحالة الموجودة أصلًا بالهيدر بدل عنصر جديد / Simple visual progress shown in the existing header status badge instead of a new element */
+function showLoadProgress_(loaded, total){
+  const el = document.getElementById('lastUpdateLabel');
+  if(el) el.textContent = total ? `جاري تحميل بيانات المحطات: ${loaded}/${total}` : `جاري تحميل بيانات المحطات: ${loaded}`;
+}
+
+/* إعادة تحميل الفهرس الكامل من الخادم على دفعات فعلية (بدل استجابة ضخمة واحدة قد تفشل أو تتقطّع)، مع تحديث الكاش المحلي فقط بعد التأكد من اكتمال كل الدفعات بنجاح */
+/* Reloads the full index from the server in real batches (instead of one giant response that could fail or truncate), updating the local cache only after every batch is confirmed complete */
+async function refreshStationsLocalCache_(onProgress){
+  let offset = 0;
+  let collected = [];
+  let expectedTotal = null;
+  let version = null;
+
+  while(true){
+    const res = await callBackend('getAllStations', { offset });
+    if(!res.success || !Array.isArray(res.stations)){
+      // فشل بالمنتصف — نتجاهل هذي المحاولة بالكامل ولا نلمس الفهرس المحلي الشغّال إطلاقًا
+      // Mid-way failure — we discard this whole attempt and never touch the working local index
+      console.warn('فشل تحميل دفعة من المحطات، تم إلغاء التحديث بأمان');
+      return false;
+    }
+    collected = collected.concat(res.stations);
+    expectedTotal = res.totalCount;
+    version = res.version;
+    if(typeof onProgress === 'function') onProgress(collected.length, expectedTotal);
+    if(!res.nextOffset) break;
+    offset = res.nextOffset;
+  }
+
+  // تحقّق أخير: العدد المُجمَّع يطابق العدد المتوقّع فعليًا قبل الاستبدال — حماية إضافية من أي بيانات ناقصة صامتة
+  // Final check: the collected count actually matches the expected total before replacing — extra protection against silent incomplete data
+  if(expectedTotal !== null && collected.length !== expectedTotal){
+    console.warn('عدد المحطات المُحمَّلة لا يطابق العدد المتوقع، تم إلغاء التحديث بأمان');
+    return false;
+  }
+
+  allStationsLocal = collected;
+  isStationsLoaded = true;
+  saveStationsToLocalCache_(allStationsLocal);
+  localStorage.setItem(STATIONS_VERSION_KEY, version);
+  return true;
+}
+
+/* البحث المحلي الفوري — يطابق نفس شكل استجابة searchStation بالباك إند تمامًا، ليبقى الكود المستخدِم له بدون أي تغيير */
+/* Instant local search — mirrors the exact same response shape as the backend's searchStation, so calling code needs zero changes */
+function searchStationLocal(query){
+  if(!query) return { found:false };
+  // تطبيع الأرقام العربية للإنجليزية قبل المقارنة — كان مفقودًا هنا، وهذا سبب فشل البحث بالأرقام العربية تحديدًا
+  // Normalize Arabic-Indic digits to Western digits before comparing — this was missing here, causing Arabic-numeral searches to fail
+  const q = normalizeDigits(String(query).trim()).toUpperCase();
+  if(!q) return { found:false };
+  const st = allStationsLocal.find(s => normalizeDigits(String(s.id)).toUpperCase() === q);
+  if(!st) return { found:false };
+  return {
+    found:true, id:st.id, type:st.type,
+    name:(st.type === 'توزيع' ? 'محطة توزيع ' : 'محطة تحويل ') + st.id + (st.region ? ' — ' + st.region : ''),
+    lat:st.lat, lng:st.lng, region:st.region, feeder:st.feeder
+  };
+}
+
+/* ============================================================
+ *  فحص حالة الاتصال بالخادم (Google Apps Script)
+ *  Server connection health check — pings the backend periodically
+ *  فحص دوري + عند عودة التبويب لواجهة العرض، بلا تكرار مفرط
+ * ============================================================ */
+const connDot = document.getElementById('connDot');
+const connLabel = document.getElementById('connLabel');
+const statusBar = document.getElementById('statusBar');
+const lastUpdateLabel = document.getElementById('lastUpdateLabel');
+const CONN_CHECK_INTERVAL_MS = 60 * 1000; // فحص كل دقيقة / check every minute
+const CONN_CHECK_TIMEOUT_MS = 15 * 1000; // مهلة أطول تراعي بطء إقلاع Apps Script الباردة / generous timeout for Apps Script cold starts
+let lastSuccessfulCheckAt = null;
+
+// نص نسبي لوقت آخر تحديث ناجح (قبل دقيقة، قبل ٥ دقائق...) — يُحدَّث كل ٣٠ ثانية
+// Relative "last updated" text, refreshed every 30s regardless of ping timing
+function formatRelativeTime(date){
+  const diffSec = Math.floor((Date.now() - date.getTime()) / 1000);
+  if(diffSec < 15) return 'الآن';
+  if(diffSec < 60) return `قبل ${diffSec} ثانية`;
+  const diffMin = Math.floor(diffSec / 60);
+  if(diffMin < 60) return diffMin === 1 ? 'قبل دقيقة' : `قبل ${diffMin} دقائق`;
+  const diffHour = Math.floor(diffMin / 60);
+  return diffHour === 1 ? 'قبل ساعة' : `قبل ${diffHour} ساعات`;
+}
+function refreshLastUpdateLabel(){
+  lastUpdateLabel.textContent = lastSuccessfulCheckAt
+    ? `آخر تحديث: ${formatRelativeTime(lastSuccessfulCheckAt)}`
+    : 'آخر تحديث: —';
+}
+// نفس منطق "آخر تحديث" لكن داخل البطاقات الثلاث المتوسّعة، بلا بادئة "آخر تحديث:"
+// Same relative-time logic reused inside the three expandable cards, without the label prefix
+function refreshPanelUpdateLabels(){
+  const txt = lastStatsFetch ? formatRelativeTime(new Date(lastStatsFetch)) : '—';
+  ['panelStationsUpdate','panelAdditionsUpdate','panelEditsUpdate'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.textContent = txt;
+  });
+}
+setInterval(()=>{ refreshLastUpdateLabel(); refreshPanelUpdateLabels(); }, 30 * 1000);
+
+async function checkConnection(){
+  connDot.className = 'conn-dot checking';
+  connLabel.textContent = 'جاري الاتصال...';
+  try{
+    // فحص مخصص وخفيف جداً (بلا أي قراءة شيت) — لا نستخدم getStats هنا
+    // Dedicated ultra-light ping (zero sheet reads) — deliberately not getStats
+    const res = await Promise.race([
+      callBackend('ping'),
+      new Promise((_, reject)=> setTimeout(()=> reject(new Error('timeout')), CONN_CHECK_TIMEOUT_MS))
+    ]);
+    if(res && res.success){
+      connDot.className = 'conn-dot online';
+      connLabel.textContent = 'متصل';
+      statusBar.title = 'متصل بقاعدة البيانات — البيانات محدثة';
+      lastSuccessfulCheckAt = new Date();
+      refreshLastUpdateLabel();
+    } else {
+      throw new Error('backend-error');
+    }
+  }catch(err){
+    connDot.className = 'conn-dot offline';
+    connLabel.textContent = 'بدون اتصال';
+    statusBar.title = 'تعذّر الوصول لقاعدة البيانات — قد تكون البيانات غير محدثة';
+    // لا نحدّث lastSuccessfulCheckAt هنا عمداً — يبقى يعرض آخر نجاح فعلي، لا وقت الفحص الفاشل
+  }
+}
+/* عرض التاريخ الميلادي بشارة الحالة أعلى الصفحة — يتحدّث تلقائيًا إذا بقي الموقع مفتوحًا عبر منتصف الليل / Displays the Gregorian date in the top status pill — auto-updates if the site stays open past midnight */
+function renderHeaderDate(){
+  const el = document.getElementById('headerDateLine');
+  // نُجبر التقويم الميلادي صراحة — منطقة ar-SA تستخدم الهجري افتراضيًا بمعظم المتصفحات ما لم نحدد التقويم
+  // Explicitly force the Gregorian calendar — the ar-SA locale defaults to Hijri in most browsers unless specified
+  if(el) el.textContent = new Date().toLocaleDateString('ar-SA-u-ca-gregory', {day:'numeric', month:'long', year:'numeric'});
+}
+renderHeaderDate();
+setInterval(renderHeaderDate, 60 * 60 * 1000);
+setTimeout(checkConnection, 1500); // تأخير بسيط كي لا يتزاحم مع طلبات تحميل الصفحة الأولى
+setInterval(checkConnection, CONN_CHECK_INTERVAL_MS);
+
+/* زر تحديث البيانات اليدوي — شبكة أمان اختيارية، يمسح الكاش المؤقت فورًا عند الحاجة فقط / Manual data-refresh button — optional safety net, clears the cache instantly only when needed */
+document.getElementById('dataRefreshBtn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('dataRefreshBtn');
+  const session = JSON.parse(localStorage.getItem('sec-session') || '{}');
+  if(!session.phone){
+    alert('سجّل دخول أولًا لاستخدام تحديث البيانات');
+    return;
+  }
+  btn.classList.add('spinning');
+  btn.disabled = true;
+  try{
+    await callBackend('clearSearchCache', { phone: session.phone });
+    await refreshStationsLocalCache_(showLoadProgress_); // تحديث فهرس البحث المحلي فعليًا — هذا هو مصدر البحث الأساسي الآن
+  }catch(e){}
+  btn.classList.remove('spinning');
+  btn.disabled = false;
+});
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState === 'visible') checkConnection();
+});
+
+let lastStatsFetch = 0;
+const STATS_STALE_MS = 3 * 60 * 1000; // لا يُعاد الجلب إلا بعد مرور 3 دقائق على آخر تحديث فعلي
+
+async function loadStats(){
+  try{
+    const stats = await callBackend('getStats');
+    lastStatsFetch = Date.now();
+    if(!stats.success) return;
+    document.getElementById('countStations').textContent = stats.totalStations;
+    document.getElementById('countAdditions').textContent = stats.additions;
+    document.getElementById('countEdits').textContent = stats.edits;
+    document.getElementById('panelStations').innerHTML = `
+      <div class="stat-panel-row"><span><span class="legend-dot" style="background:var(--teal)"></span>محطات توزيع</span><span class="v">${stats.distribution}</span></div>
+      <div class="stat-panel-row"><span><span class="legend-dot" style="background:var(--blue-mid)"></span>محطات تحويل</span><span class="v">${stats.substations}</span></div>
+      <div class="stat-panel-row"><span>آخر تحديث</span><span class="v" id="panelStationsUpdate">—</span></div>`;
+    document.getElementById('panelAdditions').innerHTML = `
+      <div class="stat-panel-row"><span><span class="legend-dot" style="background:var(--teal)"></span>توزيع</span><span class="v">${stats.additionsDistribution}</span></div>
+      <div class="stat-panel-row"><span><span class="legend-dot" style="background:var(--blue-mid)"></span>تحويل</span><span class="v">${stats.additionsSubstations}</span></div>
+      <div class="stat-panel-row"><span>آخر تحديث</span><span class="v" id="panelAdditionsUpdate">—</span></div>`;
+    document.getElementById('panelEdits').innerHTML = `
+      <div class="stat-panel-row"><span><span class="legend-dot" style="background:var(--teal)"></span>توزيع</span><span class="v">${stats.editsDistribution}</span></div>
+      <div class="stat-panel-row"><span><span class="legend-dot" style="background:var(--blue-mid)"></span>تحويل</span><span class="v">${stats.editsSubstations}</span></div>
+      <div class="stat-panel-row"><span>آخر تحديث</span><span class="v" id="panelEditsUpdate">—</span></div>`;
+    refreshPanelUpdateLabels();
+  }catch(e){ console.error('فشل تحميل الإحصائيات', e); }
+}
+loadStats();
+
+/* ===== تحديث صامت عند عودة التبويب من حالة الخمول، مو على فترات ثابتة ===== */
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState === 'visible' && (Date.now() - lastStatsFetch) > STATS_STALE_MS){
+    loadStats();
+  }
+});
+window.addEventListener('focus', ()=>{
+  if((Date.now() - lastStatsFetch) > STATS_STALE_MS){
+    loadStats();
+  }
+});
+
+const refreshBtn = document.getElementById('refreshStatsBtn');
+const refreshIcon = document.getElementById('refreshIcon');
+refreshBtn.addEventListener('click', async ()=>{
+  if(refreshBtn.disabled) return;
+  refreshBtn.disabled = true;
+  refreshIcon.style.transition = 'transform .6s linear';
+  refreshIcon.style.transform = 'rotate(360deg)';
+  await loadStats();
+  setTimeout(()=>{
+    refreshIcon.style.transform = 'rotate(0deg)';
+    refreshBtn.disabled = false;
+  }, 600);
+});
+
+/* ============================================================
+ *  شريط الذاكرة المستخدمة محلياً (localStorage)
+ *  Local storage usage bar — reflects real browser storage bytes
+ *  السقف 50 ميجا كما حُدِّد صراحة — ليس RAM الجهاز، بل مساحة التخزين المحلي للمتصفح
+ *  Cap explicitly set to 50MB — not device RAM, just browser local storage
+ * ============================================================ */
+const ASSUMED_STORAGE_CAP_MB = 50;
+function updateStorageDisplay(){
+  let totalBytes = 0;
+  for(let i=0; i<localStorage.length; i++){
+    const key = localStorage.key(i);
+    const value = localStorage.getItem(key) || '';
+    totalBytes += (key.length + value.length) * 2; // تقدير UTF-16 تقريبي / rough UTF-16 byte estimate
+  }
+  const totalMB = totalBytes / (1024*1024);
+  const percent = Math.min(100, Math.round((totalMB / ASSUMED_STORAGE_CAP_MB) * 100));
+  document.getElementById('storageUsageLabel').textContent = `${totalMB.toFixed(2)} MB / ${ASSUMED_STORAGE_CAP_MB} MB`;
+  document.getElementById('storageBarFill').style.width = percent + '%';
+}
+updateStorageDisplay();
+
+document.getElementById('clearStorageBtn').addEventListener('click', ()=>{
+  if(!confirm('مسح البيانات المؤقتة المحفوظة بجهازك (المحطات الأخيرة وغيرها)؟ لن يمسّ هذا جلستك الحالية ولا بيانات الشيت.')) return;
+  // نحافظ على الجلسة وتفضيل الثيم عمداً — "مسح الذاكرة" يعني بيانات مؤقتة، لا تسجيل الخروج
+  // Preserve session + theme preference deliberately — "clear cache" ≠ logout
+  const preserve = ['sec-session', 'sec-phone', 'sec-theme'];
+  const preserved = {};
+  preserve.forEach(k=>{ const v = localStorage.getItem(k); if(v!==null) preserved[k]=v; });
+  localStorage.clear();
+  Object.entries(preserved).forEach(([k,v])=> localStorage.setItem(k,v));
+  updateStorageDisplay();
+  renderRecentPanel();
+});
+
+document.querySelectorAll('.stat-card').forEach(card=>{
+  card.addEventListener('click', ()=>{
+    const wasOpen = card.classList.contains('expanded');
+    document.querySelectorAll('.stat-card').forEach(c=>c.classList.remove('expanded'));
+    if(!wasOpen) card.classList.add('expanded');
+  });
+});
+
+/* ===== تبديل الثيم ===== */
+const themeToggle = document.getElementById('themeToggle');
+const headerActions = document.getElementById('headerActions');
+const mobileUserMenu = document.getElementById('mobileUserMenu');
+/* ===== حالة تسجيل الدخول بالهيدر — جلسة متجددة بمدة وردية كاملة (12 ساعة) من آخر نشاط فعلي ===== */
+/* Header login state — session renews for a full shift duration (12h) from the last real activity */
+const SESSION_MAX_AGE_MS = 12 * 60 * 60 * 1000;
+function forceLogoutExpiredSession_(){
+  localStorage.removeItem('sec-session');
+  localStorage.removeItem('sec-phone');
+  if(location.pathname.indexOf('auth.html') === -1) location.href = 'auth.html';
+}
+/* فحص دوري يفرض الخروج فعليًا حتى لو التبويب بقي مفتوحًا بدون إعادة تحميل طوال الوردية / Periodic check that enforces logout even if the tab stays open without reload for the whole shift */
+setInterval(function(){
+  const raw = localStorage.getItem('sec-session');
+  if(!raw) return;
+  try{
+    const session = JSON.parse(raw);
+    if(Date.now() - (session.ts || 0) > SESSION_MAX_AGE_MS) forceLogoutExpiredSession_();
+  }catch(e){}
+}, 5 * 60 * 1000);
+
+(function(){
+  const raw = localStorage.getItem('sec-session');
+  if(!raw) return;
+  try{
+    const session = JSON.parse(raw);
+    const age = Date.now() - (session.ts || 0);
+    if(age > SESSION_MAX_AGE_MS){
+      localStorage.removeItem('sec-session');
+      localStorage.removeItem('sec-phone');
+      return; // الجلسة منتهية، الزر يبقى "تسجيل الدخول" الافتراضي
+    }
+    session.ts = Date.now(); // تجديد النافذة من آخر نشاط فعلي
+    localStorage.setItem('sec-session', JSON.stringify(session));
+
+    const loginBtn = document.getElementById('loginBtn');
+    if(!loginBtn || !session.name) return;
+
+    headerActions.classList.add('logged-in');
+    loginBtn.textContent = session.name.split(' ')[0];
+    loginBtn.setAttribute('href', session.role === 'admin' ? 'admin.html' : 'member.html');
+
+    const logoutBtn = document.createElement('button');
+    logoutBtn.id = 'logoutBtnDesktop';
+    logoutBtn.className = 'logout-icon-btn';
+    logoutBtn.title = 'تسجيل الخروج';
+    logoutBtn.setAttribute('aria-label', 'تسجيل الخروج');
+    logoutBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>';
+    const doLogout = ()=>{
+      if(confirm('تسجيل الخروج؟')){
+        localStorage.removeItem('sec-session');
+        localStorage.removeItem('sec-phone');
+        location.reload();
+      }
+    };
+    logoutBtn.addEventListener('click', doLogout);
+    loginBtn.parentElement.insertBefore(logoutBtn, loginBtn.nextSibling);
+
+    // ===== تعبئة القائمة المنسدلة الخاصة بالجوال بنفس بيانات الجلسة =====
+    document.getElementById('mobileMenuName').textContent = session.name.split(' ')[0];
+    document.getElementById('mobileLogoutBtn').style.display = 'block';
+    document.getElementById('mobileLogoutBtn').addEventListener('click', doLogout);
+    if(session.role === 'admin'){
+      document.getElementById('mobileAdminLink').style.display = 'block';
+    }
+  }catch(e){}
+})();
+
+const mobileMenuTrigger = document.getElementById('mobileMenuTrigger');
+mobileMenuTrigger.addEventListener('click', (e)=>{
+  e.stopPropagation();
+  mobileUserMenu.classList.toggle('open');
+});
+document.addEventListener('click', (e)=>{
+  if(!mobileUserMenu.contains(e.target)) mobileUserMenu.classList.remove('open');
+});
+
+const themeSwitchMobile = document.getElementById('themeSwitchMobile');
+function syncThemeSwitch(){
+  const isDark = document.body.getAttribute('data-theme') === 'dark';
+  themeSwitchMobile.classList.toggle('on', isDark);
+}
+syncThemeSwitch();
+themeSwitchMobile.addEventListener('click', ()=>{
+  const cur = document.body.getAttribute('data-theme');
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.body.setAttribute('data-theme', next);
+  localStorage.setItem('sec-theme', next);
+  updateGlobeColors();
+  syncThemeSwitch();
+});
+
+themeToggle.addEventListener('click', ()=>{
+  const cur = document.body.getAttribute('data-theme');
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.body.setAttribute('data-theme', next);
+  localStorage.setItem('sec-theme', next);
+  updateGlobeColors();
+  syncThemeSwitch();
+});
+
+/* ===== الكرة الأرضية Three.js — محصورة بحدود globeStage فقط ===== */
+const canvas = document.getElementById('globe-canvas');
+const stageEl = document.getElementById('globeStage');
+const heroSection = document.getElementById('heroSection');
+const scene = new THREE.Scene();
+function stageSize(){
+  return { w: stageEl.clientWidth, h: stageEl.clientHeight };
+}
+const camera = new THREE.PerspectiveCamera(50, stageSize().w/stageSize().h, 0.1, 1000);
+camera.position.z = 4.1;
+function applyResponsiveGlobeOffset(){
+  const { w } = stageSize();
+  if(w <= 420){ camera.position.z = 4.9; }
+  else if(w <= 600){ camera.position.z = 4.5; }
+  else { camera.position.z = 3.9; }
+}
+const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
+renderer.setSize(stageSize().w, stageSize().h);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+
+const globeGroup = new THREE.Group();
+scene.add(globeGroup);
+
+const wireGeo = new THREE.IcosahedronGeometry(1.5, 3);
+const wireMat = new THREE.MeshBasicMaterial({color:0x4DD6B5, wireframe:true, transparent:true, opacity:0.18});
+const wireSphere = new THREE.Mesh(wireGeo, wireMat);
+globeGroup.add(wireSphere);
+
+const ringGeo = new THREE.SphereGeometry(1.5, 24, 24);
+const ringMat = new THREE.MeshBasicMaterial({color:0x2E7DD1, wireframe:true, transparent:true, opacity:0.10});
+globeGroup.add(new THREE.Mesh(ringGeo, ringMat));
+
+function latLngToVec3(lat, lng, radius){
+  const phi = (90-lat)*(Math.PI/180);
+  const theta = (lng+180)*(Math.PI/180);
+  return new THREE.Vector3(
+    -radius*Math.sin(phi)*Math.cos(theta),
+    radius*Math.cos(phi),
+    radius*Math.sin(phi)*Math.sin(theta)
+  );
+}
+
+/* ===== توجيه الكرة نحو نقطة (lat,lng) بحيث تواجه الكاميرا مباشرة ===== */
+function targetRotationYFor(lat, lng){
+  const p = latLngToVec3(lat, lng, 1);
+  // الزاوية التي تجعل z (المواجه للكاميرا) أكبر ما يمكن عند تدوير المجموعة حول Y
+  return Math.atan2(-p.x, p.z);
+}
+
+function shortestAngleDelta(from, to){
+  let d = (to - from) % (Math.PI*2);
+  if(d > Math.PI) d -= Math.PI*2;
+  if(d < -Math.PI) d += Math.PI*2;
+  return d;
+}
+
+function rotateGlobeToward(lat, lng, duration, onDone){
+  const target = targetRotationYFor(lat, lng);
+  const start = globeGroup.rotation.y;
+  const delta = shortestAngleDelta(start, target);
+  const t0 = performance.now();
+  function step(){
+    const elapsed = performance.now() - t0;
+    const p = Math.min(elapsed/duration, 1);
+    const eased = 1 - Math.pow(1-p, 3); // ease-out cubic
+    globeGroup.rotation.y = start + delta*eased;
+    if(p < 1){ requestAnimationFrame(step); }
+    else if(onDone){ onDone(); }
+  }
+  requestAnimationFrame(step);
+}
+
+const demoPoints = [];
+for(let i=0;i<46;i++){
+  demoPoints.push({lat:(Math.random()*160)-80, lng:(Math.random()*360)-180});
+}
+const pointsGroup = new THREE.Group();
+const pointGeo = new THREE.SphereGeometry(0.022, 8, 8);
+let pointMat = new THREE.MeshBasicMaterial({color:0x4DD6B5});
+demoPoints.forEach(p=>{
+  const m = new THREE.Mesh(pointGeo, pointMat);
+  const v = latLngToVec3(p.lat, p.lng, 1.52);
+  m.position.copy(v);
+  pointsGroup.add(m);
+});
+globeGroup.add(pointsGroup);
+
+function updateGlobeColors(){
+  const dark = document.body.getAttribute('data-theme')==='dark';
+  // الوضع الداكن: خطوط فيروزية + توهج أزرق + نقاط خضراء
+  // الوضع الفاتح: خطوط أزرق فاتح + نقاط خضراء داكنة + توهج خفيف جداً
+  wireMat.color.set(dark ? 0x4DD6B5 : 0x6D9EEB);
+  ringMat.color.set(dark ? 0x4A86E8 : 0x4A86E8);
+  pointMat.color.set(dark ? 0x2ECC71 : 0x0B804B);
+  wireMat.opacity = dark ? 0.20 : 0.30;
+  ringMat.opacity = dark ? 0.13 : 0.07;
+}
+updateGlobeColors();
+
+let rotSpeed = 0.0016;
+let introDone = false, introFrames = 0, introChecked = false;
+const introStartTime = performance.now();
+function finishIntro(){
+  if(introDone) return;
+  introDone = true;
+  const overlay = document.getElementById('introOverlay');
+  overlay.classList.add('fade-out');
+  setTimeout(()=> overlay.classList.add('hidden-done'), 480);
+}
+function animate(){
+  requestAnimationFrame(animate);
+  globeGroup.rotation.y += rotSpeed;
+  globeGroup.rotation.x = 0.15;
+  renderer.render(scene, camera);
+
+  if(!introDone){
+    introFrames++;
+    const elapsed = performance.now() - introStartTime;
+    if(!introChecked && elapsed >= 400){
+      introChecked = true;
+      const fps = introFrames / (elapsed/1000);
+      if(fps < 40) finishIntro(); // جهاز ضعيف — تخطّي الشاشة الافتتاحية فوراً بدل التقطيع
+    }
+    if(elapsed >= 2300) finishIntro(); // الحد الأعلى الطبيعي للتسلسل الكامل
+  }
+}
+animate();
+
+function syncRendererToStage(){
+  const { w, h } = stageSize();
+  if(w === 0 || h === 0) return;
+  camera.aspect = w/h;
+  applyResponsiveGlobeOffset();
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+  if(leafletMap) leafletMap.invalidateSize();
+  syncHeaderHeight();
+  alignHeroBelowGlobe();
+}
+new ResizeObserver(syncRendererToStage).observe(stageEl);
+window.addEventListener('resize', syncRendererToStage);
+applyResponsiveGlobeOffset();
+
+/* ============================================================
+ *  محاذاة العدسة/زر الدخول بأسفل الكرة عبر قياس حقيقي — لا حسابات CSS تقديرية
+ *  Aligns the lens/login button to the globe's real bottom edge via actual measurement — no estimated CSS math
+ * ============================================================ */
+/* ============================================================
+ *  قياس فعلي لارتفاع الهيدر الثابت (position:fixed) — يمنع أي عنصر تحته من الاختفاء خلفه
+ *  Real measurement of the fixed header's height — prevents anything beneath it from hiding behind it
+ * ============================================================ */
+function syncHeaderHeight(){
+  const header = document.querySelector('header');
+  if(!header) return;
+  const h = header.getBoundingClientRect().height;
+  document.documentElement.style.setProperty('--header-h', h + 'px');
+}
+window.addEventListener('load', syncHeaderHeight);
+window.addEventListener('resize', syncHeaderHeight);
+setTimeout(syncHeaderHeight, 300); // إعادة قياس بعد استقرار الخطوط والشعار / Re-measure after fonts and logo settle
+syncHeaderHeight();
+
+function alignHeroBelowGlobe(){
+  const heading = document.querySelector('.hero-heading');
+  const globe = document.getElementById('globeStage');
+  if(!heading || !globe || globe.classList.contains('map-active')) return;
+  const headingBottom = heading.getBoundingClientRect().bottom;
+  const globeRect = globe.getBoundingClientRect();
+  // الكرة المرسومة لا تملأ صندوقها المربّع بالكامل (تأطير الكاميرا يترك هامشًا) — نقدّر ٨٨٪ من الارتفاع كموضع قاعها المرئي الفعلي
+  // The rendered sphere doesn't fill its square box completely (camera framing leaves a margin) — estimate 88% of the height as its true visible bottom
+  const visibleGlobeBottom = globeRect.top + (globeRect.height * 0.88);
+  const extraGap = Math.max(0, visibleGlobeBottom - headingBottom);
+  const searchWrap = document.querySelector('.search-wrap');
+  const guestCta = document.querySelector('.guest-login-cta');
+  if(searchWrap) searchWrap.style.marginTop = (extraGap + 2) + 'px';
+  if(guestCta) guestCta.style.marginTop = (extraGap + 46) + 'px';
+}
+// إعادة القياس بعد استقرار الخطوط والتخطيط الكامل، لأن القياس الأول عند التحميل قد يسبق اكتمال الخطوط / Re-measure after fonts and layout fully settle, since the first measurement on load may precede font completion
+window.addEventListener('load', alignHeroBelowGlobe);
+setTimeout(alignHeroBelowGlobe, 400);
+setTimeout(alignHeroBelowGlobe, 1200);
+
+/* ===== البحث + الخريطة ===== */
+const searchLens = document.getElementById('searchLens');
+const searchInput = document.getElementById('searchInput');
+const searchHint = document.getElementById('searchHint');
+const searchLensIcon = document.getElementById('searchLensIcon');
+const heroContent = document.getElementById('heroContent');
+const mapContainer = document.getElementById('map-container');
+const searchAndBackRow = document.getElementById('searchAndBackRow');
+const stationTable = document.getElementById('stationTable');
+const zoomControls = document.getElementById('zoomControls');
+const mapToolHint = document.getElementById('mapToolHint');
+const mapModeChip = document.getElementById('mapModeChip');
+const mapModePanel = document.getElementById('mapModePanel');
+const cardsSection = document.getElementById('cardsSection');
+const stationSearchBar = document.getElementById('stationSearchBar');
+const stationSearchInput = document.getElementById('stationSearchInput');
+const stationSearchHint = document.getElementById('stationSearchHint');
+const measureToggleBtn = document.getElementById('measureToggleBtn');
+const routeToggleBtn = document.getElementById('routeToggleBtn');
+const nearbyToggleBtn = document.getElementById('nearbyToggleBtn');
+const feederToggleBtn = document.getElementById('feederToggleBtn');
+const moreToggleBtn = document.getElementById('moreToggleBtn');
+const outageToggleBtn = document.getElementById('outageToggleBtn');
+const outagePanel = document.getElementById('outagePanel');
+document.getElementById('zoomInBtn').addEventListener('click', ()=>{ if(leafletMap) leafletMap.zoomIn(); });
+document.getElementById('zoomOutBtn').addEventListener('click', ()=>{ if(leafletMap) leafletMap.zoomOut(); });
+const morePanel = document.getElementById('morePanel');
+
+document.getElementById('searchLensIcon').addEventListener('click', (e)=>{
+  if(searchLens.classList.contains('open') && searchInput.value.trim()){
+    e.stopPropagation();
+    performSearch();
+  }
+});
+
+searchLens.addEventListener('click', (e)=>{
+  if(!searchLens.classList.contains('open')){
+    searchLens.classList.add('open');
+    setTimeout(()=>searchInput.focus(), 200);
+  }
+});
+document.addEventListener('click', (e)=>{
+  if(!searchLens.contains(e.target) && searchInput.value==='' && !mapContainer.classList.contains('active')){
+    searchLens.classList.remove('open');
+  }
+});
+
+function normalizeDigits(str){
+  const arabicIndic = '٠١٢٣٤٥٦٧٨٩';
+  return str.replace(/[٠-٩]/g, d=>arabicIndic.indexOf(d));
+}
+
+function hasValidSession(){
+  const raw = localStorage.getItem('sec-session');
+  if(!raw) return false;
+  try{
+    const session = JSON.parse(raw);
+    return (Date.now() - (session.ts || 0)) <= SESSION_MAX_AGE_MS;
+  }catch(e){ return false; }
+}
+
+if(!hasValidSession()){
+  document.body.classList.add('guest-mode');
+} else {
+  initStationsLocalSearch(); // تحميل فهرس البحث المحلي فقط للمستخدمين المسجّلين دخولهم فعليًا
+}
+
+/* بحث ذكي — يستخدم الفهرس المحلي فورًا إذا كان جاهزًا، وإلا يرجع تلقائيًا للخادم كخطة احتياطية آمنة (مثلاً أثناء التحميل الأول قبل اكتماله) */
+/* Smart search — uses the local index instantly if ready, otherwise safely falls back to the server (e.g., during the first load before it finishes) */
+async function searchStationSmart(query){
+  if(isStationsLoaded) return searchStationLocal(query);
+  return await callBackend('searchStation', { query });
+}
+
+/* تحديث فوري للفهرس المحلي عند نجاح إضافة أو تعديل — بدون انتظار دورة فحص الإصدار التالية، حتى يرى المستخدم نفسه نتيجة عمله فورًا ببحثه القادم */
+/* Instant local-index update on a successful add/edit — no need to wait for the next version-check cycle, so the user immediately sees their own change on their next search */
+function upsertStationInLocalCache_(station){
+  if(!isStationsLoaded) return; // الفهرس لسه ما تحمّل، ما فيه شي نحدّثه محليًا
+  const idx = allStationsLocal.findIndex(s => String(s.id).toUpperCase() === String(station.id).toUpperCase() && s.type === station.type);
+  if(idx === -1) allStationsLocal.push(station);
+  else allStationsLocal[idx] = station;
+  saveStationsToLocalCache_(allStationsLocal);
+}
+
+let isSearching = false;
+function setSearchProgress(active, prefix){
+  prefix = prefix || 'search';
+  const progress = document.getElementById(prefix + 'Progress');
+  const fill = document.getElementById(prefix + 'ProgressFill');
+  const pct = document.getElementById(prefix + 'ProgressPct');
+  if(!active){
+    progress.classList.remove('show');
+    fill.style.width = '0%';
+    pct.textContent = '0%';
+    return null;
+  }
+  progress.classList.add('show');
+  let p = 0;
+  fill.style.width = '0%';
+  pct.textContent = '0%';
+  const timer = setInterval(()=>{
+    p = Math.min(p + Math.random()*10, 92);
+    fill.style.width = p + '%';
+    pct.textContent = Math.round(p) + '%';
+  }, 150);
+  return {
+    finish(){
+      clearInterval(timer);
+      fill.style.width = '100%';
+      pct.textContent = '100%';
+      setTimeout(()=> setSearchProgress(false, prefix), 250);
+    },
+    stop(){
+      clearInterval(timer);
+      setSearchProgress(false, prefix);
+    }
+  };
+}
+
+/* ============================================================
+ *  بطاقة "المحطة غير موجودة" — تُستخدم من بحث الصفحة الرئيسية وبحث صفحة المحطة معًا
+ *  "Station not found" card — shared by the main search and the station-page search
+ * ============================================================ */
+function renderNotFoundCard(container, rawQuery, onRetry){
+  container.innerHTML = `
+    <div class="not-found-card">
+      <div class="nfc-head">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span>المحطة غير موجودة</span>
+      </div>
+      <div class="nfc-id">رقم المحطة: <b>${escapeHtml(rawQuery)}</b></div>
+      <div class="nfc-question">هل تريد إضافتها؟</div>
+      <div class="nfc-actions">
+        <button class="nfc-btn primary" id="nfcAddBtn">+ إضافة محطة</button>
+        <button class="nfc-btn" id="nfcRetryBtn">🔍 بحث آخر</button>
+      </div>
+    </div>`;
+  document.getElementById('nfcAddBtn').addEventListener('click', ()=> goAddStationFromNotFound(rawQuery));
+  document.getElementById('nfcRetryBtn').addEventListener('click', onRetry);
+}
+/* الانتقال لإضافة المحطة المبحوث عنها — يرجع للصفحة الرئيسية أولًا إذا كانت الخريطة مفتوحة / Returns home first if the map is open, then opens the form */
+function goAddStationFromNotFound(idValue){
+  const wasMapActive = mapContainer.classList.contains('active');
+  if(wasMapActive) goBackToSearch();
+  openAddStationPanel(idValue);
+  setTimeout(()=>{
+    const input = document.getElementById('newStationId');
+    input.scrollIntoView({behavior:'smooth', block:'center'});
+    input.focus();
+  }, wasMapActive ? 80 : 0);
+}
+function retryMainSearch(){
+  searchHint.innerHTML = '';
+  searchHint.className = 'search-hint';
+  searchInput.value = '';
+  searchInput.focus();
+}
+function retryStationSearch(){
+  stationSearchHint.innerHTML = '';
+  stationSearchHint.className = 'station-search-hint';
+  stationSearchInput.value = '';
+  stationSearchInput.focus();
+}
+
+async function performSearch(){
+  if(isSearching) return; // منع الضغط المتكرر أثناء البحث الجاري
+  const raw = searchInput.value.trim();
+  if(!raw) return;
+
+  if(!hasValidSession()){
+    searchHint.innerHTML = 'سجّل دخول للحصول على النتيجة — <a href="auth.html" style="color:var(--teal);font-weight:500;text-decoration:underline">تسجيل الدخول</a>';
+    searchHint.className = 'search-hint err';
+    return;
+  }
+
+  isSearching = true;
+  searchLensIcon.style.opacity = '0.5';
+  searchHint.textContent = '';
+  searchHint.className = 'search-hint';
+  const progress = setSearchProgress(true);
+
+  try{
+    const result = await searchStationSmart(raw);
+    if(result.found){
+      progress.finish();
+      goToStation({
+        id: result.id, name: result.name, type: result.type,
+        lat: result.lat, lng: result.lng,
+        region: result.region, feeder: result.feeder,
+        _dataBuiltAt: result['تشخيص وقت بناء الكاش']
+      });
+    } else {
+      progress.stop();
+      renderNotFoundCard(searchHint, raw, retryMainSearch);
+    }
+  }catch(err){
+    progress.stop();
+    searchHint.textContent = 'تعذّر الاتصال بالخادم، حاول مرة أخرى';
+    searchHint.className = 'search-hint err';
+  }finally{
+    isSearching = false;
+    searchLensIcon.style.opacity = '';
+  }
+}
+
+searchInput.addEventListener('keydown', (e)=>{
+  if(e.key==='Enter') performSearch();
+});
+
+/* ============================================================
+ *  بحث سريع من داخل صفحة المحطة — بدون رجوع للصفحة الرئيسية
+ *  Quick search from within the station page — no need to go back
+ * ============================================================ */
+let isStationPageSearching = false;
+async function performStationPageSearch(){
+  if(isStationPageSearching) return; // منع الضغط المتكرر أثناء البحث الجاري
+  const raw = stationSearchInput.value.trim();
+  if(!raw) return;
+
+  if(!hasValidSession()){
+    stationSearchHint.innerHTML = 'سجّل دخول للحصول على النتيجة — <a href="auth.html" style="color:var(--teal);font-weight:500;text-decoration:underline">تسجيل الدخول</a>';
+    stationSearchHint.className = 'station-search-hint err';
+    return;
+  }
+
+  isStationPageSearching = true;
+  stationSearchHint.textContent = '';
+  stationSearchHint.className = 'station-search-hint';
+  const progress = setSearchProgress(true, 'stationSearch');
+
+  try{
+    const result = await searchStationSmart(raw);
+    if(result.found){
+      progress.finish();
+      stationSearchInput.value = '';
+      goToStation({
+        id: result.id, name: result.name, type: result.type,
+        lat: result.lat, lng: result.lng,
+        region: result.region, feeder: result.feeder,
+        _dataBuiltAt: result['تشخيص وقت بناء الكاش']
+      });
+    } else {
+      progress.stop();
+      renderNotFoundCard(stationSearchHint, raw, retryStationSearch);
+    }
+  }catch(err){
+    progress.stop();
+    stationSearchHint.textContent = 'تعذّر الاتصال بالخادم، حاول مرة أخرى';
+    stationSearchHint.className = 'station-search-hint err';
+  }finally{
+    isStationPageSearching = false;
+  }
+}
+stationSearchInput.addEventListener('keydown', (e)=>{
+  if(e.key==='Enter') performStationPageSearch();
+});
+document.getElementById('stationSearchLensIcon').addEventListener('click', performStationPageSearch);
+
+let leafletMap = null, currentTileLayer = null, marker = null;
+
+/* ============================================================
+ *  نظام وضع الخريطة الموحّد — تلقائي (حسب وقت الجهاز) أو يدوي
+ *  Unified map-mode system — automatic (device time) or manual
+ *  الأوضاع الأربعة: تلقائي / نهاري / ليلي / أقمار صناعية
+ *  التلقائي هو الافتراضي دائمًا حتى يبدّله المستخدم يدويًا، وبعدها يبقى على اختياره
+ * ============================================================ */
+const TILE_URL_LIGHT = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+const TILE_URL_DARK = 'https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+const SATELLITE_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+const MAP_MODE_STORAGE_KEY = 'sec-map-mode';
+let mapMode = localStorage.getItem(MAP_MODE_STORAGE_KEY) || 'auto';
+
+/* رمز لكل وضع + لون مميّز وواضح خاص به / Icon + distinct clear color per mode */
+const MAP_MODE_META = {
+  auto:      { label:'تلقائي',       color:'#1FAE8C' },
+  light:     { label:'نهاري',        color:'#C8A24E' },
+  dark:      { label:'ليلي',         color:'#2E7DD1' },
+  satellite: { label:'أقمار صناعية', color:'#8B6DD6' }
+};
+const MAP_MODE_ICON_SVG = {
+  auto: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>',
+  light: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.07" y2="4.93"/></svg>',
+  dark: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.5A8.5 8.5 0 1 1 11.5 3 6.8 6.8 0 0 0 21 12.5z"/></svg>',
+  satellite: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="6" height="6" rx="1"/><rect x="1" y="10.5" width="5" height="3" rx="0.5"/><rect x="18" y="10.5" width="5" height="3" rx="0.5"/><line x1="6" y1="12" x2="9" y2="12"/><line x1="15" y1="12" x2="18" y2="12"/><line x1="12" y1="9" x2="12" y2="4"/><circle cx="12" cy="3" r="1"/></svg>'
+};
+document.querySelectorAll('.mm-opt-icon[data-icon-mode]').forEach(el=>{
+  el.innerHTML = MAP_MODE_ICON_SVG[el.dataset.iconMode];
+});
+
+/* يحدد هل الوقت الحالي بجهاز المستخدم نهار أم ليل / Determines day or night based on device local time */
+function isDaytimeNow(){
+  const hour = new Date().getHours();
+  return hour >= 6 && hour < 18;
+}
+/* يحوّل الوضع المختار إلى نوع البلاطة الفعلي المطلوب تحميله / Resolves the selected mode to the actual tile type to load */
+function resolvedTileMode(){
+  if(mapMode === 'auto') return isDaytimeNow() ? 'light' : 'dark';
+  return mapMode;
+}
+function tileUrlFor(tileMode){
+  if(tileMode === 'satellite') return SATELLITE_URL;
+  if(tileMode === 'dark') return TILE_URL_DARK;
+  return TILE_URL_LIGHT;
+}
+/* يحدّث شريحة التحكم والقائمة المنسدلة لتعكس الوضع الحالي / Updates the chip and dropdown to reflect the current mode */
+function updateMapModeUI(){
+  const tileMode = resolvedTileMode();
+  const meta = MAP_MODE_META[tileMode];
+  const chipIcon = document.getElementById('mapModeChipIcon');
+  const chipLabel = document.getElementById('mapModeChipLabel');
+  chipIcon.innerHTML = MAP_MODE_ICON_SVG[tileMode];
+  chipIcon.style.color = meta.color;
+  chipLabel.textContent = meta.label;
+  chipLabel.style.color = meta.color;
+  document.getElementById('mapModeAutoBadge').style.display = (mapMode === 'auto') ? 'inline-block' : 'none';
+  document.querySelectorAll('.map-mode-opt').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.mode === mapMode);
+  });
+}
+/* يطبّق البلاطة المناسبة فعليًا على الخريطة / Actually applies the resolved tile layer to the map */
+function applyMapMode(){
+  if(!leafletMap) return;
+  const tileUrl = tileUrlFor(resolvedTileMode());
+  if(currentTileLayer) leafletMap.removeLayer(currentTileLayer);
+  currentTileLayer = L.tileLayer(tileUrl, {maxZoom:19}).addTo(leafletMap);
+  updateMapModeUI();
+}
+function setMapMode(mode){
+  mapMode = mode;
+  localStorage.setItem(MAP_MODE_STORAGE_KEY, mode);
+  applyMapMode();
+  closeMapModePanel();
+}
+/* تغلق كل قوائم أدوات الخريطة المنسدلة معًا — تُستدعى قبل فتح أي قائمة جديدة حتى لا تتراكم فوق بعض */
+/* Closes every map-toolbar dropdown together — called before opening any new one so they never stack on top of each other */
+function closeAllMapDropdowns(){
+  mapModePanel.classList.remove('show');
+  mapModeChip.classList.remove('open');
+  morePanel.classList.remove('show');
+  outagePanel.classList.remove('show');
+}
+function closeMapModePanel(){
+  mapModePanel.classList.remove('show');
+  mapModeChip.classList.remove('open');
+}
+mapModeChip.addEventListener('click', (e)=>{
+  e.stopPropagation();
+  const willOpen = !mapModePanel.classList.contains('show');
+  closeAllMapDropdowns();
+  if(willOpen){
+    mapModePanel.classList.add('show');
+    mapModeChip.classList.add('open');
+  }
+});
+document.querySelectorAll('.map-mode-opt').forEach(btn=>{
+  btn.addEventListener('click', ()=> setMapMode(btn.dataset.mode));
+});
+document.addEventListener('click', (e)=>{
+  if(!mapModeChip.contains(e.target) && !mapModePanel.contains(e.target)) closeMapModePanel();
+});
+/* إعادة فحص الوقت كل ٥ دقائق فقط إذا كان المستخدم على الوضع التلقائي / Re-check time every 5 min only while on auto mode */
+setInterval(()=>{ if(mapMode === 'auto' && leafletMap) applyMapMode(); }, 5 * 60 * 1000);
+
+function initMap(){
+  leafletMap = L.map('map-container', {zoomControl:false, attributionControl:false}).setView([21.54,39.19], 12);
+  applyMapMode();
+  leafletMap.on('click', (e)=>{
+    if(measureActive) handleMeasureClick(e.latlng);
+    else if(routeActive) handleRouteClick(e.latlng);
+  });
+  setTimeout(()=>leafletMap.invalidateSize(), 50);
+  setTimeout(()=>leafletMap.invalidateSize(), 400);
+}
+
+/* ===== حساب المسافة بين نقطتين بصيغة Haversine (كم) ===== */
+function haversineKm(lat1, lng1, lat2, lng2){
+  const R = 6371;
+  const dLat = (lat2-lat1)*Math.PI/180;
+  const dLng = (lng2-lng1)*Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R * 2*Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function setActiveTool(name){
+  [measureToggleBtn, routeToggleBtn].forEach(b=>b.classList.remove('active'));
+  mapToolHint.classList.remove('show');
+  if(name==='measure') measureToggleBtn.classList.add('active');
+  if(name==='route') routeToggleBtn.classList.add('active');
+}
+
+/* ===== قياس المسافة (نقطتان فأكثر بالنقر على الخريطة) ===== */
+let measureActive = false, measurePoints = [], measureLine = null, measureMarkers = [];
+function resetMeasure(){
+  measureMarkers.forEach(m=>leafletMap.removeLayer(m));
+  measureMarkers = [];
+  if(measureLine){ leafletMap.removeLayer(measureLine); measureLine = null; }
+  measurePoints = [];
+}
+measureToggleBtn.addEventListener('click', ()=>{
+  if(!leafletMap) return;
+  morePanel.classList.remove('show');
+  measureActive = !measureActive;
+  if(routeActive){ routeActive=false; }
+  resetMeasure(); resetRoute(); clearOutageMarkers();
+  if(measureActive){
+    setActiveTool('measure');
+    mapToolHint.textContent = 'اضغط نقطتين أو أكثر على الخريطة لقياس المسافة';
+    mapToolHint.classList.add('show');
+  } else {
+    setActiveTool(null);
+  }
+});
+function handleMeasureClick(latlng){
+  measurePoints.push(latlng);
+  const m = L.circleMarker(latlng, {radius:6, color:teal(), fillColor:teal(), fillOpacity:1, weight:2}).addTo(leafletMap);
+  measureMarkers.push(m);
+  if(measureLine) leafletMap.removeLayer(measureLine);
+  if(measurePoints.length > 1){
+    measureLine = L.polyline(measurePoints, {color:teal(), weight:3, dashArray:'6,6'}).addTo(leafletMap);
+    let total = 0;
+    for(let i=1;i<measurePoints.length;i++){
+      total += haversineKm(measurePoints[i-1].lat, measurePoints[i-1].lng, measurePoints[i].lat, measurePoints[i].lng);
+    }
+    mapToolHint.textContent = `المسافة الإجمالية: ${total.toFixed(2)} كم (${measurePoints.length} نقاط)`;
+  }
+}
+
+/* ===== مسار متعدد النقاط (موقعي → محطة A → محطة B → ...) — مسار شارع حقيقي عبر OSRM، مع fallback لخط مباشر ===== */
+let routeActive = false, routePoints = [], routeLine = null, routeMarkers = [];
+const OSRM_URL = 'https://router.project-osrm.org/route/v1/driving/';
+let lastOsrmCallAt = 0, osrmSeq = 0, osrmDebounceTimer = null;
+
+function resetRoute(){
+  routeMarkers.forEach(m=>leafletMap.removeLayer(m));
+  routeMarkers = [];
+  if(routeLine){ leafletMap.removeLayer(routeLine); routeLine = null; }
+  routePoints = [];
+  osrmSeq++; // إلغاء أي طلب OSRM معلّق من جولة سابقة
+  clearTimeout(osrmDebounceTimer);
+}
+routeToggleBtn.addEventListener('click', ()=>{
+  if(!leafletMap) return;
+  morePanel.classList.remove('show');
+  routeActive = !routeActive;
+  if(measureActive){ measureActive=false; }
+  resetMeasure(); resetRoute(); clearOutageMarkers();
+  if(routeActive){
+    setActiveTool('route');
+    mapToolHint.textContent = 'اضغط نقاط الطريق بالترتيب (موقعك، ثم كل محطة تنتقل لها)';
+    mapToolHint.classList.add('show');
+  } else {
+    setActiveTool(null);
+  }
+});
+
+function drawStraightRoute(){
+  if(routeLine) leafletMap.removeLayer(routeLine);
+  routeLine = L.polyline(routePoints, {color:'#C8A24E', weight:3, dashArray:'8,6'}).addTo(leafletMap);
+  let total = 0;
+  for(let i=1;i<routePoints.length;i++){
+    total += haversineKm(routePoints[i-1].lat, routePoints[i-1].lng, routePoints[i].lat, routePoints[i].lng);
+  }
+  mapToolHint.innerHTML = `خط مباشر (تقريبي) — ${routePoints.length} نقاط — ${total.toFixed(2)} كم <span style="opacity:.7">جاري محاولة جلب مسار الشارع...</span>`;
+}
+
+async function fetchOsrmRoute(mySeq){
+  const now = Date.now();
+  const wait = Math.max(0, 1000 - (now - lastOsrmCallAt)); // احترام حد طلب واحد بالثانية لخدمة OSRM
+  await new Promise(r=>setTimeout(r, wait));
+  if(mySeq !== osrmSeq) return; // النقاط تغيّرت بينما كنا ننتظر، تجاهل هذا الطلب
+
+  lastOsrmCallAt = Date.now();
+  const coordsStr = routePoints.map(p => `${p.lng},${p.lat}`).join(';');
+  try{
+    const res = await fetch(`${OSRM_URL}${coordsStr}?overview=full&geometries=geojson&alternatives=true`);
+    if(mySeq !== osrmSeq) return;
+    if(!res.ok) throw new Error('osrm-http-error');
+    const data = await res.json();
+    if(mySeq !== osrmSeq) return;
+    if(data.code !== 'Ok' || !data.routes || !data.routes[0]) throw new Error('osrm-no-route');
+
+    // لو OSRM رجّع أكثر من مسار، نختار الأقصر مسافةً تلقائياً بدل الاعتماد على المسار الافتراضي فقط
+    const route = data.routes.reduce((shortest, r) => r.distance < shortest.distance ? r : shortest, data.routes[0]);
+    const hadAlternatives = data.routes.length > 1;
+
+    const latlngs = route.geometry.coordinates.map(([lng,lat]) => [lat,lng]);
+    if(routeLine) leafletMap.removeLayer(routeLine);
+    routeLine = L.polyline(latlngs, {color:'#C8A24E', weight:4}).addTo(leafletMap);
+
+    const km = (route.distance/1000).toFixed(2);
+    const mins = Math.round(route.duration/60);
+    const altNote = hadAlternatives ? ` <span style="opacity:.6">(أقصر ${data.routes.length} بدائل متاحة)</span>` : '';
+    mapToolHint.innerHTML = `مسار شارع حقيقي — ${routePoints.length} نقاط — ${km} كم — ~${mins} دقيقة${altNote} <span style="opacity:.6">(OSRM · © OpenStreetMap)</span>`;
+  }catch(err){
+    if(mySeq !== osrmSeq) return;
+    // فشل جلب مسار الشارع (تعذّر الاتصال أو تجاوز حد الطلبات) — نبقى على الخط المباشر بدون كسر الأداة
+    mapToolHint.innerHTML = mapToolHint.innerHTML.replace('جاري محاولة جلب مسار الشارع...', 'تعذّر جلب مسار الشارع، معروض الخط المباشر');
+  }
+}
+
+function handleRouteClick(latlng){
+  routePoints.push(latlng);
+  const idx = routePoints.length;
+  const m = L.marker(latlng, {
+    icon: L.divIcon({className:'', html:`<div style="width:22px;height:22px;border-radius:50%;background:${teal()};border:2px solid #fff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;box-shadow:0 2px 6px rgba(0,0,0,.5)">${idx}</div>`, iconSize:[22,22], iconAnchor:[11,11]})
+  }).addTo(leafletMap);
+  routeMarkers.push(m);
+
+  if(routePoints.length > 1){
+    drawStraightRoute(); // عرض فوري بدون انتظار الشبكة
+    osrmSeq++;
+    const mySeq = osrmSeq;
+    clearTimeout(osrmDebounceTimer);
+    osrmDebounceTimer = setTimeout(()=> fetchOsrmRoute(mySeq), 350); // تأخير بسيط لتجميع النقرات المتتالية
+  }
+}
+
+const teal = ()=> document.body.getAttribute('data-theme')==='dark' ? '#4DD6B5':'#1FAE8C';
+
+/* ============================================================
+ *  أداة المحطات القريبة والمغذي — تفعيل مباشر بضغطة واحدة (النموذج د)
+ *  الضغط على زر مفعّل يرجّع الوضع لمحطتي تلقائيًا (بدون زر ثالث منفصل)
+ *  الضغط على الزر الآخر أثناء تفعيل أحدهما يبدّل تلقائيًا (لا يعمل الاثنان معًا)
+ * ============================================================ */
+let nearbyMarkers = [];
+function clearNearbyMarkers(){
+  nearbyMarkers.forEach(m=>leafletMap.removeLayer(m));
+  nearbyMarkers = [];
+}
+/* تحديد مستوى تكبير ذكي حسب عدد المحطات الظاهرة بدل تكبير ثابت / Smart zoom level based on visible station count instead of a fixed zoom */
+function smartZoomForCount(count){
+  if(count >= 50) return 16;
+  if(count < 10) return 18;
+  return 17;
+}
+
+/* توست تعليمي يظهر ثانيتين فقط أول مرة يُفعَّل كل وضع — بعدها الزر الأخضر ونصه المتغيّر كافيان وحدهما (النموذج د من نماذج التغذية الراجعة) */
+/* Instructional toast shown for 2 seconds only the first time each mode activates — afterward the green button and its changed label are enough on their own */
+let nearbyToastShown = false, feederToastShown = false;
+function showMapToast(text){
+  let toast = document.getElementById('mapToast');
+  if(!toast){
+    toast = document.createElement('div');
+    toast.id = 'mapToast';
+    toast.className = 'map-toast';
+    document.getElementById('globeStage').appendChild(toast);
+  }
+  toast.textContent = text;
+  toast.classList.add('show');
+  clearTimeout(toast._hideTimer);
+  toast._hideTimer = setTimeout(()=> toast.classList.remove('show'), 2000);
+}
+
+/* تحديث شكل الأزرار (أخضر + نص الحالة) حسب الوضع الحالي فعليًا / Updates button appearance (green + status label) to match the actual current state */
+function updateNearbyButtonStates(){
+  nearbyToggleBtn.classList.toggle('active', nearbyModeActive === 'nearby');
+  document.getElementById('nearbyBtnLabel').textContent = nearbyModeActive === 'nearby' ? '3كم' : 'قريب';
+  feederToggleBtn.classList.toggle('active', nearbyModeActive === 'feeder');
+  document.getElementById('feederBtnLabel').textContent = (nearbyModeActive === 'feeder' && currentStation && currentStation.feeder) ? currentStation.feeder : 'مغذي';
+}
+
+/* شارة دبوس بأسلوب قوقل ماب: بطاقة + ذيل مثلث (عند تفعيل الأرقام)، أو نقطة مصغّرة بدون نص (عند إخفائها) */
+/* شارة دبوس بأسلوب قوقل ماب: بطاقة + ذيل مثلث — الرقم يظهر دائمًا الآن، لا يوجد خيار إخفاء */
+/* Google-Maps-style pin badge: card + triangular tail — the number always shows now, no hide option */
+function nearbyPinIcon(id, color, tier, isTransformer){
+  const scale = tier===0 ? 1 : tier===1 ? 0.92 : 0.82;
+  const opacity = tier===0 ? 1 : tier===1 ? 0.92 : 0.72;
+  const w = Math.round(48*scale), h = Math.round(22*scale);
+  return L.divIcon({
+    className:'',
+    html:`<div class="nearby-pin-wrap" style="transform:scale(${scale});opacity:${opacity};transform-origin:bottom center;">
+      <div class="nearby-pin-card" style="border-color:${color}">${isTransformer ? '⚡' : ''}${id}</div>
+      <div class="nearby-pin-tail" style="border-top-color:${color}"></div>
+    </div>`,
+    iconSize:[w, h+6], iconAnchor:[w/2, h+6]
+  });
+}
+function distanceTier(km){
+  if(km < 0.1) return {tier:0, color:'#2ECC71'};       // أقل من 100م — أخضر
+  if(km <= 0.3) return {tier:1, color:'#4DD6B5'};       // 100-300م — فيروزي فاتح
+  return {tier:2, color:'#A8B5C2'};                      // أكثر من 300م — رمادي فاتح
+}
+
+let nearbyFullData = [];
+let nearbyModeActive = null; // 'nearby' | 'feeder' | null
+
+function renderNearbyMarkers(){
+  if(!nearbyModeActive || !leafletMap) return;
+  clearNearbyMarkers();
+  const zoom = leafletMap.getZoom();
+  let toShow = [];
+
+  if(zoom <= 13){
+    toShow = []; // تكبير بعيد — نعرض فقط المحطة المحددة، بلا أي نقاط أخرى
+  } else if(zoom <= 15){
+    toShow = nearbyFullData.slice().sort((a,b)=>a._dist-b._dist).slice(0,10); // أقرب 10 فقط
+  } else {
+    const b = leafletMap.getBounds();
+    toShow = nearbyFullData.filter(s => b.contains([s.lat, s.lng])); // كل ما هو داخل حدود الشاشة الحالية فقط
+  }
+
+  toShow.forEach(s=>{
+    const gmapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}&travelmode=driving`;
+    const { tier, color } = distanceTier(s._dist);
+    const isTransformer = s.type === 'تحويل';
+
+    window._nearbyStationLookup = window._nearbyStationLookup || {};
+    window._nearbyStationLookup[s.id] = s;
+
+    const marker = L.marker([s.lat, s.lng], { icon: nearbyPinIcon(s.id, color, tier, isTransformer) });
+    marker.bindPopup(`
+      <div style="font-family:'IBM Plex Sans Arabic',sans-serif;direction:rtl;min-width:170px;font-size:13px">
+        <b>${s.name || s.id}</b><br>
+        رقم: ${s.id}<br>
+        ${s.feeder ? 'المغذي: ' + s.feeder + '<br>' : ''}
+        المسافة من محطتك: <b>${s._dist.toFixed(2)} كم</b>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button onclick="window.editNearbyStation('${s.id}')" style="flex:1;background:var(--bg-elev,#101D2E);color:#fff;border:1px solid rgba(255,255,255,.2);padding:7px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">تعديل</button>
+          <a href="${gmapsUrl}" target="_blank" rel="noopener" style="flex:1;text-align:center;background:${teal()};color:#fff;padding:7px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600">قوقل ماب</a>
+        </div>
+      </div>`);
+    marker.bindTooltip(`${s.id} — ${s._dist.toFixed(2)} كم`, {direction:'top', offset:[0,-16]});
+    marker.addTo(leafletMap);
+    nearbyMarkers.push(marker);
+  });
+
+  const zoomHint = zoom <= 13 ? ' — قرّب الخريطة لعرض المحطات المجاورة' : (zoom <= 15 ? ' — أقرب 10 محطات' : ' — كل المحطات بالشاشة الحالية');
+  const label = nearbyModeActive==='feeder' ? `⚡ المغذي "${currentStation.feeder}" — عدد ${nearbyFullData.length} محطة مرتبطة` : `📍 محطات قريبة (٢ كم) — ${nearbyFullData.length} محطة`;
+  mapToolHint.textContent = `${label}${zoomHint}`;
+}
+
+/* تفعيل/إلغاء/تبديل وضع قريب أو المغذي — ضغطة واحدة تكفي لكل شيء / Activate/deactivate/switch nearby or feeder mode — a single tap does it all */
+async function activateNearbyMode(mode){
+  if(!currentStation || !leafletMap) return;
+
+  if(nearbyModeActive === mode){ // نفس الزر المفعّل — رجوع لمحطتي
+    nearbyModeActive = null;
+    clearNearbyMarkers();
+    mapToolHint.classList.remove('show');
+    updateNearbyButtonStates();
+    return;
+  }
+
+  clearNearbyMarkers(); clearOutageMarkers();
+  nearbyFullData = [];
+  nearbyModeActive = mode;
+  updateNearbyButtonStates();
+  mapToolHint.classList.add('show');
+  mapToolHint.textContent = 'جاري التحميل...';
+
+  try{
+    let res;
+    if(mode === 'feeder'){
+      if(!currentStation.feeder){
+        mapToolHint.textContent = 'لا يوجد مغذي مسجّل لهذه المحطة';
+        nearbyModeActive = null; updateNearbyButtonStates();
+        return;
+      }
+      res = await callBackend('getFeederStations', { feeder: currentStation.feeder });
+    } else {
+      res = await callBackend('getNearbyStations', { lat: currentStation.lat, lng: currentStation.lng, radiusKm: 2 });
+    }
+    if(!res.success || !res.stations) throw new Error(res.error || 'الميزة غير متاحة من الخادم بعد');
+
+    nearbyFullData = res.stations
+      .filter(s => String(s.id) !== String(currentStation.id))
+      .map(s => ({...s, _dist: haversineKm(currentStation.lat, currentStation.lng, s.lat, s.lng)}));
+
+    const bounds = [[currentStation.lat, currentStation.lng], ...nearbyFullData.map(s=>[s.lat,s.lng])];
+    if(bounds.length > 1) leafletMap.setView([currentStation.lat, currentStation.lng], smartZoomForCount(nearbyFullData.length));
+
+    renderNearbyMarkers();
+    if(!leafletMap._nearbyHandlerBound){
+      leafletMap.on('zoomend moveend', renderNearbyMarkers);
+      leafletMap._nearbyHandlerBound = true;
+    }
+    if(mode === 'nearby' && !nearbyToastShown){ showMapToast(`تم عرض ${nearbyFullData.length} محطة قريبة`); nearbyToastShown = true; }
+    if(mode === 'feeder' && !feederToastShown){ showMapToast(`تم عرض ${nearbyFullData.length} محطة بالمغذي`); feederToastShown = true; }
+  }catch(err){
+    mapToolHint.textContent = 'تعذّر جلب المحطات — الميزة تحتاج تفعيل بالباك إند';
+    nearbyModeActive = null;
+    updateNearbyButtonStates();
+  }
+}
+nearbyToggleBtn.addEventListener('click', ()=> activateNearbyMode('nearby'));
+feederToggleBtn.addEventListener('click', ()=> activateNearbyMode('feeder'));
+
+/* ============================================================
+ *  أداة محطات العطل — إدخال أكثر من محطة (توزيع و/أو تحويل معاً)
+ *  تُعرض بالترتيب على الخريطة، والانتقال لقوقل ماب يبدأ من موقعي
+ *  الحالي ثم يمر على كل محطة بالترتيب المُدخل (A → B → C...)
+ * ============================================================ */
+let outageMarkers = [];
+let outageLine = null;
+function clearOutageMarkers(){
+  outageMarkers.forEach(m=>leafletMap.removeLayer(m));
+  outageMarkers = [];
+  if(outageLine){ leafletMap.removeLayer(outageLine); outageLine = null; }
+}
+function outageLetterIcon(letter, color){
+  return L.divIcon({
+    className:'',
+    html:`<div style="width:26px;height:26px;border-radius:50%;background:${color};border:2px solid #fff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:'JetBrains Mono',monospace;box-shadow:0 2px 8px rgba(0,0,0,.5)">${letter}</div>`,
+    iconSize:[26,26], iconAnchor:[13,13]
+  });
+}
+function outageLetterFor(i){
+  // A..Z ثم AA, AB... لو تجاوز عدد المحطات 26 (سيناريو نادر لكن نتفادى الانكسار)
+  let s = '';
+  i++;
+  while(i > 0){ i--; s = String.fromCharCode(65 + (i % 26)) + s; i = Math.floor(i/26); }
+  return s;
+}
+
+moreToggleBtn.addEventListener('click', (e)=>{
+  e.stopPropagation();
+  const willOpen = !morePanel.classList.contains('show');
+  closeAllMapDropdowns();
+  if(willOpen) morePanel.classList.add('show');
+});
+outageToggleBtn.addEventListener('click', (e)=>{
+  e.stopPropagation();
+  const willOpen = !outagePanel.classList.contains('show');
+  closeAllMapDropdowns();
+  if(willOpen) outagePanel.classList.add('show');
+});
+document.addEventListener('click', (e)=>{
+  if(!outageToggleBtn.contains(e.target) && !outagePanel.contains(e.target)) outagePanel.classList.remove('show');
+});
+
+document.getElementById('outageSubmitBtn').addEventListener('click', async ()=>{
+  if(!leafletMap) return;
+  const raw = document.getElementById('outageInput').value;
+  const ids = raw.split(/[,\n،\-\/]+/).map(s=>s.trim()).filter(Boolean);
+  const errEl = document.getElementById('outageError');
+  errEl.textContent = '';
+
+  if(ids.length < 2){ errEl.textContent = 'أدخل محطتين على الأقل'; return; }
+  if(ids.length > 15){ errEl.textContent = 'الحد الأقصى 15 محطة بالمرة الواحدة'; return; }
+
+  clearOutageMarkers();
+  clearNearbyMarkers(); resetMeasure(); resetRoute();
+  measureActive = false; routeActive = false; nearbyModeActive = null;
+  setActiveTool(null);
+  mapToolHint.classList.add('show');
+  mapToolHint.textContent = 'جاري البحث عن المحطات...';
+
+  const results = await Promise.all(ids.map(id => searchStationSmart(id)));
+
+  const found = [];
+  const notFound = [];
+  results.forEach((res, i)=>{
+    if(res.found){ found.push({ ...res, _inputId: ids[i] }); }
+    else { notFound.push(ids[i]); }
+  });
+
+  if(found.length < 2){
+    errEl.textContent = 'ما لقيت محطتين صالحتين على الأقل بالأرقام المدخلة';
+    mapToolHint.classList.remove('show');
+    return;
+  }
+
+  outagePanel.classList.remove('show');
+  const bounds = [];
+  found.forEach((s, i)=>{
+    const letter = outageLetterFor(i);
+    const color = s.type === 'تحويل' ? '#8B6DD6' : teal();
+    const marker = L.marker([s.lat, s.lng], { icon: outageLetterIcon(letter, color) });
+    marker.bindPopup(`<div style="font-family:'IBM Plex Sans Arabic',sans-serif;direction:rtl;font-size:13px"><b>${letter}) ${s.name}</b><br>رقم: ${s.id}</div>`);
+    marker.addTo(leafletMap);
+    outageMarkers.push(marker);
+    bounds.push([s.lat, s.lng]);
+  });
+  outageLine = L.polyline(bounds, {color:'#C8A24E', weight:2, dashArray:'5,5'}).addTo(leafletMap);
+  const outageCenter = L.latLngBounds(bounds).getCenter();
+  leafletMap.setView(outageCenter, smartZoomForCount(found.length));
+
+  const destination = found[found.length-1];
+  const middleStops = found.slice(0, -1);
+  const waypointsStr = middleStops.map(s => `${s.lat},${s.lng}`).join('|');
+  const gmapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${destination.lat},${destination.lng}&waypoints=${encodeURIComponent(waypointsStr)}&travelmode=driving`;
+
+  const notFoundNote = notFound.length ? ` — تعذّر إيجاد: ${notFound.join('، ')}` : '';
+  mapToolHint.innerHTML = `محطات العطل (${found.length}) بالترتيب A→${outageLetterFor(found.length-1)}${notFoundNote} <a href="${gmapsUrl}" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;background:rgba(31,174,140,0.16);color:var(--teal-light);border:1px solid rgba(77,214,181,0.5);padding:6px 14px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600">الانتقال بالترتيب على قوقل ماب</a>`;
+});
+
+/* تنسيق وقت آخر تحديث لبيانات المحطة من قاعدة البيانات — ميلادي وهجري معًا حسب معيار المشروع، بدون أي مكتبة خارجية */
+/* Formats the station data's last-refresh time — Gregorian and Hijri together per project standard, no external library */
+const hijriFormatterCompact_ = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura-nu-latn', {day:'numeric', month:'numeric', year:'numeric'});
+function formatDbFreshness_(isoString){
+  try{
+    const d = new Date(isoString);
+    const gregorian = d.toLocaleString('ar-SA', {day:'numeric', month:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit'});
+    const hijri = hijriFormatterCompact_.format(d);
+    return `${gregorian} م — ${hijri} هـ`;
+  }catch(e){ return '—'; }
+}
+function stationPinIcon(id){
+  return L.divIcon({
+    className:'',
+    html:`<div class="selected-station-marker">
+      <div class="ssm-label">🔍 ${escapeHtml(String(id))}</div>
+      <div class="ssm-halo"></div>
+      <div class="ssm-pulse"></div>
+      <div class="ssm-dot"></div>
+    </div>`,
+    iconSize:[46,46], iconAnchor:[23,23]
+  });
+}
+
+/* ===== ذاكرة المحطات الأخيرة المؤقتة (TTL) — لا تحتاج إعادة إدخال رقم المحطة خلال فترة العمل ===== */
+const RECENT_TTL_MS = 2 * 60 * 60 * 1000; // ساعتين — قابل للتعديل
+const RECENT_KEY = 'recent_stations';
+
+function addRecentStation(s){
+  const recent = getRecentStations();
+  recent[s.id] = { id:s.id, name:s.name, type:s.type, lat:s.lat, lng:s.lng, region:s.region, feeder:s.feeder, visitedAt: Date.now() };
+  localStorage.setItem(RECENT_KEY, JSON.stringify(recent));
+  renderRecentPanel();
+}
+function getRecentStations(){
+  let raw = {};
+  try{ raw = JSON.parse(localStorage.getItem(RECENT_KEY) || '{}'); }catch(e){ raw = {}; }
+  const now = Date.now();
+  const valid = {};
+  for(const [id, entry] of Object.entries(raw)){
+    if(now - entry.visitedAt < RECENT_TTL_MS) valid[id] = entry;
+  }
+  localStorage.setItem(RECENT_KEY, JSON.stringify(valid));
+  return valid;
+}
+function clearRecentStations(){
+  localStorage.removeItem(RECENT_KEY);
+  renderRecentPanel();
+}
+function renderRecentPanel(){
+  const recent = getRecentStations();
+  const ids = Object.keys(recent);
+  const chips = document.getElementById('recentChips');
+  chips.innerHTML = '';
+  if(ids.length === 0){
+    chips.innerHTML = '<span style="font-size:11.5px;color:var(--text-secondary)">ما فيه محطات زرتها مؤخراً بعد</span>';
+    return;
+  }
+  ids.sort((a,b)=> recent[b].visitedAt - recent[a].visitedAt).forEach(id=>{
+    const s = recent[id];
+    const chip = document.createElement('div');
+    chip.className = 'recent-chip';
+    chip.textContent = s.id;
+    chip.title = s.name;
+    chip.addEventListener('click', ()=> goToStation(s));
+    chips.appendChild(chip);
+  });
+}
+document.getElementById('recentClearBtn').addEventListener('click', ()=>{
+  clearRecentStations();
+  renderRecentPanel();
+});
+document.getElementById('recentToggleBtn').addEventListener('click', ()=>{
+  document.getElementById('recentPanel').classList.toggle('show');
+});
+renderRecentPanel();
+
+/* ===== إضافة محطة جديدة — صفحة كاملة الآن بدل بطاقة صغيرة، تستخدم updateCoordinates الموجودة أصلاً بافتراض أن رقم المحطة محجوز كصف فارغ بالشيت ===== */
+const addStationToggle = document.getElementById('addStationToggle');
+const addStationPanel = document.getElementById('addStationPanel');
+const addStationOverlay = document.getElementById('addStationOverlay');
+let newStationType = 'توزيع';
+
+/* فتح صفحة إضافة محطة الكاملة، مع إمكانية تعبئة رقم المحطة مسبقًا (تُستخدم من الزر الرئيسي ومن بطاقة "غير موجودة") */
+/* Opens the full add-station page, optionally pre-filling the station id (used by the main button and the "not found" card) */
+function openAddStationPanel(prefillId){
+  document.getElementById('recentPanel').classList.remove('show');
+  addStationOverlay.classList.add('show');
+  if(prefillId !== undefined && prefillId !== null){
+    document.getElementById('newStationId').value = prefillId;
+  }
+}
+function closeAddStationPanel(){
+  addStationOverlay.classList.remove('show');
+}
+addStationToggle.addEventListener('click', ()=> openAddStationPanel());
+document.getElementById('addStationCloseBtn').addEventListener('click', closeAddStationPanel);
+
+document.querySelectorAll('#addStationPanel .type-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('#addStationPanel .type-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    newStationType = btn.dataset.type;
+    document.getElementById('feederRegionRow').style.display = newStationType === 'توزيع' ? 'flex' : 'none';
+  });
+});
+
+/* تفكيك إحداثية ملصوقة بصيغة "خط العرض,خط الطول" (نفس صيغة النسخ من قوقل ماب مباشرة) */
+function parsePastedCoord(raw){
+  const parts = String(raw).trim().split(/\s*,\s*/);
+  if(parts.length !== 2) return null;
+  const lat = parseFloat(parts[0]);
+  const lng = parseFloat(parts[1]);
+  if(isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
+  return { lat, lng };
+}
+
+document.getElementById('newStationGpsBtn').addEventListener('click', ()=>{
+  const errEl = document.getElementById('addStationError');
+  if(!navigator.geolocation){ errEl.textContent = 'المتصفح لا يدعم تحديد الموقع'; return; }
+  errEl.textContent = 'جاري تحديد موقعك...';
+  navigator.geolocation.getCurrentPosition(
+    pos=>{
+      document.getElementById('newStationLat').value = pos.coords.latitude.toFixed(6);
+      document.getElementById('newStationLng').value = pos.coords.longitude.toFixed(6);
+      errEl.textContent = '';
+    },
+    ()=>{ errEl.textContent = 'تعذّر تحديد الموقع، تأكد من صلاحية الوصول للموقع'; }
+  );
+});
+
+document.getElementById('newStationPasteApply').addEventListener('click', ()=>{
+  const errEl = document.getElementById('addStationError');
+  const parsed = parsePastedCoord(document.getElementById('newStationPasteCoord').value);
+  if(!parsed){ errEl.textContent = 'صيغة غير صحيحة، المطلوب: خط العرض,خط الطول'; return; }
+  document.getElementById('newStationLat').value = parsed.lat.toFixed(6);
+  document.getElementById('newStationLng').value = parsed.lng.toFixed(6);
+  errEl.textContent = '';
+});
+
+/* ===== قفل التنقل أثناء عمليات الحفظ الحرجة (إضافة/تعديل) — يمنع تكرار المحطات بسبب الاستعجال ===== */
+function lockNavigationDuringSave(){
+  document.getElementById('homeMenuLink').style.pointerEvents = 'none';
+  document.getElementById('homeMenuLink').style.opacity = '0.4';
+  searchInput.disabled = true;
+  searchLensIcon.style.pointerEvents = 'none';
+  searchLensIcon.style.opacity = '0.4';
+  window.onbeforeunload = ()=> 'عملية الحفظ لسه ما خلصت';
+}
+function unlockNavigationAfterSave(){
+  document.getElementById('homeMenuLink').style.pointerEvents = '';
+  document.getElementById('homeMenuLink').style.opacity = '';
+  searchInput.disabled = false;
+  searchLensIcon.style.pointerEvents = '';
+  searchLensIcon.style.opacity = '';
+  window.onbeforeunload = null;
+}
+
+document.getElementById('addStationSubmitBtn').addEventListener('click', async function(){
+  const errEl = document.getElementById('addStationError');
+  errEl.style.color = '#E0654F';
+  errEl.textContent = '';
+
+  if(!hasValidSession()){ errEl.textContent = 'سجّل دخول أولاً لإضافة محطة'; return; }
+
+  const stationId = document.getElementById('newStationId').value.trim();
+  const region = document.getElementById('newStationRegion').value.trim();
+  const lat = parseFloat(document.getElementById('newStationLat').value);
+  const lng = parseFloat(document.getElementById('newStationLng').value);
+
+  if(!stationId){ errEl.textContent = 'رقم المحطة مطلوب'; return; }
+  if(newStationType === 'توزيع' && !region){ errEl.textContent = 'المنطقة مطلوبة'; return; }
+  if(isNaN(lat) || isNaN(lng)){
+    errEl.textContent = 'الإحداثية إجبارية — حدّد موقعك أو أدخلها يدوياً قبل الحفظ';
+    return;
+  }
+
+  lockNavigationDuringSave();
+  document.getElementById('addStationFormBody').style.display = 'none';
+  const progressTrack = document.getElementById('addStationProgressTrack');
+  const progressFill = document.getElementById('addStationProgressFill');
+  const progressLabel = document.getElementById('addStationProgressLabel');
+  progressTrack.style.display = 'block';
+  progressLabel.style.display = 'block';
+  progressFill.style.width = '0%';
+  progressLabel.textContent = '0%';
+  let p = 0;
+  const tick = setInterval(()=>{
+    p = Math.min(p + Math.random()*12, 90);
+    progressFill.style.width = p+'%';
+    progressLabel.textContent = Math.round(p)+'%';
+  }, 150);
+
+  const session = JSON.parse(localStorage.getItem('sec-session') || '{}');
+  const opKey = 'addnew_' + stationId + '_' + Date.now();
+  try{
+    const res = await callBackend('addNewStation', {
+      opKey, phone: session.phone, stationId, type: newStationType,
+      lat, lng,
+      feeder: newStationType === 'توزيع' ? document.getElementById('newStationFeeder').value.trim() : undefined,
+      region: newStationType === 'توزيع' ? region : undefined,
+      reason: document.getElementById('newStationReason').value.trim()
+    });
+    clearInterval(tick);
+    if(!res.success){ throw new Error(res.error || 'فشل الحفظ'); }
+
+    progressFill.style.width = '100%';
+    progressLabel.textContent = '100%';
+    upsertStationInLocalCache_({
+      id: stationId, type: newStationType,
+      feeder: newStationType === 'توزيع' ? document.getElementById('newStationFeeder').value.trim() : '',
+      region: newStationType === 'توزيع' ? region : '',
+      lat, lng
+    });
+    setTimeout(()=>{
+      progressTrack.style.display = 'none';
+      progressLabel.style.display = 'none';
+      document.getElementById('addStationSuccess').style.display = 'block';
+      unlockNavigationAfterSave(); // الكاش انبطل تلقائيًا وقت الحفظ، لا حاجة لأي قفل أو إعادة تحميل
+    }, 300);
+  }catch(err){
+    clearInterval(tick);
+    progressTrack.style.display = 'none';
+    progressLabel.style.display = 'none';
+    document.getElementById('addStationFormBody').style.display = 'block';
+    errEl.textContent = err.message;
+    unlockNavigationAfterSave();
+  }
+});
+
+document.getElementById('addStationDoneBtn').addEventListener('click', ()=>{
+  closeAddStationPanel();
+  document.getElementById('addStationSuccess').style.display = 'none';
+  document.getElementById('addStationFormBody').style.display = 'block';
+  document.getElementById('newStationId').value = '';
+  document.getElementById('newStationFeeder').value = '';
+  document.getElementById('newStationRegion').value = '';
+  document.getElementById('newStationLat').value = '';
+  document.getElementById('newStationLng').value = '';
+  document.getElementById('newStationPasteCoord').value = '';
+  document.getElementById('newStationReason').value = '';
+  document.getElementById('addStationError').textContent = '';
+});
+
+let currentStation = null;
+function goToStation(s){
+  currentStation = s;
+  addRecentStation(s);
+  if(!leafletMap) initMap();
+  searchLens.classList.remove('open');
+  document.getElementById('heroContent').classList.add('hidden');
+  cardsSection.classList.add('hidden');
+  if(mapContainer.classList.contains('active')){
+    /* الخريطة مفتوحة أصلًا (بحث من داخل صفحة المحطة) — قفز مباشر بدون إعادة تشغيل حركة الكرة الأرضية */
+    /* Map already open (searching from within the station page) — jump directly, skip the globe morph replay */
+    renderStationOnMap(s);
+    return;
+  }
+  rotSpeed = 0;
+  rotateGlobeToward(s.lat, s.lng, 550, ()=> startMorphExpand(s));
+}
+
+function startMorphExpand(s){
+  let scale = 1;
+  const expand = setInterval(()=>{
+    scale += 0.06;
+    globeGroup.scale.set(scale,scale,scale);
+    wireMat.opacity = Math.max(0, 0.18-(scale-1)*0.1);
+    ringMat.opacity = Math.max(0, 0.10-(scale-1)*0.06);
+    if(scale>2.4){
+      clearInterval(expand);
+      mapContainer.classList.add('active');
+      stageEl.classList.add('map-active');
+      heroSection.classList.add('map-active');
+      searchAndBackRow.classList.add('show');
+      mapModeChip.classList.add('show');
+      zoomControls.classList.add('show');
+      cardsSection.classList.add('hidden');
+      setTimeout(()=> renderStationOnMap(s), 200);
+    }
+  }, 16);
+}
+
+/* عرض بيانات المحطة على الخريطة (الدبوس + بطاقة المعلومات) — دالة مستقلة تُستخدم عند أول بحث وعند التنقل السريع بين المحطات */
+/* Renders a station's pin and info card on the map — reusable for both the first search and fast in-page switching */
+function renderStationOnMap(s){
+  leafletMap.invalidateSize();
+  leafletMap.flyTo([s.lat, s.lng], 18, {duration:1.4});
+  if(marker) leafletMap.removeLayer(marker);
+  marker = L.marker([s.lat,s.lng], {icon: stationPinIcon(s.id)}).addTo(leafletMap);
+
+  const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}&travelmode=driving`;
+  stationTable.innerHTML = `
+    <div class="sb-inner">
+      <div class="sb-row">
+        <div class="sb-info">
+          <div class="st-name">${s.name}</div>
+          <div class="sb-meta">
+            <span>رقم المحطة <b>${s.id}</b></span>
+            ${s.region ? `<span>المنطقة <b style="font-family:inherit;direction:rtl">${s.region}</b></span>` : ''}
+            ${s.feeder ? `<span>المغذي <b style="font-family:inherit;direction:rtl">${s.feeder}</b></span>` : ''}
+          </div>
+        </div>
+        <div class="st-actions">
+          <a class="st-btn primary" href="${mapsUrl}" target="_blank" rel="noopener">انتقال لقوقل ماب</a>
+          <button class="st-btn" id="openEditBtn">تعديل</button>
+        </div>
+      </div>
+      ${s._dataBuiltAt ? `<div class="db-freshness-note">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.5A8.5 8.5 0 1 1 3 12.5a8.38 8.38 0 0 1 .9-3.8"/><path d="M21 3v6h-6"/></svg>
+        آخر تحديث لبيانات المحطة من قاعدة البيانات: ${formatDbFreshness_(s._dataBuiltAt)}
+      </div>` : ''}
+    </div>`;
+  stationTable.classList.add('show');
+  searchAndBackRow.classList.add('show');
+  document.getElementById('openEditBtn').addEventListener('click', openEditForm);
+}
+
+/* ============================================================
+ *  نموذج تعديل المحطة (مغذي/منطقة/موقع) — يفتح فوق الجدول
+ * ============================================================ */
+let editPreviewMap = null, editPreviewMarker = null;
+
+/* الانتقال المباشر لتعديل محطة من نتائج "قريبة/المغذي" — بدون حاجة لبحث منفصل عنها / Direct jump to editing a station from "nearby/feeder" results — no separate search needed */
+window.editNearbyStation = function(id){
+  const s = window._nearbyStationLookup && window._nearbyStationLookup[id];
+  if(!s) return;
+  goToStation(s);
+  setTimeout(openEditForm, 200); // بعد استقرار عرض بطاقة المحطة على الخريطة
+};
+
+function openEditForm(){
+  if(!hasValidSession()){
+    searchHint.innerHTML = 'سجّل دخول للتعديل — <a href="auth.html" style="color:var(--teal);font-weight:500;text-decoration:underline">تسجيل الدخول</a>';
+    searchHint.className = 'search-hint err';
+    return;
+  }
+  const s = currentStation;
+  const isDistribution = s.type === 'توزيع';
+  document.getElementById('editStationTitle').textContent = 'تعديل: ' + s.name;
+
+  document.getElementById('editStationBody').innerHTML = `
+    <div class="sb-inner">
+      <div id="editError" style="display:none;font-size:12px;color:#E0654F;margin-bottom:10px;"></div>
+      <div class="edit-grid">
+        <div>
+          ${isDistribution ? `
+          <div style="margin-bottom:10px;">
+            <label style="font-size:12px;color:var(--text-secondary)">المغذي</label>
+            <input id="editFeeder" class="edit-input" value="${s.feeder || ''}" placeholder="مثال: SNB38">
+          </div>
+          <div style="margin-bottom:10px;">
+            <label style="font-size:12px;color:var(--text-secondary)">المنطقة</label>
+            <input id="editRegion" class="edit-input" value="${s.region || ''}" placeholder="مثال: القرينية">
+          </div>` : ''}
+          <div style="display:flex;gap:8px;margin-bottom:10px;">
+            <input id="editLat" class="edit-input" placeholder="مثال: 21.523456" value="${s.lat.toFixed(6)}">
+            <input id="editLng" class="edit-input" placeholder="مثال: 39.187654" value="${s.lng.toFixed(6)}">
+          </div>
+          <button id="useGpsBtn" type="button" style="width:100%;font-size:13px;padding:12px;border-radius:9px;border:1px solid var(--border-strong);background:var(--bg);color:var(--teal);cursor:pointer;">📍 استخدام موقعي الحالي</button>
+          <div class="paste-coord-row">
+            <span class="paste-coord-label">أو الصق الإحداثية مباشرة</span>
+            <div style="display:flex;gap:8px;">
+              <input id="editPasteCoord" class="edit-input" placeholder="مثال: 21.5234,39.1876" style="flex:1">
+              <button type="button" class="paste-apply-btn" id="editPasteApply">تطبيق</button>
+            </div>
+          </div>
+        </div>
+        <div class="edit-map-wrap">
+          <div id="editPreviewMap"></div>
+          <button type="button" class="edit-map-sat-btn" id="editMapSatBtn" title="تبديل القمر الصناعي">🛰️</button>
+        </div>
+      </div>
+      <input id="editReason" class="edit-input" placeholder="مثال: تصحيح موقع المحطة على الخريطة" style="margin-top:10px;">
+      <div class="add-station-progress-track" id="editProgressTrack" style="display:none;margin-top:8px;">
+        <div class="add-station-progress-fill" id="editProgressFill"></div>
+      </div>
+      <div id="editProgressLabel" style="display:none;text-align:center;font-size:11px;color:var(--text-secondary);margin-top:4px;font-family:'JetBrains Mono',monospace;">0%</div>
+      <div class="st-actions" style="margin-top:14px">
+        <button class="st-btn primary" id="saveEditBtn">حفظ التعديل</button>
+        <button class="st-btn" id="cancelEditBtn">إلغاء</button>
+      </div>
+    </div>`;
+  document.getElementById('editStationOverlay').classList.add('show');
+
+  let editPreviewTileLayer = null, editPreviewIsSat = false;
+  setTimeout(()=>{
+    if(editPreviewMap){ editPreviewMap.remove(); editPreviewMap = null; }
+    editPreviewMap = L.map('editPreviewMap', {zoomControl:false, attributionControl:false, dragging:true}).setView([s.lat, s.lng], 17);
+    editPreviewTileLayer = L.tileLayer(TILE_URL_LIGHT, {maxZoom:19}).addTo(editPreviewMap);
+    editPreviewMarker = L.marker([s.lat, s.lng], {draggable:true}).addTo(editPreviewMap);
+    editPreviewMarker.on('dragend', ()=>{
+      const pos = editPreviewMarker.getLatLng();
+      document.getElementById('editLat').value = pos.lat.toFixed(6);
+      document.getElementById('editLng').value = pos.lng.toFixed(6);
+    });
+    setTimeout(()=>editPreviewMap.invalidateSize(), 100);
+
+    document.getElementById('editLat').addEventListener('input', syncPreviewFromInputs);
+    document.getElementById('editLng').addEventListener('input', syncPreviewFromInputs);
+
+    document.getElementById('editMapSatBtn').addEventListener('click', (btnEvent)=>{
+      editPreviewIsSat = !editPreviewIsSat;
+      btnEvent.currentTarget.classList.toggle('active', editPreviewIsSat);
+      editPreviewMap.removeLayer(editPreviewTileLayer);
+      editPreviewTileLayer = L.tileLayer(editPreviewIsSat ? SATELLITE_URL : TILE_URL_LIGHT, {maxZoom:19}).addTo(editPreviewMap);
+    });
+  }, 50);
+
+  function syncPreviewFromInputs(){
+    const lat = parseFloat(document.getElementById('editLat').value);
+    const lng = parseFloat(document.getElementById('editLng').value);
+    if(!isNaN(lat) && !isNaN(lng) && editPreviewMap){
+      editPreviewMarker.setLatLng([lat,lng]);
+      editPreviewMap.setView([lat,lng]);
+    }
+  }
+
+  document.getElementById('useGpsBtn').addEventListener('click', ()=>{
+    if(!navigator.geolocation){ alert('المتصفح لا يدعم تحديد الموقع'); return; }
+    navigator.geolocation.getCurrentPosition(pos=>{
+      document.getElementById('editLat').value = pos.coords.latitude.toFixed(6);
+      document.getElementById('editLng').value = pos.coords.longitude.toFixed(6);
+      syncPreviewFromInputs();
+    }, ()=> alert('تعذّر الحصول على الموقع، تأكد من تفعيل صلاحية الموقع'));
+  });
+
+  document.getElementById('editPasteApply').addEventListener('click', ()=>{
+    const errEl = document.getElementById('editError');
+    const parsed = parsePastedCoord(document.getElementById('editPasteCoord').value);
+    if(!parsed){
+      errEl.textContent = 'صيغة غير صحيحة، المطلوب: خط العرض,خط الطول';
+      errEl.style.display = 'block';
+      return;
+    }
+    document.getElementById('editLat').value = parsed.lat.toFixed(6);
+    document.getElementById('editLng').value = parsed.lng.toFixed(6);
+    errEl.style.display = 'none';
+    syncPreviewFromInputs();
+  });
+
+  document.getElementById('cancelEditBtn').addEventListener('click', ()=> document.getElementById('editStationOverlay').classList.remove('show'));
+  document.getElementById('editStationCloseBtn').onclick = ()=> document.getElementById('editStationOverlay').classList.remove('show');
+
+  document.getElementById('saveEditBtn').addEventListener('click', async function(){
+    const btn = this;
+    if(btn.disabled) return;
+    const lat = parseFloat(document.getElementById('editLat').value);
+    const lng = parseFloat(document.getElementById('editLng').value);
+    const errEl = document.getElementById('editError');
+    if(isNaN(lat) || isNaN(lng)){
+      errEl.textContent = 'الرجاء إدخال إحداثية صحيحة'; errEl.style.display='block'; return;
+    }
+    errEl.style.display='none';
+    btn.disabled = true;
+    document.getElementById('cancelEditBtn').disabled = true;
+    lockNavigationDuringSave();
+
+    const progressTrack = document.getElementById('editProgressTrack');
+    const progressFill = document.getElementById('editProgressFill');
+    const progressLabel = document.getElementById('editProgressLabel');
+    progressTrack.style.display = 'block';
+    progressLabel.style.display = 'block';
+    progressFill.style.width = '0%';
+    progressLabel.textContent = '0%';
+    let p = 0;
+    const tick = setInterval(()=>{
+      p = Math.min(p + Math.random()*12, 90);
+      progressFill.style.width = p+'%';
+      progressLabel.textContent = Math.round(p)+'%';
+    }, 150);
+
+    const session = JSON.parse(localStorage.getItem('sec-session') || '{}');
+    const opKey = 'edit_' + s.id + '_' + Date.now();
+    try{
+      const res = await callBackend('updateCoordinates', {
+        opKey, phone: session.phone, stationId: s.id, type: s.type,
+        lat, lng, method: 'يدوي/GPS',
+        feeder: isDistribution ? document.getElementById('editFeeder').value.trim() : undefined,
+        region: isDistribution ? document.getElementById('editRegion').value.trim() : undefined,
+        reason: document.getElementById('editReason').value.trim()
+      });
+      clearInterval(tick);
+      if(!res.success) throw new Error(res.error || 'فشل الحفظ');
+      progressFill.style.width = '100%';
+      progressLabel.textContent = '100%';
+      upsertStationInLocalCache_({
+        id: s.id, type: s.type,
+        feeder: isDistribution ? document.getElementById('editFeeder').value.trim() : '',
+        region: isDistribution ? document.getElementById('editRegion').value.trim() : '',
+        lat, lng
+      });
+
+      document.getElementById('editStationBody').innerHTML = `
+        <div class="sb-inner" style="text-align:center;">
+          <div style="color:var(--teal);font-weight:700;font-size:13px;margin-bottom:10px;">✓ تم حفظ التعديل بنجاح</div>
+          <button class="add-station-submit" id="editDoneBtn">حسنًا</button>
+        </div>`;
+      currentStation.lat = lat; currentStation.lng = lng;
+      if(marker) marker.setLatLng([lat,lng]);
+      renderStationOnMap(currentStation); // تحديث بطاقة المحطة الظاهرة أسفل صفحة التعديل بالإحداثية الجديدة فورًا
+      document.getElementById('editDoneBtn').addEventListener('click', ()=> document.getElementById('editStationOverlay').classList.remove('show'));
+      unlockNavigationAfterSave();
+    }catch(err){
+      clearInterval(tick);
+      progressTrack.style.display = 'none';
+      progressLabel.style.display = 'none';
+      errEl.textContent = err.message; errEl.style.display='block';
+      btn.disabled = false; btn.textContent = 'حفظ التعديل';
+      document.getElementById('cancelEditBtn').disabled = false;
+      unlockNavigationAfterSave();
+    }
+  });
+}
+
+/* الرجوع للبحث — كانت زرًا مستقلاً بجانب صندوق البحث، أصبحت الآن دالة موحّدة يستدعيها رابط "الصفحة الرئيسية" بالقائمة المنسدلة فقط / Back-to-search — used to be its own button beside the search box, now a unified function called only by the "Home" dropdown-menu link */
+function goBackToSearch(){
+  document.getElementById('addStationOverlay').classList.remove('show');
+  document.getElementById('editStationOverlay').classList.remove('show');
+  mapContainer.classList.remove('active');
+  stageEl.classList.remove('map-active');
+  heroSection.classList.remove('map-active');
+  document.getElementById('heroContent').classList.remove('hidden');
+  searchAndBackRow.classList.remove('show');
+  mapModeChip.classList.remove('show');
+  closeMapModePanel();
+  zoomControls.classList.remove('show');
+  mapToolHint.classList.remove('show');
+  cardsSection.classList.remove('hidden');
+  measureActive = false; routeActive = false;
+  resetMeasure(); resetRoute(); clearNearbyMarkers(); nearbyModeActive = null; morePanel.classList.remove('show'); updateNearbyButtonStates();
+  clearOutageMarkers(); outagePanel.classList.remove('show'); document.getElementById('outageInput').value=''; document.getElementById('outageError').textContent='';
+  setActiveTool(null);
+  stationTable.classList.remove('show');
+  stationSearchInput.value = '';
+  stationSearchHint.textContent = '';
+  setSearchProgress(false, 'stationSearch');
+  searchInput.value='';
+  searchHint.textContent='';
+  globeGroup.scale.set(1,1,1);
+  wireMat.opacity = document.body.getAttribute('data-theme')==='dark' ? 0.18 : 0.32;
+  ringMat.opacity = document.body.getAttribute('data-theme')==='dark' ? 0.10 : 0.20;
+  rotSpeed = 0.0016;
+}
+document.getElementById('homeMenuLink').addEventListener('click', (e)=>{
+  if(mapContainer.classList.contains('active')){
+    e.preventDefault(); // نحن أصلًا بنفس الصفحة وبحالة عرض محطة — رجوع فوري بدون أي إعادة تحميل
+    goBackToSearch();
+  }
+  // غير ذلك: نترك الرابط يعمل بشكل طبيعي (فائدة عند الدخول من صفحة أخرى كلوحة المدير أو العضو)
+});
+</script>
+</body>
+</html>
