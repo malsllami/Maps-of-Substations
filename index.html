@@ -130,15 +130,16 @@ header{
 .mobile-menu-panel{
   position:absolute;top:calc(100% + 8px);left:0;
   background:var(--bg-card);border:1px solid var(--border-strong);border-radius:14px;
-  min-width:190px;box-shadow:0 10px 28px rgba(0,0,0,.35);
-  padding:8px;display:none;z-index:60;
+  min-width:215px;box-shadow:0 10px 28px rgba(0,0,0,.35);
+  padding:6px;display:none;z-index:60;
 }
 .mobile-user-menu.open .mobile-menu-panel{display:block;}
-.mobile-menu-row{display:flex;align-items:center;gap:10px;padding:9px 10px;font-size:12.5px;color:var(--text-primary);}
+.mobile-menu-row{display:flex;align-items:center;gap:10px;padding:10px 10px;font-size:12.5px;color:var(--text-primary);border-bottom:1px solid var(--border);margin-bottom:4px;}
 .mobile-menu-link{
   display:flex;align-items:center;gap:10px;
   padding:10px 10px;font-size:12.5px;color:var(--text-primary);
-  text-decoration:none;border-radius:8px;border:1px solid transparent;transition:.15s;
+  text-decoration:none;border-radius:9px;border:1px solid transparent;transition:.15s;
+  margin-bottom:2px;
 }
 .mobile-menu-link:hover{background:var(--bg-elev);}
 .mobile-menu-link.current-page{
@@ -660,7 +661,7 @@ body.guest-mode h1{
 
 .outage-panel{
   display:none;flex-direction:column;gap:8px;
-  width:min(1100px, 94vw);margin:10px auto 0;position:relative;z-index:6;
+  width:min(1100px, 94vw);position:relative;z-index:6;
   background:var(--bg-card);border:1px solid var(--border-strong);border-radius:16px;
   padding:16px;box-shadow:0 10px 24px rgba(0,0,0,.2);
 }
@@ -725,8 +726,18 @@ body.guest-mode h1{
   border-left:4px solid transparent;border-right:4px solid transparent;
   border-top:5px solid;
 }
+/* الحاوية الموحّدة لكل ما يظهر أسفل الخريطة — الإزاحة الصحيحة الوحيدة، بدل تكرارها بكل عنصر على حدة (وهذا كان سبب مشكلة التغطية سابقًا) */
+/* The single unified wrapper for everything below the map — the one correct offset, instead of repeating it per element (this was the root cause of the earlier overlap bug) */
+.below-map-area{
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  width:100%;
+  margin-top:calc(var(--header-h, 90px) + 8px + min(44vh, 480px) + var(--map-toolbar-h) + 10px);
+}
+@supports (height: 100svh){
+  .below-map-area{margin-top:calc(var(--header-h, 90px) + 8px + min(44svh, 480px) + var(--map-toolbar-h) + 10px);}
+}
 .map-tool-hint{
-  width:min(1100px, 94vw);margin:10px auto 0;position:relative;z-index:6;
+  width:min(1100px, 94vw);position:relative;z-index:6;
   background:var(--bg-card);border:1px solid var(--border-strong);
   padding:10px 16px;border-radius:16px;font-size:12px;color:var(--text-secondary);
   display:none;text-align:center;line-height:1.6;
@@ -737,8 +748,6 @@ body.guest-mode h1{
   display:none;align-items:center;gap:8px;
   width:min(1100px, 94vw);
   position:relative;z-index:6;
-  margin-top:calc(var(--header-h, 90px) + 8px + min(44vh, 480px) + var(--map-toolbar-h) + 10px);
-  margin-top:calc(var(--header-h, 90px) + 8px + min(44svh, 480px) + var(--map-toolbar-h) + 10px);
 }
 .search-and-back-row.show{display:flex;}
 body.guest-mode .search-and-back-row{width:min(1300px,96vw);}
@@ -1054,7 +1063,7 @@ footer{
             تقويم دوام الورديات
           </a>
           <a href="admin.html" class="mobile-menu-link" id="mobileAdminLink" style="display:none">
-            <span class="menu-icon" style="color:#F0B429"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V9l2 2 5-6 5 6 2-2v11"/></svg></span>
+            <span class="menu-icon" style="color:#F0B429"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5z"/><polyline points="9 12 11 14 15 10"/></svg></span>
             لوحة المدير
           </a>
           <button class="mobile-menu-logout" id="mobileLogoutBtn" style="display:none">
@@ -1160,12 +1169,30 @@ footer{
     </div>
   </div>
 
-  <div class="map-tool-hint" id="mapToolHint"></div>
-  <div class="outage-panel" id="outagePanel">
-    <div class="outage-panel-title">محطات العطل — أدخل الأرقام بالترتيب</div>
-    <textarea id="outageInput" placeholder="مثال: 39070-93080-ABN110&#10;افصل بينها بفاصلة أو / أو - أو سطر جديد"></textarea>
-    <div id="outageError" class="outage-error"></div>
-    <button class="outage-submit-btn" id="outageSubmitBtn">عرض على الخريطة</button>
+  <!-- حاوية موحّدة لكل ما يظهر أسفل الخريطة — الإزاحة الصحيحة محسوبة هنا مرة واحدة فقط، بدل كل عنصر يحسبها بمفرده -->
+  <!-- Unified wrapper for everything below the map — the correct offset is computed here once, instead of each element computing it on its own -->
+  <div class="below-map-area" id="belowMapArea">
+    <div class="map-tool-hint" id="mapToolHint"></div>
+    <div class="outage-panel" id="outagePanel">
+      <div class="outage-panel-title">محطات العطل — أدخل الأرقام بالترتيب</div>
+      <textarea id="outageInput" placeholder="مثال: 39070-93080-ABN110&#10;افصل بينها بفاصلة أو / أو - أو سطر جديد"></textarea>
+      <div id="outageError" class="outage-error"></div>
+      <button class="outage-submit-btn" id="outageSubmitBtn">عرض على الخريطة</button>
+    </div>
+    <div class="search-and-back-row" id="searchAndBackRow">
+      <div class="station-search-bar" id="stationSearchBar">
+        <span class="ssb-icon" id="stationSearchLensIcon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </span>
+        <input id="stationSearchInput" type="text" placeholder="ابحث عن محطة أخرى..." inputmode="text">
+      </div>
+    </div>
+    <div class="station-search-progress" id="stationSearchProgress">
+      <div class="search-progress-track"><div class="search-progress-fill" id="stationSearchProgressFill"></div></div>
+      <div class="search-progress-label"><span>جاري البحث عن المحطة...</span><span id="stationSearchProgressPct">0%</span></div>
+    </div>
+    <div class="station-search-hint" id="stationSearchHint"></div>
+    <div class="station-table" id="stationTable"></div>
   </div>
 
   <div class="hero-content" id="heroContent">
@@ -1189,21 +1216,6 @@ footer{
       تسجيل الدخول
     </a>
   </div>
-
-  <div class="search-and-back-row" id="searchAndBackRow">
-    <div class="station-search-bar" id="stationSearchBar">
-      <span class="ssb-icon" id="stationSearchLensIcon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-      </span>
-      <input id="stationSearchInput" type="text" placeholder="ابحث عن محطة أخرى..." inputmode="text">
-    </div>
-  </div>
-  <div class="station-search-progress" id="stationSearchProgress">
-    <div class="search-progress-track"><div class="search-progress-fill" id="stationSearchProgressFill"></div></div>
-    <div class="search-progress-label"><span>جاري البحث عن المحطة...</span><span id="stationSearchProgressPct">0%</span></div>
-  </div>
-  <div class="station-search-hint" id="stationSearchHint"></div>
-  <div class="station-table" id="stationTable"></div>
 </section>
 
 <section class="cards-section" id="cardsSection">
@@ -2483,12 +2495,6 @@ function clearNearbyMarkers(){
   nearbyMarkers = [];
 }
 /* تحديد مستوى تكبير ذكي حسب عدد المحطات الظاهرة بدل تكبير ثابت / Smart zoom level based on visible station count instead of a fixed zoom */
-function smartZoomForCount(count){
-  if(count >= 50) return 16;
-  if(count < 10) return 18;
-  return 17;
-}
-
 /* توست تعليمي يظهر ثانيتين فقط أول مرة يُفعَّل كل وضع — بعدها الزر الأخضر ونصه المتغيّر كافيان وحدهما (النموذج د من نماذج التغذية الراجعة) */
 /* Instructional toast shown for 2 seconds only the first time each mode activates — afterward the green button and its changed label are enough on their own */
 let nearbyToastShown = false, feederToastShown = false;
@@ -2622,7 +2628,7 @@ async function activateNearbyMode(mode){
       .map(s => ({...s, _dist: haversineKm(currentStation.lat, currentStation.lng, s.lat, s.lng)}));
 
     const bounds = [[currentStation.lat, currentStation.lng], ...nearbyFullData.map(s=>[s.lat,s.lng])];
-    if(bounds.length > 1) leafletMap.setView([currentStation.lat, currentStation.lng], smartZoomForCount(nearbyFullData.length));
+    if(bounds.length > 1) leafletMap.fitBounds(bounds, { padding:[36,36], maxZoom:17 });
 
     renderNearbyMarkers();
     if(!leafletMap._nearbyHandlerBound){
@@ -2727,8 +2733,7 @@ document.getElementById('outageSubmitBtn').addEventListener('click', async ()=>{
     bounds.push([s.lat, s.lng]);
   });
   outageLine = L.polyline(bounds, {color:'#C8A24E', weight:2, dashArray:'5,5'}).addTo(leafletMap);
-  const outageCenter = L.latLngBounds(bounds).getCenter();
-  leafletMap.setView(outageCenter, smartZoomForCount(found.length));
+  leafletMap.fitBounds(bounds, { padding:[44,44], maxZoom:17 });
 
   const destination = found[found.length-1];
   const middleStops = found.slice(0, -1);
