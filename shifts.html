@@ -13,14 +13,69 @@
   --morning:#0EA5E9;--morning-bg:rgba(14,165,233,0.12);--evening:#A9632F;--evening-bg:rgba(169,99,47,0.13);--rest:#16A34A;--rest-bg:rgba(22,163,74,0.12);}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;padding-bottom:60px;transition:background .3s,color .3s;}
-header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;}
-.brand{display:flex;align-items:center;gap:10px;cursor:pointer;text-decoration:none;color:inherit;}
-.brand-mark{height:32px;width:auto;object-fit:contain;transition:transform .2s;}
+header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--border);display:flex;flex-direction:column;}
+.header-row-main{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 28px;}
+@media (max-width:600px){.header-row-main{padding:12px 14px;}}
+.brand{display:flex;align-items:center;gap:10px;cursor:pointer;text-decoration:none;color:inherit;min-width:0;flex-shrink:1;overflow:hidden;}
+.brand-mark{height:38px;width:auto;object-fit:contain;transition:transform .2s;flex-shrink:0;}
 .brand:hover .brand-mark{transform:scale(1.06);}
-.brand-text{font-size:15px;font-weight:700;}
-.brand-sub{font-size:11px;color:var(--text-secondary);}
-.theme-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--border-strong);background:var(--bg-card);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-primary);transition:.2s;}
-.theme-btn:hover{border-color:var(--teal);}
+.brand:hover .brand-text{color:var(--teal);}
+.brand-text{font-size:14.5px;font-weight:700;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .2s;}
+.brand-sub{font-size:11px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.header-actions{display:flex;align-items:center;gap:8px;}
+.login-link{
+  text-decoration:none;font-size:13px;font-weight:600;color:var(--teal-light);
+  background:rgba(31,174,140,0.14);border:1px solid rgba(77,214,181,0.45);
+  padding:9px 18px;border-radius:22px;transition:.2s;
+}
+.login-link:hover{background:rgba(31,174,140,0.24);}
+.mobile-user-menu{display:block;position:relative;}
+.mobile-menu-trigger{
+  display:flex;align-items:center;gap:6px;
+  background:var(--bg-card);border:1px solid var(--border-strong);border-radius:22px;
+  padding:9px 16px;font-size:13px;font-weight:600;color:var(--text-primary);
+  cursor:pointer;font-family:inherit;
+}
+.mobile-menu-trigger:hover{border-color:var(--teal);}
+.mobile-menu-trigger svg{transition:transform .2s;flex-shrink:0;}
+.mobile-user-menu.open .mobile-menu-trigger svg{transform:rotate(180deg);}
+.mobile-menu-panel{
+  position:absolute;top:calc(100% + 8px);left:0;
+  background:var(--bg-card);border:1px solid var(--border-strong);border-radius:14px;
+  min-width:215px;box-shadow:0 10px 28px rgba(0,0,0,.35);
+  padding:6px;display:none;z-index:60;
+}
+.mobile-user-menu.open .mobile-menu-panel{display:block;}
+.mobile-menu-row{display:flex;align-items:center;gap:10px;padding:10px 10px;font-size:12.5px;color:var(--text-primary);border-bottom:1px solid var(--border);margin-bottom:4px;}
+.mobile-menu-link{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 10px;font-size:12.5px;color:var(--text-primary);
+  text-decoration:none;border-radius:9px;border:1px solid transparent;transition:.15s;
+  margin-bottom:2px;
+}
+.mobile-menu-link:hover{background:var(--bg-elev);}
+.mobile-menu-link.current-page{
+  background:rgba(31,174,140,0.12);border-color:rgba(31,174,140,0.4);
+  color:var(--teal-light);font-weight:700;
+}
+.menu-icon{display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.mobile-menu-logout{
+  display:flex;align-items:center;gap:10px;width:100%;
+  text-align:right;padding:10px 10px;font-size:12.5px;color:#E0654F;
+  background:transparent;border:none;border-top:1px solid var(--border);margin-top:4px;
+  cursor:pointer;font-family:inherit;border-radius:8px;transition:.15s;
+}
+.mobile-menu-logout:hover{background:rgba(224,101,79,0.1);}
+.theme-switch{
+  width:42px;height:23px;border-radius:12px;position:relative;flex-shrink:0;
+  background:var(--border-strong);border:none;cursor:pointer;transition:background .2s;padding:0;
+}
+.theme-switch.on{background:var(--teal);}
+.theme-switch-knob{
+  position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;
+  background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.3);
+}
+.theme-switch.on .theme-switch-knob{transform:translateX(19px);}
 .content{max-width:820px;margin:0 auto;padding:28px 20px;}
 .page-title{font-size:20px;font-weight:700;margin-bottom:4px;}
 .page-sub{font-size:13px;color:var(--text-secondary);margin-bottom:24px;}
@@ -85,16 +140,53 @@ header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px s
 </script>
 
 <header>
-  <a href="index.html" class="brand">
-    <img class="brand-mark" src="assets/logo-icon.png" alt="شعار الشركة السعودية للطاقة">
-    <div>
-      <div class="brand-text">تقويم دوام الورديات</div>
-      <div class="brand-sub">نظام 4×4 — الشركة السعودية للطاقة</div>
+  <div class="header-row-main">
+    <div class="brand" id="brandLink" style="cursor:pointer">
+      <img class="brand-mark" src="assets/logo-icon.png" alt="شعار الشركة السعودية للطاقة">
+      <div>
+        <div class="brand-text">تقويم دوام الورديات</div>
+        <div class="brand-sub">نظام 4×4 — الشركة السعودية للطاقة</div>
+      </div>
     </div>
-  </a>
-  <button class="theme-btn" id="themeBtn" aria-label="تبديل الوضع">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.07" y2="4.93"/></svg>
-  </button>
+    <div class="header-actions" id="headerActions">
+      <a href="auth.html" class="login-link" id="loginLink" style="display:none">تسجيل الدخول</a>
+      <div class="mobile-user-menu" id="mobileUserMenu" style="display:none">
+        <button class="mobile-menu-trigger" id="mobileMenuTrigger">
+          <span id="mobileMenuName">القائمة</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="mobile-menu-panel" id="mobileMenuPanel">
+          <div class="mobile-menu-row">
+            <span class="menu-icon" style="color:#8B6DD6">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v1M12 20v1M4.2 4.2l.7.7M18.4 18.4l.7.7M3 12h1M20 12h1M4.2 19.8l.7-.7M18.4 5.6l.7-.7"/><circle cx="12" cy="12" r="4"/></svg>
+            </span>
+            <span style="flex:1">الوضع الداكن</span>
+            <button class="theme-switch" id="themeSwitchMobile" aria-label="تبديل الوضع الداكن"><span class="theme-switch-knob"></span></button>
+          </div>
+          <a href="index.html" class="mobile-menu-link">
+            <span class="menu-icon" style="color:#2ECC71"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg></span>
+            الصفحة الرئيسية
+          </a>
+          <a href="member.html" class="mobile-menu-link">
+            <span class="menu-icon" style="color:#4A86E8"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+            حسابي
+          </a>
+          <a href="shifts.html" class="mobile-menu-link current-page">
+            <span class="menu-icon" style="color:#A479E2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+            تقويم دوام الورديات
+          </a>
+          <a href="admin.html" class="mobile-menu-link" id="mobileAdminLink" style="display:none">
+            <span class="menu-icon" style="color:#F0B429"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5z"/><polyline points="9 12 11 14 15 10"/></svg></span>
+            لوحة المدير
+          </a>
+          <button class="mobile-menu-logout" id="mobileLogoutBtn">
+            <span class="menu-icon" style="color:#E0654F"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
+            تسجيل الخروج
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </header>
 
 <div class="content">
@@ -252,10 +344,61 @@ document.getElementById('nextMonthBtn').addEventListener('click', ()=>{
   viewMonth++; if(viewMonth>11){ viewMonth=0; viewYear++; }
   renderCalendar();
 });
-document.getElementById('themeBtn').addEventListener('click', ()=>{
-  const next = document.body.getAttribute('data-theme')==='dark' ? 'light' : 'dark';
+/* ===== حالة تسجيل الدخول بالهيدر — نفس آلية الصفحة الرئيسية (جلسة متجددة 12 ساعة) ===== */
+/* Header login state — same mechanism as the homepage (12h renewing session) */
+const SESSION_MAX_AGE_MS = 12 * 60 * 60 * 1000;
+(function(){
+  const raw = localStorage.getItem('sec-session');
+  const loginLink = document.getElementById('loginLink');
+  const mobileUserMenu = document.getElementById('mobileUserMenu');
+  if(!raw){ loginLink.style.display = 'block'; return; }
+  try{
+    const session = JSON.parse(raw);
+    const age = Date.now() - (session.ts || 0);
+    if(age > SESSION_MAX_AGE_MS || !session.name){
+      localStorage.removeItem('sec-session');
+      localStorage.removeItem('sec-phone');
+      loginLink.style.display = 'block';
+      return;
+    }
+    session.ts = Date.now(); // تجديد النافذة من آخر نشاط فعلي
+    localStorage.setItem('sec-session', JSON.stringify(session));
+
+    loginLink.style.display = 'none';
+    mobileUserMenu.style.display = 'block';
+    document.getElementById('mobileMenuName').textContent = session.name.split(' ')[0];
+    if(session.role === 'admin') document.getElementById('mobileAdminLink').style.display = 'flex';
+  }catch(e){ loginLink.style.display = 'block'; }
+})();
+
+document.getElementById('mobileLogoutBtn').addEventListener('click', ()=>{
+  if(confirm('تسجيل الخروج؟')){
+    localStorage.removeItem('sec-session');
+    localStorage.removeItem('sec-phone');
+    location.reload();
+  }
+});
+document.getElementById('brandLink').addEventListener('click', ()=> location.href = 'index.html');
+
+const mobileUserMenuEl = document.getElementById('mobileUserMenu');
+document.getElementById('mobileMenuTrigger').addEventListener('click', (e)=>{
+  e.stopPropagation();
+  mobileUserMenuEl.classList.toggle('open');
+});
+document.addEventListener('click', (e)=>{
+  if(!mobileUserMenuEl.contains(e.target)) mobileUserMenuEl.classList.remove('open');
+});
+
+const themeSwitchMobile = document.getElementById('themeSwitchMobile');
+function syncThemeSwitch(){
+  themeSwitchMobile.classList.toggle('on', document.body.getAttribute('data-theme') === 'dark');
+}
+syncThemeSwitch();
+themeSwitchMobile.addEventListener('click', ()=>{
+  const next = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
   document.body.setAttribute('data-theme', next);
   localStorage.setItem('sec-theme', next);
+  syncThemeSwitch();
 });
 
 renderAll();
