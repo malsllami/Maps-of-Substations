@@ -231,8 +231,8 @@ body.guest-mode{
   top:calc(var(--header-h, 130px) + 8px);
   width:min(1400px, 96vw);
   aspect-ratio:auto;
-  height:calc(min(44vh, 480px) + var(--map-toolbar-h));
-  height:calc(min(44svh, 480px) + var(--map-toolbar-h));
+  height:calc(min(68vh, 720px) + var(--map-toolbar-h));
+  height:calc(min(68svh, 720px) + var(--map-toolbar-h));
   min-height:calc(280px + var(--map-toolbar-h));
   display:flex;flex-direction:column;
 }
@@ -258,8 +258,8 @@ body.guest-mode{
   flex:1 1 auto;min-height:0;border-radius:0 0 16px 16px;overflow:hidden;
 }
 .hero.map-active{
-  min-height:calc(var(--header-h, 130px) + 8px + min(44vh, 480px) + var(--map-toolbar-h) + 40px);
-  min-height:calc(var(--header-h, 130px) + 8px + min(44svh, 480px) + var(--map-toolbar-h) + 40px);
+  min-height:calc(var(--header-h, 130px) + 8px + min(68vh, 720px) + var(--map-toolbar-h) + 40px);
+  min-height:calc(var(--header-h, 130px) + 8px + min(68svh, 720px) + var(--map-toolbar-h) + 40px);
 }
 .hero-content{
   position:relative;z-index:5;width:100%;
@@ -527,10 +527,9 @@ body.guest-mode h1{
 .map-mode-chip .mm-chev{color:var(--text-secondary);transition:transform .2s;flex-shrink:0;}
 .map-mode-chip.open .mm-chev{transform:rotate(180deg);}
 .map-mode-panel{
-  position:absolute;top:calc(var(--map-toolbar-h) + 4px);left:14px;z-index:7;
-  display:none;flex-direction:column;gap:2px;
-  background:var(--bg-card);border:1px solid var(--border-strong);border-radius:12px;
-  padding:6px;box-shadow:0 10px 24px rgba(0,0,0,.3);min-width:210px;
+  display:none;flex-direction:column;gap:2px;flex-shrink:0;
+  background:var(--bg-card);border-bottom:1px solid var(--border-strong);
+  padding:6px 14px;
 }
 .map-mode-panel.show{display:flex;}
 .map-mode-opt{
@@ -568,10 +567,9 @@ body.guest-mode h1{
 }
 .map-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 .more-panel{
-  position:absolute;top:calc(var(--map-toolbar-h) + 4px);left:14px;z-index:6;
-  display:none;flex-direction:column;gap:6px;
-  background:var(--bg-card);border:1px solid var(--border-strong);border-radius:12px;
-  padding:8px;box-shadow:0 10px 24px rgba(0,0,0,.3);min-width:220px;
+  display:none;flex-direction:column;gap:6px;flex-shrink:0;
+  background:var(--bg-card);border-bottom:1px solid var(--border-strong);
+  padding:8px 14px;
 }
 .more-panel.show{display:flex;}
 .nearby-opt{
@@ -715,11 +713,11 @@ body.guest-mode h1{
 .below-map-area{
   display:none;flex-direction:column;align-items:center;gap:8px;
   width:100%;
-  margin-top:calc(var(--header-h, 130px) + 8px + min(44vh, 480px) + var(--map-toolbar-h) + 10px);
+  margin-top:calc(var(--header-h, 130px) + 8px + min(68vh, 720px) + var(--map-toolbar-h) + 10px);
 }
 .hero.map-active .below-map-area{display:flex;}
 @supports (height: 100svh){
-  .below-map-area{margin-top:calc(var(--header-h, 130px) + 8px + min(44svh, 480px) + var(--map-toolbar-h) + 10px);}
+  .below-map-area{margin-top:calc(var(--header-h, 130px) + 8px + min(68svh, 720px) + var(--map-toolbar-h) + 10px);}
 }
 .map-tool-hint{
   width:min(1100px, 94vw);position:relative;z-index:6;
@@ -796,23 +794,29 @@ body.guest-mode .station-search-hint{width:min(1300px,96vw);}
 }
 body.guest-mode .station-table{width:min(1300px,96vw);}
 .station-table.show{display:block;}
-.sb-inner{padding:14px 20px;}
-.sb-row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
-.sb-info{display:flex;align-items:center;gap:18px;flex-wrap:wrap;min-width:0;}
-.station-table .st-name{font-weight:700;font-size:13.5px;white-space:nowrap;}
-.sb-meta{display:flex;gap:16px;flex-wrap:wrap;font-size:11.5px;color:var(--text-secondary);}
-.sb-meta b{color:var(--text-primary);font-weight:600;font-family:'JetBrains Mono',monospace;direction:ltr;display:inline-block;}
+.sb-inner{padding:16px 20px;}
+.sb-title-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.sb-title-icon{
+  width:34px;height:34px;border-radius:10px;flex-shrink:0;
+  background:rgba(31,174,140,0.14);color:var(--teal);
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+}
+.st-name{font-weight:800;font-size:17px;font-family:'JetBrains Mono',monospace;direction:ltr;display:inline-block;}
+.sb-type-badge{font-size:11px;color:var(--text-secondary);font-weight:600;margin-top:1px;}
+.sb-meta{display:flex;flex-direction:column;gap:6px;font-size:12.5px;color:var(--text-secondary);margin-bottom:14px;}
+.sb-meta .meta-line{display:flex;align-items:center;gap:7px;}
+.sb-meta .meta-line b{color:var(--text-primary);font-weight:700;font-family:inherit;direction:rtl;}
 .station-table table{width:100%;border-collapse:collapse;font-size:11px;}
 .station-table td{padding:3px 0;color:var(--text-secondary);}
 .station-table td.v{color:var(--text-primary);font-weight:500;text-align:left;font-family:'JetBrains Mono',monospace;direction:ltr;}
-.station-table .st-actions{display:flex;gap:8px;flex-shrink:0;}
+.station-table .st-actions{display:flex;gap:8px;}
 .station-table .st-btn{
-  text-align:center;font-size:11.5px;padding:8px 16px;border-radius:8px;white-space:nowrap;
-  border:1px solid var(--border-strong);background:var(--bg);color:var(--text-primary);
-  text-decoration:none;cursor:pointer;transition:.2s;
+  text-align:center;font-size:11px;padding:7px 14px;border-radius:8px;white-space:nowrap;
+  border:1px solid var(--border-strong);background:var(--bg);color:var(--text-secondary);
+  text-decoration:none;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:5px;
 }
-.station-table .st-btn:hover{border-color:var(--teal);}
-.station-table .st-btn.primary{background:var(--teal);border-color:var(--teal);color:#fff;}
+.station-table .st-btn:hover{border-color:var(--teal);color:var(--text-primary);}
+.station-table .st-btn.primary{background:transparent;border-color:rgba(31,174,140,0.4);color:var(--teal-light);}
 .edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;}
 .edit-map-wrap{position:relative;width:100%;height:220px;border-radius:10px;overflow:hidden;border:1px solid var(--border-strong);}
 #editPreviewMap{width:100%;height:100%;}
@@ -828,10 +832,6 @@ body.guest-mode .station-table{width:min(1300px,96vw);}
   .edit-map-wrap{height:180px;}
 }
 @media (max-width:700px){
-  .sb-row{flex-direction:column;align-items:stretch;}
-  .sb-info{flex-direction:column;align-items:flex-start;gap:6px;}
-  .station-table .st-actions{width:100%;}
-  .station-table .st-btn{flex:1;}
   .edit-grid{grid-template-columns:1fr;}
 }
 .cards-section{
@@ -3031,19 +3031,20 @@ function renderStationOnMap(s){
   const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}&travelmode=driving`;
   stationTable.innerHTML = `
     <div class="sb-inner">
-      <div class="sb-row">
-        <div class="sb-info">
-          <div class="st-name">${s.name}</div>
-          <div class="sb-meta">
-            <span>رقم المحطة <b>${s.id}</b></span>
-            ${s.region ? `<span>المنطقة <b style="font-family:inherit;direction:rtl">${s.region}</b></span>` : ''}
-            ${s.feeder ? `<span>المغذي <b style="font-family:inherit;direction:rtl">${s.feeder}</b></span>` : ''}
-          </div>
+      <div class="sb-title-row">
+        <div class="sb-title-icon">${s.type === 'تحويل' ? '⚡' : '🏭'}</div>
+        <div>
+          <div class="st-name">${s.id}</div>
+          <div class="sb-type-badge">محطة ${s.type}</div>
         </div>
-        <div class="st-actions">
-          <a class="st-btn primary" href="${mapsUrl}" target="_blank" rel="noopener">انتقال لقوقل ماب</a>
-          <button class="st-btn" id="openEditBtn">تعديل</button>
-        </div>
+      </div>
+      <div class="sb-meta">
+        ${s.region ? `<div class="meta-line">📍 <b>${s.region}</b></div>` : ''}
+        ${s.feeder ? `<div class="meta-line">🔌 <b style="font-family:'JetBrains Mono',monospace;direction:ltr">${s.feeder}</b></div>` : ''}
+      </div>
+      <div class="st-actions">
+        <a class="st-btn primary" href="${mapsUrl}" target="_blank" rel="noopener">قوقل ماب 🧭</a>
+        <button class="st-btn" id="openEditBtn">تعديل ✏️</button>
       </div>
       ${s._dataBuiltAt ? `<div class="db-freshness-note">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.5A8.5 8.5 0 1 1 3 12.5a8.38 8.38 0 0 1 .9-3.8"/><path d="M21 3v6h-6"/></svg>
@@ -3291,4 +3292,3 @@ document.getElementById('homeMenuLink').addEventListener('click', (e)=>{
 </script>
 </body>
 </html>
-
