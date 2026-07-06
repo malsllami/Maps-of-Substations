@@ -246,7 +246,7 @@ body.guest-mode{
   position:absolute;inset:-8%;z-index:0;pointer-events:none;
   background:radial-gradient(circle at center, rgba(77,214,181,0.16) 0%, rgba(46,125,209,0.07) 38%, transparent 68%);
 }
-#globe-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:1;}
+#globe-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;}
 #map-container{
   position:absolute;inset:0;width:100%;height:100%;z-index:2;
   opacity:0;pointer-events:none;
@@ -1929,46 +1929,50 @@ setTimeout(syncHeaderHeight, 300); // إعادة قياس بعد استقرار 
  *  The map always keeps a fixed height; opening any panel (day/more/nearby/feeder/outage) grows the total frame and shifts the map down within it, never shrinking it
  * ============================================================ */
 function layoutMapActive(){
-  const stage = document.getElementById('globeStage');
-  if(!stage || !stage.classList.contains('map-active')) return;
-  const topArea = document.getElementById('topContentArea');
-  const header = document.querySelector('header');
-  const headerH = header ? header.getBoundingClientRect().height : 130;
-  const topAreaH = topArea ? topArea.offsetHeight : 0;
-  const stageTop = headerH + 14 + topAreaH + 10; // ١٤ تطابق حشو .hero.map-active العلوي المخفَّف، و١٠ فراغ فاصل بسيط
-  stage.style.top = stageTop + 'px';
+  try{
+    const stage = document.getElementById('globeStage');
+    if(!stage || !stage.classList.contains('map-active')) return;
+    const topArea = document.getElementById('topContentArea');
+    const header = document.querySelector('header');
+    const headerH = header ? header.getBoundingClientRect().height : 130;
+    const topAreaH = topArea ? topArea.offsetHeight : 0;
+    const stageTop = headerH + 14 + topAreaH + 10; // ١٤ تطابق حشو .hero.map-active العلوي المخفَّف، و١٠ فراغ فاصل بسيط
+    stage.style.top = stageTop + 'px';
 
-  const toolbarEl = document.querySelector('.map-toolbar-bar');
-  const toolbarH = toolbarEl ? toolbarEl.offsetHeight : 45;
-  const availableH = window.innerHeight - stageTop - toolbarH - 16; // هامش أمان أسفل الشاشة
-  const mapContainer = document.getElementById('map-container');
-  if(mapContainer) mapContainer.style.height = Math.max(320, availableH) + 'px';
+    const toolbarEl = document.querySelector('.map-toolbar-bar');
+    const toolbarH = toolbarEl ? toolbarEl.offsetHeight : 45;
+    const availableH = window.innerHeight - stageTop - toolbarH - 16; // هامش أمان أسفل الشاشة
+    const mapContainer = document.getElementById('map-container');
+    if(mapContainer) mapContainer.style.height = Math.max(320, availableH) + 'px';
 
-  // تأخير invalidateSize وضبط ارتفاع الهيرو لإطار رسم واحد — الاستدعاء الفوري المتزامن كان يحصل قبل اكتمال تخطيط المتصفح الفعلي لأبعاد اللوحة المفتوحة، فيربك خريطة Leaflet داخليًا (يفسّر تعطّل تبديل نوع الخريطة وأداة القياس معًا)
-  // Delay invalidateSize and the hero min-height adjustment by one animation frame — firing them synchronously happened before the browser's real layout of the open panel settled, confusing Leaflet internally (this explains both the tile-mode switch and the measure tool breaking together)
-  requestAnimationFrame(()=>{
-    if(leafletMap) leafletMap.invalidateSize();
-    const heroEl = document.getElementById('heroSection');
-    if(heroEl) heroEl.style.minHeight = (stageTop + stage.offsetHeight + 40) + 'px';
-  });
+    requestAnimationFrame(()=>{
+      try{
+        if(leafletMap) leafletMap.invalidateSize();
+        const heroEl = document.getElementById('heroSection');
+        if(heroEl) heroEl.style.minHeight = (stageTop + stage.offsetHeight + 40) + 'px';
+      }catch(err){ console.warn('layoutMapActive (frame):', err); }
+    });
+  }catch(err){ console.warn('layoutMapActive:', err); }
 }
 window.addEventListener('resize', layoutMapActive);
-/* مراقبة فعلية لحجم منطقة المحتوى العلوي — أي تغيّر حقيقي بارتفاعها (ظهور نتيجة، بطاقة محطة، إلخ) يعيد حساب موضع الخريطة فورًا، بدل انتظار مهلة زمنية تخمينية قد لا تطابق التوقيت الفعلي */
-/* Real size observation of the top content area — any actual height change (result appears, station card, etc.) immediately recomputes the map's position, instead of waiting on a guessed timing window that might not match reality */
-const _topAreaEl = document.getElementById('topContentArea');
-if(_topAreaEl) new ResizeObserver(layoutMapActive).observe(_topAreaEl);
-/* مراقبة تلقائية لكل لوحات الشريط (نهاري/المزيد/قريب-مغذي/الأعطال) — أي تغيّر بظهورها يعيد حساب التخطيط فورًا، بدل الاعتماد على استدعاء يدوي متفرّق بكل معالج ضغط */
-/* Automatic observer on all toolbar panels — any visibility change immediately triggers a re-layout, instead of relying on scattered manual calls in every click handler */
+/* مراقبة فعلية لحجم منطقة المحتوى العلوي — أي تغيّر حقيقي بارتفاعها يعيد حساب موضع الخريطة فورًا / Real size observation of the top content area — any actual height change immediately recomputes the map's position */
+try{
+  const _topAreaEl = document.getElementById('topContentArea');
+  if(_topAreaEl && typeof ResizeObserver !== 'undefined') new ResizeObserver(layoutMapActive).observe(_topAreaEl);
+}catch(err){ console.warn('ResizeObserver setup:', err); }
+/* مراقبة تلقائية لكل لوحات الشريط — أي تغيّر بظهورها يعيد حساب التخطيط فورًا / Automatic observer on all toolbar panels — any visibility change immediately triggers a re-layout */
 let _layoutDebounceTimer = null;
 function _debouncedLayoutMapActive(){
   clearTimeout(_layoutDebounceTimer);
   _layoutDebounceTimer = setTimeout(layoutMapActive, 30);
 }
-['mapModePanel','morePanel','mapToolHint','outagePanel'].forEach(function(id){
-  const el = document.getElementById(id);
-  if(!el) return;
-  new MutationObserver(_debouncedLayoutMapActive).observe(el, {attributes:true, attributeFilter:['class']});
-});
+try{
+  ['mapModePanel','morePanel','mapToolHint','outagePanel'].forEach(function(id){
+    const el = document.getElementById(id);
+    if(!el || typeof MutationObserver === 'undefined') return;
+    new MutationObserver(_debouncedLayoutMapActive).observe(el, {attributes:true, attributeFilter:['class']});
+  });
+}catch(err){ console.warn('MutationObserver setup:', err); }
 syncHeaderHeight();
 
 function alignHeroBelowGlobe(){
@@ -3339,4 +3343,3 @@ document.getElementById('homeMenuLink').addEventListener('click', (e)=>{
 </script>
 </body>
 </html>
-
