@@ -3177,9 +3177,18 @@ window.editNearbyStation = function(id){
 
 function openEditForm(){
   try{
+  console.log('[تشخيص التعديل] الدالة بدأت — hasValidSession=' + hasValidSession() + ' — currentStation=', currentStation);
   if(!hasValidSession()){
-    searchHint.innerHTML = 'سجّل دخول للتعديل — <a href="auth.html" style="color:var(--teal);font-weight:500;text-decoration:underline">تسجيل الدخول</a>';
-    searchHint.className = 'search-hint err';
+    const msg = 'سجّل دخول للتعديل — <a href="auth.html" style="color:var(--teal);font-weight:500;text-decoration:underline">تسجيل الدخول</a>';
+    // بوضع الخريطة، searchHint مخفي (داخل .hero-content المخفي) — نعرض الرسالة بمكان مرئي فعليًا حسب الحالة الظاهرة
+    // In map mode, searchHint is hidden (inside the hidden .hero-content) — show the message wherever is actually visible for the current state
+    if(mapContainer.classList.contains('active')){
+      const hintEl = document.getElementById('stationSearchHint');
+      hintEl.innerHTML = msg; hintEl.className = 'station-search-hint err';
+    } else {
+      searchHint.innerHTML = msg;
+      searchHint.className = 'search-hint err';
+    }
     return;
   }
   const s = currentStation;
@@ -3229,6 +3238,7 @@ function openEditForm(){
       </div>
     </div>`;
   document.getElementById('editStationOverlay').classList.add('show');
+  console.log('[تشخيص التعديل] تم الوصول لسطر الإظهار — classList الآن:', document.getElementById('editStationOverlay').className);
 
   let editPreviewTileLayer = null, editPreviewIsSat = false;
   setTimeout(()=>{
