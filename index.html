@@ -587,7 +587,14 @@ body.guest-mode h1{
 }
 .nearby-opt:hover{background:var(--bg-elev);}
 
-.edit-input{width:100%;height:44px;background:var(--bg);border:1px solid var(--border-strong);border-radius:9px;color:var(--text-primary);font-size:13.5px;padding:0 12px;font-family:'JetBrains Mono',monospace;direction:ltr;text-align:right;}
+.edit-input{
+  width:100%;height:54px;background:var(--bg);border:1.5px solid var(--border-strong);
+  border-radius:11px;color:var(--text-primary);font-size:16px;padding:0 16px;
+  font-family:'JetBrains Mono',monospace;direction:ltr;text-align:right;
+  transition:border-color .2s, box-shadow .2s;
+}
+.edit-input:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(31,174,140,0.18);}
+.edit-input::placeholder{color:var(--text-secondary);opacity:.75;}
 
 /* ===== صفحة النموذج الكاملة الموحّدة — تُستخدم لكل من الإضافة والتعديل، بأنيميشن دخول أنيق بدل مجرد بطاقة مكبّرة ===== */
 /* ===== Unified full-page form — shared by both add and edit, with a smooth entrance animation instead of just a bigger card ===== */
@@ -602,44 +609,62 @@ body.guest-mode h1{
 }
 .fullpage-form-header{
   display:flex;align-items:center;justify-content:space-between;
-  padding:18px 24px;border-bottom:1px solid var(--border);
+  padding:20px 32px;border-bottom:1px solid var(--border);
   position:sticky;top:0;background:var(--bg);z-index:2;
 }
-.fullpage-form-title{font-size:17px;font-weight:700;}
+.fullpage-form-title{font-size:20px;font-weight:800;}
 .fullpage-form-close{
-  width:38px;height:38px;border-radius:50%;background:var(--bg-card);border:1px solid var(--border-strong);
+  width:42px;height:42px;border-radius:50%;background:var(--bg-card);border:1px solid var(--border-strong);
   display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-primary);transition:.2s;flex-shrink:0;
 }
 .fullpage-form-close:hover{border-color:var(--teal);color:var(--teal);}
-.fullpage-form-body{padding:26px 24px 60px;max-width:760px;margin:0 auto;}
+.fullpage-form-body{padding:36px 32px 70px;max-width:1000px;margin:0 auto;}
+.form-field-label{display:block;font-size:13.5px;font-weight:700;color:var(--text-primary);margin-bottom:8px;}
 .add-station-panel{
   display:flex;flex-direction:column;gap:12px;
   width:100%;
 }
-.add-station-type{display:flex;gap:8px;}
+.add-station-type{display:flex;gap:10px;}
 .type-btn{
-  flex:1;padding:12px;border-radius:9px;border:1px solid var(--border-strong);background:var(--bg);
-  color:var(--text-secondary);font-size:13px;cursor:pointer;font-family:inherit;transition:.2s;
+  flex:1;padding:15px;border-radius:11px;border:1.5px solid var(--border-strong);background:var(--bg);
+  color:var(--text-secondary);font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:.2s;
 }
-.type-btn.active{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:600;}
-.paste-coord-row{display:flex;flex-direction:column;gap:6px;margin-top:4px;}
-.paste-coord-label{font-size:11.5px;color:var(--text-secondary);}
+.type-btn.active{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:700;}
+.paste-coord-row{display:flex;flex-direction:column;gap:8px;margin-top:6px;}
+.paste-coord-label{font-size:13px;color:var(--text-secondary);font-weight:600;}
 .paste-apply-btn{
-  background:rgba(31,174,140,0.14);color:var(--teal-light);border:1px solid rgba(77,214,181,0.45);
-  border-radius:9px;padding:0 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;
+  background:rgba(31,174,140,0.14);color:var(--teal-light);border:1.5px solid rgba(77,214,181,0.45);
+  border-radius:11px;padding:0 20px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;
   transition:.2s;flex-shrink:0;
 }
 .paste-apply-btn:hover{background:rgba(31,174,140,0.24);border-color:var(--teal);}
 .use-gps-btn{
-  width:100%;font-size:13px;padding:12px;border-radius:9px;border:1px solid var(--border-strong);
-  background:var(--bg);color:var(--teal);cursor:pointer;font-family:inherit;
+  width:100%;font-size:15px;font-weight:600;padding:15px;border-radius:11px;border:1.5px solid var(--border-strong);
+  background:var(--bg);color:var(--teal);cursor:pointer;font-family:inherit;transition:.2s;
 }
+.use-gps-btn:hover{border-color:var(--teal);background:rgba(31,174,140,0.08);}
 .add-station-submit{
-  background:rgba(31,174,140,0.14);color:var(--teal-light);border:1px solid rgba(77,214,181,0.45);
-  border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:.2s;
+  background:var(--teal);color:#fff;border:1.5px solid var(--teal);
+  border-radius:12px;padding:17px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;transition:.2s;
+  box-shadow:0 4px 14px rgba(31,174,140,0.28);
 }
-.add-station-submit:hover{background:rgba(31,174,140,0.24);border-color:var(--teal);}
-.add-station-submit:disabled{opacity:.5;cursor:not-allowed;}
+.add-station-submit:hover{background:var(--teal-light);border-color:var(--teal-light);box-shadow:0 6px 18px rgba(31,174,140,0.38);}
+.add-station-submit:disabled{opacity:.5;cursor:not-allowed;box-shadow:none;}
+/* أزرار حفظ/إلغاء التعديل داخل صفحة النموذج — نطاق خاص بها، منفصل عن الأزرار الصغيرة المدمجة ببطاقة عرض المحطة */
+/* Edit-form save/cancel buttons — their own scope, separate from the small compact buttons on the station display card */
+.fullpage-form-body .st-actions{display:flex;gap:12px;}
+.fullpage-form-body .st-btn{
+  flex:1;text-align:center;padding:16px;border-radius:12px;font-size:15.5px;font-weight:700;
+  cursor:pointer;font-family:inherit;transition:.2s;border:1.5px solid var(--border-strong);
+  background:var(--bg);color:var(--text-primary);
+}
+.fullpage-form-body .st-btn:hover{border-color:var(--teal);}
+.fullpage-form-body .st-btn.primary{
+  background:var(--teal);border-color:var(--teal);color:#fff;
+  box-shadow:0 4px 14px rgba(31,174,140,0.28);
+}
+.fullpage-form-body .st-btn.primary:hover{background:var(--teal-light);border-color:var(--teal-light);}
+.fullpage-form-body .st-btn:disabled{opacity:.5;cursor:not-allowed;box-shadow:none;}
 .add-station-progress-track{
   width:100%;height:8px;border-radius:5px;background:rgba(255,255,255,0.12);overflow:hidden;margin-top:10px;
 }
@@ -816,8 +841,8 @@ body.guest-mode h1{
 }
 .station-table .st-btn:hover{border-color:var(--teal);color:var(--text-primary);}
 .station-table .st-btn.primary{background:transparent;border-color:rgba(31,174,140,0.4);color:var(--teal-light);}
-.edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;}
-.edit-map-wrap{position:relative;width:100%;height:220px;border-radius:10px;overflow:hidden;border:1px solid var(--border-strong);}
+.edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start;}
+.edit-map-wrap{position:relative;width:100%;height:280px;border-radius:12px;overflow:hidden;border:1.5px solid var(--border-strong);}
 #editPreviewMap{width:100%;height:100%;}
 .edit-map-sat-btn{
   position:absolute;top:8px;left:8px;z-index:5;
@@ -1201,30 +1226,48 @@ footer{
       </div>
     </div>
     <div class="fullpage-form-body">
-      <div class="add-station-panel" id="addStationPanel">
-        <div id="addStationFormBody">
-          <div class="add-station-type">
-            <button class="type-btn active" data-type="توزيع">توزيع</button>
-            <button class="type-btn" data-type="تحويل">تحويل</button>
+      <div class="add-station-panel" id="addStationPanel" style="gap:20px">
+        <div id="addStationFormBody" style="display:flex;flex-direction:column;gap:20px">
+          <div>
+            <label class="form-field-label">نوع المحطة</label>
+            <div class="add-station-type">
+              <button class="type-btn active" data-type="توزيع">توزيع</button>
+              <button class="type-btn" data-type="تحويل">تحويل</button>
+            </div>
           </div>
-          <input id="newStationId" class="edit-input" placeholder="مثال: 39070">
-          <div id="feederRegionRow" style="display:flex;gap:6px;">
-            <input id="newStationFeeder" class="edit-input" placeholder="مثال: SNB38 (اختياري)">
-            <input id="newStationRegion" class="edit-input" placeholder="مثال: القرينية">
+          <div>
+            <label class="form-field-label">رقم المحطة</label>
+            <input id="newStationId" class="edit-input" placeholder="مثال: 39070">
           </div>
-          <div style="display:flex;gap:6px;">
-            <input id="newStationLat" class="edit-input" placeholder="مثال: 21.523456">
-            <input id="newStationLng" class="edit-input" placeholder="مثال: 39.187654">
+          <div id="feederRegionRow" style="display:flex;gap:14px;">
+            <div style="flex:1">
+              <label class="form-field-label">المغذي (اختياري)</label>
+              <input id="newStationFeeder" class="edit-input" placeholder="مثال: SNB38">
+            </div>
+            <div style="flex:1">
+              <label class="form-field-label">المنطقة</label>
+              <input id="newStationRegion" class="edit-input" placeholder="مثال: القرينية">
+            </div>
+          </div>
+          <div>
+            <label class="form-field-label">الإحداثيات (خط العرض والطول)</label>
+            <div style="display:flex;gap:14px;">
+              <input id="newStationLat" class="edit-input" placeholder="مثال: 21.523456">
+              <input id="newStationLng" class="edit-input" placeholder="مثال: 39.187654">
+            </div>
           </div>
           <button class="use-gps-btn" id="newStationGpsBtn" type="button">📍 استخدام موقعي الحالي</button>
           <div class="paste-coord-row">
-            <span class="paste-coord-label">أو الصق الإحداثية مباشرة</span>
-            <div style="display:flex;gap:6px;">
+            <span class="paste-coord-label">أو الصق الإحداثية مباشرة (بصيغة: خط العرض,خط الطول)</span>
+            <div style="display:flex;gap:10px;">
               <input id="newStationPasteCoord" class="edit-input" placeholder="مثال: 21.5234,39.1876" style="flex:1">
               <button type="button" class="paste-apply-btn" id="newStationPasteApply">تطبيق</button>
             </div>
           </div>
-          <input id="newStationReason" class="edit-input" placeholder="مثال: محطة جديدة بحي القرينية">
+          <div>
+            <label class="form-field-label">سبب الإضافة</label>
+            <input id="newStationReason" class="edit-input" placeholder="مثال: محطة جديدة بحي القرينية لتغذية المنطقة الصناعية">
+          </div>
           <div id="addStationError" class="add-station-error"></div>
           <button class="add-station-submit" id="addStationSubmitBtn">حفظ المحطة</button>
         </div>
@@ -3203,22 +3246,23 @@ function openEditForm(){
       <div class="edit-grid">
         <div>
           ${isDistribution ? `
-          <div style="margin-bottom:10px;">
-            <label style="font-size:12px;color:var(--text-secondary)">المغذي</label>
+          <div style="margin-bottom:18px;">
+            <label class="form-field-label">المغذي</label>
             <input id="editFeeder" class="edit-input" value="${s.feeder || ''}" placeholder="مثال: SNB38">
           </div>
-          <div style="margin-bottom:10px;">
-            <label style="font-size:12px;color:var(--text-secondary)">المنطقة</label>
+          <div style="margin-bottom:18px;">
+            <label class="form-field-label">المنطقة</label>
             <input id="editRegion" class="edit-input" value="${s.region || ''}" placeholder="مثال: القرينية">
           </div>` : ''}
-          <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <label class="form-field-label">الإحداثيات (خط العرض والطول)</label>
+          <div style="display:flex;gap:14px;margin-bottom:18px;">
             <input id="editLat" class="edit-input" placeholder="مثال: 21.523456" value="${Number(s.lat).toFixed(6)}">
             <input id="editLng" class="edit-input" placeholder="مثال: 39.187654" value="${Number(s.lng).toFixed(6)}">
           </div>
-          <button id="useGpsBtn" type="button" style="width:100%;font-size:13px;padding:12px;border-radius:9px;border:1px solid var(--border-strong);background:var(--bg);color:var(--teal);cursor:pointer;">📍 استخدام موقعي الحالي</button>
+          <button id="useGpsBtn" type="button" class="use-gps-btn">📍 استخدام موقعي الحالي</button>
           <div class="paste-coord-row">
-            <span class="paste-coord-label">أو الصق الإحداثية مباشرة</span>
-            <div style="display:flex;gap:8px;">
+            <span class="paste-coord-label">أو الصق الإحداثية مباشرة (بصيغة: خط العرض,خط الطول)</span>
+            <div style="display:flex;gap:10px;">
               <input id="editPasteCoord" class="edit-input" placeholder="مثال: 21.5234,39.1876" style="flex:1">
               <button type="button" class="paste-apply-btn" id="editPasteApply">تطبيق</button>
             </div>
@@ -3229,7 +3273,8 @@ function openEditForm(){
           <button type="button" class="edit-map-sat-btn" id="editMapSatBtn" title="تبديل القمر الصناعي">🛰️</button>
         </div>
       </div>
-      <input id="editReason" class="edit-input" placeholder="مثال: تصحيح موقع المحطة على الخريطة" style="margin-top:10px;">
+      <label class="form-field-label" style="margin-top:18px">سبب التعديل</label>
+      <input id="editReason" class="edit-input" placeholder="مثال: تصحيح موقع المحطة بعد معاينة ميدانية">
       <div class="add-station-progress-track" id="editProgressTrack" style="display:none;margin-top:8px;">
         <div class="add-station-progress-fill" id="editProgressFill"></div>
       </div>
