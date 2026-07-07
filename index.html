@@ -3158,7 +3158,14 @@ document.getElementById('recentClearBtn').addEventListener('click', ()=>{
   renderRecentPanel();
 });
 document.getElementById('recentToggleBtn').addEventListener('click', ()=>{
-  document.getElementById('recentPanel').classList.toggle('show');
+  const panel = document.getElementById('recentPanel');
+  const willOpen = !panel.classList.contains('show');
+  panel.classList.toggle('show');
+  if(willOpen){
+    // تمرير سلس تلقائي يخبر المستخدم العادي إن القائمة ظهرت أسفل الشاشة، بدل ما تفتح بصمت خارج نطاق الرؤية
+    // Smooth automatic scroll telling a regular user the list appeared below the screen, instead of opening silently out of view
+    setTimeout(()=> panel.scrollIntoView({behavior:'smooth', block:'nearest'}), 50);
+  }
 });
 renderRecentPanel();
 
