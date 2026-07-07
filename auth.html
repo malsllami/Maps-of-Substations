@@ -463,12 +463,13 @@ function buildContactMessage_(){
   const shift = document.getElementById('contactShift').value;
   const message = document.getElementById('contactMessage').value.trim();
   const errEl = document.getElementById('contactModalError');
+  errEl.classList.remove('show');
   errEl.textContent = '';
 
-  if(!name){ errEl.textContent = 'الرجاء إدخال الاسم'; return null; }
-  if(!phone || phone.length < 9){ errEl.textContent = 'الرجاء إدخال رقم جوال صحيح'; return null; }
-  if(!shift){ errEl.textContent = 'الرجاء اختيار الوردية'; return null; }
-  if(!message){ errEl.textContent = 'الرجاء كتابة الرسالة'; return null; }
+  if(!name){ errEl.textContent = 'الرجاء إدخال الاسم'; errEl.classList.add('show'); return null; }
+  if(!phone || phone.length < 9){ errEl.textContent = 'الرجاء إدخال رقم جوال صحيح'; errEl.classList.add('show'); return null; }
+  if(!shift){ errEl.textContent = 'الرجاء اختيار الوردية'; errEl.classList.add('show'); return null; }
+  if(!message){ errEl.textContent = 'الرجاء كتابة الرسالة'; errEl.classList.add('show'); return null; }
 
   return `رسالة من نظام إحداثيات محطات SEC\n\nالاسم: ${name}\nرقم الجوال: ${phone}\nالإيميل: ${email || '—'}\nنوع العضوية: ${selectedContactType}\nالوردية: ${shift}\n\nالرسالة:\n${message}`;
 }
@@ -478,6 +479,7 @@ document.getElementById('sendWhatsappBtn').addEventListener('click', ()=>{
   if(!text) return;
   if(!adminContactInfo.phone){
     document.getElementById('contactModalError').textContent = 'تعذّر جلب رقم المدير من الخادم — تأكد من نشر آخر نسخة';
+    document.getElementById('contactModalError').classList.add('show');
     return;
   }
   const waPhone = adminContactInfo.phone.replace(/^\+/, '').replace(/\D/g, '');
@@ -489,6 +491,7 @@ document.getElementById('sendEmailBtn').addEventListener('click', ()=>{
   if(!text) return;
   if(!adminContactInfo.email){
     document.getElementById('contactModalError').textContent = 'تعذّر جلب إيميل المدير من الخادم — تأكد من نشر آخر نسخة';
+    document.getElementById('contactModalError').classList.add('show');
     return;
   }
   const subject = 'رسالة من نظام إحداثيات محطات SEC';
