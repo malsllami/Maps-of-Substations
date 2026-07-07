@@ -3176,6 +3176,7 @@ window.editNearbyStation = function(id){
 };
 
 function openEditForm(){
+  try{
   if(!hasValidSession()){
     searchHint.innerHTML = 'سجّل دخول للتعديل — <a href="auth.html" style="color:var(--teal);font-weight:500;text-decoration:underline">تسجيل الدخول</a>';
     searchHint.className = 'search-hint err';
@@ -3200,8 +3201,8 @@ function openEditForm(){
             <input id="editRegion" class="edit-input" value="${s.region || ''}" placeholder="مثال: القرينية">
           </div>` : ''}
           <div style="display:flex;gap:8px;margin-bottom:10px;">
-            <input id="editLat" class="edit-input" placeholder="مثال: 21.523456" value="${s.lat.toFixed(6)}">
-            <input id="editLng" class="edit-input" placeholder="مثال: 39.187654" value="${s.lng.toFixed(6)}">
+            <input id="editLat" class="edit-input" placeholder="مثال: 21.523456" value="${Number(s.lat).toFixed(6)}">
+            <input id="editLng" class="edit-input" placeholder="مثال: 39.187654" value="${Number(s.lng).toFixed(6)}">
           </div>
           <button id="useGpsBtn" type="button" style="width:100%;font-size:13px;padding:12px;border-radius:9px;border:1px solid var(--border-strong);background:var(--bg);color:var(--teal);cursor:pointer;">📍 استخدام موقعي الحالي</button>
           <div class="paste-coord-row">
@@ -3357,6 +3358,7 @@ function openEditForm(){
       unlockNavigationAfterSave();
     }
   });
+  }catch(err){ console.error('openEditForm فشلت بخطأ:', err); }
 }
 
 /* الرجوع للبحث — كانت زرًا مستقلاً بجانب صندوق البحث، أصبحت الآن دالة موحّدة يستدعيها رابط "الصفحة الرئيسية" بالقائمة المنسدلة فقط / Back-to-search — used to be its own button beside the search box, now a unified function called only by the "Home" dropdown-menu link */
