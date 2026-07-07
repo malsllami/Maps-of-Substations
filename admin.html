@@ -102,8 +102,20 @@ header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px s
 .ops-status-ring{flex-shrink:0;}
 .ops-status-info{flex:1;min-width:180px;}
 .ops-status-title{font-size:13.5px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:7px;}
-.ops-status-sub{font-size:11.5px;color:var(--text-secondary);}
-.ops-status-count{font-size:14.5px;font-weight:800;color:var(--text-primary);font-family:'JetBrains Mono',monospace;}
+.ops-status-sub{font-size:11.5px;color:var(--text-secondary);margin-top:3px;}
+.ops-status-count-line{font-size:13px;color:var(--text-secondary);display:flex;align-items:baseline;gap:5px;}
+.ops-status-count{font-size:21px;font-weight:800;color:var(--teal);font-family:'JetBrains Mono',monospace;}
+.ops-breakdown-card{
+  background:var(--bg-card);border:1px solid var(--border);border-radius:16px;
+  padding:18px;margin-top:12px;
+}
+.ops-breakdown-title{font-size:13px;font-weight:700;margin-bottom:12px;color:var(--text-secondary);}
+.ops-breakdown-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 4px;border-top:1px solid var(--border);font-size:13px;
+}
+.ops-breakdown-row:first-of-type{border-top:none;}
+.ops-breakdown-row b{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--teal);}
 .ops-row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
 .ops-pill{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:14px 10px;text-align:center;}
 .ops-pill b{display:block;font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:800;margin-bottom:3px;}
@@ -388,7 +400,7 @@ function renderHeaderDate(){
 renderHeaderDate();
 setInterval(renderHeaderDate, 60 * 60 * 1000);
 setTimeout(checkConnection, 1500);
-setInterval(checkConnection, 60 * 1000);
+setInterval(()=>{ if(document.visibilityState === 'visible') checkConnection(); }, 3 * 60 * 1000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') checkConnection(); });
 const session = JSON.parse(localStorage.getItem('sec-session') || '{}');
 let fetching = false;
@@ -487,14 +499,34 @@ function renderOpsMain(d){
   const quotaPct = Math.min(100, Math.round((d.dailyRequests / d.dailyRequestLimit) * 100));
   const qualityPct = d.dataQualityPct;
 
+  /* ترجمة أسماء الإجراءات التقنية لتسميات عربية مفهومة بالعرض — لا تُخزَّن بالكود كبيانات عمل، فقط تسميات عرض ثابتة لواجهة تقنية / Technical action names translated to readable Arabic labels for display — not business data, just fixed display labels for a technical interface */
+  const ACTION_LABELS = {
+    'ping': 'فحص الاتصال', 'searchStation': 'بحث بالخادم (احتياطي)', 'getAllStations': 'تحميل فهرس المحطات',
+    'getDataVersion': 'فحص إصدار البيانات', 'updateCoordinates': 'تعديل إحداثية', 'addNewStation': 'إضافة محطة',
+    'getNearbyStations': 'محطات قريبة', 'getFeederStations': 'محطات المغذي', 'getMemberProfile': 'ملف العضو',
+    'getOperationsDashboard': 'تحميل لوحة العمليات', 'checkPhoneExists': 'التحقق من الجوال', 'registerUser': 'تسجيل عضو',
+    'generateLoginChallenge': 'تحدي دخول بالبصمة', 'verifyAssertion': 'تحقق دخول بالبصمة',
+    'generateRegisterChallenge': 'تحدي تسجيل بصمة', 'registerCredential': 'حفظ بصمة'
+  };
+  const breakdownRows = (d.dailyRequestBreakdown || []).map(item => `
+    <div class="ops-breakdown-row">
+      <span>${ACTION_LABELS[item.action] || item.action}</span>
+      <b>${item.count.toLocaleString('ar-SA')}</b>
+    </div>`).join('');
+
   document.getElementById('opsMain').innerHTML = `
     <div class="ops-status-card">
       <div class="ops-status-ring">${renderRing(quotaPct, 'quota', 84)}</div>
       <div class="ops-status-info">
         <div class="ops-status-title">⚡ طلبات اليوم على السكربت</div>
-        <div class="ops-status-sub"><b class="ops-status-count">${d.dailyRequests.toLocaleString('ar-SA')}</b> من <b class="ops-status-count">${d.dailyRequestLimit.toLocaleString('ar-SA')}</b> طلب — ${d.currentShiftLabel}</div>
+        <div class="ops-status-count-line"><b class="ops-status-count">${d.dailyRequests.toLocaleString('ar-SA')}</b> من <b class="ops-status-count">${d.dailyRequestLimit.toLocaleString('ar-SA')}</b> طلب</div>
+        <div class="ops-status-sub">${d.currentShiftLabel}</div>
       </div>
     </div>
+    ${breakdownRows ? `<div class="ops-breakdown-card">
+      <div class="ops-breakdown-title">📊 أكثر ٥ أنواع طلبات اليوم (يوضّح سبب أي ارتفاع بالعدد)</div>
+      ${breakdownRows}
+    </div>` : ''}
 
     <div class="ops-row3">
       <div class="ops-pill"><b style="color:var(--teal)">${d.additionsToday}</b><span>إضافات اليوم</span></div>
