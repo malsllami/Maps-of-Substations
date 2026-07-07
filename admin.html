@@ -103,6 +103,7 @@ header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px s
 .ops-status-info{flex:1;min-width:180px;}
 .ops-status-title{font-size:13.5px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:7px;}
 .ops-status-sub{font-size:11.5px;color:var(--text-secondary);}
+.ops-status-count{font-size:14.5px;font-weight:800;color:var(--text-primary);font-family:'JetBrains Mono',monospace;}
 .ops-row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
 .ops-pill{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:14px 10px;text-align:center;}
 .ops-pill b{display:block;font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:800;margin-bottom:3px;}
@@ -491,7 +492,7 @@ function renderOpsMain(d){
       <div class="ops-status-ring">${renderRing(quotaPct, 'quota', 84)}</div>
       <div class="ops-status-info">
         <div class="ops-status-title">⚡ طلبات اليوم على السكربت</div>
-        <div class="ops-status-sub">${d.dailyRequests.toLocaleString('ar-SA')} من ${d.dailyRequestLimit.toLocaleString('ar-SA')} طلب — ${d.currentShiftLabel}</div>
+        <div class="ops-status-sub"><b class="ops-status-count">${d.dailyRequests.toLocaleString('ar-SA')}</b> من <b class="ops-status-count">${d.dailyRequestLimit.toLocaleString('ar-SA')}</b> طلب — ${d.currentShiftLabel}</div>
       </div>
     </div>
 
