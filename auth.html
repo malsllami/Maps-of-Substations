@@ -3,730 +3,884 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>تسجيل الدخول | محطات التوزيع</title>
+<title>لوحة المدير | محطات التوزيع</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-:root{
-  --blue-deep:#1B4D8C; --blue-mid:#2E7DD1; --teal:#1FAE8C; --teal-light:#4DD6B5;
-}
-[data-theme="dark"]{
-  --bg:#0A1420; --bg-elev:#101D2E; --bg-card:#0D1826;
-  --text-primary:#EAF1F7; --text-secondary:#8FA3B8;
-  --border:rgba(255,255,255,0.08); --border-strong:rgba(255,255,255,0.16);
-  --danger:#E0654F; --danger-bg:rgba(224,101,79,0.1);
-}
-[data-theme="light"]{
-  --bg:#F4F8FB; --bg-elev:#FFFFFF; --bg-card:#FFFFFF;
-  --text-primary:#102035; --text-secondary:#52647A;
-  --border:rgba(16,32,53,0.10); --border-strong:rgba(16,32,53,0.20);
-  --danger:#C8412C; --danger-bg:rgba(200,65,44,0.08);
-}
+:root{--blue-deep:#1B4D8C;--blue-mid:#2E7DD1;--teal:#1FAE8C;--teal-light:#4DD6B5;}
+[data-theme="dark"]{--bg:#0A1420;--bg-elev:#101D2E;--bg-card:#0D1826;--text-primary:#EAF1F7;--text-secondary:#8FA3B8;--border:rgba(255,255,255,0.08);--border-strong:rgba(255,255,255,0.16);}
+[data-theme="light"]{--bg:#EAF1F6;--bg-elev:#F4F8FB;--bg-card:#FFFFFF;--text-primary:#102035;--text-secondary:#52647A;--border:rgba(16,32,53,0.10);--border-strong:rgba(16,32,53,0.20);}
 *{margin:0;padding:0;box-sizing:border-box;}
-body{
-  font-family:'IBM Plex Sans Arabic',sans-serif;
-  background:var(--bg); color:var(--text-primary);
-  min-height:100vh; display:flex; align-items:center; justify-content:center;
-  padding:24px; transition:background .3s,color .3s;
+body{font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;padding-bottom:48px;transition:background .3s,color .3s;}
+header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--border);display:flex;flex-direction:column;}
+.header-row-main{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 28px;}
+@media (max-width:600px){.header-row-main{padding:12px 14px;}}
+.brand{display:flex;align-items:center;gap:10px;cursor:pointer;text-decoration:none;}
+.brand-mark{
+  height:38px;width:auto;flex-shrink:0;display:block;object-fit:contain;
+  transition:transform .2s;
 }
-.auth-card{
-  width:100%; max-width:400px;
-  background:var(--bg-card); border:1px solid var(--border);
-  border-radius:16px; padding:32px 28px;
-}
-.brand{display:flex; align-items:center; gap:10px; margin-bottom:28px;cursor:pointer;}
-.brand-mark{height:32px;width:auto;flex-shrink:0;display:block;object-fit:contain;transition:transform .2s;}
-.brand-text{font-size:15px;font-weight:700;letter-spacing:.3px;white-space:nowrap;transition:color .2s;}
+.brand-text{font-size:14.5px;font-weight:700;letter-spacing:.2px;white-space:nowrap;transition:color .2s;}
 .brand:hover .brand-mark{transform:scale(1.06);}
 .brand:hover .brand-text{color:var(--teal);}
-.tabs{position:relative;display:flex; background:var(--bg); border-radius:10px; padding:4px; margin-bottom:24px; border:1px solid var(--border);}
-.tab-indicator{
-  position:absolute;top:4px;bottom:4px;left:0;width:0;
-  background:var(--bg-card);border-radius:7px;
-  box-shadow:0 1px 3px rgba(0,0,0,.1);
-  transition:left .32s cubic-bezier(.34,1.35,.64,1), width .32s cubic-bezier(.34,1.35,.64,1);
-  z-index:0;
+.brand-sub{font-size:11px;color:var(--text-secondary);}
+.header-actions{display:flex;align-items:center;gap:8px;}
+.mobile-user-menu{display:block;position:relative;}
+.mobile-menu-trigger{
+  display:flex;align-items:center;gap:6px;
+  background:var(--bg-card);border:1px solid var(--border-strong);border-radius:22px;
+  padding:9px 16px;font-size:13px;font-weight:600;color:var(--text-primary);
+  cursor:pointer;font-family:inherit;
 }
-.tab{flex:1;position:relative;z-index:1; text-align:center; padding:9px; border-radius:7px; font-size:13px; cursor:pointer; color:var(--text-secondary); transition:color .2s;}
-.tab.active{color:var(--text-primary); font-weight:500;}
-h2{font-size:18px; font-weight:700; margin-bottom:6px;}
-.desc{font-size:13px; color:var(--text-secondary); margin-bottom:22px; line-height:1.6;}
-.field{margin-bottom:16px;}
-.field label{display:block; font-size:12.5px; color:var(--text-secondary); margin-bottom:7px;}
-.input-base{
-  width:100%; height:46px; background:var(--bg); border:1px solid var(--border-strong);
-  border-radius:10px; color:var(--text-primary); font-family:inherit; font-size:14px;
-  padding:0 14px; outline:none; transition:border-color .2s;
+.mobile-menu-trigger:hover{border-color:var(--teal);}
+.mobile-menu-trigger svg{transition:transform .2s;flex-shrink:0;}
+.mobile-user-menu.open .mobile-menu-trigger svg{transform:rotate(180deg);}
+.mobile-menu-panel{
+  position:absolute;top:calc(100% + 8px);left:0;
+  background:var(--bg-card);border:1px solid var(--border-strong);border-radius:14px;
+  min-width:215px;box-shadow:0 10px 28px rgba(0,0,0,.35);
+  padding:6px;display:none;z-index:60;
 }
-.input-base:focus{border-color:var(--teal);}
+.mobile-user-menu.open .mobile-menu-panel{display:block;}
+.mobile-menu-row{display:flex;align-items:center;gap:10px;padding:10px 10px;font-size:12.5px;color:var(--text-primary);border-bottom:1px solid var(--border);margin-bottom:4px;}
+.mobile-menu-link{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 10px;font-size:12.5px;color:var(--text-primary);
+  text-decoration:none;border-radius:9px;border:1px solid transparent;transition:.15s;
+  margin-bottom:2px;
+}
+.mobile-menu-link:hover{background:var(--bg-elev);}
+.mobile-menu-link.current-page{
+  background:rgba(31,174,140,0.12);border-color:rgba(31,174,140,0.4);
+  color:var(--teal-light);font-weight:700;
+}
+.menu-icon{display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.mobile-menu-logout{
+  display:flex;align-items:center;gap:10px;width:100%;
+  text-align:right;padding:10px 10px;font-size:12.5px;color:#E0654F;
+  background:transparent;border:none;border-top:1px solid var(--border);margin-top:4px;
+  cursor:pointer;font-family:inherit;border-radius:8px;transition:.15s;
+}
+.mobile-menu-logout:hover{background:rgba(224,101,79,0.1);}
+.theme-switch{
+  width:42px;height:23px;border-radius:12px;position:relative;flex-shrink:0;
+  background:var(--border-strong);border:none;cursor:pointer;transition:background .2s;padding:0;
+}
+.theme-switch.on{background:var(--teal);}
+.theme-switch-knob{
+  position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;
+  background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.3);
+}
+.theme-switch.on .theme-switch-knob{transform:translateX(19px);}
+.content{max-width:1000px;margin:0 auto;padding:28px 20px;}
+.page-title{font-size:20px;font-weight:700;margin-bottom:4px;}
+.page-sub{font-size:13px;color:var(--text-secondary);margin-bottom:24px;}
+.loading-overlay{display:flex;align-items:center;justify-content:center;height:240px;color:var(--text-secondary);font-size:13px;gap:8px;}
+.spinner{width:18px;height:18px;border:2px solid var(--border-strong);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err-msg{text-align:center;color:#E0654F;font-size:13px;padding:40px;background:var(--bg-card);border-radius:8px;}
+.status-refresh-btn{
+  display:flex;align-items:center;justify-content:center;
+  width:20px;height:20px;flex-shrink:0;margin-right:auto;
+  background:transparent;border:none;border-radius:50%;
+  color:var(--text-secondary);cursor:pointer;transition:.2s;
+}
+.status-refresh-btn:hover{background:rgba(31,174,140,0.14);color:var(--teal);}
 
-/* ===== Floating Label ===== */
-.field.floating{position:relative;margin-bottom:18px;}
-.field.floating label{
-  position:absolute;right:14px;top:23px;transform:translateY(-50%);
-  font-size:14px;color:var(--text-secondary);margin:0;
-  transition:top .18s ease,font-size .18s ease,color .18s ease;
-  pointer-events:none;background:var(--bg);padding:0 4px;
-  z-index:2;
+/* ===== غرفة العمليات — Phase 2 (الواجهة) ===== */
+/* ===== Operations room — Phase 2 (frontend) ===== */
+.alert-strip{display:flex;gap:7px;overflow-x:auto;padding-bottom:2px;margin-bottom:16px;}
+.alert-chip{
+  flex-shrink:0;display:flex;align-items:center;gap:6px;
+  background:rgba(224,101,79,.12);border:1px solid rgba(224,101,79,.35);color:#E0654F;
+  font-size:11.5px;font-weight:600;padding:7px 13px;border-radius:20px;white-space:nowrap;
 }
-.field.floating .input-base:focus + label,
-.field.floating .input-base:not(:placeholder-shown) + label,
-.field.floating .phone-unified.focused label,
-.field.floating .phone-unified.filled label{
-  top:0;font-size:11px;color:var(--teal);
+.ops-status-card{
+  background:var(--bg-card);border:1px solid var(--border);border-radius:14px;
+  padding:18px 20px;margin-bottom:14px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;
 }
+.ops-status-ring{flex-shrink:0;}
+.ops-status-info{flex:1;min-width:180px;}
+.ops-status-title{font-size:13.5px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:7px;}
+.ops-status-sub{font-size:11.5px;color:var(--text-secondary);}
+.ops-status-count{font-size:14.5px;font-weight:800;color:var(--text-primary);font-family:'JetBrains Mono',monospace;}
+.ops-row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.ops-pill{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:14px 10px;text-align:center;}
+.ops-pill b{display:block;font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:800;margin-bottom:3px;}
+.ops-pill span{font-size:11px;color:var(--text-secondary);}
+.acc-item{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden;}
+.acc-head{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:14px 16px;cursor:pointer;user-select:none;
+}
+.acc-head-title{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;}
+.acc-head-badge{font-size:11px;color:var(--text-secondary);}
+.acc-chev{transition:transform .25s;color:var(--text-secondary);flex-shrink:0;}
+.acc-item.open .acc-chev{transform:rotate(180deg);}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+.acc-item.open .acc-body{max-height:600px;}
+.acc-body-inner{padding:0 16px 16px;font-size:12.5px;color:var(--text-secondary);}
+.acc-body-inner table{width:100%;border-collapse:collapse;font-size:12px;}
+.acc-body-inner th{background:var(--bg-elev);color:var(--text-primary);font-weight:700;font-size:12px;text-align:center;padding:8px 6px;border-radius:6px 6px 0 0;}
+.acc-body-inner td{text-align:center;padding:7px 6px;border-bottom:1px solid var(--border);color:var(--text-primary);}
+.coming-soon{text-align:center;padding:24px 10px;color:var(--text-secondary);font-size:12px;}
+.chart-box{position:relative;height:200px;}
+.heatmap-grid{display:grid;grid-template-columns:34px repeat(24,1fr);gap:2px;font-size:8.5px;color:var(--text-secondary);}
+.heatmap-cell{aspect-ratio:1;border-radius:3px;}
+.heatmap-label{display:flex;align-items:center;justify-content:flex-end;padding-left:4px;font-size:9px;}
+.heatmap-peak-note{margin-top:10px;font-size:11.5px;color:var(--text-primary);text-align:center;}
+.region-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.region-bar-label{width:90px;flex-shrink:0;font-size:11.5px;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.region-bar-track{flex:1;height:16px;background:var(--bg-elev);border-radius:6px;overflow:hidden;}
+.region-bar-fill{height:100%;background:linear-gradient(90deg,var(--blue-mid),var(--teal));border-radius:6px;}
+.region-bar-count{width:26px;flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:11px;text-align:center;}
 
-/* ===== مربع الجوال الموحّد: مفتاح الدولة + خط فاصل + رقم الجوال بنفس الصندوق ===== */
-.phone-unified{
-  position:relative;display:flex;align-items:center;
-  height:46px;background:var(--bg);border:1px solid var(--border-strong);
-  border-radius:10px;transition:border-color .2s;
+/* ===== الصفحات المنبثقة الكاملة للتفاصيل — المرحلة 4 ===== */
+/* ===== Full detail popup pages — Phase 4 ===== */
+.detail-modal-overlay{
+  display:none;position:fixed;inset:0;z-index:100;
+  background:rgba(2,5,8,.6);backdrop-filter:blur(2px);
+  align-items:flex-end;justify-content:center;
 }
-.phone-unified:focus-within{border-color:var(--teal);}
-.phone-prefix{
-  position:relative;display:flex;align-items:center;gap:5px;
-  padding:0 12px 0 10px;height:100%;cursor:pointer;flex-shrink:0;
+.detail-modal-overlay.show{display:flex;}
+.detail-modal{
+  width:100%;max-width:720px;max-height:92vh;
+  background:var(--bg);border-radius:20px 20px 0 0;
+  display:flex;flex-direction:column;overflow:hidden;
+  animation:modalSlideUp .25s ease-out;
 }
-.phone-divider{width:1px;height:22px;background:var(--border-strong);flex-shrink:0;}
-.phone-input-unified{
-  flex:1;min-width:0;height:100%;border:none;background:transparent;outline:none;
-  color:var(--text-primary);font-family:'JetBrains Mono',monospace;font-size:14px;
-  direction:ltr;text-align:right;padding:0 12px;
+@keyframes modalSlideUp{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
+.detail-modal-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 18px;border-bottom:1px solid var(--border);flex-shrink:0;
 }
-#phoneLabel{right:98px;}
-.country-code{font-family:'JetBrains Mono',monospace; font-size:13px; direction:ltr;}
-.country-dropdown{
-  position:absolute; top:44px; right:-4px; width:230px; max-height:240px; overflow-y:auto;
-  background:var(--bg-card); border:1px solid var(--border-strong); border-radius:10px;
-  box-shadow:0 8px 24px rgba(0,0,0,.2); z-index:20; display:none;
+.detail-modal-title{font-size:15px;font-weight:700;}
+.detail-modal-close{
+  width:32px;height:32px;border-radius:50%;background:var(--bg-card);border:1px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-primary);
 }
-.country-dropdown.open{display:block;}
-.country-option{display:flex; align-items:center; gap:10px; padding:10px 12px; cursor:pointer; font-size:13px;}
-.country-option:hover{background:var(--bg);}
-.error-banner{
-  background:var(--danger-bg); color:var(--danger); font-size:12.5px;
-  padding:10px 12px; border-radius:8px; margin-bottom:16px; display:none; line-height:1.6;
+.detail-modal-filters{padding:14px 18px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;gap:10px;}
+.detail-filter-row{display:flex;gap:8px;flex-wrap:wrap;}
+.detail-filter-row input, .detail-filter-row select{
+  flex:1;min-width:120px;background:var(--bg-card);border:1px solid var(--border-strong);border-radius:10px;
+  padding:9px 12px;font-size:12.5px;color:var(--text-primary);font-family:inherit;
 }
-.error-banner.show{display:block;}
-.member-type-btn.active{border-color:var(--teal)!important;background:var(--teal)!important;color:#fff!important;font-weight:500;}
-
-.btn-progress{
-  position:relative; width:100%; height:46px; border-radius:10px; border:none;
-  background:var(--teal); color:#fff; font-family:inherit; font-size:14px; font-weight:700;
-  cursor:pointer; overflow:hidden; transition:opacity .2s;
+.detail-hijri-note{font-size:10.5px;color:var(--text-secondary);}
+.detail-filter-actions{display:flex;gap:8px;}
+.detail-btn{
+  flex:1;padding:9px 12px;border-radius:10px;font-size:12.5px;font-weight:600;
+  border:1px solid var(--border-strong);background:var(--bg-card);color:var(--text-primary);
+  cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;
 }
-.btn-progress:disabled{cursor:not-allowed;}
-.btn-progress .label{position:relative; z-index:2; display:flex; align-items:center; justify-content:center; gap:8px; height:100%;}
-.btn-progress .fill{
-  position:absolute; inset:0; width:0%; background:rgba(255,255,255,0.28);
-  transition:width .25s linear; z-index:1;
+.detail-btn.primary{background:rgba(31,174,140,.15);border-color:rgba(31,174,140,.4);color:var(--teal-light);}
+.detail-btn.primary:hover{background:rgba(31,174,140,.25);}
+.detail-modal-body{flex:1;overflow-y:auto;padding:14px 18px 24px;}
+.detail-modal-body table{width:100%;border-collapse:collapse;font-size:12px;}
+.detail-modal-body th{background:var(--bg-elev);color:var(--text-primary);font-weight:700;font-size:12px;text-align:center;padding:9px 6px;position:sticky;top:0;}
+.detail-modal-body td{text-align:center;padding:8px 6px;border-bottom:1px solid var(--border);color:var(--text-primary);font-size:12px;}
+.detail-count-badge{font-size:11.5px;color:var(--text-secondary);margin-bottom:10px;}
+.detail-preview-link{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  margin-top:8px;padding:9px;border-radius:10px;background:var(--bg-elev);
+  color:var(--teal-light);font-size:12px;font-weight:600;cursor:pointer;border:1px dashed var(--border-strong);
 }
-.btn-progress.error .fill{background:rgba(255,255,255,0.0);}
-.btn-progress.error{background:var(--danger);}
-.btn-progress .pct{font-family:'JetBrains Mono',monospace; font-size:13px;}
-.btn-progress .check{display:none;}
-.btn-progress.success .check{display:inline;}
-.btn-progress.success .pct, .btn-progress.success .default-label{display:none;}
-.ripple{
-  position:absolute;border-radius:50%;background:rgba(255,255,255,0.45);
-  transform:scale(0);animation:rippleAnim .6s ease-out;
-  pointer-events:none;z-index:3;
+/* شريط حالة الاتصال + آخر تحديث — جزء بنيوي فعلي من الهيدر، لا عنصر شقيق منفصل / Connection status bar — structural part of header, not a separate sibling */
+.header-row-status{
+  padding:0 28px 12px;font-size:11px;color:var(--text-secondary);
 }
-@keyframes rippleAnim{to{transform:scale(3.2);opacity:0;}}
-
-.fingerprint-step{display:none; text-align:center; padding:20px 0;}
-.fingerprint-step.show{display:block;}
-.fp-wrap{position:relative; width:96px; height:96px; margin:0 auto 18px;}
-.fp-icon{
-  position:relative; z-index:2;
-  width:96px; height:96px; border-radius:50%;
-  background: radial-gradient(circle at 35% 30%, var(--bg-elev), var(--bg-card) 70%);
-  box-shadow:
-    inset 0 0 0 7px var(--teal),
-    inset 0 -2px 6px rgba(0,0,0,0.25),
-    0 2px 8px rgba(0,0,0,0.2);
-  display:flex; align-items:center; justify-content:center;
+.conn-status-pill{
+  display:flex;align-items:center;gap:14px;width:100%;
+  border:1px solid var(--border-strong);border-radius:14px;
+  padding:9px 16px;background:var(--bg-card);color:var(--text-primary);
 }
-.fp-icon svg{stroke:var(--text-primary); opacity:0.85;}
-.fp-spinner{
-  position:absolute; inset:-6px; border-radius:50%; z-index:1;
-  background: conic-gradient(from 0deg, transparent 0%, transparent 75%, var(--teal) 92%, transparent 100%);
-  animation: fp-spin 1.1s linear infinite;
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 4px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 4px));
+.status-bar-item{display:flex;align-items:center;gap:6px;}
+.conn-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:#8FA3B8;transition:background .3s;}
+.conn-dot.checking{background:#C8A24E;box-shadow:0 0 6px rgba(200,162,78,.6);}
+.conn-dot.online{background:#2ECC71;box-shadow:0 0 6px rgba(46,204,113,.6);}
+.conn-dot.offline{background:#E0654F;box-shadow:0 0 6px rgba(224,101,79,.6);}
+@media(max-width:600px){.header-row-status{padding:0 12px 10px;}.conn-status-pill{padding:8px 12px;font-size:10.5px;gap:10px;flex-wrap:wrap;}}
+@media(max-width:600px){
+  .content{padding:16px 12px;}
 }
-.fp-spinner.verifying{
-  background: conic-gradient(from 0deg, transparent 0%, transparent 70%, var(--blue-mid) 92%, transparent 100%);
-  animation-duration:0.7s;
-}
-@keyframes fp-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-.fp-progress{font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--teal); margin-top:-10px; margin-bottom:10px; min-height:16px;}
-.fp-icon.verifying svg{opacity:1;}
-.field-disabled{opacity:.5; pointer-events:none;}
-.switch-link{text-align:center; margin-top:18px; font-size:13px; color:var(--text-secondary);}
-.switch-link a{color:var(--teal); cursor:pointer; text-decoration:none; font-weight:500;}
 </style>
 </head>
 <body data-theme="dark" id="bodyEl">
 <script>
 (function(){
-  var saved = localStorage.getItem('sec-theme');
-  if(saved === 'light' || saved === 'dark') document.getElementById('bodyEl').setAttribute('data-theme', saved);
+  var t = localStorage.getItem('sec-theme');
+  if(t==='light'||t==='dark') document.getElementById('bodyEl').setAttribute('data-theme',t);
+  var s = localStorage.getItem('sec-session');
+  if(!s){ location.href='auth.html'; return; }
+  try{
+    var session = JSON.parse(s);
+    if(session.role !== 'admin'){ location.href='index.html'; }
+  }catch(e){ location.href='auth.html'; }
 })();
 </script>
 
-<div class="auth-card">
-  <div class="brand" id="brandLink">
-    <img class="brand-mark" src="assets/logo-icon.png" alt="شعار الشركة السعودية للطاقة">
-    <div class="brand-text">محطات التوزيع — SEC</div>
-  </div>
-
-  <div class="tabs" id="tabsWrap">
-    <div class="tab-indicator" id="tabIndicator"></div>
-    <div class="tab active" id="tabLogin">تسجيل الدخول</div>
-    <div class="tab" id="tabRegister">عضو جديد</div>
-  </div>
-
-  <div id="errorBanner" class="error-banner"></div>
-
-  <!-- ===== خطوة إدخال الجوال (مشتركة) ===== -->
-  <div id="phoneStep">
-    <h2 id="stepTitle">تسجيل الدخول</h2>
-    <p class="desc" id="stepDesc">أدخل رقم جوالك المسجل، ثم تحقق من هويتك بأفضل وسيلة يدعمها جهازك</p>
-
-    <div class="field floating" id="nameField" style="display:none">
-      <input type="text" class="input-base" id="nameInput" placeholder=" ">
-      <label for="nameInput">الاسم الكامل</label>
-    </div>
-
-    <div class="field" id="memberTypeField" style="display:none">
-      <label>نوع العضوية</label>
-      <div style="display:flex;gap:8px">
-        <button type="button" class="member-type-btn active" data-type="موظف" style="flex:1;height:44px;border-radius:10px;border:1px solid var(--border-strong);background:var(--bg);color:var(--text-primary);font-family:inherit;font-size:13px;cursor:pointer;transition:.2s">موظف</button>
-        <button type="button" class="member-type-btn" data-type="مقاول" style="flex:1;height:44px;border-radius:10px;border:1px solid var(--border-strong);background:var(--bg);color:var(--text-primary);font-family:inherit;font-size:13px;cursor:pointer;transition:.2s">مقاول</button>
+<header>
+  <div class="header-row-main">
+    <div class="brand" id="brandLink" style="cursor:pointer">
+      <img class="brand-mark" src="assets/logo-icon.png" alt="شعار الشركة السعودية للطاقة">
+      <div>
+        <div class="brand-text">لوحة المدير</div>
+        <div class="brand-sub">الشركة السعودية للطاقة — محطات التوزيع</div>
       </div>
     </div>
-
-    <div class="field floating">
-      <div class="phone-unified" id="phoneUnified">
-        <div class="phone-prefix" id="countrySelect">
-          <span id="selectedFlag">🇸🇦</span>
-          <span class="country-code" id="selectedCode">+966</span>
-          <span style="font-size:9px;color:var(--text-secondary)">▾</span>
-          <div class="country-dropdown" id="countryDropdown"></div>
+    <div class="header-actions" id="headerActions">
+      <div class="mobile-user-menu" id="mobileUserMenu">
+        <button class="mobile-menu-trigger" id="mobileMenuTrigger">
+          <span id="mobileMenuName">القائمة</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="mobile-menu-panel" id="mobileMenuPanel">
+          <div class="mobile-menu-row">
+            <span class="menu-icon" style="color:#8B6DD6">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v1M12 20v1M4.2 4.2l.7.7M18.4 18.4l.7.7M3 12h1M20 12h1M4.2 19.8l.7-.7M18.4 5.6l.7-.7"/><circle cx="12" cy="12" r="4"/></svg>
+            </span>
+            <span style="flex:1">الوضع الداكن</span>
+            <button class="theme-switch" id="themeSwitchMobile" aria-label="تبديل الوضع الداكن"><span class="theme-switch-knob"></span></button>
+          </div>
+          <a href="index.html" class="mobile-menu-link">
+            <span class="menu-icon" style="color:#2ECC71"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg></span>
+            الصفحة الرئيسية
+          </a>
+          <a href="member.html" class="mobile-menu-link">
+            <span class="menu-icon" style="color:#4A86E8"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+            حسابي
+          </a>
+          <a href="shifts.html" class="mobile-menu-link">
+            <span class="menu-icon" style="color:#A479E2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+            تقويم دوام الورديات
+          </a>
+          <a href="admin.html" class="mobile-menu-link current-page">
+            <span class="menu-icon" style="color:#F0B429"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5z"/><polyline points="9 12 11 14 15 10"/></svg></span>
+            لوحة المدير
+          </a>
+          <button class="mobile-menu-logout" id="mobileLogoutBtn">
+            <span class="menu-icon" style="color:#E0654F"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
+            تسجيل الخروج
+          </button>
         </div>
-        <div class="phone-divider"></div>
-        <input type="text" inputmode="tel" class="phone-input-unified" id="phoneInput" placeholder=" " autocomplete="tel">
-        <label for="phoneInput" id="phoneLabel">رقم الجوال</label>
       </div>
     </div>
-
-    <button class="btn-progress" id="mainBtn">
-      <span class="label">
-        <span class="default-label" id="mainBtnLabel">متابعة</span>
-        <span class="pct" id="mainBtnPct"></span>
-        <span class="check">✓</span>
-      </span>
-      <span class="fill" id="mainBtnFill"></span>
-    </button>
   </div>
+  <!-- شريط حالة الاتصال + آخر تحديث — إطار واحد كامل العرض، جزء بنيوي فعلي من الهيدر / Connection status — one full-width frame, structural part of header -->
+  <div class="header-row-status" id="statusBar">
+    <div class="conn-status-pill">
+      <div class="status-bar-item">
+        <span class="conn-dot" id="connDot"></span>
+        <span id="connLabel">جاري التحقق...</span>
+      </div>
+      <div class="status-bar-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span id="lastUpdateLabel">آخر تحديث: —</span>
+      </div>
+      <div class="status-bar-item" id="headerDateLine"></div>
+      <button class="status-refresh-btn" id="dataRefreshBtn" title="تحديث لوحة العمليات الآن">
+        <svg id="dataRefreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
 
-  <!-- ===== خطوة البصمة ===== -->
-  <div class="fingerprint-step" id="fingerprintStep">
-    <div class="fp-wrap">
-      <div class="fp-spinner" id="fpSpinner"></div>
-      <div class="fp-icon" id="fpIcon">
-        <svg width="46" height="46" viewBox="0 0 100 100" fill="none" stroke-linecap="round">
-          <path d="M50 28c-13 0-22 9-22 22v8" stroke-width="3.2"/>
-          <path d="M50 22c-17 0-29 12-29 28v9" stroke-width="3.2"/>
-          <path d="M50 35c-9 0-15 6-15 15v10c0 4 1 7 3 10" stroke-width="3.2"/>
-          <path d="M50 42c-5 0-8 3-8 8v9c0 6 2 11 6 15" stroke-width="3.2"/>
-          <path d="M50 49c-1.5 0-2 1-2 2v8c0 9 4 16 11 21" stroke-width="3.2"/>
-          <path d="M65 47v10c0 12-6 21-16 27" stroke-width="3.2"/>
-          <path d="M71 44v12c0 16-9 28-23 35" stroke-width="3.2"/>
-        </svg>
+<div class="content">
+  <div class="page-title">لوحة العمليات</div>
+  <div class="page-sub" id="greetLine">مرحبًا...</div>
+
+  <!-- شريط التنبيهات — يظهر فقط عند وجود تنبيهات فعلية، لا عنصر وهمي دائم الظهور -->
+  <div class="alert-strip" id="alertStrip" style="display:none"></div>
+
+  <div id="opsMain">
+    <div class="loading-overlay"><div class="spinner"></div> جاري التحميل...</div>
+  </div>
+</div>
+
+<!-- النافذة المنبثقة الكاملة الموحّدة — تُستخدم للمتواجدين والإضافات والتعديلات معًا -->
+<!-- Unified full detail popup — shared by present-users, additions, and edits -->
+<div class="detail-modal-overlay" id="detailModalOverlay">
+  <div class="detail-modal">
+    <div class="detail-modal-head">
+      <div class="detail-modal-title" id="detailModalTitle">التفاصيل</div>
+      <div class="detail-modal-close" id="detailModalClose">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </div>
     </div>
-    <p class="fp-progress" id="fpProgress"></p>
-    <p style="font-size:14px; font-weight:500; margin-bottom:6px;" id="fpTitle">تحقق من هويتك</p>
-    <p style="font-size:12.5px; color:var(--text-secondary)" id="fpSubtitle">سيستخدم جهازك أفضل وسيلة تحقق متوفرة</p>
+    <div class="detail-modal-filters">
+      <div class="detail-filter-row">
+        <input type="text" id="detailSearchInput" placeholder="بحث برقم المحطة أو الاسم أو الجوال...">
+      </div>
+      <div class="detail-filter-row">
+        <input type="date" id="detailDateFrom">
+        <input type="date" id="detailDateTo">
+      </div>
+      <div class="detail-hijri-note" id="detailHijriNote"></div>
+      <div class="detail-filter-actions">
+        <button class="detail-btn primary" id="detailApplyBtn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          تطبيق
+        </button>
+        <button class="detail-btn" id="detailExportBtn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          تصدير CSV
+        </button>
+      </div>
+    </div>
+    <div class="detail-modal-body">
+      <div class="detail-count-badge" id="detailCountBadge"></div>
+      <div id="detailTableWrap"><div class="loading-overlay"><div class="spinner"></div></div></div>
+    </div>
   </div>
-
-  <div class="switch-link" id="switchHint">ما عندك حساب؟ <a id="goRegister">سجّل كعضو جديد</a></div>
 </div>
 
 <script>
-/* ===== الثيم ===== */
-const phone10ToFull = (code, local) => code + local.replace(/^0+/, '');
+const API_URL = 'https://script.google.com/macros/s/AKfycbyxZUSLZNa6UlZLINsfAEe8CmQPoNGJbpnNtUDxP019TfL8uLh_5fuP0e5HE6daP8dh1w/exec';
+
+/* ============================================================
+ *  فحص حالة الاتصال بالخادم — نفس منطق index.html بالضبط
+ *  Server connection health check — mirrors index.html exactly
+ * ============================================================ */
+async function pingBackend(){
+  const res = await fetch(API_URL, { method:'POST', body: JSON.stringify({ action:'ping' }) });
+  return await res.json();
+}
+const connDot = document.getElementById('connDot');
+const connLabel = document.getElementById('connLabel');
+const statusBarEl = document.getElementById('statusBar');
+const lastUpdateLabel = document.getElementById('lastUpdateLabel');
+let lastSuccessfulCheckAt = null;
+function formatRelativeTime(date){
+  const diffSec = Math.floor((Date.now() - date.getTime()) / 1000);
+  if(diffSec < 15) return 'الآن';
+  if(diffSec < 60) return `قبل ${diffSec} ثانية`;
+  const diffMin = Math.floor(diffSec / 60);
+  if(diffMin < 60) return diffMin === 1 ? 'قبل دقيقة' : `قبل ${diffMin} دقائق`;
+  const diffHour = Math.floor(diffMin / 60);
+  return diffHour === 1 ? 'قبل ساعة' : `قبل ${diffHour} ساعات`;
+}
+function refreshLastUpdateLabel(){
+  lastUpdateLabel.textContent = lastSuccessfulCheckAt ? `آخر تحديث: ${formatRelativeTime(lastSuccessfulCheckAt)}` : 'آخر تحديث: —';
+}
+setInterval(refreshLastUpdateLabel, 30 * 1000);
+async function checkConnection(){
+  connDot.className = 'conn-dot checking';
+  connLabel.textContent = 'جاري الاتصال...';
+  try{
+    const res = await Promise.race([
+      pingBackend(),
+      new Promise((_, reject)=> setTimeout(()=> reject(new Error('timeout')), 15000))
+    ]);
+    if(res && res.success){
+      connDot.className = 'conn-dot online';
+      connLabel.textContent = 'متصل';
+      lastSuccessfulCheckAt = new Date();
+      refreshLastUpdateLabel();
+    } else { throw new Error('backend-error'); }
+  }catch(err){
+    connDot.className = 'conn-dot offline';
+    connLabel.textContent = 'بدون اتصال';
+  }
+}
+function renderHeaderDate(){
+  const el = document.getElementById('headerDateLine');
+  if(el) el.textContent = new Date().toLocaleDateString('ar-SA-u-ca-gregory', {day:'numeric', month:'long', year:'numeric'});
+}
+renderHeaderDate();
+setInterval(renderHeaderDate, 60 * 60 * 1000);
+setTimeout(checkConnection, 1500);
+setInterval(checkConnection, 60 * 1000);
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') checkConnection(); });
+const session = JSON.parse(localStorage.getItem('sec-session') || '{}');
+let fetching = false;
+
+document.getElementById('greetLine').textContent = 'مرحبًا ' + (session.name || 'المدير') + ' — ' + new Date().toLocaleDateString('ar-SA', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+
+/* ===== ثيم ===== */
+function setTheme(next){
+  document.body.setAttribute('data-theme', next);
+  localStorage.setItem('sec-theme', next);
+  syncThemeSwitch();
+}
+const themeSwitchMobile = document.getElementById('themeSwitchMobile');
+function syncThemeSwitch(){
+  themeSwitchMobile.classList.toggle('on', document.body.getAttribute('data-theme')==='dark');
+}
+syncThemeSwitch();
+themeSwitchMobile.addEventListener('click', ()=>{
+  setTheme(document.body.getAttribute('data-theme')==='dark' ? 'light' : 'dark');
+});
+
+/* ===== خروج ===== */
 document.getElementById('brandLink').addEventListener('click', ()=>{ location.href = 'index.html'; });
 
-/* ===== قائمة الدول الخليجية/العربية، السعودية افتراضي ===== */
-const countries = [
-  {code:'+966', flag:'🇸🇦', name:'السعودية'},
-  {code:'+971', flag:'🇦🇪', name:'الإمارات'},
-  {code:'+973', flag:'🇧🇭', name:'البحرين'},
-  {code:'+965', flag:'🇰🇼', name:'الكويت'},
-  {code:'+974', flag:'🇶🇦', name:'قطر'},
-  {code:'+968', flag:'🇴🇲', name:'عُمان'},
-  {code:'+20',  flag:'🇪🇬', name:'مصر'},
-  {code:'+962',  flag:'🇯🇴', name:'الأردن'},
-];
-let selectedCountry = countries[0];
-
-let selectedMemberType = 'موظف';
-document.querySelectorAll('.member-type-btn').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    document.querySelectorAll('.member-type-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    selectedMemberType = btn.dataset.type;
-  });
-});
-const dropdown = document.getElementById('countryDropdown');
-const phoneUnified = document.getElementById('phoneUnified');
-const phonePrefix = document.getElementById('countrySelect');
-function positionPhoneLabel(){
-  document.getElementById('phoneLabel').style.right = (phonePrefix.offsetWidth + 13) + 'px';
+function doLogout(){
+  if(confirm('تسجيل الخروج؟')){
+    localStorage.removeItem('sec-session');
+    localStorage.removeItem('sec-phone');
+    location.href = 'auth.html';
+  }
 }
-countries.forEach(c=>{
-  const opt = document.createElement('div');
-  opt.className = 'country-option';
-  opt.innerHTML = `<span>${c.flag}</span><span style="font-family:'JetBrains Mono',monospace">${c.code}</span><span style="color:var(--text-secondary)">${c.name}</span>`;
-  opt.addEventListener('click', ()=>{
-    selectedCountry = c;
-    document.getElementById('selectedFlag').textContent = c.flag;
-    document.getElementById('selectedCode').textContent = c.code;
-    dropdown.classList.remove('open');
-    positionPhoneLabel();
-  });
-  dropdown.appendChild(opt);
-});
-document.getElementById('countrySelect').addEventListener('click', (e)=>{
+document.getElementById('mobileLogoutBtn').addEventListener('click', doLogout);
+
+/* ===== القائمة المنسدلة بالجوال ===== */
+document.getElementById('mobileMenuName').textContent = (session.name || 'المدير').split(' ')[0];
+const mobileUserMenu = document.getElementById('mobileUserMenu');
+document.getElementById('mobileMenuTrigger').addEventListener('click', (e)=>{
   e.stopPropagation();
-  dropdown.classList.toggle('open');
+  mobileUserMenu.classList.toggle('open');
 });
-document.addEventListener('click', ()=> dropdown.classList.remove('open'));
-positionPhoneLabel();
-
-/* ===== تحويل أرقام عربية لإنجليزية بالإدخال + تفعيل عنوان الجوال العائم ===== */
-const phoneInput = document.getElementById('phoneInput');
-function syncPhoneFloating(){
-  phoneUnified.classList.toggle('filled', phoneInput.value.trim().length > 0);
-}
-phoneInput.addEventListener('input', ()=>{
-  const arabicIndic = '٠١٢٣٤٥٦٧٨٩';
-  phoneInput.value = phoneInput.value.replace(/[٠-٩]/g, d => arabicIndic.indexOf(d)).replace(/[^\d]/g,'');
-  syncPhoneFloating();
+document.addEventListener('click', (e)=>{
+  if(!mobileUserMenu.contains(e.target)) mobileUserMenu.classList.remove('open');
 });
-phoneInput.addEventListener('focus', ()=> phoneUnified.classList.add('focused'));
-phoneInput.addEventListener('blur', ()=> phoneUnified.classList.remove('focused'));
-
-/* ===== التبديل بين تسجيل الدخول / عضو جديد ===== */
-let mode = 'login';
-const tabLogin = document.getElementById('tabLogin');
-const tabRegister = document.getElementById('tabRegister');
-const tabIndicator = document.getElementById('tabIndicator');
-function moveTabIndicator(el){
-  tabIndicator.style.width = el.offsetWidth + 'px';
-  tabIndicator.style.left = el.offsetLeft + 'px';
-}
-moveTabIndicator(tabLogin);
-window.addEventListener('resize', ()=> moveTabIndicator(mode==='login' ? tabLogin : tabRegister));
-function setMode(m){
-  mode = m;
-  tabLogin.classList.toggle('active', m==='login');
-  tabRegister.classList.toggle('active', m==='register');
-  moveTabIndicator(m==='login' ? tabLogin : tabRegister);
-  document.getElementById('nameField').style.display = m==='register' ? 'block':'none';
-  document.getElementById('memberTypeField').style.display = m==='register' ? 'block':'none';
-  document.getElementById('stepTitle').textContent = m==='login' ? 'تسجيل الدخول' : 'إنشاء حساب جديد';
-  document.getElementById('stepDesc').textContent = m==='login'
-    ? 'أدخل رقم جوالك المسجل، ثم تحقق من هويتك بأفضل وسيلة يدعمها جهازك'
-    : 'سجّل بياناتك، ثم فعّل التحقق الآمن بجهازك فورًا لتأمين الدخول';
-  document.getElementById('switchHint').innerHTML = m==='login'
-    ? 'ما عندك حساب؟ <a id="goRegister">سجّل كعضو جديد</a>'
-    : 'عندك حساب؟ <a id="goLogin">سجّل الدخول</a>';
-  hideError();
-  bindSwitchLinks();
-}
-function bindSwitchLinks(){
-  const r = document.getElementById('goRegister');
-  const l = document.getElementById('goLogin');
-  if(r) r.addEventListener('click', ()=>setMode('register'));
-  if(l) l.addEventListener('click', ()=>setMode('login'));
-}
-tabLogin.addEventListener('click', ()=>setMode('login'));
-tabRegister.addEventListener('click', ()=>setMode('register'));
-bindSwitchLinks();
-
-function showError(msg){
-  const el = document.getElementById('errorBanner');
-  el.textContent = msg; el.classList.add('show');
-}
-function hideError(){ document.getElementById('errorBanner').classList.remove('show'); }
 
 /* ============================================================
- *  مكوّن زر التقدم القابل لإعادة الاستخدام
- *  منع التكرار: disable فوري + قفل أي حقل بالنموذج
+ *  غرفة العمليات — Phase 2 (الواجهة)
+ *  Operations room — Phase 2 (frontend)
  * ============================================================ */
-function ProgressButton(btnEl, labelEl, pctEl, fillEl, formFields){
-  let running = false;
-  return {
-    async run(taskFn){
-      if(running) return; // حماية إضافية من النقر المزدوج
-      running = true;
-      btnEl.disabled = true;
-      btnEl.classList.remove('error','success');
-      formFields.forEach(f=>f.classList.add('field-disabled'));
-      labelEl.style.display='none';
-      pctEl.style.display='inline';
 
-      let progress = 0;
-      const tick = setInterval(()=>{
-        progress = Math.min(progress + Math.random()*14, 92);
-        fillEl.style.width = progress+'%';
-        pctEl.textContent = Math.round(progress)+'%';
-      }, 120);
+/* لون المؤشر حسب النسبة ونوعه: quota (الأعلى أسوأ) أو quality (الأعلى أفضل) */
+/* Indicator color by percentage and type: quota (higher = worse) or quality (higher = better) */
+function gaugeColor(pct, type){
+  const isGood = type === 'quality' ? pct >= 90 : pct <= 60;
+  const isWarn = type === 'quality' ? (pct >= 70 && pct < 90) : (pct > 60 && pct <= 85);
+  if(isGood) return '#2ECC71';
+  if(isWarn) return '#C8A24E';
+  return '#E0654F';
+}
+/* مؤشر دائري تفاعلي — يتغيّر لونه فعليًا حسب النسبة، لا لون ثابت واحد / Interactive ring gauge — color genuinely changes with the percentage, not a single fixed color */
+function renderRing(pct, type, size){
+  const color = gaugeColor(pct, type);
+  const r = (size/2) - 7;
+  const c = 2*Math.PI*r;
+  const offset = c - (Math.min(100,Math.max(0,pct))/100)*c;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--border-strong)" stroke-width="7"/>
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${color}" stroke-width="7"
+      stroke-dasharray="${c}" stroke-dashoffset="${offset}" stroke-linecap="round"
+      transform="rotate(-90 ${size/2} ${size/2})" style="transition:stroke-dashoffset .6s ease, stroke .4s ease"/>
+    <text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" font-size="${Math.round(size*0.2)}" font-weight="800" fill="${color}" font-family="'JetBrains Mono',monospace">${pct}%</text>
+  </svg>`;
+}
 
-      try{
-        const result = await taskFn();
-        clearInterval(tick);
-        fillEl.style.width = '100%';
-        pctEl.textContent = '100%';
-        await new Promise(r=>setTimeout(r,250));
-        btnEl.classList.add('success');
-        await new Promise(r=>setTimeout(r,500));
-        return result;
-      }catch(err){
-        clearInterval(tick);
-        btnEl.classList.add('error');
-        fillEl.style.width = '0%';
-        showError(err.message || 'حدث خطأ، حاول مرة أخرى');
-        throw err;
-      }finally{
-        running = false;
-        btnEl.disabled = false;
-        btnEl.classList.remove('error','success');
-        labelEl.style.display='inline';
-        pctEl.style.display='none';
-        fillEl.style.width='0%';
-        formFields.forEach(f=>f.classList.remove('field-disabled'));
+const ALERT_CATEGORY_ICON = {
+  'فشل تحديث بيانات': '⚠️',
+  'محاولة دخول خاطئة': '🔒',
+  'مشاكل اتصال': '📡',
+  'تنبيهات': 'ℹ️'
+};
+
+function renderAlertStrip(alertsSummary){
+  const chips = Object.keys(alertsSummary)
+    .filter(cat => alertsSummary[cat] > 0)
+    .map(cat => `<div class="alert-chip">${ALERT_CATEGORY_ICON[cat]||'⚠️'} ${alertsSummary[cat]} ${cat}</div>`)
+    .join('');
+  const strip = document.getElementById('alertStrip');
+  if(chips){
+    strip.innerHTML = chips;
+    strip.style.display = 'flex';
+  } else {
+    strip.style.display = 'none';
+  }
+}
+
+function renderOpsMain(d){
+  const quotaPct = Math.min(100, Math.round((d.dailyRequests / d.dailyRequestLimit) * 100));
+  const qualityPct = d.dataQualityPct;
+
+  document.getElementById('opsMain').innerHTML = `
+    <div class="ops-status-card">
+      <div class="ops-status-ring">${renderRing(quotaPct, 'quota', 84)}</div>
+      <div class="ops-status-info">
+        <div class="ops-status-title">⚡ طلبات اليوم على السكربت</div>
+        <div class="ops-status-sub"><b class="ops-status-count">${d.dailyRequests.toLocaleString('ar-SA')}</b> من <b class="ops-status-count">${d.dailyRequestLimit.toLocaleString('ar-SA')}</b> طلب — ${d.currentShiftLabel}</div>
+      </div>
+    </div>
+
+    <div class="ops-row3">
+      <div class="ops-pill"><b style="color:var(--teal)">${d.additionsToday}</b><span>إضافات اليوم</span></div>
+      <div class="ops-pill"><b style="color:var(--blue-mid)">${d.editsToday}</b><span>تعديلات اليوم</span></div>
+      <div class="ops-pill"><b>${d.totalStations.toLocaleString('ar-SA')}</b><span>إجمالي المحطات</span></div>
+    </div>
+
+    <div class="acc-item" data-section="present">
+      <div class="acc-head">
+        <div class="acc-head-title">👥 المتواجدون</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="acc-head-badge">اليوم ${d.activeUsersToday} — الوردية ${d.activeUsersShift}</span>
+          <svg class="acc-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </div>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner" id="accPresentBody"><div class="coming-soon">جاري التحميل عند الفتح...</div></div></div>
+    </div>
+
+    <div class="acc-item" data-section="additions">
+      <div class="acc-head">
+        <div class="acc-head-title">+ الإضافات</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="acc-head-badge">${d.additionsToday} اليوم</span>
+          <svg class="acc-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </div>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner" id="accAdditionsBody"><div class="coming-soon">جاري التحميل عند الفتح...</div></div></div>
+    </div>
+
+    <div class="acc-item" data-section="edits">
+      <div class="acc-head">
+        <div class="acc-head-title">✎ التعديلات</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="acc-head-badge">${d.editsToday} اليوم</span>
+          <svg class="acc-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </div>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner" id="accEditsBody"><div class="coming-soon">جاري التحميل عند الفتح...</div></div></div>
+    </div>
+
+    <div class="acc-item" data-section="charts">
+      <div class="acc-head">
+        <div class="acc-head-title">📈 زوار آخر 7 أيام</div>
+        <svg class="acc-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner" id="accChartsBody"><div class="coming-soon">جاري التحميل عند الفتح...</div></div></div>
+    </div>
+
+    <div class="acc-item" data-section="peak">
+      <div class="acc-head">
+        <div class="acc-head-title">🔥 أوقات الذروة</div>
+        <svg class="acc-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner" id="accPeakBody"><div class="coming-soon">جاري التحميل عند الفتح...</div></div></div>
+    </div>
+
+    <div class="acc-item" data-section="regions">
+      <div class="acc-head">
+        <div class="acc-head-title">🗺️ نشاط المناطق</div>
+        <svg class="acc-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner" id="accRegionsBody"><div class="coming-soon">جاري التحميل عند الفتح...</div></div></div>
+    </div>
+
+    <div class="acc-item" data-section="quality">
+      <div class="acc-head">
+        <div class="acc-head-title">⭐ جودة البيانات</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="acc-head-badge" style="color:${gaugeColor(qualityPct,'quality')}">${qualityPct}%</span>
+          <svg class="acc-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </div>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:8px">
+          ${renderRing(qualityPct, 'quality', 60)}
+          <div>${d.stationsNeedingReview} محطة تحتاج مراجعة (إحداثية ناقصة) من أصل ${d.totalStations}</div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="acc-item" data-section="log">
+      <div class="acc-head">
+        <div class="acc-head-title">⚠️ سجل النظام</div>
+        <svg class="acc-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        ${Object.keys(d.alertsSummary).map(cat => `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span>${ALERT_CATEGORY_ICON[cat]||''} ${cat}</span><b style="color:var(--text-primary)">${d.alertsSummary[cat]}</b></div>`).join('')}
+      </div></div>
+    </div>
+  `;
+
+  renderAlertStrip(d.alertsSummary);
+  wireAccordion();
+}
+
+/* فتح/طي الأقسام — وتحميل المعاينات المصغّرة كسلًا فقط عند أول فتح لكل قسم / Accordion open/close — lazy-loads compact previews only on first open */
+let presentLoaded = false, additionsLoaded = false, editsLoaded = false, chartsLoaded = false, peakLoaded = false, regionsLoaded = false;
+function wireAccordion(){
+  document.querySelectorAll('.acc-head').forEach(head=>{
+    head.addEventListener('click', ()=>{
+      const item = head.closest('.acc-item');
+      const wasOpen = item.classList.contains('open');
+      document.querySelectorAll('.acc-item.open').forEach(el=> el.classList.remove('open'));
+      if(!wasOpen){
+        item.classList.add('open');
+        const section = item.dataset.section;
+        if(section === 'present' && !presentLoaded) loadPresentPreview();
+        if(section === 'additions' && !additionsLoaded) loadAdditionsPreview();
+        if(section === 'edits' && !editsLoaded) loadEditsPreview();
+        if(section === 'charts' && !chartsLoaded) loadVisitorsChart();
+        if(section === 'peak' && !peakLoaded) loadPeakHeatmap();
+        if(section === 'regions' && !regionsLoaded) loadRegionActivity();
       }
+    });
+  });
+}
+
+/* معاينة مصغّرة (أول 5 صفوف فقط) داخل الأكورديون + رابط لفتح الصفحة المنبثقة الكاملة بفلاترها وتصديرها */
+/* Compact preview (first 5 rows only) inside the accordion + a link opening the full popup page with its filters and export */
+async function loadPresentPreview(){
+  presentLoaded = true;
+  try{
+    const res = await fetch(API_URL, {method:'POST', body: JSON.stringify({action:'getActiveUsersDetail', period:'today'})});
+    const data = await res.json();
+    const rows = (data.users||[]).slice(0,5).map(u => `<tr><td>${u.name}</td><td dir="ltr">${u.phone}</td><td>${u.shift||'—'}</td><td>${u.lastActivity}</td></tr>`).join('');
+    document.getElementById('accPresentBody').innerHTML = (data.users && data.users.length
+      ? `<table><tr><th>الاسم</th><th>الجوال</th><th>الوردية</th><th>آخر نشاط</th></tr>${rows}</table>`
+      : '<div class="coming-soon">لا يوجد نشاط اليوم بعد</div>')
+      + `<div class="detail-preview-link" onclick="openDetailModal('present')">عرض التفاصيل الكاملة والتصدير ←</div>`;
+  }catch(e){
+    document.getElementById('accPresentBody').innerHTML = '<div class="coming-soon">تعذّر التحميل</div>';
+    presentLoaded = false;
+  }
+}
+async function loadAdditionsPreview(){
+  additionsLoaded = true;
+  try{
+    const res = await fetch(API_URL, {method:'POST', body: JSON.stringify({action:'getChangesLog', type:'إضافة_محطة_جديدة', limit:5})});
+    const data = await res.json();
+    const rows = (data.changes||[]).map(c => `<tr><td>${c.stationId}</td><td>${c.memberName}</td><td>${c.date}</td></tr>`).join('');
+    document.getElementById('accAdditionsBody').innerHTML = (data.changes && data.changes.length
+      ? `<table><tr><th>المحطة</th><th>العضو</th><th>التاريخ</th></tr>${rows}</table>`
+      : '<div class="coming-soon">لا توجد إضافات مسجّلة بعد</div>')
+      + `<div class="detail-preview-link" onclick="openDetailModal('additions')">عرض التفاصيل الكاملة والتصدير ←</div>`;
+  }catch(e){
+    document.getElementById('accAdditionsBody').innerHTML = '<div class="coming-soon">تعذّر التحميل</div>';
+    additionsLoaded = false;
+  }
+}
+async function loadEditsPreview(){
+  editsLoaded = true;
+  try{
+    const res = await fetch(API_URL, {method:'POST', body: JSON.stringify({action:'getChangesLog', type:'تعديل_إحداثية', limit:5})});
+    const data = await res.json();
+    const rows = (data.changes||[]).map(c => `<tr><td>${c.stationId}</td><td>${c.memberName}</td><td>${c.date}</td></tr>`).join('');
+    document.getElementById('accEditsBody').innerHTML = (data.changes && data.changes.length
+      ? `<table><tr><th>المحطة</th><th>العضو</th><th>التاريخ</th></tr>${rows}</table>`
+      : '<div class="coming-soon">لا توجد تعديلات مسجّلة بعد</div>')
+      + `<div class="detail-preview-link" onclick="openDetailModal('edits')">عرض التفاصيل الكاملة والتصدير ←</div>`;
+  }catch(e){
+    document.getElementById('accEditsBody').innerHTML = '<div class="coming-soon">تعذّر التحميل</div>';
+    editsLoaded = false;
+  }
+}
+
+/* ============================================================
+ *  الصفحة المنبثقة الكاملة الموحّدة — المتواجدون / الإضافات / التعديلات
+ *  Unified full detail popup — present users / additions / edits
+ * ============================================================ */
+const DETAIL_MODAL_CONFIG = {
+  present:   { title:'👥 المتواجدون — التفاصيل الكاملة',  columns:['الاسم','الجوال','الوردية','آخر نشاط'] },
+  additions: { title:'+ الإضافات — التفاصيل الكاملة',      columns:['المحطة','العضو','الجوال','الوردية','التاريخ','الوقت'] },
+  edits:     { title:'✎ التعديلات — التفاصيل الكاملة',     columns:['المحطة','العضو','الجوال','الوردية','التاريخ','الوقت'] }
+};
+let currentDetailKind = null;
+let currentDetailRows = [];
+
+/* تحويل تاريخ ميلادي لهجري للعرض فقط — بدون مكتبة خارجية، عبر واجهة المتصفح القياسية / Gregorian→Hijri display only, via the browser's built-in API, no external library */
+const hijriFormatter = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura-nu-latn', {day:'numeric', month:'long', year:'numeric'});
+function hijriOf(dateStr){
+  try{ return hijriFormatter.format(new Date(dateStr + 'T00:00:00')); }catch(e){ return ''; }
+}
+function updateHijriNote(){
+  const from = document.getElementById('detailDateFrom').value;
+  const to = document.getElementById('detailDateTo').value;
+  const note = document.getElementById('detailHijriNote');
+  note.textContent = (from && to) ? `📅 هجري: من ${hijriOf(from)} إلى ${hijriOf(to)}` : '';
+}
+
+function openDetailModal(kind){
+  currentDetailKind = kind;
+  const cfg = DETAIL_MODAL_CONFIG[kind];
+  document.getElementById('detailModalTitle').textContent = cfg.title;
+  document.getElementById('detailSearchInput').value = '';
+  const today = new Date();
+  const weekAgo = new Date(Date.now() - 6*24*3600000);
+  document.getElementById('detailDateTo').value = Utilities_formatLocalDate(today);
+  document.getElementById('detailDateFrom').value = Utilities_formatLocalDate(weekAgo);
+  updateHijriNote();
+  document.getElementById('detailModalOverlay').classList.add('show');
+  fetchAndRenderDetail();
+}
+function Utilities_formatLocalDate(d){
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function closeDetailModal(){
+  document.getElementById('detailModalOverlay').classList.remove('show');
+}
+document.getElementById('detailModalClose').addEventListener('click', closeDetailModal);
+document.getElementById('detailModalOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'detailModalOverlay') closeDetailModal();
+});
+document.getElementById('detailDateFrom').addEventListener('change', updateHijriNote);
+document.getElementById('detailDateTo').addEventListener('change', updateHijriNote);
+document.getElementById('detailApplyBtn').addEventListener('click', fetchAndRenderDetail);
+document.getElementById('detailExportBtn').addEventListener('click', exportDetailCsv);
+
+async function fetchAndRenderDetail(){
+  const wrap = document.getElementById('detailTableWrap');
+  wrap.innerHTML = '<div class="loading-overlay"><div class="spinner"></div></div>';
+  const search = document.getElementById('detailSearchInput').value.trim();
+  const dateFrom = document.getElementById('detailDateFrom').value;
+  const dateTo = document.getElementById('detailDateTo').value;
+
+  try{
+    let rows = [];
+    if(currentDetailKind === 'present'){
+      const res = await fetch(API_URL, {method:'POST', body: JSON.stringify({action:'getActiveUsersDetail', dateFrom, dateTo, search})});
+      const data = await res.json();
+      rows = (data.users||[]).map(u => ({cells:[u.name, u.phone, u.shift||'—', u.lastActivity], raw:u}));
+    } else {
+      const type = currentDetailKind === 'additions' ? 'إضافة_محطة_جديدة' : 'تعديل_إحداثية';
+      const res = await fetch(API_URL, {method:'POST', body: JSON.stringify({action:'getChangesLog', type, dateFrom, dateTo, search, limit:500})});
+      const data = await res.json();
+      rows = (data.changes||[]).map(c => ({cells:[c.stationId, c.memberName, c.phone, c.shift||'—', c.date, c.time], raw:c}));
     }
+    currentDetailRows = rows;
+    const cfg = DETAIL_MODAL_CONFIG[currentDetailKind];
+    document.getElementById('detailCountBadge').textContent = `${rows.length} نتيجة`;
+    if(!rows.length){
+      wrap.innerHTML = '<div class="coming-soon">لا توجد نتائج ضمن هذا النطاق</div>';
+      return;
+    }
+    const headHtml = '<tr>' + cfg.columns.map(c=>`<th>${c}</th>`).join('') + '</tr>';
+    const bodyHtml = rows.map(r => '<tr>' + r.cells.map(v => `<td dir="${/^\+?\d[\d\s]*$/.test(String(v))?'ltr':'rtl'}">${v}</td>`).join('') + '</tr>').join('');
+    wrap.innerHTML = `<table>${headHtml}${bodyHtml}</table>`;
+  }catch(e){
+    wrap.innerHTML = '<div class="coming-soon">تعذّر تحميل التفاصيل</div>';
+  }
+}
+
+/* تصدير النتائج الحالية إلى CSV — من نفس البيانات المعروضة، بدون طلب إضافي للخادم / Exports the currently displayed results to CSV — from the same rendered data, no extra server call */
+function exportDetailCsv(){
+  if(!currentDetailRows.length){ alert('لا توجد بيانات للتصدير'); return; }
+  const cfg = DETAIL_MODAL_CONFIG[currentDetailKind];
+  const lines = [cfg.columns.join(',')];
+  currentDetailRows.forEach(r => lines.push(r.cells.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')));
+  const csv = '\uFEFF' + lines.join('\n'); // BOM لدعم عرض العربي بشكل صحيح داخل Excel / BOM so Arabic renders correctly in Excel
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `${currentDetailKind}-${Utilities_formatLocalDate(new Date())}.csv`;
+  link.click();
+}
+
+function getChartColors(){
+  const dark = document.body.getAttribute('data-theme')==='dark';
+  return {
+    grid: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.07)',
+    text: dark ? '#8FA3B8' : '#52647A'
   };
 }
 
-const mainBtn = document.getElementById('mainBtn');
-mainBtn.addEventListener('click', (e)=>{
-  const rect = mainBtn.getBoundingClientRect();
-  const size = Math.max(rect.width, rect.height);
-  const ripple = document.createElement('span');
-  ripple.className = 'ripple';
-  ripple.style.width = ripple.style.height = size + 'px';
-  ripple.style.left = (e.clientX - rect.left - size/2) + 'px';
-  ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
-  mainBtn.appendChild(ripple);
-  setTimeout(()=> ripple.remove(), 650);
-});
-const mainBtnLabel = document.getElementById('mainBtnLabel');
-const mainBtnPct = document.getElementById('mainBtnPct');
-const mainBtnFill = document.getElementById('mainBtnFill');
-const formFields = [phoneInput, document.getElementById('nameInput'), document.getElementById('countrySelect')];
-const progressBtn = ProgressButton(mainBtn, mainBtnLabel, mainBtnPct, mainBtnFill, formFields);
-
-/* ============================================================
- *  استدعاء الباكند الفعلي
- * ============================================================ */
-const API_URL = 'https://script.google.com/macros/s/AKfycbyxZUSLZNa6UlZLINsfAEe8CmQPoNGJbpnNtUDxP019TfL8uLh_5fuP0e5HE6daP8dh1w/exec';
-async function callBackend(action, payload){
-  const res = await fetch(API_URL, {
-    method:'POST',
-    body: JSON.stringify({ action, ...payload })
-  });
-  const json = await res.json();
-  if(json.error){
-    return { success:false, error: json.error, ...json };
-  }
-  return { success:true, ...json };
-}
-
-/* ============================================================
- *  تحويلات base64url <-> ArrayBuffer (مطلوبة لتبادل بيانات WebAuthn)
- * ============================================================ */
-function b64urlToBuffer(b64url){
-  let b64 = b64url.replace(/-/g,'+').replace(/_/g,'/');
-  while(b64.length % 4) b64 += '=';
-  const raw = atob(b64);
-  const buf = new Uint8Array(raw.length);
-  for(let i=0;i<raw.length;i++) buf[i] = raw.charCodeAt(i);
-  return buf.buffer;
-}
-function bufferToB64url(buf){
-  const bytes = new Uint8Array(buf);
-  let str = '';
-  for(let i=0;i<bytes.length;i++) str += String.fromCharCode(bytes[i]);
-  return btoa(str).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-}
-
-mainBtn.addEventListener('click', async ()=>{
-  hideError();
-  const phone = selectedCountry.code + phoneInput.value.trim();
-  if(phoneInput.value.trim().length < 8){
-    showError('الرجاء إدخال رقم جوال صحيح'); return;
-  }
-  if(mode==='register' && document.getElementById('nameInput').value.trim().length < 2){
-    showError('الرجاء إدخال الاسم الكامل'); return;
-  }
-  if(!window.PublicKeyCredential){
-    showError('هذا المتصفح لا يدعم تسجيل الدخول الآمن بالمصادقة البيومترية. الرجاء استخدام متصفح حديث مثل Chrome أو Safari أو Edge.');
-    return;
-  }
-
+/* ===== ١) رسم نشاط آخر ٧ أيام ===== */
+async function loadVisitorsChart(){
+  chartsLoaded = true;
   try{
-    await progressBtn.run(async ()=>{
-      let result;
-      if(mode==='login'){
-        result = await startWebAuthnLogin(phone);
-      } else {
-        const name = document.getElementById('nameInput').value.trim();
-        const reg = await callBackend('registerUser', {name, phone, memberType: selectedMemberType});
-        if(!reg.success) throw new Error(reg.error || 'تعذّر إنشاء الحساب');
-        result = await startWebAuthnRegistration(phone, name);
+    const res = await fetch(API_URL, {method:'POST', body: JSON.stringify({action:'getVisitorsChart'})});
+    const data = await res.json();
+    document.getElementById('accChartsBody').innerHTML = '<div class="chart-box"><canvas id="visitorsCanvas"></canvas></div>';
+    const colors = getChartColors();
+    new Chart(document.getElementById('visitorsCanvas').getContext('2d'), {
+      type: 'line',
+      data:{ labels: data.labels, datasets:[{
+        label:'أحداث النشاط', data: data.values,
+        borderColor:'#1FAE8C', backgroundColor:'rgba(31,174,140,.15)',
+        fill:true, tension:.35, pointRadius:3, pointBackgroundColor:'#1FAE8C'
+      }]},
+      options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{display:false}, tooltip:{rtl:true, bodyFont:{family:"'JetBrains Mono', monospace"}} },
+        scales:{
+          x:{ ticks:{color:colors.text, font:{size:10}}, grid:{color:colors.grid} },
+          y:{ ticks:{color:colors.text, precision:0}, grid:{color:colors.grid}, beginAtZero:true }
+        }
       }
-      if(result && result.success){
-        await new Promise(r=>setTimeout(r, 700));
-        window.location.href = 'index.html'; // الجميع يدخل الرئيسية أولاً؛ المدير يفتح لوحته من القائمة عند الحاجة
-      }
-      return result;
     });
   }catch(e){
-    document.getElementById('fingerprintStep').classList.remove('show');
-    document.getElementById('fpIcon').classList.remove('verifying');
-    document.getElementById('fpSpinner').classList.remove('verifying');
-    document.getElementById('fpProgress').textContent = '';
-    document.getElementById('phoneStep').style.display='block';
+    document.getElementById('accChartsBody').innerHTML = '<div class="coming-soon">تعذّر تحميل الرسم</div>';
+    chartsLoaded = false;
   }
+}
+
+/* ===== ٢) خريطة أوقات الذروة الحرارية ===== */
+async function loadPeakHeatmap(){
+  peakLoaded = true;
+  try{
+    const res = await fetch(API_URL, {method:'POST', body: JSON.stringify({action:'getPeakHoursHeatmap'})});
+    const data = await res.json();
+    const maxCount = Math.max(1, ...data.matrix.flat());
+    let grid = '<div class="heatmap-grid">';
+    grid += '<div></div>' + Array.from({length:24}, (_,h)=> `<div style="text-align:center">${h%3===0?h:''}</div>`).join('');
+    data.matrix.forEach((row, d)=>{
+      grid += `<div class="heatmap-label">${data.weekdayLabels[d]}</div>`;
+      row.forEach(count=>{
+        const intensity = count / maxCount;
+        const bg = intensity === 0 ? 'var(--bg-elev)' : `rgba(31,174,140,${0.15 + intensity*0.85})`;
+        grid += `<div class="heatmap-cell" style="background:${bg}" title="${count}"></div>`;
+      });
+    });
+    grid += '</div>';
+    if(data.peak){
+      grid += `<div class="heatmap-peak-note">🔥 أكثر وقت نشاطًا: <b>${data.peak.day} — الساعة ${data.peak.hour}:00</b> (${data.peak.count} حدث)</div>`;
+    }
+    document.getElementById('accPeakBody').innerHTML = grid;
+  }catch(e){
+    document.getElementById('accPeakBody').innerHTML = '<div class="coming-soon">تعذّر تحميل الخريطة</div>';
+    peakLoaded = false;
+  }
+}
+
+/* ===== ٣) نشاط المناطق ===== */
+async function loadRegionActivity(){
+  regionsLoaded = true;
+  try{
+    const res = await fetch(API_URL, {method:'POST', body: JSON.stringify({action:'getRegionActivity'})});
+    const data = await res.json();
+    if(!data.regions || !data.regions.length){
+      document.getElementById('accRegionsBody').innerHTML = '<div class="coming-soon">لا توجد بيانات نشاط كافية آخر 30 يومًا</div>';
+      return;
+    }
+    const maxCount = Math.max(...data.regions.map(r=>r.count));
+    document.getElementById('accRegionsBody').innerHTML = data.regions.map(r => `
+      <div class="region-bar-row">
+        <div class="region-bar-label">${r.region}</div>
+        <div class="region-bar-track"><div class="region-bar-fill" style="width:${Math.round((r.count/maxCount)*100)}%"></div></div>
+        <div class="region-bar-count">${r.count}</div>
+      </div>`).join('');
+  }catch(e){
+    document.getElementById('accRegionsBody').innerHTML = '<div class="coming-soon">تعذّر التحميل</div>';
+    regionsLoaded = false;
+  }
+}
+
+/* ===== جلب بيانات لوحة العمليات الرئيسية ===== */
+async function loadDashboard(){
+  if(fetching) return;
+  fetching = true;
+  document.getElementById('dataRefreshIcon').style.animation = 'spin .7s linear infinite';
+  presentLoaded = false; changesLoaded = false; chartsLoaded = false; peakLoaded = false; regionsLoaded = false;
+
+  try{
+    const res = await fetch(API_URL, {method:'POST', body: JSON.stringify({action:'getOperationsDashboard', phone: session.phone})});
+    const data = await res.json();
+    if(!data.success){ throw new Error(data.error || 'خطأ غير معروف'); }
+    renderOpsMain(data);
+    lastSuccessfulCheckAt = new Date();
+    refreshLastUpdateLabel();
+  }catch(err){
+    document.getElementById('opsMain').innerHTML = `<div class="err-msg">تعذّر تحميل البيانات: ${err.message}</div>`;
+  }finally{
+    fetching = false;
+    document.getElementById('dataRefreshIcon').style.animation = '';
+  }
+}
+
+/* ===== تحديث تلقائي عند رجوع التبويب ===== */
+let lastFetch = 0;
+const STALE = 3 * 60 * 1000;
+loadDashboard();
+document.getElementById('dataRefreshBtn').addEventListener('click', async ()=>{
+  lastFetch = 0;
+  try{ await fetch(API_URL, {method:'POST', body: JSON.stringify({action:'clearSearchCache', phone: session.phone})}); }catch(e){}
+  loadDashboard();
 });
-
-/* ============================================================
- *  WebAuthn — حماية من تكدّس الطلبات المعلّقة (AbortController)
- *  هذا تحديدًا يمنع مشكلة "تتكرر نافذة البصمة بعدد الضغطات"
- * ============================================================ */
-let activeAbortController = null;
-function abortPendingWebAuthn(){
-  if(activeAbortController){
-    activeAbortController.abort();
-    activeAbortController = null;
-  }
-}
-
-/* ============================================================
- *  WebAuthn — تسجيل بصمة جديدة (registration ceremony)
- * ============================================================ */
-async function startWebAuthnRegistration(phone, displayName){
-  document.getElementById('phoneStep').style.display='none';
-  document.getElementById('fingerprintStep').classList.add('show');
-  setAuthIcon();
-  document.getElementById('fpTitle').textContent = 'سجّل بصمتك الآن لتأمين حسابك';
-  document.getElementById('fpSubtitle').textContent = 'سيستخدم جهازك أفضل وسيلة تحقق متوفرة';
-  const fpProgress = startFpProgress();
-
-  const begin = await callBackend('generateRegisterChallenge', {phone});
-  if(!begin.success) throw new Error(begin.error || 'تعذّر بدء تسجيل البصمة');
-
-  abortPendingWebAuthn();
-  activeAbortController = new AbortController();
-
-  let credential;
-  try{
-    credential = await navigator.credentials.create({
-      signal: activeAbortController.signal,
-      publicKey: {
-        challenge: b64urlToBuffer(begin.challenge),
-        rp: { id: begin.rpId, name: begin.rpName },
-        user: {
-          id: b64urlToBuffer(begin.userIdB64),
-          name: begin.userName,
-          displayName: begin.userDisplayName || displayName
-        },
-        pubKeyCredParams: [{ type:'public-key', alg:-7 }],
-        authenticatorSelection: { userVerification:'required' },
-        timeout: 60000,
-        attestation: 'none'
-      }
-    });
-  }catch(err){
-    throw new Error(err.name==='NotAllowedError' ? 'تم إلغاء العملية أو رفض البصمة' : 'تعذّر تسجيل البصمة على هذا الجهاز');
-  }finally{
-    activeAbortController = null;
-  }
-
-  document.getElementById('fpTitle').textContent = 'جاري التحقق من البصمة...';
-  document.getElementById('fpIcon').classList.add('verifying');
-  document.getElementById('fpSpinner').classList.add('verifying');
-  const result = await callBackend('registerCredential', {
-    phone,
-    credentialId: bufferToB64url(credential.rawId),
-    attestationObjectB64: bufferToB64url(credential.response.attestationObject),
-    clientDataJSONB64: bufferToB64url(credential.response.clientDataJSON),
-    deviceName: guessDeviceName()
-  });
-  if(!result.success){ fpProgress.fail(); throw new Error(result.error || 'فشل حفظ البصمة بالخادم'); }
-  fpProgress.finish();
-
-  saveSession(phone, result.name || displayName, result.role || 'member');
-  document.getElementById('fpTitle').textContent = 'تم تسجيل البصمة بنجاح';
-  return result;
-}
-
-/* ============================================================
- *  WebAuthn — الدخول ببصمة موجودة (authentication ceremony)
- * ============================================================ */
-async function startWebAuthnLogin(phone){
-  document.getElementById('phoneStep').style.display='none';
-  document.getElementById('fingerprintStep').classList.add('show');
-  setAuthIcon();
-  document.getElementById('fpTitle').textContent = 'تحقق من هويتك';
-  document.getElementById('fpSubtitle').textContent = 'سيستخدم جهازك أفضل وسيلة تحقق متوفرة';
-  const fpProgress = startFpProgress();
-
-  const begin = await callBackend('generateLoginChallenge', {phone});
-  if(!begin.success){
-    if(begin.notRegistered){
-      // عضو موجود بالنظام لكن بدون بصمة مسجّلة (مثلًا عضو منقول من موقع سابق)
-      // ينتقل مباشرة لتفعيل البصمة، بدون المرور بـ registerUser من جديد
-      fpProgress.fail();
-      document.getElementById('fpTitle').textContent = 'لا توجد بصمة مسجّلة، سيتم تفعيلها الآن';
-      try{
-        const result = await startWebAuthnRegistration(phone, begin.name || '');
-        return result;
-      }catch(regErr){
-        throw regErr;
-      }
-    }
-    throw new Error(begin.error || 'تعذّر بدء تسجيل الدخول');
-  }
-
-  abortPendingWebAuthn();
-  activeAbortController = new AbortController();
-
-  let credential;
-  try{
-    credential = await navigator.credentials.get({
-      signal: activeAbortController.signal,
-      publicKey: {
-        challenge: b64urlToBuffer(begin.challenge),
-        rpId: begin.rpId,
-        allowCredentials: begin.allowCredentialIds.map(id => ({ type:'public-key', id: b64urlToBuffer(id) })),
-        userVerification: 'required',
-        timeout: 60000
-      }
-    });
-  }catch(err){
-    throw new Error(err.name==='NotAllowedError' ? 'تم إلغاء العملية أو رفض البصمة' : 'تعذّر التحقق من البصمة على هذا الجهاز');
-  }finally{
-    activeAbortController = null;
-  }
-
-  document.getElementById('fpTitle').textContent = 'جاري التحقق من البصمة...';
-  document.getElementById('fpIcon').classList.add('verifying');
-  document.getElementById('fpSpinner').classList.add('verifying');
-  const result = await callBackend('verifyAssertion', {
-    phone,
-    credentialId: bufferToB64url(credential.rawId),
-    authenticatorDataB64: bufferToB64url(credential.response.authenticatorData),
-    clientDataJSONB64: bufferToB64url(credential.response.clientDataJSON),
-    signatureB64: bufferToB64url(credential.response.signature)
-  });
-  if(!result.success){ fpProgress.fail(); throw new Error(result.error || 'فشل التحقق من تسجيل الدخول'); }
-  fpProgress.finish();
-
-  saveSession(phone, result.name, result.role || 'member');
-  return result;
-}
-
-function saveSession(phone, name, role){
-  localStorage.setItem('sec-phone', phone);
-  localStorage.setItem('sec-session', JSON.stringify({phone, name, role, ts: Date.now()}));
-}
-
-function startFpProgress(){
-  const el = document.getElementById('fpProgress');
-  let p = 0;
-  el.textContent = '0%';
-  const timer = setInterval(()=>{
-    p = Math.min(p + Math.random()*9, 94);
-    el.textContent = Math.round(p) + '%';
-  }, 180);
-  return {
-    finish(){ clearInterval(timer); el.textContent = '100%'; },
-    fail(){ clearInterval(timer); el.textContent = ''; }
-  };
-}
-
-function guessDeviceName(){
-  const ua = navigator.userAgent;
-  if(/iPhone/.test(ua)) return 'iPhone';
-  if(/iPad/.test(ua)) return 'iPad';
-  if(/Android/.test(ua)) return 'جهاز أندرويد';
-  if(/Macintosh/.test(ua)) return 'Mac';
-  if(/Windows/.test(ua)) return 'كمبيوتر ويندوز';
-  return 'جهاز غير معروف';
-}
-
-/* ============================================================
- *  أيقونة المصادقة تتكيّف مع الجهاز — الواجهة لا "تفرض" طريقة معيّنة،
- *  فقط تعرض إشارة بصرية مرجّحة؛ نظام التشغيل نفسه يتولى فعليًا
- *  اختيار وعرض أفضل وسيلة تحقق متاحة (Face ID / بصمة / PIN...)
- * ============================================================ */
-const AUTH_ICONS = {
-  fingerprint: `<svg width="46" height="46" viewBox="0 0 100 100" fill="none" stroke-linecap="round">
-    <path d="M50 28c-13 0-22 9-22 22v8" stroke-width="3.2"/>
-    <path d="M50 22c-17 0-29 12-29 28v9" stroke-width="3.2"/>
-    <path d="M50 35c-9 0-15 6-15 15v10c0 4 1 7 3 10" stroke-width="3.2"/>
-    <path d="M50 42c-5 0-8 3-8 8v9c0 6 2 11 6 15" stroke-width="3.2"/>
-    <path d="M50 49c-1.5 0-2 1-2 2v8c0 9 4 16 11 21" stroke-width="3.2"/>
-    <path d="M65 47v10c0 12-6 21-16 27" stroke-width="3.2"/>
-    <path d="M71 44v12c0 16-9 28-23 35" stroke-width="3.2"/>
-  </svg>`,
-  face: `<svg width="46" height="46" viewBox="0 0 100 100" fill="none" stroke-linecap="round">
-    <path d="M20 30V22a6 6 0 016-6h8" stroke-width="3.2"/>
-    <path d="M80 30V22a6 6 0 00-6-6h-8" stroke-width="3.2"/>
-    <path d="M20 70v8a6 6 0 006 6h8" stroke-width="3.2"/>
-    <path d="M80 70v8a6 6 0 01-6 6h-8" stroke-width="3.2"/>
-    <circle cx="38" cy="46" r="3" fill="currentColor" stroke="none"/>
-    <circle cx="62" cy="46" r="3" fill="currentColor" stroke="none"/>
-    <path d="M40 62c4 3 16 3 20 0" stroke-width="3.2"/>
-  </svg>`,
-  windows: `<svg width="46" height="46" viewBox="0 0 100 100" fill="none" stroke-linecap="round">
-    <rect x="18" y="18" width="28" height="28" rx="3" stroke-width="3.2"/>
-    <rect x="54" y="18" width="28" height="28" rx="3" stroke-width="3.2"/>
-    <rect x="18" y="54" width="28" height="28" rx="3" stroke-width="3.2"/>
-    <rect x="54" y="54" width="28" height="28" rx="3" stroke-width="3.2"/>
-  </svg>`
-};
-function detectAuthIconType(){
-  const ua = navigator.userAgent;
-  if(/iPhone|iPad|iPod/.test(ua)) return 'face';       // آيفون/آيباد الحديثة أغلبها Face ID
-  if(/Windows/.test(ua)) return 'windows';              // ويندوز → Windows Hello
-  return 'fingerprint';                                  // أندرويد وماك → بصمة
-}
-function setAuthIcon(){
-  document.getElementById('fpIcon').innerHTML = AUTH_ICONS[detectAuthIconType()];
-}
-
-/* ===== اقتراح آخر رقم جوال مستخدم تلقائيًا ===== */
-window.addEventListener('load', ()=>{
-  const saved = localStorage.getItem('sec-phone');
-  if(saved){
-    const match = countries.find(c => saved.startsWith(c.code));
-    if(match){
-      selectedCountry = match;
-      document.getElementById('selectedFlag').textContent = match.flag;
-      document.getElementById('selectedCode').textContent = match.code;
-      phoneInput.value = saved.slice(match.code.length);
-      positionPhoneLabel();
-      syncPhoneFloating();
-    }
-  }
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState==='visible' && (Date.now()-lastFetch)>STALE){ loadDashboard(); }
 });
 </script>
 </body>
