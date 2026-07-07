@@ -424,7 +424,7 @@ document.getElementById('regDepartmentInput').addEventListener('change', functio
 /* ===== التواصل مع المدير — جلب بيانات المدير مرة واحدة عند تحميل الصفحة ===== */
 /* Contact admin — fetch admin contact info once on page load */
 let adminContactInfo = { phone: '', email: '' };
-(async function loadAdminContact(){
+async function loadAdminContact(){
   try{
     const res = await callBackend('getAdminContactInfo', {});
     console.log('[تشخيص التواصل] استجابة جلب بيانات المدير:', res);
@@ -437,7 +437,7 @@ let adminContactInfo = { phone: '', email: '' };
   }catch(e){
     console.error('[تشخيص التواصل] فشل الاتصال بالخادم لجلب بيانات المدير:', e);
   }
-})();
+}
 
 document.getElementById('messageAdminBtn').addEventListener('click', ()=>{
   document.getElementById('contactModalOverlay').classList.add('show');
@@ -663,6 +663,7 @@ async function callBackend(action, payload){
   }
   return { success:true, ...json };
 }
+loadAdminContact(); // يُستدعى هنا بعد تعريف API_URL وcallBackend مباشرة — استدعاؤه مبكرًا بمكان تعريفه السابق كان يسبب خطأ "الوصول قبل التهيئة"
 
 /* ============================================================
  *  تحويلات base64url <-> ArrayBuffer (مطلوبة لتبادل بيانات WebAuthn)
