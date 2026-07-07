@@ -1459,6 +1459,9 @@ async function refreshStationsLocalCache_(onProgress){
         return false;
       }
       const res = await callBackend('getAllStations', { offset });
+      // تسجيل تشخيصي مؤقت — يوري بالضبط تسلسل الدفعات لتحديد سبب أي تكرار أو تجاوز للعدد الحقيقي
+      // Temporary diagnostic log — shows the exact batch sequence to pinpoint any repetition or overshoot past the real total
+      console.log(`[تشخيص التحميل] دفعة #${batchCount} — أُرسل offset=${offset} — استُلم ${res.stations ? res.stations.length : 0} محطة — totalCount=${res.totalCount} — nextOffset=${res.nextOffset}`);
       if(!res.success || !Array.isArray(res.stations)){
         // فشل بالمنتصف — نتجاهل هذي المحاولة بالكامل ولا نلمس الفهرس المحلي الشغّال إطلاقًا
         // Mid-way failure — we discard this whole attempt and never touch the working local index
