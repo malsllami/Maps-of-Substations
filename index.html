@@ -1759,6 +1759,7 @@ const mobileUserMenu = document.getElementById('mobileUserMenu');
  * على نفس الجهاز حتى تسجيل خروج يدوي أو مسح بيانات المتصفح، بصمة WebAuthn نفسها
  * مسجّلة بجهة الخادم بشكل دائم أصلاً فهذا لا يُضعف الأمان */
 const SESSION_MAX_AGE_MS = 10 * 365 * 24 * 60 * 60 * 1000; // 10 سنوات — عمليًا بلا انتهاء
+function forceLogoutExpiredSession_(){
   localStorage.removeItem('sec-session');
   localStorage.removeItem('sec-phone');
   if(location.pathname.indexOf('auth.html') === -1) location.href = 'auth.html';
