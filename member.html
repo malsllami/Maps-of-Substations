@@ -11,7 +11,6 @@
 [data-theme="light"]{--bg:#EAF1F6;--bg-elev:#F4F8FB;--bg-card:#FFFFFF;--text-primary:#102035;--text-secondary:#52647A;--border:rgba(16,32,53,0.10);--border-strong:rgba(16,32,53,0.20);--danger:#C8412C;--danger-bg:rgba(200,65,44,0.08);}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;padding-bottom:24px;transition:background .3s,color .3s;}
-/* ===== هيدر موحّد مطابق لبقية الصفحات (الرئيسية ولوحة المدير) ===== */
 header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--border);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;}
 .brand{display:flex;align-items:center;gap:10px;cursor:pointer;text-decoration:none;}
 .brand-mark{height:32px;width:auto;flex-shrink:0;display:block;object-fit:contain;transition:transform .2s;}
@@ -64,7 +63,6 @@ header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px s
 .theme-switch.on{background:var(--teal);}
 .theme-switch-knob{position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.3);}
 .theme-switch.on .theme-switch-knob{transform:translateX(19px);}
-/* شريط حالة الاتصال + آخر تحديث / Connection status + last-update bar */
 .status-bar{
   position:sticky;top:65px;z-index:19;
   display:flex;align-items:center;justify-content:space-between;
@@ -82,7 +80,14 @@ header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px s
 }
 .wrap{max-width:480px;margin:0 auto;padding:24px 24px 0;}
 .card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:16px;}
-.avatar{width:56px;height:56px;border-radius:50%;background:conic-gradient(from 200deg,var(--blue-deep),var(--blue-mid),var(--teal),var(--teal-light),var(--blue-deep));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:20px;margin-bottom:14px;}
+/* ===== أيقونة العضو — استُبدلت دائرة التدرّج اللونية بحرف الاسم بأيقونة ثابتة توضّح هوية عامل الشركة ===== */
+/* ===== Member icon — replaced the gradient-circle-with-initial with a fixed icon representing a company worker ===== */
+.avatar{
+  width:64px;height:64px;border-radius:50%;
+  overflow:hidden;display:flex;align-items:center;justify-content:center;
+  margin-bottom:14px;background:var(--bg-elev);border:1px solid var(--border-strong);
+}
+.avatar img{width:100%;height:100%;object-fit:contain;display:block;}
 h2{font-size:17px;font-weight:700;margin-bottom:4px;}
 .role-badge{display:inline-block;font-size:11px;color:var(--teal);background:rgba(31,174,140,0.1);padding:3px 10px;border-radius:10px;margin-top:6px;}
 .field{margin-bottom:14px;}
@@ -161,7 +166,6 @@ h2{font-size:17px;font-weight:700;margin-bottom:4px;}
   </div>
 </header>
 
-<!-- شريط حالة الاتصال + آخر تحديث / Connection status + last-update bar -->
 <div class="status-bar" id="statusBar">
   <div class="status-bar-item">
     <span class="conn-dot" id="connDot"></span>
@@ -176,7 +180,7 @@ h2{font-size:17px;font-weight:700;margin-bottom:4px;}
 
 <div class="wrap">
   <div class="card" id="profileCard">
-    <div class="avatar" id="avatarInitial">-</div>
+    <div class="avatar" id="avatarInitial"><img src="assets/member-icon.png" alt="أيقونة العضو"></div>
     <h2 id="profileName">...</h2>
     <div style="font-size:12.5px;color:var(--text-secondary);font-family:'JetBrains Mono',monospace;direction:ltr;text-align:right" id="profilePhone">-</div>
     <span class="role-badge" id="memberTypeBadge"></span>
@@ -263,10 +267,6 @@ async function callBackend(action, payload){
 const session = JSON.parse(localStorage.getItem('sec-session') || '{}');
 const phone = session.phone;
 
-/* ============================================================
- *  منطق الهيدر الموحّد (قائمة منسدلة + ثيم + خروج)
- *  Unified header logic (dropdown menu + theme + logout) — same pattern as admin.html
- * ============================================================ */
 function setTheme(mode){
   document.body.setAttribute('data-theme', mode);
   localStorage.setItem('sec-theme', mode);
@@ -303,10 +303,6 @@ function doLogout(){
 document.getElementById('mobileLogoutBtn').addEventListener('click', doLogout);
 document.getElementById('brandLink').addEventListener('click', ()=> location.href='index.html');
 
-/* ============================================================
- *  فحص حالة الاتصال — نفس منطق index.html وadmin.html بالضبط
- *  Server connection health check — mirrors index.html / admin.html exactly
- * ============================================================ */
 async function pingBackend(){
   const res = await fetch(API_URL, { method:'POST', body: JSON.stringify({ action:'ping' }) });
   return await res.json();
@@ -357,7 +353,6 @@ async function loadProfile(){
   if(!res.success){ showError(res.error || 'تعذّر تحميل البيانات'); return; }
   document.getElementById('profileName').textContent = res.name;
   document.getElementById('profilePhone').textContent = res.phone;
-  document.getElementById('avatarInitial').textContent = res.name.trim()[0] || '؟';
   document.getElementById('memberTypeBadge').textContent = res.memberType || 'عضو';
   document.getElementById('nameInput').value = res.name;
   document.getElementById('phoneInput').value = res.phone;
