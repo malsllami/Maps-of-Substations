@@ -208,6 +208,40 @@ h2{font-size:17px;font-weight:700;margin-bottom:4px;}
     </div>
   </div>
 
+  <div class="card" id="additionsCard" style="display:none">
+    <div style="font-size:13px;font-weight:700;margin-bottom:12px;color:var(--blue-mid)">📥 تفاصيل الإضافات</div>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead>
+          <tr style="background:rgba(46,125,209,0.1)">
+            <th style="padding:8px 6px;text-align:right;color:var(--blue-mid);white-space:nowrap">رقم المحطة</th>
+            <th style="padding:8px 6px;text-align:right;color:var(--blue-mid);white-space:nowrap">المنطقة</th>
+            <th style="padding:8px 6px;text-align:right;color:var(--blue-mid);white-space:nowrap">التاريخ</th>
+            <th style="padding:8px 6px;text-align:right;color:var(--blue-mid);white-space:nowrap">الوقت</th>
+          </tr>
+        </thead>
+        <tbody id="additionsTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" id="editsCard" style="display:none">
+    <div style="font-size:13px;font-weight:700;margin-bottom:12px;color:#C8A24E">✏️ تفاصيل التعديلات</div>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead>
+          <tr style="background:rgba(200,162,78,0.12)">
+            <th style="padding:8px 6px;text-align:right;color:#C8A24E;white-space:nowrap">رقم المحطة</th>
+            <th style="padding:8px 6px;text-align:right;color:#C8A24E;white-space:nowrap">المنطقة</th>
+            <th style="padding:8px 6px;text-align:right;color:#C8A24E;white-space:nowrap">التاريخ</th>
+            <th style="padding:8px 6px;text-align:right;color:#C8A24E;white-space:nowrap">الوقت</th>
+          </tr>
+        </thead>
+        <tbody id="editsTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
   <div class="card">
     <div id="errorBanner" class="error-banner"></div>
     <div id="successBanner" class="success-banner">تم حفظ التعديلات بنجاح</div>
@@ -352,6 +386,26 @@ document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState=
 function showError(msg){ const el=document.getElementById('errorBanner'); el.textContent=msg; el.classList.add('show'); document.getElementById('successBanner').classList.remove('show'); }
 function hideMsgs(){ document.getElementById('errorBanner').classList.remove('show'); document.getElementById('successBanner').classList.remove('show'); }
 
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+/* list مُرتّبة الأحدث أولًا من الخادم مسبقًا — نعرضها بنفس الترتيب بدون فرز إضافي */
+function renderContributionTable_(list, tbodyId, cardId, emptyMsg){
+  const tbody = document.getElementById(tbodyId);
+  if(!list || !list.length){
+    tbody.innerHTML = `<tr><td colspan="4" style="padding:14px;text-align:center;color:var(--text-secondary)">${emptyMsg}</td></tr>`;
+  } else {
+    tbody.innerHTML = list.map(e => `
+      <tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:8px 6px;font-family:'JetBrains Mono',monospace" dir="ltr">${escapeHtml(e.stationId)}</td>
+        <td style="padding:8px 6px">${escapeHtml(e.region)}</td>
+        <td style="padding:8px 6px;font-family:'JetBrains Mono',monospace" dir="ltr">${escapeHtml(e.date)}</td>
+        <td style="padding:8px 6px;font-family:'JetBrains Mono',monospace" dir="ltr">${escapeHtml(e.time)}</td>
+      </tr>`).join('');
+  }
+  document.getElementById(cardId).style.display = 'block';
+}
+
 async function loadProfile(){
   const res = await callBackend('getMemberProfile', {phone});
   if(!res.success){ showError(res.error || 'تعذّر تحميل البيانات'); return; }
@@ -377,6 +431,8 @@ async function loadProfile(){
     document.getElementById('statEdits').textContent = res.stats.edits;
     document.getElementById('statsCard').style.display = 'block';
   }
+  renderContributionTable_(res.additionsList, 'additionsTableBody', 'additionsCard', 'ما فيه إضافات بعد');
+  renderContributionTable_(res.editsList, 'editsTableBody', 'editsCard', 'ما فيه تعديلات بعد');
 }
 loadProfile();
 
