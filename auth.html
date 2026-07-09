@@ -249,6 +249,11 @@ h2{font-size:18px; font-weight:700; margin-bottom:6px;}
       <label for="nameInput">الاسم الكامل</label>
     </div>
 
+    <div class="field floating" id="emailField" style="display:none">
+      <input type="email" class="input-base" id="regEmailInput" placeholder=" " dir="ltr" style="text-align:left">
+      <label for="regEmailInput">الإيميل</label>
+    </div>
+
     <div class="field" id="memberTypeField" style="display:none">
       <label>نوع العضوية</label>
       <div style="display:flex;gap:8px">
@@ -580,6 +585,7 @@ function setMode(m){
   tabRegister.setAttribute('aria-selected', m==='register');
   moveTabIndicator(m==='login' ? tabLogin : tabRegister);
   document.getElementById('nameField').style.display = m==='register' ? 'block':'none';
+  document.getElementById('emailField').style.display = m==='register' ? 'block':'none';
   document.getElementById('memberTypeField').style.display = m==='register' ? 'block':'none';
   document.getElementById('shiftField').style.display = m==='register' ? 'block':'none';
   document.getElementById('departmentField').style.display = m==='register' ? 'block':'none';
@@ -677,7 +683,7 @@ mainBtn.addEventListener('click', (e)=>{
 const mainBtnLabel = document.getElementById('mainBtnLabel');
 const mainBtnPct = document.getElementById('mainBtnPct');
 const mainBtnFill = document.getElementById('mainBtnFill');
-const formFields = [phoneInput, document.getElementById('nameInput'), document.getElementById('countrySelect')];
+const formFields = [phoneInput, document.getElementById('nameInput'), document.getElementById('regEmailInput'), document.getElementById('countrySelect')];
 const progressBtn = ProgressButton(mainBtn, mainBtnLabel, mainBtnPct, mainBtnFill, formFields);
 
 /* ============================================================
@@ -722,6 +728,10 @@ function bufferToB64url(buf){
   return btoa(str).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 }
 
+function isValidEmail_(email){
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || '').trim());
+}
+
 mainBtn.addEventListener('click', async ()=>{
   hideError();
   phoneInput.value = stripLeadingZeros_(phoneInput.value.trim()); // إعادة تحقق دفاعية قبل الإرسال مباشرة
@@ -729,8 +739,11 @@ mainBtn.addEventListener('click', async ()=>{
   if(phoneInput.value.trim().length < 8){
     showError('الرجاء إدخال رقم جوال صحيح'); return;
   }
-  if(mode==='register' && document.getElementById('nameInput').value.trim().length < 2){
-    showError('الرجاء إدخال الاسم الكامل'); return;
+  if(mode==='register' && document.getElementById('nameInput').value.trim().length < 3){
+    showError('الرجاء إدخال اسم صحيح (٣ أحرف على الأقل)'); return;
+  }
+  if(mode==='register' && !isValidEmail_(document.getElementById('regEmailInput').value)){
+    showError('الرجاء إدخال بريد إلكتروني صحيح'); return;
   }
   if(mode==='register' && !document.getElementById('regShiftInput').value){
     showError('الرجاء اختيار الوردية'); return;
@@ -753,10 +766,11 @@ mainBtn.addEventListener('click', async ()=>{
         result = await startWebAuthnLogin(phone);
       } else {
         const name = document.getElementById('nameInput').value.trim();
+        const email = document.getElementById('regEmailInput').value.trim();
         const shift = document.getElementById('regShiftInput').value;
         const departmentSelect = document.getElementById('regDepartmentInput').value;
         const department = departmentSelect==='أخرى' ? document.getElementById('regDepartmentOther').value.trim() : departmentSelect;
-        const reg = await callBackend('registerUser', {name, phone, memberType: selectedMemberType, shift, department});
+        const reg = await callBackend('registerUser', {name, email, phone, memberType: selectedMemberType, shift, department});
         if(!reg.success) throw new Error(reg.error || 'تعذّر إنشاء الحساب');
         result = await startWebAuthnRegistration(phone, name);
       }
