@@ -194,6 +194,7 @@ header{
 }
 :root{
   --globe-size: clamp(360px, 92vw, 760px);
+  --map-toolbar-h: 45px;
 }
 body.guest-mode{
   --globe-size: clamp(400px, 100vw, 860px);
@@ -483,7 +484,7 @@ body.guest-mode h1{
 }
 .intro-text{
   font-family:'JetBrains Mono',monospace;
-  font-size:13px;letter-spacing:3px;color:var(--teal-light);
+  font-size:13px;letter-spacing:3px;color:#4DD6B5;
   opacity:0;text-align:center;
   animation:introTextIn .5s ease-out .85s forwards;
 }
@@ -918,10 +919,11 @@ body.guest-mode h1{
 .storage-bar-wrap{display:flex;align-items:center;gap:8px;font-size:10.5px;color:var(--text-secondary);flex:1;min-width:160px;}
 .storage-bar-track{flex:1;height:8px;border-radius:4px;background:var(--bg-elev);border:1px solid var(--border-strong);overflow:hidden;}
 .storage-bar-fill{height:100%;min-width:2px;border-radius:4px;background:linear-gradient(90deg, var(--blue-mid), var(--teal-light));transition:width .4s ease;}
-/* ===== سطر كمية بيانات المحطات المحمّلة فعليًا بالذاكرة المؤقتة ===== */
+/* ===== سطر كمية بيانات المحطات المحمّلة فعليًا بالذاكرة المؤقتة (مضاف حديثًا) ===== */
+/* ===== Actual loaded stations-cache size line (newly added) ===== */
 .stations-cache-info{
   width:100%;display:flex;align-items:center;justify-content:center;gap:6px;
-  font-size:11.5px;color:var(--text-secondary);flex-wrap:wrap;
+  font-size:10.5px;color:var(--text-secondary);
   padding-top:8px;margin-top:2px;border-top:1px solid var(--border);
   font-family:'JetBrains Mono',monospace;
 }
@@ -990,9 +992,9 @@ body.guest-mode #loginBtn{display:none;}
 }
 .stat-card.expanded .stat-panel{max-height:160px;margin-top:14px;}
 .stat-panel-inner{border-top:1px solid var(--border);padding-top:12px;display:flex;flex-direction:column;gap:8px;}
-.stat-panel-row{display:flex;justify-content:space-between;align-items:center;font-size:13.5px;}
-.stat-panel-row .v{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:var(--text-primary);direction:ltr;}
-.legend-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-left:7px;}
+.stat-panel-row{display:flex;justify-content:space-between;font-size:12.5px;}
+.stat-panel-row .v{font-family:'JetBrains Mono',monospace;color:var(--teal);direction:ltr;}
+.legend-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-left:6px;}
 footer{
   text-align:center;padding:12px 20px;font-size:10px;color:var(--text-secondary);opacity:.7;
   border-top:1px solid var(--border);
@@ -1015,44 +1017,6 @@ footer{
   .logo-text{font-size:11px;}
   .login-btn{padding:6px 9px;font-size:11px;}
 }
-/* ===== نافذة مراسلة المدير (اتصال/واتساب/إيميل) — نفس نموذج صفحة التسجيل ===== */
-/* Contact-admin modal (call/WhatsApp/email) — same model as the registration page */
-.field{margin-bottom:14px;}
-.field label{display:block;font-size:12px;color:var(--text-secondary);margin-bottom:6px;}
-.input-base{width:100%;height:44px;background:var(--bg);border:1px solid var(--border-strong);border-radius:10px;color:var(--text-primary);font-family:inherit;font-size:14px;padding:0 14px;outline:none;}
-.input-base:focus{border-color:var(--teal);}
-.error-banner{background:rgba(224,101,79,0.1);color:#E0654F;font-size:12.5px;padding:10px 12px;border-radius:8px;margin-bottom:14px;display:none;}
-.error-banner.show{display:block;}
-.contact-modal-overlay{
-  display:none;position:fixed;inset:0;z-index:300;
-  background:rgba(6,10,16,0.75);align-items:center;justify-content:center;padding:20px;overflow-y:auto;
-}
-.contact-modal-overlay.show{display:flex;}
-.contact-modal-card{
-  width:min(440px, 100%);background:var(--bg-card);border:1px solid var(--border-strong);
-  border-radius:20px;padding:26px;box-shadow:0 20px 50px rgba(0,0,0,.4);max-height:90vh;overflow-y:auto;
-}
-.contact-modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
-.contact-modal-header h2{font-size:17px;font-weight:800;margin:0;}
-.contact-modal-close{
-  width:34px;height:34px;border-radius:50%;background:var(--bg);border:1px solid var(--border-strong);
-  display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-primary);transition:.2s;flex-shrink:0;
-}
-.contact-modal-close:hover{border-color:var(--teal);color:var(--teal);}
-.contact-type-btn{
-  flex:1;height:42px;border-radius:10px;border:1px solid var(--border-strong);background:var(--bg);
-  color:var(--text-primary);font-family:inherit;font-size:13px;cursor:pointer;transition:.2s;
-}
-.contact-type-btn.active{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:700;}
-.contact-send-btn{
-  flex:1;display:flex;align-items:center;justify-content:center;gap:8px;
-  height:48px;border-radius:12px;border:none;font-family:inherit;font-size:14px;font-weight:700;
-  cursor:pointer;transition:.2s;
-}
-.contact-send-whatsapp{background:#25D366;color:#04341c;}
-.contact-send-whatsapp:hover{background:#1ebc59;}
-.contact-send-email{background:#fff;color:#3c4043;border:1px solid #dadce0;}
-.contact-send-email:hover{background:#f8f9fa;}
 </style>
 </head>
 <body data-theme="dark" id="bodyEl">
@@ -1116,14 +1080,6 @@ footer{
             <span class="menu-icon" style="color:#F0B429"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5z"/><polyline points="9 12 11 14 15 10"/></svg></span>
             لوحة المدير
           </a>
-          <a href="#" class="mobile-menu-link" id="menuCallAdmin">
-            <span class="menu-icon" style="color:var(--teal)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
-            اتصال بالمدير
-          </a>
-          <button type="button" class="mobile-menu-link" id="menuMessageAdmin" style="width:100%;text-align:right;background:transparent;border:1px solid transparent;font-family:inherit;cursor:pointer">
-            <span class="menu-icon" style="color:#6C5CE7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span>
-            مراسلة المدير
-          </button>
           <button class="mobile-menu-logout" id="mobileLogoutBtn">
             <span class="menu-icon" style="color:#E0654F"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
             تسجيل الخروج
@@ -1146,7 +1102,7 @@ footer{
       <div class="status-bar-item" id="headerDateLine"></div>
       <div class="conn-refresh-group">
         <div class="conn-pill-div"></div>
-        <button class="status-refresh-btn" id="dataRefreshBtn" title="تحديث بيانات المحطات — لو لاحظت نتائج بحث غير محدّثة" aria-label="تحديث بيانات المحطات">
+        <button class="status-refresh-btn" id="dataRefreshBtn" title="تحديث بيانات المحطات — لو لاحظت نتائج بحث غير محدّثة">
           <svg id="dataRefreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
         </button>
       </div>
@@ -1154,70 +1110,13 @@ footer{
   </div>
 </header>
 
-<!-- طبقة نموذج مراسلة المدير — تُفتح من "مراسلة المدير" بالقائمة المنسدلة / Contact-admin modal — opened from "Message admin" in the header dropdown -->
-<div class="contact-modal-overlay" id="contactModalOverlay">
-  <div class="contact-modal-card">
-    <div class="contact-modal-header">
-      <h2>مراسلة المدير</h2>
-      <div class="contact-modal-close" id="contactModalCloseBtn" role="button" tabindex="0" aria-label="إغلاق نافذة مراسلة المدير">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </div>
-    </div>
-    <div class="field">
-      <label>الاسم</label>
-      <input type="text" class="input-base" id="contactName">
-    </div>
-    <div class="field">
-      <label>رقم الجوال</label>
-      <input type="tel" class="input-base" id="contactPhone" dir="ltr" style="text-align:left" value="966">
-    </div>
-    <div class="field">
-      <label>الإيميل</label>
-      <input type="email" class="input-base" id="contactEmail" dir="ltr" style="text-align:left">
-    </div>
-    <div class="field">
-      <label>نوع العضوية</label>
-      <div style="display:flex;gap:8px">
-        <button type="button" class="contact-type-btn active" data-type="موظف">موظف</button>
-        <button type="button" class="contact-type-btn" data-type="مقاول">مقاول</button>
-      </div>
-    </div>
-    <div class="field">
-      <label>الوردية</label>
-      <select class="input-base" id="contactShift" style="cursor:pointer">
-        <option value="">اختر الوردية</option>
-        <option value="أ">أ</option>
-        <option value="ب">ب</option>
-        <option value="ج">ج</option>
-        <option value="د">د</option>
-        <option value="دوام ثابت">دوام ثابت</option>
-      </select>
-    </div>
-    <div class="field">
-      <label>الرسالة</label>
-      <textarea class="input-base" id="contactMessage" style="height:90px;padding:12px 14px;resize:vertical"></textarea>
-    </div>
-    <div id="contactModalError" class="error-banner"></div>
-    <div style="display:flex;gap:10px;margin-top:6px">
-      <button type="button" id="sendWhatsappBtn" class="contact-send-btn contact-send-whatsapp">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.876.508 3.649 1.395 5.163L2 22l4.973-1.372A9.943 9.943 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18.062a8.048 8.048 0 0 1-4.106-1.13l-.294-.176-3.048.84.822-2.99-.192-.306A8.05 8.05 0 0 1 3.938 12c0-4.446 3.616-8.062 8.062-8.062S20.062 7.554 20.062 12 16.446 20.062 12 20.062z"/></svg>
-        واتساب
-      </button>
-      <button type="button" id="sendEmailBtn" class="contact-send-btn contact-send-email">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M2 6c0-1.1.9-2 2-2h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6z" fill="#fff"/><path d="M2 6.5l10 7 10-7" stroke="#EA4335" stroke-width="1.6" fill="none"/><path d="M2 6l8.5 6L2 17.5V6z" fill="#4285F4"/><path d="M22 6l-8.5 6L22 17.5V6z" fill="#34A853"/><path d="M2 6c0-1.1.9-2 2-2h1l7 5.2L19 4h1c1.1 0 2 .9 2 2l-10 7.2L2 6z" fill="#EA4335"/><path d="M2 17.5V6l8.5 6-7 5.5A2 2 0 0 1 2 17.5z" fill="#FBBC05"/></svg>
-        إيميل
-      </button>
-    </div>
-  </div>
-</div>
-
 <div class="profile-gate-overlay" id="profileGateOverlay">
   <div class="profile-gate-card">
     <div class="profile-gate-icon">
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
     </div>
     <h2>قبل ما نكمل رحلتك معنا...</h2>
-    <p>نحتاج نعرف وردية وقسم عملك وإيميلك عشان نقدر نخدمك بشكل أفضل. اضغط الزر بالأسفل، افتح "حسابي" من القائمة، واستكمل بياناتك من هناك</p>
+    <p>نحتاج نعرف وردية وقسم عملك عشان نقدر نخدمك بشكل أفضل. اضغط الزر بالأسفل، افتح "حسابي" من القائمة، واستكمل بياناتك من هناك</p>
     <button class="add-station-submit profile-gate-btn" id="profileGateOpenMenuBtn" style="width:100%">فتح القائمة والانتقال لحسابي</button>
   </div>
 </div>
@@ -1229,7 +1128,7 @@ footer{
         <span class="ssb-icon" id="stationSearchLensIcon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         </span>
-        <input id="stationSearchInput" type="text" placeholder="ابحث عن محطة أخرى..." inputmode="text">
+        <input id="stationSearchInput" type="text" placeholder="ابحث عن محطة أخرى..." inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
       </div>
     </div>
     <div class="station-search-progress" id="stationSearchProgress">
@@ -1245,7 +1144,7 @@ footer{
 
     <div class="map-toolbar-bar">
       <div class="toolbar-scroll" id="toolbarScroll">
-        <div class="map-mode-chip" id="mapModeChip" title="نوع الخريطة" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false" aria-label="نوع الخريطة">
+        <div class="map-mode-chip" id="mapModeChip" title="نوع الخريطة">
           <span class="mm-icon" id="mapModeChipIcon"></span>
           <span id="mapModeChipLabel">تلقائي</span>
           <span class="mm-auto-badge" id="mapModeAutoBadge">تلقائي</span>
@@ -1301,7 +1200,7 @@ footer{
     <div class="map-tool-hint" id="mapToolHint"></div>
     <div class="outage-panel" id="outagePanel">
       <div class="outage-panel-title">محطات العطل — أدخل الأرقام بالترتيب</div>
-      <textarea id="outageInput" placeholder="مثال: 39070-93080-ABN110&#10;افصل بينها بفاصلة أو / أو - أو سطر جديد"></textarea>
+      <textarea id="outageInput" placeholder="مثال: 39070-93080-ABN110&#10;افصل بينها بفاصلة أو / أو - أو سطر جديد" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
       <div id="outageError" class="outage-error"></div>
       <button class="outage-submit-btn" id="outageSubmitBtn">عرض على الخريطة</button>
     </div>
@@ -1309,10 +1208,10 @@ footer{
     <div id="map-container"></div>
 
     <div class="zoom-controls" id="zoomControls">
-      <div class="zoom-btn" id="zoomInBtn" title="تكبير" role="button" tabindex="0" aria-label="تكبير الخريطة">
+      <div class="zoom-btn" id="zoomInBtn" title="تكبير">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </div>
-      <div class="zoom-btn" id="zoomOutBtn" title="تصغير" role="button" tabindex="0" aria-label="تصغير الخريطة">
+      <div class="zoom-btn" id="zoomOutBtn" title="تصغير">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </div>
     </div>
@@ -1326,7 +1225,7 @@ footer{
     <div class="search-wrap globe-bottom-anchor">
       <div class="search-lens" id="searchLens">
         <svg id="searchLensIcon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        <input id="searchInput" type="text" placeholder="مثال: 39070 أو ABN" inputmode="text">
+        <input id="searchInput" type="text" placeholder="مثال: 39070 أو ABN" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
       </div>
       <div class="search-hint" id="searchHint"></div>
       <div class="search-progress" id="searchProgress">
@@ -1335,7 +1234,7 @@ footer{
       </div>
       <button type="button" class="homepage-outage-toggle" id="homepageOutageToggle">⚠️ بحث عن حالة عطل (أكثر من محطة)</button>
       <div class="homepage-outage-panel" id="homepageOutagePanel">
-        <textarea id="homepageOutageInput" placeholder="مثال: IC2-11995&#10;افصل بينها بفاصلة أو / أو - أو سطر جديد"></textarea>
+        <textarea id="homepageOutageInput" placeholder="مثال: IC2-11995&#10;افصل بينها بفاصلة أو / أو - أو سطر جديد" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
         <div id="homepageOutageError" class="outage-error"></div>
         <button class="outage-submit-btn" id="homepageOutageSubmitBtn">عرض على الخريطة</button>
       </div>
@@ -1350,7 +1249,7 @@ footer{
   <div class="fullpage-form-overlay" id="addStationOverlay">
     <div class="fullpage-form-header">
       <div class="fullpage-form-title">+ إضافة محطة جديدة</div>
-      <div class="fullpage-form-close" id="addStationCloseBtn" role="button" tabindex="0" aria-label="إغلاق نموذج إضافة المحطة">
+      <div class="fullpage-form-close" id="addStationCloseBtn">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </div>
     </div>
@@ -1366,16 +1265,16 @@ footer{
           </div>
           <div>
             <label class="form-field-label">رقم المحطة</label>
-            <input id="newStationId" class="edit-input" placeholder="مثال: 39070">
+            <input id="newStationId" class="edit-input" placeholder="مثال: 39070" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
           <div id="feederRegionRow" style="display:flex;gap:14px;">
             <div style="flex:1">
               <label class="form-field-label">المغذي (اختياري)</label>
-              <input id="newStationFeeder" class="edit-input" placeholder="مثال: SNB38">
+              <input id="newStationFeeder" class="edit-input" placeholder="مثال: SNB38" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             </div>
             <div style="flex:1">
               <label class="form-field-label">المنطقة</label>
-              <input id="newStationRegion" class="edit-input" placeholder="مثال: القرينية">
+              <input id="newStationRegion" class="edit-input" placeholder="مثال: القرينية" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             </div>
           </div>
           <div class="edit-grid">
@@ -1389,7 +1288,7 @@ footer{
               <div class="paste-coord-row">
                 <span class="paste-coord-label">أو الصق الإحداثية مباشرة (بصيغة: خط العرض,خط الطول)</span>
                 <div style="display:flex;gap:10px;">
-                  <input id="newStationPasteCoord" class="edit-input" placeholder="مثال: 21.5234,39.1876" style="flex:1">
+                  <input id="newStationPasteCoord" class="edit-input" placeholder="مثال: 21.5234,39.1876" style="flex:1" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
                   <button type="button" class="paste-apply-btn" id="newStationPasteApply">تطبيق</button>
                 </div>
               </div>
@@ -1401,7 +1300,7 @@ footer{
           </div>
           <div>
             <label class="form-field-label">سبب الإضافة</label>
-            <input id="newStationReason" class="edit-input" placeholder="مثال: محطة جديدة بحي القرينية لتغذية المنطقة الصناعية">
+            <input id="newStationReason" class="edit-input" placeholder="مثال: محطة جديدة بحي القرينية لتغذية المنطقة الصناعية" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
           <div id="addStationError" class="add-station-error"></div>
           <button class="add-station-submit" id="addStationSubmitBtn">حفظ المحطة</button>
@@ -1421,7 +1320,7 @@ footer{
   <div class="fullpage-form-overlay" id="editStationOverlay">
     <div class="fullpage-form-header">
       <div class="fullpage-form-title" id="editStationTitle">تعديل المحطة</div>
-      <div class="fullpage-form-close" id="editStationCloseBtn" role="button" tabindex="0" aria-label="إغلاق نموذج تعديل المحطة">
+      <div class="fullpage-form-close" id="editStationCloseBtn">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </div>
     </div>
@@ -1484,6 +1383,7 @@ footer{
       <div class="storage-bar-track"><div class="storage-bar-fill" id="storageBarFill"></div></div>
       <span id="storageUsageLabel">0 MB / 50 MB</span>
     </div>
+    <!-- سطر جديد: كمية بيانات المحطات المحمّلة فعليًا بالذاكرة المؤقتة -->
     <div class="stations-cache-info" id="stationsCacheInfo">بيانات المحطات المحمّلة بالذاكرة المؤقتة: —</div>
   </div>
 </section>
@@ -1512,13 +1412,6 @@ function renewSessionActivity_(){
 
 function escapeHtml(str){
   return String(str).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-}
-
-// للقيم المُدرجة داخل onclick="fn('${...}')" — يهرّب أولاً كسلسلة JS (لأن &#39; تُفكّ قبل تنفيذ معالج الحدث)
-// ثم يهرّب الناتج كسمة HTML، لمنع كسر كل من سياق JS وسياق السمة معًا
-function escapeJsAttr(str){
-  const jsEscaped = String(str).replace(/[\\'\n\r]/g, ch => ({'\\':'\\\\',"'":"\\'",'\n':'\\n','\r':'\\r'}[ch]));
-  return escapeHtml(jsEscaped);
 }
 
 const STATIONS_CACHE_KEY = 'sec-stations-cache-v1';
@@ -1576,30 +1469,29 @@ function showLoadProgress_(loaded, total){
   if(el) el.textContent = total ? `جاري تحميل بيانات المحطات: ${loaded}/${total}` : `جاري تحميل بيانات المحطات: ${loaded}`;
 }
 
-/* سطر "بيانات المحطات المحمّلة بالذاكرة المؤقتة" — يعرض عدد المحطات الفعلي
- * المحمَّل بالذاكرة الآن + حجم الكاش المضغوط داخل localStorage، منفصل عن
- * شريط "الذاكرة المستخدمة" العام الذي يحسب كل مفاتيح التخزين المحلي مجتمعة */
+/* ============================================================
+ *  سطر "بيانات المحطات المحمّلة بالذاكرة المؤقتة" — مؤشر جديد يعرض
+ *  عدد المحطات الفعلي المحمَّل بالذاكرة الآن + حجم الكاش المضغوط
+ *  فعليًا داخل localStorage، منفصل عن شريط "الذاكرة المستخدمة" العام
+ *  الذي يحسب كل مفاتيح التخزين المحلي مجتمعة بلا تفصيل
+ * ============================================================ */
+/* ============================================================
+ *  "Stations data loaded in cache" line — a new indicator showing
+ *  the actual station count currently loaded in memory + the real
+ *  compressed cache size inside localStorage, separate from the
+ *  general "storage used" bar which lumps every key together
+ * ============================================================ */
 function updateStationsCacheInfo(){
   const el = document.getElementById('stationsCacheInfo');
   if(!el) return;
   const raw = localStorage.getItem(STATIONS_CACHE_KEY);
-  if(!raw || !allStationsLocal.length){
+  const count = allStationsLocal.length;
+  if(!raw || !count){
     el.textContent = 'بيانات المحطات المحمّلة بالذاكرة المؤقتة: لم تُحمَّل بعد';
     return;
   }
-  // نفس منهجية getStats() بالخادم بالضبط: عدّ معرّفات فريدة (بعد تطبيع الأرقام) لكل نوع على
-  // حدة بدل عدّ خام لكل صف — يمنع تضارب الرقم المعروض هنا مع "إجمالي المحطات" بلوحة المدير
-  const distIds = new Set(), subIds = new Set();
-  allStationsLocal.forEach(s => {
-    const key = normalizeDigits(String(s.id)).toUpperCase();
-    (s.type === 'تحويل' ? subIds : distIds).add(key);
-  });
-  const count = distIds.size + subIds.size;
   const compressedMB = (raw.length * 2) / (1024*1024); // تقدير UTF-16 تقريبي، نفس منطق شريط الذاكرة العام
-  el.innerHTML = `بيانات المحطات المحمّلة بالذاكرة المؤقتة: <b>${count.toLocaleString('ar-SA-u-nu-latn')}</b> محطة `
-    + `(<span style="color:var(--teal);font-weight:700;font-size:12.5px">توزيع ${distIds.size.toLocaleString('ar-SA-u-nu-latn')}</span>`
-    + ` | <span style="color:var(--blue-mid);font-weight:700;font-size:12.5px">تحويل ${subIds.size.toLocaleString('ar-SA-u-nu-latn')}</span>) `
-    + `— ${compressedMB.toFixed(2)} MB مضغوطة`;
+  el.innerHTML = `بيانات المحطات المحمّلة بالذاكرة المؤقتة: <b>${count.toLocaleString('ar-SA')}</b> محطة (${compressedMB.toFixed(2)} MB مضغوطة)`;
 }
 
 let _isRefreshingStationsCache = false;
@@ -1610,8 +1502,7 @@ async function syncIncrementalUpdates_(){
     if(!res.success || !Array.isArray(res.updated)) return false;
 
     res.updated.forEach(function(st){
-      const stKey = normalizeDigits(String(st.id)).toUpperCase();
-      const idx = allStationsLocal.findIndex(s => normalizeDigits(String(s.id)).toUpperCase() === stKey && s.type === st.type);
+      const idx = allStationsLocal.findIndex(s => String(s.id).toUpperCase() === String(st.id).toUpperCase() && s.type === st.type);
       if(idx === -1) allStationsLocal.push(st);
       else allStationsLocal[idx] = st;
     });
@@ -1744,7 +1635,7 @@ async function checkConnection(){
 }
 function renderHeaderDate(){
   const el = document.getElementById('headerDateLine');
-  if(el) el.textContent = new Date().toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', {day:'numeric', month:'long', year:'numeric'});
+  if(el) el.textContent = new Date().toLocaleDateString('ar-SA-u-ca-gregory', {day:'numeric', month:'long', year:'numeric'});
 }
 renderHeaderDate();
 setInterval(renderHeaderDate, 60 * 60 * 1000);
@@ -1783,16 +1674,16 @@ async function loadStats(){
     document.getElementById('countAdditions').textContent = stats.additions;
     document.getElementById('countEdits').textContent = stats.edits;
     document.getElementById('panelStations').innerHTML = `
-      <div class="stat-panel-row"><span><span class="legend-dot" style="background:var(--teal)"></span>محطات توزيع</span><span class="v" style="color:var(--teal)">${stats.distribution}</span></div>
-      <div class="stat-panel-row"><span><span class="legend-dot" style="background:var(--blue-mid)"></span>محطات تحويل</span><span class="v" style="color:var(--blue-mid)">${stats.substations}</span></div>
+      <div class="stat-panel-row"><span><span class="legend-dot" style="background:var(--teal)"></span>محطات توزيع</span><span class="v">${stats.distribution}</span></div>
+      <div class="stat-panel-row"><span><span class="legend-dot" style="background:var(--blue-mid)"></span>محطات تحويل</span><span class="v">${stats.substations}</span></div>
       <div class="stat-panel-row"><span>آخر تحديث</span><span class="v" id="panelStationsUpdate">—</span></div>`;
     document.getElementById('panelAdditions').innerHTML = `
-      <div class="stat-panel-row"><span><span class="legend-dot" style="background:var(--teal)"></span>توزيع</span><span class="v" style="color:var(--teal)">${stats.additionsDistribution}</span></div>
-      <div class="stat-panel-row"><span><span class="legend-dot" style="background:var(--blue-mid)"></span>تحويل</span><span class="v" style="color:var(--blue-mid)">${stats.additionsSubstations}</span></div>
+      <div class="stat-panel-row"><span><span class="legend-dot" style="background:var(--teal)"></span>توزيع</span><span class="v">${stats.additionsDistribution}</span></div>
+      <div class="stat-panel-row"><span><span class="legend-dot" style="background:var(--blue-mid)"></span>تحويل</span><span class="v">${stats.additionsSubstations}</span></div>
       <div class="stat-panel-row"><span>آخر تحديث</span><span class="v" id="panelAdditionsUpdate">—</span></div>`;
     document.getElementById('panelEdits').innerHTML = `
-      <div class="stat-panel-row"><span><span class="legend-dot" style="background:var(--teal)"></span>توزيع</span><span class="v" style="color:var(--teal)">${stats.editsDistribution}</span></div>
-      <div class="stat-panel-row"><span><span class="legend-dot" style="background:var(--blue-mid)"></span>تحويل</span><span class="v" style="color:var(--blue-mid)">${stats.editsSubstations}</span></div>
+      <div class="stat-panel-row"><span><span class="legend-dot" style="background:var(--teal)"></span>توزيع</span><span class="v">${stats.editsDistribution}</span></div>
+      <div class="stat-panel-row"><span><span class="legend-dot" style="background:var(--blue-mid)"></span>تحويل</span><span class="v">${stats.editsSubstations}</span></div>
       <div class="stat-panel-row"><span>آخر تحديث</span><span class="v" id="panelEditsUpdate">—</span></div>`;
     refreshPanelUpdateLabels();
   }catch(e){ console.error('فشل تحميل الإحصائيات', e); }
@@ -1935,85 +1826,6 @@ mobileMenuTrigger.addEventListener('click', (e)=>{
 });
 document.addEventListener('click', (e)=>{
   if(!mobileUserMenu.contains(e.target)) mobileUserMenu.classList.remove('open');
-});
-
-/* ===== التواصل مع المدير — اتصال مباشر + نموذج مراسلة (واتساب/إيميل)، متاح من القائمة بكل صفحات الموقع ===== */
-/* Contact admin — direct call + message form (WhatsApp/email), available from the menu on every page */
-let adminContactInfo = { phone: '', email: '' };
-async function loadAdminContact(){
-  try{
-    const res = await callBackend('getAdminContactInfo', {});
-    if(res.success && res.phone){
-      adminContactInfo = { phone: res.phone, email: res.email };
-      document.getElementById('menuCallAdmin').href = 'tel:+' + res.phone.replace(/^\+/, '');
-    }
-  }catch(e){}
-}
-loadAdminContact();
-
-const contactModalOverlay = document.getElementById('contactModalOverlay');
-document.getElementById('menuMessageAdmin').addEventListener('click', ()=>{
-  mobileUserMenu.classList.remove('open');
-  try{
-    const s = JSON.parse(localStorage.getItem('sec-session') || '{}');
-    if(s.name) document.getElementById('contactName').value = s.name;
-    if(s.phone) document.getElementById('contactPhone').value = s.phone;
-  }catch(e){}
-  contactModalOverlay.classList.add('show');
-});
-const closeContactModal = ()=> contactModalOverlay.classList.remove('show');
-document.getElementById('contactModalCloseBtn').addEventListener('click', closeContactModal);
-document.getElementById('contactModalCloseBtn').addEventListener('keydown', (e)=>{
-  if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); closeContactModal(); }
-});
-
-let selectedContactType = 'موظف';
-document.querySelectorAll('.contact-type-btn').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    document.querySelectorAll('.contact-type-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    selectedContactType = btn.dataset.type;
-  });
-});
-
-function buildContactMessage_(){
-  const name = document.getElementById('contactName').value.trim();
-  const phone = document.getElementById('contactPhone').value.trim();
-  const email = document.getElementById('contactEmail').value.trim();
-  const shift = document.getElementById('contactShift').value;
-  const message = document.getElementById('contactMessage').value.trim();
-  const errEl = document.getElementById('contactModalError');
-  errEl.classList.remove('show');
-  errEl.textContent = '';
-  if(!name){ errEl.textContent = 'الرجاء إدخال الاسم'; errEl.classList.add('show'); return null; }
-  if(!phone || phone.length < 9){ errEl.textContent = 'الرجاء إدخال رقم جوال صحيح'; errEl.classList.add('show'); return null; }
-  if(!shift){ errEl.textContent = 'الرجاء اختيار الوردية'; errEl.classList.add('show'); return null; }
-  if(!message){ errEl.textContent = 'الرجاء كتابة الرسالة'; errEl.classList.add('show'); return null; }
-  return `رسالة من نظام إحداثيات محطات SEC\n\nالاسم: ${name}\nرقم الجوال: ${phone}\nالإيميل: ${email || '—'}\nنوع العضوية: ${selectedContactType}\nالوردية: ${shift}\n\nالرسالة:\n${message}`;
-}
-
-document.getElementById('sendWhatsappBtn').addEventListener('click', ()=>{
-  const text = buildContactMessage_();
-  if(!text) return;
-  if(!adminContactInfo.phone){
-    document.getElementById('contactModalError').textContent = 'تعذّر جلب رقم المدير من الخادم — تأكد من نشر آخر نسخة';
-    document.getElementById('contactModalError').classList.add('show');
-    return;
-  }
-  const waPhone = adminContactInfo.phone.replace(/^\+/, '').replace(/\D/g, '');
-  window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(text)}`, '_blank');
-});
-
-document.getElementById('sendEmailBtn').addEventListener('click', ()=>{
-  const text = buildContactMessage_();
-  if(!text) return;
-  if(!adminContactInfo.email){
-    document.getElementById('contactModalError').textContent = 'تعذّر جلب إيميل المدير من الخادم — تأكد من نشر آخر نسخة';
-    document.getElementById('contactModalError').classList.add('show');
-    return;
-  }
-  const subject = 'رسالة من نظام إحداثيات محطات SEC';
-  window.location.href = `mailto:${adminContactInfo.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`;
 });
 
 const themeSwitchMobile = document.getElementById('themeSwitchMobile');
@@ -2274,15 +2086,8 @@ const feederToggleBtn = document.getElementById('feederToggleBtn');
 const moreToggleBtn = document.getElementById('moreToggleBtn');
 const outageToggleBtn = document.getElementById('outageToggleBtn');
 const outagePanel = document.getElementById('outagePanel');
-// يفعّل عنصر div بدور زر (role=button) بالنقر أو بلوحة المفاتيح (Enter/Space) لدعم إمكانية الوصول
-function bindActivatable(el, handler){
-  el.addEventListener('click', handler);
-  el.addEventListener('keydown', (e)=>{
-    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); handler(e); }
-  });
-}
-bindActivatable(document.getElementById('zoomInBtn'), ()=>{ if(leafletMap) leafletMap.zoomIn(); });
-bindActivatable(document.getElementById('zoomOutBtn'), ()=>{ if(leafletMap) leafletMap.zoomOut(); });
+document.getElementById('zoomInBtn').addEventListener('click', ()=>{ if(leafletMap) leafletMap.zoomIn(); });
+document.getElementById('zoomOutBtn').addEventListener('click', ()=>{ if(leafletMap) leafletMap.zoomOut(); });
 const morePanel = document.getElementById('morePanel');
 
 document.getElementById('searchLensIcon').addEventListener('click', (e)=>{
@@ -2331,7 +2136,7 @@ async function checkProfileCompleteness_(){
     if(!session.phone) return;
     const res = await callBackend('getMemberProfile', { phone: session.phone });
     if(!res.success) return;
-    if(!res.shift || !res.department || !res.email || !res.name){
+    if(!res.shift || !res.department){
       document.getElementById('profileGateOverlay').classList.add('show');
     }
   }catch(e){ }
@@ -2585,14 +2390,12 @@ function setMapMode(mode){
 function closeAllMapDropdowns(){
   mapModePanel.classList.remove('show');
   mapModeChip.classList.remove('open');
-  mapModeChip.setAttribute('aria-expanded', 'false');
   morePanel.classList.remove('show');
   outagePanel.classList.remove('show');
 }
 function closeMapModePanel(){
   mapModePanel.classList.remove('show');
   mapModeChip.classList.remove('open');
-  mapModeChip.setAttribute('aria-expanded', 'false');
 }
 mapModeChip.addEventListener('click', (e)=>{
   e.stopPropagation();
@@ -2601,11 +2404,7 @@ mapModeChip.addEventListener('click', (e)=>{
   if(willOpen){
     mapModePanel.classList.add('show');
     mapModeChip.classList.add('open');
-    mapModeChip.setAttribute('aria-expanded', 'true');
   }
-});
-mapModeChip.addEventListener('keydown', (e)=>{
-  if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); mapModeChip.click(); }
 });
 document.querySelectorAll('.map-mode-opt').forEach(btn=>{
   btn.addEventListener('click', ()=> setMapMode(btn.dataset.mode));
@@ -2800,7 +2599,7 @@ function nearbyPinIcon(id, color, tier, isTransformer){
   return L.divIcon({
     className:'',
     html:`<div class="nearby-pin-wrap" style="transform:scale(${scale});opacity:${opacity};transform-origin:bottom center;">
-      <div class="nearby-pin-card" style="border-color:${color}">${isTransformer ? '⚡' : ''}${escapeHtml(id)}</div>
+      <div class="nearby-pin-card" style="border-color:${color}">${isTransformer ? '⚡' : ''}${id}</div>
       <div class="nearby-pin-tail" style="border-top-color:${color}"></div>
     </div>`,
     iconSize:[w, h+6], iconAnchor:[w/2, h+6]
@@ -2844,11 +2643,11 @@ function renderNearbyMarkers(){
         <div class="sb-data-row" style="margin-bottom:8px">
           <div class="sb-data-cell">
             <div class="cell-label">${isTransformer ? '⚡' : '🏭'} رقم المحطة</div>
-            <div class="cell-value" style="font-size:12px">${escapeHtml(s.id)}</div>
+            <div class="cell-value" style="font-size:12px">${s.id}</div>
           </div>
           ${s.feeder ? `<div class="sb-data-cell">
             <div class="cell-label">🔌 المغذي</div>
-            <div class="cell-value" style="font-size:12px">${escapeHtml(s.feeder)}</div>
+            <div class="cell-value" style="font-size:12px">${s.feeder}</div>
           </div>` : ''}
           <div class="sb-data-cell">
             <div class="cell-label">📏 المسافة</div>
@@ -2857,10 +2656,10 @@ function renderNearbyMarkers(){
         </div>
         <div class="st-actions">
           <a href="${gmapsUrl}" target="_blank" rel="noopener" class="st-btn primary">قوقل ماب 🧭</a>
-          <button onclick="window.editNearbyStation('${escapeJsAttr(s.id)}')" class="st-btn">تعديل ✏️</button>
+          <button onclick="window.editNearbyStation('${s.id}')" class="st-btn">تعديل ✏️</button>
         </div>
       </div>`);
-    marker.bindTooltip(`${escapeHtml(s.id)} — ${s._dist.toFixed(2)} كم`, {direction:'top', offset:[0,-16]});
+    marker.bindTooltip(`${s.id} — ${s._dist.toFixed(2)} كم`, {direction:'top', offset:[0,-16]});
     marker.addTo(leafletMap);
     nearbyMarkers.push(marker);
   });
@@ -2887,8 +2686,6 @@ async function activateNearbyMode(mode){
 
   if(nearbyModeActive === mode){
     nearbyModeActive = null;
-    if(mode === 'nearby') nearbyToastShown = false;
-    if(mode === 'feeder') feederToastShown = false;
     clearNearbyMarkers();
     mapToolHint.classList.remove('show');
     updateNearbyButtonStates();
@@ -2924,7 +2721,8 @@ async function activateNearbyMode(mode){
       .filter(s => String(s.id) !== String(currentStation.id))
       .map(s => ({...s, _dist: haversineKm(currentStation.lat, currentStation.lng, s.lat, s.lng)}));
 
-    if(nearbyFullData.length > 0) leafletMap.setView([currentStation.lat, currentStation.lng], 17);
+    const bounds = [[currentStation.lat, currentStation.lng], ...nearbyFullData.map(s=>[s.lat,s.lng])];
+    if(bounds.length > 1) leafletMap.setView([currentStation.lat, currentStation.lng], 17);
 
     renderNearbyMarkers();
     if(!leafletMap._nearbyHandlerBound){
@@ -2986,7 +2784,7 @@ function renderOutageRoute_(found, notFound){
     const letter = outageLetterFor(i);
     const color = s.type === 'تحويل' ? '#8B6DD6' : teal();
     const marker = L.marker([s.lat, s.lng], { icon: outageLetterIcon(letter, color) });
-    marker.bindPopup(`<div style="font-family:'IBM Plex Sans Arabic',sans-serif;direction:rtl;font-size:13px"><b>${letter}) ${escapeHtml(s.name)}</b><br>رقم: ${escapeHtml(s.id)}</div>`);
+    marker.bindPopup(`<div style="font-family:'IBM Plex Sans Arabic',sans-serif;direction:rtl;font-size:13px"><b>${letter}) ${s.name}</b><br>رقم: ${s.id}</div>`);
     marker.addTo(leafletMap);
     outageMarkers.push(marker);
     bounds.push([s.lat, s.lng]);
@@ -3003,7 +2801,7 @@ function renderOutageRoute_(found, notFound){
     ? `https://www.google.com/maps/dir/?api=1&destination=${destination.lat},${destination.lng}&waypoints=${encodeURIComponent(waypointsStr)}&travelmode=driving`
     : `https://www.google.com/maps?q=${destination.lat},${destination.lng}`;
 
-  const notFoundNote = notFound.length ? ` — تعذّر إيجاد: ${escapeHtml(notFound.join('، '))}` : '';
+  const notFoundNote = notFound.length ? ` — تعذّر إيجاد: ${notFound.join('، ')}` : '';
   const orderLabel = found.length > 1 ? `بالترتيب A→${outageLetterFor(found.length-1)}` : '';
   mapToolHint.classList.add('show');
   mapToolHint.innerHTML = `محطات العطل (${found.length}) ${orderLabel}${notFoundNote} <a href="${gmapsUrl}" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;background:rgba(31,174,140,0.16);color:var(--teal-light);border:1px solid rgba(77,214,181,0.5);padding:6px 14px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600">الانتقال بالترتيب على قوقل ماب</a>`;
@@ -3022,7 +2820,6 @@ document.getElementById('outageSubmitBtn').addEventListener('click', async ()=>{
   clearOutageMarkers();
   clearNearbyMarkers(); resetMeasure(); resetRoute();
   measureActive = false; routeActive = false; nearbyModeActive = null;
-  nearbyToastShown = false; feederToastShown = false;
   setActiveTool(null);
   mapToolHint.classList.add('show');
   mapToolHint.textContent = 'جاري البحث عن المحطات...';
@@ -3087,7 +2884,7 @@ const hijriFormatterCompact_ = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalq
 function formatDbFreshness_(isoString){
   try{
     const d = new Date(isoString);
-    const gregorian = d.toLocaleString('ar-SA-u-nu-latn', {day:'numeric', month:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit'});
+    const gregorian = d.toLocaleString('ar-SA', {day:'numeric', month:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit'});
     const hijri = hijriFormatterCompact_.format(d);
     return `${gregorian} م — ${hijri} هـ`;
   }catch(e){ return '—'; }
@@ -3214,7 +3011,7 @@ function closeAddStationPanel(){
   addStationOverlay.classList.remove('show');
 }
 addStationToggle.addEventListener('click', ()=> openAddStationPanel());
-bindActivatable(document.getElementById('addStationCloseBtn'), closeAddStationPanel);
+document.getElementById('addStationCloseBtn').addEventListener('click', closeAddStationPanel);
 
 document.querySelectorAll('#addStationPanel .type-btn').forEach(btn=>{
   btn.addEventListener('click', ()=>{
@@ -3413,15 +3210,15 @@ function renderStationOnMap(s){
       <div class="sb-data-row">
         <div class="sb-data-cell">
           <div class="cell-label">${s.type === 'تحويل' ? '⚡ رقم المحطة' : '🏭 رقم المحطة'}</div>
-          <div class="cell-value">${escapeHtml(s.id)}</div>
+          <div class="cell-value">${s.id}</div>
         </div>
         ${s.feeder ? `<div class="sb-data-cell">
           <div class="cell-label">🔌 المغذي</div>
-          <div class="cell-value">${escapeHtml(s.feeder)}</div>
+          <div class="cell-value">${s.feeder}</div>
         </div>` : ''}
         ${s.region ? `<div class="sb-data-cell">
           <div class="cell-label">📍 المنطقة</div>
-          <div class="cell-value ar">${escapeHtml(s.region)}</div>
+          <div class="cell-value ar">${s.region}</div>
         </div>` : ''}
       </div>
       <div class="st-actions">
@@ -3475,22 +3272,22 @@ function openEditForm(){
           ${isDistribution ? `
           <div style="margin-bottom:18px;">
             <label class="form-field-label">المغذي</label>
-            <input id="editFeeder" class="edit-input" value="${escapeHtml(s.feeder || '')}" placeholder="مثال: SNB38">
+            <input id="editFeeder" class="edit-input" value="${s.feeder || ''}" placeholder="مثال: SNB38" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
           <div style="margin-bottom:18px;">
             <label class="form-field-label">المنطقة</label>
-            <input id="editRegion" class="edit-input" value="${escapeHtml(s.region || '')}" placeholder="مثال: القرينية">
+            <input id="editRegion" class="edit-input" value="${s.region || ''}" placeholder="مثال: القرينية" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>` : ''}
           <label class="form-field-label">الإحداثيات (خط العرض والطول)</label>
           <div style="display:flex;gap:14px;margin-bottom:18px;">
-            <input id="editLat" class="edit-input" placeholder="مثال: 21.523456" value="${Number(s.lat).toFixed(6)}">
-            <input id="editLng" class="edit-input" placeholder="مثال: 39.187654" value="${Number(s.lng).toFixed(6)}">
+            <input id="editLat" class="edit-input" placeholder="مثال: 21.523456" value="${Number(s.lat).toFixed(6)}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <input id="editLng" class="edit-input" placeholder="مثال: 39.187654" value="${Number(s.lng).toFixed(6)}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
           <button id="useGpsBtn" type="button" class="use-gps-btn">📍 استخدام موقعي الحالي</button>
           <div class="paste-coord-row">
             <span class="paste-coord-label">أو الصق الإحداثية مباشرة (بصيغة: خط العرض,خط الطول)</span>
             <div style="display:flex;gap:10px;">
-              <input id="editPasteCoord" class="edit-input" placeholder="مثال: 21.5234,39.1876" style="flex:1">
+              <input id="editPasteCoord" class="edit-input" placeholder="مثال: 21.5234,39.1876" style="flex:1" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
               <button type="button" class="paste-apply-btn" id="editPasteApply">تطبيق</button>
             </div>
           </div>
@@ -3501,7 +3298,7 @@ function openEditForm(){
         </div>
       </div>
       <label class="form-field-label" style="margin-top:18px">سبب التعديل</label>
-      <input id="editReason" class="edit-input" placeholder="مثال: تصحيح موقع المحطة بعد معاينة ميدانية">
+      <input id="editReason" class="edit-input" placeholder="مثال: تصحيح موقع المحطة بعد معاينة ميدانية" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
       <div class="add-station-progress-track" id="editProgressTrack" style="display:none;margin-top:8px;">
         <div class="add-station-progress-fill" id="editProgressFill"></div>
       </div>
@@ -3571,9 +3368,6 @@ function openEditForm(){
 
   document.getElementById('cancelEditBtn').addEventListener('click', ()=> document.getElementById('editStationOverlay').classList.remove('show'));
   document.getElementById('editStationCloseBtn').onclick = ()=> document.getElementById('editStationOverlay').classList.remove('show');
-  document.getElementById('editStationCloseBtn').onkeydown = (e)=>{
-    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); document.getElementById('editStationOverlay').classList.remove('show'); }
-  };
 
   document.getElementById('saveEditBtn').addEventListener('click', async function(){
     const btn = this;
@@ -3664,7 +3458,6 @@ function goBackToSearch(){
   cardsSection.classList.remove('hidden');
   measureActive = false; routeActive = false;
   resetMeasure(); resetRoute(); clearNearbyMarkers(); nearbyModeActive = null; morePanel.classList.remove('show'); updateNearbyButtonStates();
-  nearbyToastShown = false; feederToastShown = false;
   clearOutageMarkers(); outagePanel.classList.remove('show'); document.getElementById('outageInput').value=''; document.getElementById('outageError').textContent='';
   setActiveTool(null);
   stationTable.classList.remove('show');
