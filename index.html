@@ -1128,7 +1128,7 @@ footer{
         <span class="ssb-icon" id="stationSearchLensIcon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         </span>
-        <input id="stationSearchInput" type="text" placeholder="ابحث عن محطة أخرى..." inputmode="text" name="x_stationSearchInput_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false" dir="ltr">
+        <input id="stationSearchInput" type="text" placeholder="ابحث عن محطة أخرى..." inputmode="text" name="x_stationSearchInput_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false">
       </div>
     </div>
     <div class="station-search-progress" id="stationSearchProgress">
@@ -1225,7 +1225,7 @@ footer{
     <div class="search-wrap globe-bottom-anchor">
       <div class="search-lens" id="searchLens">
         <svg id="searchLensIcon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        <input id="searchInput" type="text" placeholder="مثال: 39070 أو ABN" inputmode="text" name="x_searchInput_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false" dir="ltr">
+        <input id="searchInput" type="text" placeholder="مثال: 39070 أو ABN" inputmode="text" name="x_searchInput_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false">
       </div>
       <div class="search-hint" id="searchHint"></div>
       <div class="search-progress" id="searchProgress">
@@ -1265,7 +1265,7 @@ footer{
           </div>
           <div>
             <label class="form-field-label" for="newStationId">رقم المحطة</label>
-            <input id="newStationId" class="edit-input" placeholder="مثال: 39070" name="x_newStationId_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false" dir="ltr">
+            <input id="newStationId" class="edit-input" placeholder="مثال: 39070" name="x_newStationId_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
           <div id="feederRegionRow" style="display:flex;gap:14px;">
             <div style="flex:1">
@@ -1281,14 +1281,14 @@ footer{
             <div>
               <label class="form-field-label">الإحداثيات (خط العرض والطول)</label>
               <div style="display:flex;gap:14px;margin-bottom:14px;">
-                <input id="newStationLat" class="edit-input" placeholder="مثال: 21.523456" name="x_newStationLat_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false" dir="ltr">
-                <input id="newStationLng" class="edit-input" placeholder="مثال: 39.187654" name="x_newStationLng_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false" dir="ltr">
+                <input id="newStationLat" class="edit-input" placeholder="مثال: 21.523456" name="x_newStationLat_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false">
+                <input id="newStationLng" class="edit-input" placeholder="مثال: 39.187654" name="x_newStationLng_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false">
               </div>
               <button class="use-gps-btn" id="newStationGpsBtn" type="button">📍 استخدام موقعي الحالي</button>
               <div class="paste-coord-row">
                 <span class="paste-coord-label">أو الصق الإحداثية مباشرة (بصيغة: خط العرض,خط الطول)</span>
                 <div style="display:flex;gap:10px;">
-                  <input id="newStationPasteCoord" class="edit-input" placeholder="مثال: 21.5234,39.1876" style="flex:1" name="x_newStationPasteCoord_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false" dir="ltr">
+                  <input id="newStationPasteCoord" class="edit-input" placeholder="مثال: 21.5234,39.1876" style="flex:1" name="x_newStationPasteCoord_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false">
                   <button type="button" class="paste-apply-btn" id="newStationPasteApply">تطبيق</button>
                 </div>
               </div>
@@ -2122,6 +2122,25 @@ function normalizeDigits(str){
   return stripInvisibleChars_(str).replace(/[٠-٩]/g, d=>arabicIndic.indexOf(d));
 }
 
+/* تحويل فوري للأرقام العربية إلى إنجليزية أثناء الإدخال مباشرة — الحقل يقبل الأرقام العربية
+ * بالكتابة، لكن تنعكس بصريًا كأرقام إنجليزية بنفس اللحظة، بدل انتظار لحظة البحث/الإرسال.
+ * التحويل حرف-بحرف بنفس الطول تمامًا (١ رقم عربي = ١ رقم إنجليزي)، فموضع المؤشر يبقى صحيحًا
+ * بعد إعادة ضبطه يدويًا (المتصفح يفقده تلقائيًا عند تعديل value برمجيًا) */
+function enableLiveDigitConversion_(inputEl){
+  if(!inputEl) return;
+  inputEl.addEventListener('input', function(){
+    const start = this.selectionStart;
+    const end = this.selectionEnd;
+    const converted = normalizeDigits(this.value);
+    if(converted !== this.value){
+      this.value = converted;
+      if(start !== null && end !== null){
+        try{ this.setSelectionRange(start, end); }catch(e){}
+      }
+    }
+  });
+}
+
 function hasValidSession(){
   const raw = localStorage.getItem('sec-session');
   if(!raw) return false;
@@ -2281,6 +2300,11 @@ async function performSearch(){
     searchLensIcon.style.opacity = '';
   }
 }
+
+// تفعيل التحويل الفوري للأرقام العربية على كل حقول البحث/الإدخال الرقمية
+[searchInput, stationSearchInput, document.getElementById('newStationId'),
+ document.getElementById('newStationLat'), document.getElementById('newStationLng'),
+ document.getElementById('newStationPasteCoord')].forEach(enableLiveDigitConversion_);
 
 searchInput.addEventListener('keydown', (e)=>{
   if(e.key==='Enter') performSearch();
@@ -3288,14 +3312,14 @@ function openEditForm(){
           </div>` : ''}
           <label class="form-field-label">الإحداثيات (خط العرض والطول)</label>
           <div style="display:flex;gap:14px;margin-bottom:18px;">
-            <input id="editLat" class="edit-input" placeholder="مثال: 21.523456" value="${Number(s.lat).toFixed(6)}" name="x_editLat_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false" dir="ltr">
-            <input id="editLng" class="edit-input" placeholder="مثال: 39.187654" value="${Number(s.lng).toFixed(6)}" name="x_editLng_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false" dir="ltr">
+            <input id="editLat" class="edit-input" placeholder="مثال: 21.523456" value="${Number(s.lat).toFixed(6)}" name="x_editLat_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <input id="editLng" class="edit-input" placeholder="مثال: 39.187654" value="${Number(s.lng).toFixed(6)}" name="x_editLng_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
           <button id="useGpsBtn" type="button" class="use-gps-btn">📍 استخدام موقعي الحالي</button>
           <div class="paste-coord-row">
             <span class="paste-coord-label">أو الصق الإحداثية مباشرة (بصيغة: خط العرض,خط الطول)</span>
             <div style="display:flex;gap:10px;">
-              <input id="editPasteCoord" class="edit-input" placeholder="مثال: 21.5234,39.1876" style="flex:1" name="x_editPasteCoord_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false" dir="ltr">
+              <input id="editPasteCoord" class="edit-input" placeholder="مثال: 21.5234,39.1876" style="flex:1" name="x_editPasteCoord_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false">
               <button type="button" class="paste-apply-btn" id="editPasteApply">تطبيق</button>
             </div>
           </div>
@@ -3331,6 +3355,9 @@ function openEditForm(){
     });
     setTimeout(()=>editPreviewMap.invalidateSize(), 100);
 
+    enableLiveDigitConversion_(document.getElementById('editLat'));
+    enableLiveDigitConversion_(document.getElementById('editLng'));
+    enableLiveDigitConversion_(document.getElementById('editPasteCoord'));
     document.getElementById('editLat').addEventListener('input', syncPreviewFromInputs);
     document.getElementById('editLng').addEventListener('input', syncPreviewFromInputs);
 
