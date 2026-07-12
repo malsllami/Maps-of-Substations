@@ -1128,7 +1128,7 @@ footer{
         <span class="ssb-icon" id="stationSearchLensIcon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         </span>
-        <input id="stationSearchInput" type="text" placeholder="ابحث عن محطة أخرى..." inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <input id="stationSearchInput" type="text" placeholder="ابحث عن محطة أخرى..." inputmode="text" name="x_stationSearchInput_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false">
       </div>
     </div>
     <div class="station-search-progress" id="stationSearchProgress">
@@ -1200,7 +1200,7 @@ footer{
     <div class="map-tool-hint" id="mapToolHint"></div>
     <div class="outage-panel" id="outagePanel">
       <div class="outage-panel-title">محطات العطل — أدخل الأرقام بالترتيب</div>
-      <textarea id="outageInput" placeholder="مثال: 39070-93080-ABN110&#10;افصل بينها بفاصلة أو / أو - أو سطر جديد" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+      <textarea id="outageInput" placeholder="مثال: 39070-93080-ABN110&#10;افصل بينها بفاصلة أو / أو - أو سطر جديد" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
       <div id="outageError" class="outage-error"></div>
       <button class="outage-submit-btn" id="outageSubmitBtn">عرض على الخريطة</button>
     </div>
@@ -1225,7 +1225,7 @@ footer{
     <div class="search-wrap globe-bottom-anchor">
       <div class="search-lens" id="searchLens">
         <svg id="searchLensIcon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        <input id="searchInput" type="text" placeholder="مثال: 39070 أو ABN" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <input id="searchInput" type="text" placeholder="مثال: 39070 أو ABN" inputmode="text" name="x_searchInput_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false">
       </div>
       <div class="search-hint" id="searchHint"></div>
       <div class="search-progress" id="searchProgress">
@@ -1234,7 +1234,7 @@ footer{
       </div>
       <button type="button" class="homepage-outage-toggle" id="homepageOutageToggle">⚠️ بحث عن حالة عطل (أكثر من محطة)</button>
       <div class="homepage-outage-panel" id="homepageOutagePanel">
-        <textarea id="homepageOutageInput" placeholder="مثال: IC2-11995&#10;افصل بينها بفاصلة أو / أو - أو سطر جديد" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+        <textarea id="homepageOutageInput" placeholder="مثال: IC2-11995&#10;افصل بينها بفاصلة أو / أو - أو سطر جديد" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
         <div id="homepageOutageError" class="outage-error"></div>
         <button class="outage-submit-btn" id="homepageOutageSubmitBtn">عرض على الخريطة</button>
       </div>
@@ -1265,30 +1265,30 @@ footer{
           </div>
           <div>
             <label class="form-field-label">رقم المحطة</label>
-            <input id="newStationId" class="edit-input" placeholder="مثال: 39070" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <input id="newStationId" class="edit-input" placeholder="مثال: 39070" name="x_newStationId_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
           <div id="feederRegionRow" style="display:flex;gap:14px;">
             <div style="flex:1">
               <label class="form-field-label">المغذي (اختياري)</label>
-              <input id="newStationFeeder" class="edit-input" placeholder="مثال: SNB38" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+              <input id="newStationFeeder" class="edit-input" placeholder="مثال: SNB38" name="x_newStationFeeder_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false">
             </div>
             <div style="flex:1">
               <label class="form-field-label">المنطقة</label>
-              <input id="newStationRegion" class="edit-input" placeholder="مثال: القرينية" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+              <input id="newStationRegion" class="edit-input" placeholder="مثال: القرينية" name="x_newStationRegion_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false">
             </div>
           </div>
           <div class="edit-grid">
             <div>
               <label class="form-field-label">الإحداثيات (خط العرض والطول)</label>
               <div style="display:flex;gap:14px;margin-bottom:14px;">
-                <input id="newStationLat" class="edit-input" placeholder="مثال: 21.523456">
-                <input id="newStationLng" class="edit-input" placeholder="مثال: 39.187654">
+                <input id="newStationLat" class="edit-input" placeholder="مثال: 21.523456" name="x_newStationLat_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false">
+                <input id="newStationLng" class="edit-input" placeholder="مثال: 39.187654" name="x_newStationLng_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false">
               </div>
               <button class="use-gps-btn" id="newStationGpsBtn" type="button">📍 استخدام موقعي الحالي</button>
               <div class="paste-coord-row">
                 <span class="paste-coord-label">أو الصق الإحداثية مباشرة (بصيغة: خط العرض,خط الطول)</span>
                 <div style="display:flex;gap:10px;">
-                  <input id="newStationPasteCoord" class="edit-input" placeholder="مثال: 21.5234,39.1876" style="flex:1" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                  <input id="newStationPasteCoord" class="edit-input" placeholder="مثال: 21.5234,39.1876" style="flex:1" name="x_newStationPasteCoord_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false">
                   <button type="button" class="paste-apply-btn" id="newStationPasteApply">تطبيق</button>
                 </div>
               </div>
@@ -1300,7 +1300,7 @@ footer{
           </div>
           <div>
             <label class="form-field-label">سبب الإضافة</label>
-            <input id="newStationReason" class="edit-input" placeholder="مثال: محطة جديدة بحي القرينية لتغذية المنطقة الصناعية" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <input id="newStationReason" class="edit-input" placeholder="مثال: محطة جديدة بحي القرينية لتغذية المنطقة الصناعية" name="x_newStationReason_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
           <div id="addStationError" class="add-station-error"></div>
           <button class="add-station-submit" id="addStationSubmitBtn">حفظ المحطة</button>
@@ -3272,22 +3272,22 @@ function openEditForm(){
           ${isDistribution ? `
           <div style="margin-bottom:18px;">
             <label class="form-field-label">المغذي</label>
-            <input id="editFeeder" class="edit-input" value="${s.feeder || ''}" placeholder="مثال: SNB38" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <input id="editFeeder" class="edit-input" value="${s.feeder || ''}" placeholder="مثال: SNB38" name="x_editFeeder_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
           <div style="margin-bottom:18px;">
             <label class="form-field-label">المنطقة</label>
-            <input id="editRegion" class="edit-input" value="${s.region || ''}" placeholder="مثال: القرينية" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <input id="editRegion" class="edit-input" value="${s.region || ''}" placeholder="مثال: القرينية" name="x_editRegion_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>` : ''}
           <label class="form-field-label">الإحداثيات (خط العرض والطول)</label>
           <div style="display:flex;gap:14px;margin-bottom:18px;">
-            <input id="editLat" class="edit-input" placeholder="مثال: 21.523456" value="${Number(s.lat).toFixed(6)}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-            <input id="editLng" class="edit-input" placeholder="مثال: 39.187654" value="${Number(s.lng).toFixed(6)}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <input id="editLat" class="edit-input" placeholder="مثال: 21.523456" value="${Number(s.lat).toFixed(6)}" name="x_editLat_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <input id="editLng" class="edit-input" placeholder="مثال: 39.187654" value="${Number(s.lng).toFixed(6)}" name="x_editLng_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
           <button id="useGpsBtn" type="button" class="use-gps-btn">📍 استخدام موقعي الحالي</button>
           <div class="paste-coord-row">
             <span class="paste-coord-label">أو الصق الإحداثية مباشرة (بصيغة: خط العرض,خط الطول)</span>
             <div style="display:flex;gap:10px;">
-              <input id="editPasteCoord" class="edit-input" placeholder="مثال: 21.5234,39.1876" style="flex:1" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+              <input id="editPasteCoord" class="edit-input" placeholder="مثال: 21.5234,39.1876" style="flex:1" name="x_editPasteCoord_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false">
               <button type="button" class="paste-apply-btn" id="editPasteApply">تطبيق</button>
             </div>
           </div>
@@ -3298,7 +3298,7 @@ function openEditForm(){
         </div>
       </div>
       <label class="form-field-label" style="margin-top:18px">سبب التعديل</label>
-      <input id="editReason" class="edit-input" placeholder="مثال: تصحيح موقع المحطة بعد معاينة ميدانية" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+      <input id="editReason" class="edit-input" placeholder="مثال: تصحيح موقع المحطة بعد معاينة ميدانية" name="x_editReason_nofill" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false">
       <div class="add-station-progress-track" id="editProgressTrack" style="display:none;margin-top:8px;">
         <div class="add-station-progress-fill" id="editProgressFill"></div>
       </div>
