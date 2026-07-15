@@ -2177,7 +2177,7 @@ function guardTextInput_(inputEl, allowedCharsRegex, maxLen){
     }
   });
 }
-const SEARCH_QUERY_CHARS_ = /[^0-9٠-٩A-Za-z\-]/g;
+const SEARCH_QUERY_CHARS_ = /[^0-9٠-٩A-Za-z\- ]/g;
 const COORD_NUMBER_CHARS_ = /[^0-9.\-]/g;
 const COORD_PAIR_CHARS_ = /[^0-9.,\-\s]/g;
 guardTextInput_(searchInput, SEARCH_QUERY_CHARS_, 24);
