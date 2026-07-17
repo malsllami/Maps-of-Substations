@@ -4,9 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>تقويم دوام الورديات | محطات التوزيع</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0D1826">
-<link rel="apple-touch-icon" href="assets/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--blue-deep:#1B4D8C;--blue-mid:#2E7DD1;--teal:#1FAE8C;--teal-light:#4DD6B5;}
@@ -263,14 +260,6 @@ header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px s
             <span class="menu-icon" style="color:#6C5CE7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span>
             مراسلة المدير
           </button>
-          <button type="button" class="mobile-menu-link" id="menuShareBtn" style="width:100%;text-align:right;background:transparent;border:1px solid transparent;font-family:inherit;cursor:pointer">
-            <span class="menu-icon" style="color:#4DD6B5"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></span>
-            مشاركة
-          </button>
-          <button type="button" class="mobile-menu-link" id="menuInstallApp" style="display:none;width:100%;text-align:right;background:transparent;border:1px solid transparent;font-family:inherit;cursor:pointer">
-            <span class="menu-icon" style="color:#5C9EFF"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
-            تثبيت التطبيق
-          </button>
           <button class="mobile-menu-logout" id="mobileLogoutBtn">
             <span class="menu-icon" style="color:#E0654F"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
             تسجيل الخروج
@@ -387,6 +376,36 @@ header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px s
 </div>
 
 <script>
+function stripInvisibleChars_(str){
+  return String(str).replace(/[\u200B-\u200F\u202A-\u202E\u2060-\u2069\uFEFF]/g, '');
+}
+
+function normalizeDigits(str){
+  const arabicIndic = '٠١٢٣٤٥٦٧٨٩';
+  return stripInvisibleChars_(str).replace(/[٠-٩]/g, d=>arabicIndic.indexOf(d));
+}
+
+/* تحويل فوري للأرقام العربية إلى إنجليزية أثناء الإدخال مباشرة — الحقل يقبل الأرقام العربية
+ * بالكتابة، لكن تنعكس بصريًا كأرقام إنجليزية بنفس اللحظة، بدل انتظار لحظة البحث/الإرسال.
+ * التحويل حرف-بحرف بنفس الطول تمامًا (١ رقم عربي = ١ رقم إنجليزي)، فموضع المؤشر يبقى صحيحًا
+ * بعد إعادة ضبطه يدويًا (المتصفح يفقده تلقائيًا عند تعديل value برمجيًا) */
+function enableLiveDigitConversion_(inputEl){
+  if(!inputEl) return;
+  inputEl.addEventListener('input', function(){
+    const start = this.selectionStart;
+    const end = this.selectionEnd;
+    const converted = normalizeDigits(this.value);
+    if(converted !== this.value){
+      this.value = converted;
+      if(start !== null && end !== null){
+        try{ this.setSelectionRange(start, end); }catch(e){}
+      }
+    }
+  });
+}
+
+[document.getElementById('contactName'), document.getElementById('contactPhone'),
+ document.getElementById('contactEmail'), document.getElementById('contactMessage')].forEach(enableLiveDigitConversion_);
 /* ===== المرجع الأساسي المؤكد ===== */
 const REF_DATE_UTC = Date.UTC(2026, 6, 2); // الخميس 2/7/2026م — منتصف الليل UTC كمرجع أيام كامل بدون كسور
 const GROUP_REF_CYCLE = { 'أ':1, 'د':3, 'ج':5, 'ب':7 }; // موضع كل وردية بدورة الـ8 أيام بتاريخ المرجع
@@ -701,36 +720,6 @@ document.getElementById('mobileMenuTrigger').addEventListener('click', (e)=>{
 document.addEventListener('click', (e)=>{
   if(!mobileUserMenuEl.contains(e.target)) mobileUserMenuEl.classList.remove('open');
 });
-
-/* ===== مشاركة الموقع + تثبيته كتطبيق (PWA) — متاحة من القائمة بكل صفحات الموقع ===== */
-/* Share the site + install it as an app (PWA) — available from the menu on every page */
-if('serviceWorker' in navigator){
-  window.addEventListener('load', ()=> navigator.serviceWorker.register('sw.js').catch(()=>{}));
-}
-document.getElementById('menuShareBtn').addEventListener('click', async ()=>{
-  mobileUserMenuEl.classList.remove('open');
-  const shareData = { title: document.title, text: 'نظام الإحداثيات الجغرافية لمحطات الشركة السعودية للطاقة', url: location.href };
-  try{
-    if(navigator.share){ await navigator.share(shareData); }
-    else{ await navigator.clipboard.writeText(shareData.url); alert('تم نسخ رابط الموقع'); }
-  }catch(e){}
-});
-let deferredInstallPrompt_ = null;
-const menuInstallBtn_ = document.getElementById('menuInstallApp');
-window.addEventListener('beforeinstallprompt', (e)=>{
-  e.preventDefault();
-  deferredInstallPrompt_ = e;
-  menuInstallBtn_.style.display = 'flex';
-});
-menuInstallBtn_.addEventListener('click', async ()=>{
-  mobileUserMenuEl.classList.remove('open');
-  if(!deferredInstallPrompt_) return;
-  deferredInstallPrompt_.prompt();
-  await deferredInstallPrompt_.userChoice;
-  deferredInstallPrompt_ = null;
-  menuInstallBtn_.style.display = 'none';
-});
-window.addEventListener('appinstalled', ()=>{ menuInstallBtn_.style.display = 'none'; });
 
 /* ===== التواصل مع المدير — اتصال مباشر + نموذج مراسلة (واتساب/إيميل)، متاح من القائمة بكل صفحات الموقع ===== */
 /* Contact admin — direct call + message form (WhatsApp/email), available from the menu on every page */
