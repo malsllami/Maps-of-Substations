@@ -846,7 +846,7 @@ body.guest-mode h1{
 .station-table table{width:100%;border-collapse:collapse;font-size:11px;}
 .station-table td{padding:3px 0;color:var(--text-secondary);}
 .station-table td.v{color:var(--text-primary);font-weight:500;text-align:left;font-family:'JetBrains Mono',monospace;direction:ltr;}
-.station-table .st-actions{display:flex;gap:8px;}
+.station-table .st-actions{display:flex;gap:8px;flex-wrap:wrap;}
 .station-table .st-btn{
   text-align:center;font-size:11px;padding:7px 14px;border-radius:8px;white-space:nowrap;
   border:1px solid var(--border-strong);background:var(--bg);color:var(--text-secondary);
@@ -2686,6 +2686,31 @@ function showMapToast(text){
   toast._hideTimer = setTimeout(()=> toast.classList.remove('show'), 2000);
 }
 
+// بناء نص مشاركة بيانات المحطة / Build the shareable text for a station
+function buildStationShareText_(s){
+  const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}&travelmode=driving`;
+  const lines = [`رقم المحطة: ${s.id}`];
+  if(s.feeder) lines.push(`المغذي: ${s.feeder}`);
+  if(s.region) lines.push(`المنطقة: ${s.region}`);
+  lines.push(`رابط قوقل ماب: ${mapsUrl}`);
+  return lines.join('\n');
+}
+
+// مشاركة عبر Web Share API مع نسخ احتياطي للحافظة / Share via Web Share API, fallback to clipboard copy
+async function shareStation_(s){
+  const text = buildStationShareText_(s);
+  if(navigator.share){
+    try{ await navigator.share({ title: `بيانات محطة ${s.id}`, text }); return; }
+    catch(err){ if(err && err.name === 'AbortError') return; }
+  }
+  try{
+    await navigator.clipboard.writeText(text);
+    showMapToast('تم نسخ بيانات المحطة 📋');
+  }catch(err){
+    showMapToast('تعذّر نسخ البيانات');
+  }
+}
+
 function updateNearbyButtonStates(){
   nearbyToggleBtn.classList.toggle('active', nearbyModeActive === 'nearby');
   document.getElementById('nearbyBtnLabel').textContent = nearbyModeActive === 'nearby' ? '3كم' : 'قريب';
@@ -2757,6 +2782,7 @@ function renderNearbyMarkers(){
         </div>
         <div class="st-actions">
           <a href="${gmapsUrl}" target="_blank" rel="noopener" class="st-btn primary">قوقل ماب 🧭</a>
+          <button onclick="window.shareStation('${s.id}')" class="st-btn">مشاركة 📤</button>
           <button onclick="window.editNearbyStation('${s.id}')" class="st-btn">تعديل ✏️</button>
         </div>
       </div>`);
@@ -3325,6 +3351,7 @@ function renderStationOnMap(s){
       </div>
       <div class="st-actions">
         <a class="st-btn primary" href="${mapsUrl}" target="_blank" rel="noopener">قوقل ماب 🧭</a>
+        <button class="st-btn" id="shareStationBtn">مشاركة 📤</button>
         <button class="st-btn" id="openEditBtn">تعديل ✏️</button>
       </div>
       ${s._dataBuiltAt ? `<div class="db-freshness-note">
@@ -3335,6 +3362,7 @@ function renderStationOnMap(s){
   stationTable.classList.add('show');
   searchAndBackRow.classList.add('show');
   document.getElementById('stationSearchBar').classList.add('compact');
+  document.getElementById('shareStationBtn').addEventListener('click', () => shareStation_(s));
   document.getElementById('openEditBtn').addEventListener('click', openEditForm);
 }
 
@@ -3345,6 +3373,12 @@ window.editNearbyStation = function(id){
   if(!s) return;
   goToStation(s);
   setTimeout(openEditForm, 200);
+};
+
+window.shareStation = function(id){
+  const s = window._nearbyStationLookup && window._nearbyStationLookup[id];
+  if(!s) return;
+  shareStation_(s);
 };
 
 function openEditForm(){
