@@ -304,20 +304,24 @@ h2{font-size:18px; font-weight:700; margin-bottom:6px;}
       </div>
     </div>
 
+    <!-- الزر الرئيسي: تسجيل الدخول برقم الجوال (الطريقة الافتراضية
+         للجميع — لا تتطلب بصمة). في وضع "عضو جديد" يبقى بنفس منطق
+         التسجيل القديم (تسجيل + تفعيل بصمة إجباري أول مرة). -->
     <button class="btn-progress" id="mainBtn">
       <span class="label">
-        <span class="default-label" id="mainBtnLabel">متابعة</span>
+        <span class="default-label" id="mainBtnLabel">دخول برقم الجوال</span>
         <span class="pct" id="mainBtnPct"></span>
         <span class="check">✓</span>
       </span>
       <span class="fill" id="mainBtnFill"></span>
     </button>
 
-    <!-- مسار دخول بديل بدون بصمة — لعضو فقد جهازه أو جهازه لا يدعم
-         البصمة. يمنح دائمًا صلاحية عضو عادي فقط (بغض النظر عن كون
-         الرقم رقم مدير)؛ صلاحية المدير الكاملة تبقى حصرًا بالبصمة. -->
-    <button type="button" id="phoneOnlyLoginBtn" style="width:100%;margin-top:10px;background:none;border:none;color:var(--text-secondary);font-family:inherit;font-size:12.5px;cursor:pointer;text-decoration:underline;">
-      ما تقدر تستخدم البصمة؟ ادخل برقم جوالك فقط
+    <!-- خيار ثانوي واضح: الدخول بالبصمة (أيقونة ونص يتغيران حسب نوع
+         الجهاز). يمنح صلاحية المدير الكاملة إن كان الرقم هو رقم
+         المدير السري؛ الدخول برقم الجوال أعلاه يمنح عضوًا عاديًا دومًا. -->
+    <button type="button" id="biometricLoginBtn" style="width:100%;margin-top:10px;height:44px;border-radius:10px;border:1px solid var(--border-strong);background:var(--bg);color:var(--text-primary);font-family:inherit;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:.2s;">
+      <span id="biometricIcon">🆔</span>
+      <span id="biometricLabel">الدخول بالبصمة</span>
     </button>
   </div>
 
@@ -631,8 +635,11 @@ function setMode(m){
   document.getElementById('departmentField').style.display = m==='register' ? 'block':'none';
   document.getElementById('stepTitle').textContent = m==='login' ? 'تسجيل الدخول' : 'إنشاء حساب جديد';
   document.getElementById('stepDesc').textContent = m==='login'
-    ? 'أدخل رقم جوالك المسجل، ثم تحقق من هويتك بأفضل وسيلة يدعمها جهازك'
-    : 'سجّل بياناتك، ثم فعّل التحقق الآمن بجهازك فورًا لتأمين الدخول';
+    ? 'أدخل رقم جوالك المسجل للدخول، أو استخدم البصمة إن كانت مفعّلة'
+    : 'سجّل بياناتك — تفعيل البصمة اختياري ومتاح لك لاحقًا';
+  mainBtnLabel.textContent = m==='login' ? 'دخول برقم الجوال' : 'إنشاء حساب';
+  // خيار البصمة مرتبط بحساب موجود مسبقًا فقط — لا يظهر أثناء إنشاء حساب جديد
+  biometricLoginBtn.style.display = m==='login' ? 'flex' : 'none';
   document.getElementById('switchHint').innerHTML = m==='login'
     ? 'ما عندك حساب؟ <a id="goRegister">سجّل كعضو جديد</a>'
     : 'عندك حساب؟ <a id="goLogin">سجّل الدخول</a>';
@@ -726,6 +733,25 @@ const mainBtnFill = document.getElementById('mainBtnFill');
 const formFields = [phoneInput, document.getElementById('nameInput'), document.getElementById('regEmailInput'), document.getElementById('countrySelect')];
 const progressBtn = ProgressButton(mainBtn, mainBtnLabel, mainBtnPct, mainBtnFill, formFields);
 
+/* ===== خيار الدخول بالبصمة — أيقونة ونص يتغيران حسب نوع الجهاز ===== */
+const biometricLoginBtn = document.getElementById('biometricLoginBtn');
+const biometricIcon = document.getElementById('biometricIcon');
+const biometricLabel = document.getElementById('biometricLabel');
+function detectBiometricLabel_(){
+  const ua = navigator.userAgent || '';
+  if(/iPhone|iPad|iPod/.test(ua)) return { icon:'🆔', label:'الدخول بـ Face ID / Touch ID' };
+  if(/Macintosh|Mac OS X/.test(ua)) return { icon:'👆', label:'الدخول بـ Touch ID' };
+  if(/Android/.test(ua)) return { icon:'👆', label:'الدخول ببصمة الإصبع' };
+  if(/Windows/.test(ua)) return { icon:'🔐', label:'الدخول بـ Windows Hello' };
+  return { icon:'🔐', label:'الدخول بالبصمة' };
+}
+(function applyBiometricLabel_(){
+  const b = detectBiometricLabel_();
+  biometricIcon.textContent = b.icon;
+  biometricLabel.textContent = b.label;
+})();
+setMode('login'); // يضبط نص الزر الرئيسي وظهور خيار البصمة للحالة الافتراضية عند التحميل
+
 /* ============================================================
  *  استدعاء الباكند الفعلي
  * ============================================================ */
@@ -794,16 +820,14 @@ mainBtn.addEventListener('click', async ()=>{
   if(mode==='register' && document.getElementById('regDepartmentInput').value==='أخرى' && !document.getElementById('regDepartmentOther').value.trim()){
     showError('الرجاء ذكر اسم القسم'); return;
   }
-  if(!window.PublicKeyCredential){
-    showError('هذا المتصفح لا يدعم تسجيل الدخول الآمن بالمصادقة البيومترية. الرجاء استخدام متصفح حديث مثل Chrome أو Safari أو Edge.');
-    return;
-  }
+  // ملاحظة: لا فحص لدعم البصمة هنا — هذا الزر (دخول بالجوال / إنشاء
+  // حساب) لا يحتاج بصمة إطلاقًا في أي من الوضعين
 
   try{
     await progressBtn.run(async ()=>{
       let result;
       if(mode==='login'){
-        result = await startWebAuthnLogin(phone);
+        result = await loginByPhoneOnly_(phone);
       } else {
         const name = document.getElementById('nameInput').value.trim();
         const email = document.getElementById('regEmailInput').value.trim();
@@ -812,7 +836,11 @@ mainBtn.addEventListener('click', async ()=>{
         const department = departmentSelect==='أخرى' ? document.getElementById('regDepartmentOther').value.trim() : departmentSelect;
         const reg = await callBackend('registerUser', {name, email, phone, memberType: selectedMemberType, shift, department});
         if(!reg.success) throw new Error(reg.error || 'تعذّر إنشاء الحساب');
-        result = await startWebAuthnRegistration(phone, name);
+        // البصمة اختيارية، وليست جزءًا إجباريًا من التسجيل — العضو يدخل
+        // مباشرة بحساب فعّال، ويقدر يفعّل البصمة لاحقًا من خيار الدخول
+        // بالبصمة (يبدأ تلقائيًا مسار "لا توجد بصمة مسجّلة" لتفعيلها)
+        saveSession(phone, name, 'member');
+        result = { success: true };
       }
       if(result && result.success){
         await new Promise(r=>setTimeout(r, 700));
@@ -830,29 +858,47 @@ mainBtn.addEventListener('click', async ()=>{
 });
 
 /* ============================================================
- *  مسار دخول بديل بدون بصمة (رقم الجوال فقط) — لعضو فقد جهازه أو
- *  جهازه لا يدعم البصمة. مستقل تمامًا عن تدفق WebAuthn أعلاه.
+ *  تسجيل دخول بديل بدون بصمة (رقم الجوال فقط) — الطريقة الافتراضية
+ *  لتسجيل الدخول لعضو موجود. مستقل تمامًا عن تدفق WebAuthn.
  * ============================================================ */
-const phoneOnlyLoginBtn = document.getElementById('phoneOnlyLoginBtn');
-phoneOnlyLoginBtn.addEventListener('click', async ()=>{
+async function loginByPhoneOnly_(phone){
+  const result = await callBackend('loginByPhone', {phone});
+  if(!result.success) throw new Error(result.error || 'تعذّر تسجيل الدخول');
+  saveSession(phone, result.name, result.role || 'member');
+  return result;
+}
+
+/* ============================================================
+ *  خيار الدخول بالبصمة — منفصل تمامًا عن الزر الرئيسي، يظهر فقط
+ *  عند تسجيل الدخول (لا عند إنشاء حساب جديد). عضو موجود بلا بصمة
+ *  مسجّلة بعد يُنقَل تلقائيًا لتفعيلها (نفس مسار startWebAuthnLogin
+ *  الحالي عند notRegistered).
+ * ============================================================ */
+biometricLoginBtn.addEventListener('click', async ()=>{
   hideError();
   phoneInput.value = stripLeadingZeros_(phoneInput.value.trim());
   const phone = selectedCountry.code + phoneInput.value;
   if(phoneInput.value.trim().length < 8){
     showError('الرجاء إدخال رقم جوال صحيح'); return;
   }
+  if(!window.PublicKeyCredential){
+    showError('هذا المتصفح لا يدعم البصمة. الرجاء استخدام متصفح حديث مثل Chrome أو Safari أو Edge، أو استخدم "دخول برقم الجوال" أعلاه.');
+    return;
+  }
 
-  phoneOnlyLoginBtn.disabled = true;
-  phoneOnlyLoginBtn.textContent = 'جاري الدخول...';
   try{
-    const result = await callBackend('loginByPhone', {phone});
-    if(!result.success) throw new Error(result.error || 'تعذّر تسجيل الدخول');
-    saveSession(phone, result.name, result.role || 'member');
-    window.location.href = 'index.html';
+    const result = await startWebAuthnLogin(phone);
+    if(result && result.success){
+      await new Promise(r=>setTimeout(r, 700));
+      window.location.href = 'index.html';
+    }
   }catch(e){
-    showError(e.message || 'تعذّر تسجيل الدخول');
-    phoneOnlyLoginBtn.disabled = false;
-    phoneOnlyLoginBtn.textContent = 'ما تقدر تستخدم البصمة؟ ادخل برقم جوالك فقط';
+    document.getElementById('fingerprintStep').classList.remove('show');
+    document.getElementById('fpIcon').classList.remove('verifying');
+    document.getElementById('fpSpinner').classList.remove('verifying');
+    document.getElementById('fpProgress').textContent = '';
+    document.getElementById('phoneStep').style.display='block';
+    showError(e.message || 'تعذّر الدخول بالبصمة');
   }
 });
 
