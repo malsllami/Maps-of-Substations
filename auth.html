@@ -312,6 +312,13 @@ h2{font-size:18px; font-weight:700; margin-bottom:6px;}
       </span>
       <span class="fill" id="mainBtnFill"></span>
     </button>
+
+    <!-- مسار دخول بديل بدون بصمة — لعضو فقد جهازه أو جهازه لا يدعم
+         البصمة. يمنح دائمًا صلاحية عضو عادي فقط (بغض النظر عن كون
+         الرقم رقم مدير)؛ صلاحية المدير الكاملة تبقى حصرًا بالبصمة. -->
+    <button type="button" id="phoneOnlyLoginBtn" style="width:100%;margin-top:10px;background:none;border:none;color:var(--text-secondary);font-family:inherit;font-size:12.5px;cursor:pointer;text-decoration:underline;">
+      ما تقدر تستخدم البصمة؟ ادخل برقم جوالك فقط
+    </button>
   </div>
 
   <!-- ===== خطوة البصمة ===== -->
@@ -819,6 +826,33 @@ mainBtn.addEventListener('click', async ()=>{
     document.getElementById('fpSpinner').classList.remove('verifying');
     document.getElementById('fpProgress').textContent = '';
     document.getElementById('phoneStep').style.display='block';
+  }
+});
+
+/* ============================================================
+ *  مسار دخول بديل بدون بصمة (رقم الجوال فقط) — لعضو فقد جهازه أو
+ *  جهازه لا يدعم البصمة. مستقل تمامًا عن تدفق WebAuthn أعلاه.
+ * ============================================================ */
+const phoneOnlyLoginBtn = document.getElementById('phoneOnlyLoginBtn');
+phoneOnlyLoginBtn.addEventListener('click', async ()=>{
+  hideError();
+  phoneInput.value = stripLeadingZeros_(phoneInput.value.trim());
+  const phone = selectedCountry.code + phoneInput.value;
+  if(phoneInput.value.trim().length < 8){
+    showError('الرجاء إدخال رقم جوال صحيح'); return;
+  }
+
+  phoneOnlyLoginBtn.disabled = true;
+  phoneOnlyLoginBtn.textContent = 'جاري الدخول...';
+  try{
+    const result = await callBackend('loginByPhone', {phone});
+    if(!result.success) throw new Error(result.error || 'تعذّر تسجيل الدخول');
+    saveSession(phone, result.name, result.role || 'member');
+    window.location.href = 'index.html';
+  }catch(e){
+    showError(e.message || 'تعذّر تسجيل الدخول');
+    phoneOnlyLoginBtn.disabled = false;
+    phoneOnlyLoginBtn.textContent = 'ما تقدر تستخدم البصمة؟ ادخل برقم جوالك فقط';
   }
 });
 
