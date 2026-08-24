@@ -1124,15 +1124,44 @@ async function loadDashboard(){
   document.getElementById('dataRefreshIcon').style.animation = 'spin .7s linear infinite';
   presentLoaded = false; additionsLoaded = false; editsLoaded = false; chartsLoaded = false; peakLoaded = false; regionsLoaded = false;
 
+  // طلب واحد بمهلة زمنية صريحة (بدل fetch بلا حد أقصى) — يمنع تعليق اللوحة إلى ما لا نهاية
+  // عند بطء استجابة خادم Apps Script. A single request with an explicit timeout — prevents the
+  // dashboard from hanging indefinitely when the Apps Script server responds slowly.
+  async function fetchDashboardOnce(){
+    const controller = new AbortController();
+    const timeoutId = setTimeout(()=> controller.abort(), 25000);
+    try{
+      const res = await fetch(API_URL, {method:'POST', body: JSON.stringify({action:'getOperationsDashboard', identityToken: session.identityToken}), signal: controller.signal});
+      const data = await res.json();
+      if(!data.success){ throw new Error(data.error || 'خطأ غير معروف'); }
+      return data;
+    } finally { clearTimeout(timeoutId); }
+  }
+
   try{
-    const res = await fetch(API_URL, {method:'POST', body: JSON.stringify({action:'getOperationsDashboard', phone: session.phone})});
-    const data = await res.json();
-    if(!data.success){ throw new Error(data.error || 'خطأ غير معروف'); }
+    let data;
+    try{
+      data = await fetchDashboardOnce();
+    }catch(firstErr){
+      // إعادة محاولة تلقائية واحدة بعد تأخير قصير — تمتص أغلب أخطاء اتصال Apps Script العابرة
+      // (بما فيها استجابة HTML بدل JSON عند حمل مؤقت) دون تدخل يدوي من المستخدم.
+      // One automatic retry after a short delay — absorbs most transient Apps Script connectivity
+      // errors (including an HTML-instead-of-JSON response under temporary load) with no manual retry.
+      await new Promise(r=> setTimeout(r, 2000));
+      data = await fetchDashboardOnce();
+    }
     renderOpsMain(data);
     lastSuccessfulCheckAt = new Date();
     refreshLastUpdateLabel();
   }catch(err){
     document.getElementById('opsMain').innerHTML = `<div class="err-msg">تعذّر تحميل البيانات: ${escapeHtml(err.message)}</div>`;
+    // تسجيل تفصيلي لهذا الفشل (بعد استنفاد إعادة المحاولة) بشيت "سجل الأخطاء" — أفضل جهد فقط،
+    // لا ينتظر الرد ولا يمنع عرض رسالة الخطأ للمستخدم.
+    // Best-effort detailed logging of this failure (after retry exhausted) to the error-log sheet —
+    // fire-and-forget, never blocks showing the error message to the user.
+    try{
+      fetch(API_URL, {method:'POST', body: JSON.stringify({action:'logClientError', source:'client/loadDashboard', message:String(err && err.message || err), details: navigator.userAgent})}).catch(()=>{});
+    }catch(e){}
   }finally{
     fetching = false;
     document.getElementById('dataRefreshIcon').style.animation = '';
