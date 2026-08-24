@@ -451,6 +451,7 @@ function enableLiveDigitConversion_(inputEl){
 
 const session = JSON.parse(localStorage.getItem('sec-session') || '{}');
 const phone = session.phone;
+const identityToken = session.identityToken;
 
 function setTheme(mode){
   document.body.setAttribute('data-theme', mode);
@@ -646,7 +647,7 @@ function renderContributionTable_(list, tbodyId, cardId, emptyMsg){
 
 async function loadProfile(){
   document.getElementById('dataRefreshIcon').style.animation = 'spin .7s linear infinite';
-  const res = await callBackend('getMemberProfile', {phone});
+  const res = await callBackend('getMemberProfile', {identityToken});
   document.getElementById('dataRefreshIcon').style.animation = '';
   if(!res.success){ showError(res.error || 'تعذّر تحميل البيانات'); return; }
   document.getElementById('profileName').textContent = res.name;
@@ -709,7 +710,7 @@ saveBtn.addEventListener('click', async ()=>{
   const tick = setInterval(()=>{ p=Math.min(p+Math.random()*15,92); saveFill.style.width=p+'%'; savePct.textContent=Math.round(p)+'%'; },120);
 
   try{
-    const res = await callBackend('updateMemberProfile', {phone, name, email, shift, department});
+    const res = await callBackend('updateMemberProfile', {identityToken, name, email, shift, department});
     clearInterval(tick);
     saveFill.style.width='100%'; savePct.textContent='100%';
     if(!res.success) throw new Error(res.error || 'فشل الحفظ');

@@ -2227,8 +2227,8 @@ if(!hasValidSession()){
 async function checkProfileCompleteness_(){
   try{
     const session = JSON.parse(localStorage.getItem('sec-session') || '{}');
-    if(!session.phone) return;
-    const res = await callBackend('getMemberProfile', { phone: session.phone });
+    if(!session.identityToken) return;
+    const res = await callBackend('getMemberProfile', { identityToken: session.identityToken });
     if(!res.success) return;
     if(!res.shift || !res.department){
       document.getElementById('profileGateOverlay').classList.add('show');

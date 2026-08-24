@@ -839,7 +839,7 @@ mainBtn.addEventListener('click', async ()=>{
         // البصمة اختيارية، وليست جزءًا إجباريًا من التسجيل — العضو يدخل
         // مباشرة بحساب فعّال، ويقدر يفعّل البصمة لاحقًا من خيار الدخول
         // بالبصمة (يبدأ تلقائيًا مسار "لا توجد بصمة مسجّلة" لتفعيلها)
-        saveSession(phone, name, 'member');
+        saveSession(phone, name, 'member', reg.identityToken);
         result = { success: true };
       }
       if(result && result.success){
@@ -864,7 +864,7 @@ mainBtn.addEventListener('click', async ()=>{
 async function loginByPhoneOnly_(phone){
   const result = await callBackend('loginByPhone', {phone});
   if(!result.success) throw new Error(result.error || 'تعذّر تسجيل الدخول');
-  saveSession(phone, result.name, result.role || 'member');
+  saveSession(phone, result.name, result.role || 'member', result.identityToken);
   return result;
 }
 
@@ -968,7 +968,7 @@ async function startWebAuthnRegistration(phone, displayName){
   if(!result.success){ fpProgress.fail(); throw new Error(result.error || 'فشل حفظ البصمة بالخادم'); }
   fpProgress.finish();
 
-  saveSession(phone, result.name || displayName, result.role || 'member');
+  saveSession(phone, result.name || displayName, result.role || 'member', result.identityToken);
   document.getElementById('fpTitle').textContent = 'تم تسجيل البصمة بنجاح';
   return result;
 }
@@ -1035,13 +1035,13 @@ async function startWebAuthnLogin(phone){
   if(!result.success){ fpProgress.fail(); throw new Error(result.error || 'فشل التحقق من تسجيل الدخول'); }
   fpProgress.finish();
 
-  saveSession(phone, result.name, result.role || 'member');
+  saveSession(phone, result.name, result.role || 'member', result.identityToken);
   return result;
 }
 
-function saveSession(phone, name, role){
+function saveSession(phone, name, role, identityToken){
   localStorage.setItem('sec-phone', phone);
-  localStorage.setItem('sec-session', JSON.stringify({phone, name, role, ts: Date.now()}));
+  localStorage.setItem('sec-session', JSON.stringify({phone, name, role, identityToken, ts: Date.now()}));
 }
 
 function startFpProgress(){

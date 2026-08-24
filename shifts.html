@@ -629,8 +629,8 @@ document.getElementById('dataRefreshBtn').addEventListener('click', async ()=>{
     const raw = localStorage.getItem('sec-session');
     if(raw){
       const session = JSON.parse(raw);
-      if(session.phone){
-        const res = await callBackend('getMemberProfile', { phone: session.phone });
+      if(session.identityToken){
+        const res = await callBackend('getMemberProfile', { identityToken: session.identityToken });
         if(res && res.success && ['أ','ب','ج','د'].includes(res.shift)){
           selectedGroup = res.shift;
           syncGroupTabs();
@@ -684,8 +684,8 @@ document.getElementById('dataRefreshBtn').addEventListener('click', async ()=>{
     // ربط وردية العضو تلقائيًا — تُجلب من الخادم مباشرة (لا تُخزَّن محليًا) لضمان أحدث قيمة دائمًا حتى لو عدّلها العضو للتو بصفحة "حسابي"
     // Auto-linking the member's own shift — fetched fresh from the server (never cached locally) to always reflect the latest value even if just edited on the account page
     // إصلاح: هذا الاستدعاء الآن معزول تمامًا ولا يمكن أن يمس الجلسة إطلاقًا مهما فشل — لا حذف، لا إعادة توجيه
-    if(session.phone){
-      callBackend('getMemberProfile', { phone: session.phone }).then(res=>{
+    if(session.identityToken){
+      callBackend('getMemberProfile', { identityToken: session.identityToken }).then(res=>{
         if(res && res.success && ['أ','ب','ج','د'].includes(res.shift)){
           selectedGroup = res.shift;
           syncGroupTabs();
