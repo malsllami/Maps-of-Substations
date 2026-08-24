@@ -1205,7 +1205,7 @@ footer{
     <div class="map-tool-hint" id="mapToolHint"></div>
     <div class="outage-panel" id="outagePanel">
       <div class="outage-panel-title">محطات العطل — أدخل الأرقام بالترتيب</div>
-      <textarea id="outageInput" placeholder="مثال: 39070-93080-ABN110&#10;افصل بينها بفاصلة أو / أو - أو سطر جديد" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+      <textarea id="outageInput" placeholder="افصل بينها بفاصلة أو / أو - أو سطر جديد" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
       <div id="outageError" class="outage-error"></div>
       <button class="outage-submit-btn" id="outageSubmitBtn">عرض على الخريطة</button>
     </div>
@@ -1414,6 +1414,12 @@ function renewSessionActivity_(){
     localStorage.setItem('sec-session', JSON.stringify(session));
   }catch(e){}
 }
+/* رقم جوال الجلسة الحالية — يُرفَق الآن مع طلبات بيانات المحطات، لأنها
+   لم تعد متاحة بدون تسجيل دخول */
+function getSessionPhone_(){
+  try{ return JSON.parse(localStorage.getItem('sec-session') || '{}').phone || ''; }
+  catch(e){ return ''; }
+}
 
 function escapeHtml(str){
   return String(str).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -1542,7 +1548,7 @@ async function refreshStationsLocalCache_(onProgress){
         console.warn('تجاوز الحد الأقصى الآمن لعدد الدفعات — تم إيقاف التحميل وإلغاؤه بأمان');
         return false;
       }
-      const res = await callBackend('getAllStations', { offset });
+      const res = await callBackend('getAllStations', { offset, phone: getSessionPhone_() });
       if(!res.success || !Array.isArray(res.stations)){
         console.warn('فشل تحميل دفعة من المحطات، تم إلغاء التحديث بأمان');
         return false;
@@ -1684,7 +1690,7 @@ const STATS_STALE_MS = 3 * 60 * 1000;
 
 async function loadStats(){
   try{
-    const stats = await callBackend('getStats');
+    const stats = await callBackend('getStats', { phone: getSessionPhone_() });
     lastStatsFetch = Date.now();
     if(!stats.success) return;
     document.getElementById('countStations').textContent = stats.totalStations;
@@ -2235,7 +2241,7 @@ document.getElementById('profileGateOpenMenuBtn').addEventListener('click', ()=>
 
 async function searchStationSmart(query){
   if(isStationsLoaded) return searchStationLocal(query);
-  return await callBackend('searchStation', { query });
+  return await callBackend('searchStation', { query, phone: getSessionPhone_() });
 }
 
 function upsertStationInLocalCache_(station){
@@ -2839,7 +2845,7 @@ async function activateNearbyMode(mode){
     } else {
       const res = mode === 'feeder'
         ? await callBackend('getFeederStations', { feeder: currentStation.feeder })
-        : await callBackend('getNearbyStations', { lat: currentStation.lat, lng: currentStation.lng, radiusKm: 2 });
+        : await callBackend('getNearbyStations', { lat: currentStation.lat, lng: currentStation.lng, radiusKm: 2, phone: getSessionPhone_() });
       if(!res.success || !res.stations) throw new Error(res.error || 'الميزة غير متاحة من الخادم بعد');
       stationsResult = res.stations;
     }
