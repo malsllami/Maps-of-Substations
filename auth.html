@@ -764,8 +764,13 @@ setMode('login'); // يضبط نص الزر الرئيسي وظهور خيار �
 const API_URL = 'https://script.google.com/macros/s/AKfycbyxZUSLZNa6UlZLINsfAEe8CmQPoNGJbpnNtUDxP019TfL8uLh_5fuP0e5HE6daP8dh1w/exec';
 /* إعدادات مرونة الاتصال — Apps Script يتأخر أحيانًا (تشغيل بارد/ضغط بالشيت) فيرجع HTML بدل JSON أو يعلّق طويلًا
  * Connection-resilience settings — Apps Script sometimes stalls (cold start / sheet load) and returns HTML instead of JSON */
-const REQUEST_TIMEOUT_MS = 30000;
-const RETRY_DELAYS_MS = [1500, 3000]; // عدد عناصرها = عدد إعادات المحاولة / its length = number of retries
+// قياس فعلي: أغلب الطلبات ~٢ث لكن بعضها يتأخر ١٨–٦٥ث (تشغيل بارد من جوجل) — مهلة قصيرة كانت تقطع طلبًا
+// كان سينجح ثم تبدأ طلبًا جديدًا بطيئًا بدوره، فالأفضل انتظار أطول مرة واحدة + إعادة واحدة فقط
+// Measured: most requests ~2s but some spike to 18–65s (Google cold start) — a short timeout aborted
+// requests that would have succeeded and started another slow one, so wait longer once + retry once
+const REQUEST_TIMEOUT_MS = 75000;
+const RETRY_DELAYS_MS = [1000]; // عدد عناصرها = عدد إعادات المحاولة / its length = number of retries
+const SLOW_NOTICE_AFTER_MS = 8000;
 // إجراءات آمنة للتكرار فقط (registerUser محمي بالخادم من التكرار: "مسجّل مسبقًا") — لا تُعاد verifyAssertion/registerCredential لأن التحدي يُستهلك مرة واحدة
 // Only repeat-safe actions (registerUser is duplicate-guarded server-side) — never retry verifyAssertion/registerCredential (single-use challenge)
 const RETRYABLE_ACTIONS = ['loginByPhone', 'getAdminContactInfo', 'generateLoginChallenge', 'generateRegisterChallenge', 'registerUser'];
@@ -800,26 +805,34 @@ async function callBackend(action, payload){
   const body = JSON.stringify({ action, ...payload });
   const maxAttempts = RETRYABLE_ACTIONS.includes(action) ? RETRY_DELAYS_MS.length + 1 : 1;
   const isBackground = action === 'getAdminContactInfo'; // طلب خلفي عند التحميل — لا يلمس شريط الرسائل / background call on load — never touches the banner
-  let json, lastErr;
-  for(let attempt = 1; attempt <= maxAttempts; attempt++){
-    try{
-      json = await fetchJsonOnce_(body);
-      break;
-    }catch(err){
-      lastErr = err;
-      if(attempt < maxAttempts){
-        if(!isBackground) showInfo('الخادم بطيء حاليًا، جارٍ إعادة المحاولة تلقائيًا…');
-        await new Promise(r=> setTimeout(r, RETRY_DELAYS_MS[attempt - 1]));
+  let json, lastErr, slowNoticeShown = false;
+  // تنبيه مبكر لو تأخر الرد — حتى لا يظن المستخدم أن الصفحة علّقت / Early notice on a slow reply so the page doesn't look frozen
+  const slowTimer = isBackground ? null : setTimeout(()=>{
+    slowNoticeShown = true;
+    showInfo('الخادم بطيء حاليًا، يرجى الانتظار قليلًا…');
+  }, SLOW_NOTICE_AFTER_MS);
+  try{
+    for(let attempt = 1; attempt <= maxAttempts; attempt++){
+      try{
+        json = await fetchJsonOnce_(body);
+        break;
+      }catch(err){
+        lastErr = err;
+        if(attempt < maxAttempts){
+          if(!isBackground){ slowNoticeShown = true; showInfo('الخادم بطيء حاليًا، جارٍ إعادة المحاولة تلقائيًا…'); }
+          await new Promise(r=> setTimeout(r, RETRY_DELAYS_MS[attempt - 1]));
+        }
       }
     }
+  }finally{
+    clearTimeout(slowTimer);
+    if(slowNoticeShown) hideError();
   }
   if(!json){
-    if(!isBackground) hideError();
     reportConnectionFailure_(action, lastErr, maxAttempts);
     return { success:false, error: CONNECTION_ERROR_MSG, connectionError: true };
   }
   const retried = !!lastErr;
-  if(retried && !isBackground) hideError();
   if(json.error){
     return { ...json, success:false, error: json.error, retried };
   }
