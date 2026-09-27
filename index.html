@@ -1398,6 +1398,7 @@ footer{
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
+<script src="services/session.js"></script>
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyxZUSLZNa6UlZLINsfAEe8CmQPoNGJbpnNtUDxP019TfL8uLh_5fuP0e5HE6daP8dh1w/exec';
 async function callBackend(action, payload){
@@ -2221,14 +2222,16 @@ if(!hasValidSession()){
   document.body.classList.add('guest-mode');
 } else {
   initStationsLocalSearch();
-  checkProfileCompleteness_();
+  // تجديد تذكرة الهوية (30 يومًا منزلقة) ثم فحص اكتمال الملف — Renew the identity ticket (30-day sliding) then check profile completeness
+  SecSession.ensureFresh(API_URL).then(ok=>{ if(ok) checkProfileCompleteness_(); });
 }
 
 async function checkProfileCompleteness_(){
   try{
-    const session = JSON.parse(localStorage.getItem('sec-session') || '{}');
-    if(!session.identityToken) return;
-    const res = await callBackend('getMemberProfile', { identityToken: session.identityToken });
+    const identityToken = SecSession.getToken();
+    if(!identityToken) return;
+    const res = await callBackend('getMemberProfile', { identityToken });
+    if(SecSession.isTokenInvalid(res)){ SecSession.handleExpired(); return; }
     if(!res.success) return;
     if(!res.shift || !res.department){
       document.getElementById('profileGateOverlay').classList.add('show');
