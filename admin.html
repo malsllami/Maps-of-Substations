@@ -448,6 +448,7 @@ header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px s
   </div>
 </div>
 
+<script src="services/session.js"></script>
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyxZUSLZNa6UlZLINsfAEe8CmQPoNGJbpnNtUDxP019TfL8uLh_5fuP0e5HE6daP8dh1w/exec';
 
@@ -1131,9 +1132,14 @@ async function loadDashboard(){
     const controller = new AbortController();
     const timeoutId = setTimeout(()=> controller.abort(), 25000);
     try{
-      const res = await fetch(API_URL, {method:'POST', body: JSON.stringify({action:'getOperationsDashboard', identityToken: session.identityToken}), signal: controller.signal});
+      const res = await fetch(API_URL, {method:'POST', body: JSON.stringify({action:'getOperationsDashboard', identityToken: SecSession.getToken()}), signal: controller.signal});
       const data = await res.json();
-      if(!data.success){ throw new Error(data.error || 'خطأ غير معروف'); }
+      if(!data.success){
+        const err = new Error(data.error || 'خطأ غير معروف');
+        err.refused = true; // رفض منطقي من الخادم — لا فائدة من إعادة المحاولة / logical server refusal — retrying won't help
+        err.tokenInvalid = SecSession.isTokenInvalid(data);
+        throw err;
+      }
       return data;
     } finally { clearTimeout(timeoutId); }
   }
@@ -1143,6 +1149,8 @@ async function loadDashboard(){
     try{
       data = await fetchDashboardOnce();
     }catch(firstErr){
+      if(firstErr.tokenInvalid){ SecSession.handleExpired(); return; }
+      if(firstErr.refused) throw firstErr;
       // إعادة محاولة تلقائية واحدة بعد تأخير قصير — تمتص أغلب أخطاء اتصال Apps Script العابرة
       // (بما فيها استجابة HTML بدل JSON عند حمل مؤقت) دون تدخل يدوي من المستخدم.
       // One automatic retry after a short delay — absorbs most transient Apps Script connectivity
@@ -1154,13 +1162,14 @@ async function loadDashboard(){
     lastSuccessfulCheckAt = new Date();
     refreshLastUpdateLabel();
   }catch(err){
+    if(err.tokenInvalid){ SecSession.handleExpired(); return; }
     document.getElementById('opsMain').innerHTML = `<div class="err-msg">تعذّر تحميل البيانات: ${escapeHtml(err.message)}</div>`;
     // تسجيل تفصيلي لهذا الفشل (بعد استنفاد إعادة المحاولة) بشيت "سجل الأخطاء" — أفضل جهد فقط،
     // لا ينتظر الرد ولا يمنع عرض رسالة الخطأ للمستخدم.
     // Best-effort detailed logging of this failure (after retry exhausted) to the error-log sheet —
     // fire-and-forget, never blocks showing the error message to the user.
     try{
-      fetch(API_URL, {method:'POST', body: JSON.stringify({action:'logClientError', source:'client/loadDashboard', message:String(err && err.message || err), details: navigator.userAgent})}).catch(()=>{});
+      fetch(API_URL, {method:'POST', body: JSON.stringify({action:'logClientError', source: err.refused ? 'client/loadDashboard' : 'client/connection', message:'admin/loadDashboard: ' + String(err && err.message || err), details: navigator.userAgent})}).catch(()=>{});
     }catch(e){}
   }finally{
     fetching = false;
@@ -1171,7 +1180,8 @@ async function loadDashboard(){
 /* ===== تحديث تلقائي عند رجوع التبويب ===== */
 let lastFetch = 0;
 const STALE = 3 * 60 * 1000;
-loadDashboard();
+// تجديد التذكرة أولًا حتى لا تُرسَل تذكرة منتهية للوحة — Renew the ticket first so an expired one is never sent to the dashboard
+SecSession.ensureFresh(API_URL).then(ok=>{ if(ok) loadDashboard(); });
 document.getElementById('dataRefreshBtn').addEventListener('click', async ()=>{
   lastFetch = 0;
   try{ await fetch(API_URL, {method:'POST', body: JSON.stringify({action:'clearSearchCache', phone: session.phone})}); }catch(e){}
