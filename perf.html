@@ -1,0 +1,20 @@
+<!doctype html>
+<!-- perf.html — صفحة عرض قياسات زمن الطلبات فقط (تشخيص). لا تشغّل الموقع ولا ترسل أي طلب للخادم،
+     فلا تضيف طلبات مكررة تفسد القياس كما يحدث عند فتح الموقع نفسه مع ?perf=1 في تبويب ثانٍ.
+     Viewer-only page for request timings (diagnostics). Runs none of the site and sends no server request,
+     so it adds no duplicate requests that skew measurements (unlike opening the site itself with ?perf=1 in a second tab). -->
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>قياس زمن الطلبات</title>
+<style>
+  :root { --bg: #0D1826; }
+  body { margin: 0; min-height: 100vh; background: var(--bg); font-family: system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif; }
+</style>
+</head>
+<body>
+<script src="services/timing.js"></script>
+</body>
+</html>

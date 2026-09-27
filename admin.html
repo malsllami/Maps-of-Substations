@@ -1190,11 +1190,17 @@ async function loadDashboard(){
 let lastFetch = 0;
 const STALE = 3 * 60 * 1000;
 // تجديد التذكرة أولًا حتى لا تُرسَل تذكرة منتهية للوحة — Renew the ticket first so an expired one is never sent to the dashboard
-SecSession.ensureFresh(API_URL).then(ok=>{ if(ok) loadDashboard(); });
+SecSession.ensureFresh(API_URL).then(ok=>{
+  if(ok){ loadDashboard(); return; }
+  // تعذّر تجديد التذكرة بسبب الشبكة (وليس رفضًا — الرفض يحوّل لصفحة الدخول) — Renewal failed on the network (not a refusal — a refusal redirects to login)
+  if(localStorage.getItem('sec-session')){
+    document.getElementById('opsMain').innerHTML = '<div class="err-msg">تعذّر الاتصال بالخادم لتجديد الجلسة — اضغط زر التحديث للمحاولة مجددًا</div>';
+  }
+});
 document.getElementById('dataRefreshBtn').addEventListener('click', async ()=>{
   lastFetch = 0;
   try{ await fetch(API_URL, {method:'POST', body: JSON.stringify({action:'clearSearchCache', phone: session.phone})}); }catch(e){}
-  loadDashboard();
+  if(await SecSession.ensureFresh(API_URL)) loadDashboard();
 });
 document.addEventListener('visibilitychange', ()=>{
   if(document.visibilityState==='visible' && (Date.now()-lastFetch)>STALE){ loadDashboard(); }
