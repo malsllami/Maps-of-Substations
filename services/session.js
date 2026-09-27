@@ -43,10 +43,10 @@
   }
 
   /**
-   * يتحقق من التذكرة ويجددها عند الحاجة. يُرجع true إن كانت الجلسة صالحة للاستخدام.
-   * أخطاء الشبكة لا تُخرج المستخدم (التذكرة الحالية ما زالت صالحة) — فقط الرفض الصريح من الخادم.
-   * Validates and renews the ticket when due. Returns true if the session is usable.
-   * Network errors never log the user out (the current ticket is still valid) — only an explicit server refusal does.
+   * يتحقق من التذكرة ويجددها عند الحاجة (حتى لو انتهت). يُرجع true إن كانت الجلسة صالحة للاستخدام.
+   * أخطاء الشبكة لا تُخرج المستخدم أبدًا — فقط الرفض الصريح من الخادم (TOKEN_INVALID).
+   * Validates and renews the ticket when due (even if expired). Returns true if the session is usable.
+   * Network errors never log the user out — only an explicit server refusal (TOKEN_INVALID) does.
    */
   async function ensureFresh(apiUrl, options) {
     // redirectOnExpired=false لصفحات تعمل كضيف أيضًا (مثل جدول الورديات) — for pages that also work as guest (e.g. shifts)
@@ -54,11 +54,14 @@
     const expire = function () { if (redirect) handleExpired(); return false; };
     const session = readSession_();
     if (!session) return false;
-    const exp = session.identityToken ? getTokenExpiry_(session.identityToken) : 0;
-    if (exp <= Date.now()) return expire();
+    if (!session.identityToken) return expire(); // جلسة قديمة جدًا بلا تذكرة أصلًا — لا شيء يمكن تجديده / very old session with no ticket at all — nothing to renew
+    const exp = getTokenExpiry_(session.identityToken);
+    // التذكرة المنتهية لا تُخرج المستخدم مباشرة: يُحاوَل تجديدها أولًا، والخادم وحده يقرر الرفض (فترة سماح بتوقيع صحيح)
+    // An expired ticket doesn't log the user out directly: renewal is tried first, and only the server decides to refuse (signed grace period)
+    const expired = exp <= Date.now();
 
     const issuedAt = exp - TOKEN_TTL_MS; // التذاكر القديمة (12 ساعة) تظهر كأنها قديمة جدًا فتُجدَّد فورًا / legacy 12h tickets look very old, so they renew immediately
-    if (Date.now() - issuedAt < RENEW_AFTER_MS) return true;
+    if (!expired && Date.now() - issuedAt < RENEW_AFTER_MS) return true;
 
     const controller = new AbortController();
     const timeoutId = setTimeout(function () { controller.abort(); }, REQUEST_TIMEOUT_MS);
@@ -77,9 +80,11 @@
         return true;
       }
       if (isTokenInvalid(json)) return expire();
-      return true;
+      return !expired;
     } catch (e) {
-      return true;
+      // خطأ شبكة: لا خروج أبدًا. تذكرة صالحة ← تابع؛ منتهية ← لا ترسل طلبات تحتاجها (ستُرفض)، وتُعاد المحاولة بالفتح القادم
+      // Network error: never log out. Valid ticket → continue; expired → skip ticket-dependent calls (they'd be refused), retry on next open
+      return !expired;
     } finally {
       clearTimeout(timeoutId);
     }
