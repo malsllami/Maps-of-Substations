@@ -409,6 +409,7 @@ h2{font-size:18px; font-weight:700; margin-bottom:6px;}
 </div>
 
 <script src="services/timing.js"></script>
+<script src="services/connection.js"></script>
 <script>
 function stripInvisibleChars_(str){
   return String(str).replace(/[\u200B-\u200F\u202A-\u202E\u2060-\u2069\uFEFF]/g, '');
@@ -793,6 +794,9 @@ async function fetchJsonOnce_(body){
 
 /* تسجيل فشل الاتصال بسجل الأخطاء (أفضل جهد بلا انتظار) — Best-effort, fire-and-forget logging of the connection failure */
 function reportConnectionFailure_(action, err, attempts){
+  // services/connection.js يسجّل كل محاولة فاشلة بتفاصيلها تلقائيًا — هذا احتياط فقط لو لم يُحمَّل
+  // services/connection.js logs every failed attempt with details automatically — this is only a fallback if it didn't load
+  if(window.SecConnection) return;
   try{
     fetch(API_URL, { method:'POST', body: JSON.stringify({
       action:'logClientError', source:'client/connection',

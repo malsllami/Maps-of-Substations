@@ -1211,9 +1211,13 @@ async function loadDashboard(){
     // لا ينتظر الرد ولا يمنع عرض رسالة الخطأ للمستخدم.
     // Best-effort detailed logging of this failure (after retry exhausted) to the error-log sheet —
     // fire-and-forget, never blocks showing the error message to the user.
-    try{
-      fetch(API_URL, {method:'POST', body: JSON.stringify({action:'logClientError', source: err.refused ? 'client/loadDashboard' : 'client/connection', message:'admin/loadDashboard: ' + String(err && err.message || err), details: navigator.userAgent})}).catch(()=>{});
-    }catch(e){}
+    // فشل الاتصال نفسه يُسجَّل تلقائيًا بتفاصيله من services/connection.js — هنا فقط الرفض المنطقي، أو الاتصال لو لم يُحمَّل ذلك الملف
+    // Connection failures are logged automatically with details by services/connection.js — here only logical refusals, or connection if that file didn't load
+    if(err.refused || !window.SecConnection){
+      try{
+        fetch(API_URL, {method:'POST', body: JSON.stringify({action:'logClientError', source: err.refused ? 'client/loadDashboard' : 'client/connection', message:'admin/loadDashboard: ' + String(err && err.message || err), details: navigator.userAgent})}).catch(()=>{});
+      }catch(e){}
+    }
   }finally{
     fetching = false;
     document.getElementById('dataRefreshIcon').style.animation = '';
