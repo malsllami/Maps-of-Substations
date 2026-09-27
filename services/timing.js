@@ -190,7 +190,7 @@
       '#secPerfViewer tr.stages pre{margin:0;font-size:11.5px;font-weight:700;white-space:pre-wrap;direction:rtl;line-height:1.7;color:#EAF1F7}' +
       '</style>' +
       '<div class="bar"><b>قياس زمن الطلبات — آخر ' + log.length + ' سجل</b>' +
-      '<button id="secPerfCopy">نسخ</button><button id="secPerfClear">مسح</button><button id="secPerfClose">إغلاق</button>' +
+      '<button id="secPerfCopy">نسخ</button><button id="secPerfClear">مسح</button><button id="secPerfClose">' + (isViewerPage ? '↩ رجوع' : 'إغلاق') + '</button>' +
       '<span>' + todayBothCalendars_() + ' — الأزمنة بالثواني، الأحمر = 8 ثوانٍ أو أكثر — يتحدّث تلقائيًا مع كل طلب من التبويبات الأخرى</span></div>' +
       '<div class="wrap"><table><thead><tr><th>البداية</th><th>الصفحة</th><th>التبويب</th><th>الإجراء</th><th>الخادم</th><th>الإجمالي</th><th>خارج الخادم</th><th>متزامنة</th><th>النهاية</th><th>الحالة</th><th>requestId</th></tr></thead><tbody>' +
       (rows || '<tr><td colspan="11">لا توجد قياسات بعد</td></tr>') + '</tbody></table></div>';
@@ -203,7 +203,13 @@
       };
     });
     box.querySelector('.wrap').scrollTop = scrollTop;
-    document.getElementById('secPerfClose').onclick = function () { box.remove(); };
+    // في perf.html: رجوع للصفحة السابقة، أو للوحة المدير إن فُتحت مباشرة بلا صفحة سابقة. غيرها: إغلاق الجدول فقط
+    // In perf.html: go back to the previous page, or to the admin panel if opened directly. Elsewhere: just close the table
+    document.getElementById('secPerfClose').onclick = function () {
+      if (!isViewerPage) { box.remove(); return; }
+      if (history.length > 1) history.back();
+      else location.href = 'admin.html';
+    };
     document.getElementById('secPerfClear').onclick = function () { try { localStorage.removeItem(LOG_KEY); } catch (e) {} renderViewer_(); };
     document.getElementById('secPerfCopy').onclick = function () {
       const lines = ['البداية\tالصفحة\tالتبويب\tالإجراء\tالخادم\tالإجمالي\tخارج الخادم\tمتزامنة\tالنهاية\tالحالة\trequestId'].concat(readLog_().map(function (e) {
