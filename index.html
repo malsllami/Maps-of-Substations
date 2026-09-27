@@ -2239,7 +2239,7 @@ async function checkProfileCompleteness_(){
   try{
     const identityToken = SecSession.getToken();
     if(!identityToken) return;
-    const res = await callBackend('getMemberProfile', { identityToken });
+    const res = await callBackend('getMemberProfileLite', { identityToken });
     if(SecSession.isTokenInvalid(res)){ SecSession.handleExpired(); return; }
     if(!res.success) return;
     if(!res.shift || !res.department){

@@ -640,7 +640,7 @@ document.getElementById('dataRefreshBtn').addEventListener('click', async ()=>{
     if(raw){
       const session = JSON.parse(raw);
       if(session.identityToken){
-        const res = await callBackend('getMemberProfile', { identityToken: SecSession.getToken() });
+        const res = await callBackend('getMemberProfileLite', { identityToken: SecSession.getToken() });
         if(res && res.success && ['أ','ب','ج','د'].includes(res.shift)){
           selectedGroup = res.shift;
           syncGroupTabs();
@@ -697,7 +697,7 @@ document.getElementById('dataRefreshBtn').addEventListener('click', async ()=>{
     if(session.identityToken){
       // تجديد صامت للتذكرة أولًا بلا أي توجيه (الصفحة تعمل كضيف أيضًا) — silent renewal first, never redirects (page also works as guest)
       SecSession.ensureFresh(API_URL, { redirectOnExpired:false })
-        .then(()=> callBackend('getMemberProfile', { identityToken: SecSession.getToken() })).then(res=>{
+        .then(()=> callBackend('getMemberProfileLite', { identityToken: SecSession.getToken() })).then(res=>{
         if(res && res.success && ['أ','ب','ج','د'].includes(res.shift)){
           selectedGroup = res.shift;
           syncGroupTabs();
