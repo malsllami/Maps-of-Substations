@@ -3,9 +3,9 @@
  * A minimal service worker that enables installing the site as an app (PWA) — it never caches
  * station data or search results, only the static page shell, so displayed data always stays
  * live from the server. */
-const CACHE_NAME = 'sec-shell-v2';
+const CACHE_NAME = 'sec-shell-v3';
 const APP_SHELL = [
-  'index.html', 'auth.html', 'member.html', 'shifts.html', 'admin.html', 'services/session.js',
+  'index.html', 'auth.html', 'member.html', 'shifts.html', 'admin.html', 'services/session.js', 'services/timing.js',
   'assets/logo-icon.png', 'assets/icon-192.png', 'assets/icon-512.png'
 ];
 
