@@ -105,6 +105,15 @@ header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px s
 .ops-status-sub{font-size:11.5px;color:var(--text-secondary);margin-top:3px;}
 .ops-status-count-line{font-size:13px;color:var(--text-secondary);display:flex;align-items:baseline;gap:5px;}
 .ops-status-count{font-size:21px;font-weight:800;color:var(--teal);font-family:'JetBrains Mono',monospace;}
+.ops-status-note{font-size:11px;color:var(--text-secondary);margin-top:4px;line-height:1.6;}
+.perf-link-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.perf-link-btn{
+  display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:12px;
+  background:var(--bg-card);border:1px solid var(--border);color:var(--text-primary);
+  font-size:13px;font-weight:700;text-decoration:none;transition:border-color .2s;
+}
+.perf-link-btn:hover{border-color:var(--teal);}
+.perf-link-note{font-size:11.5px;color:var(--text-secondary);}
 .ops-breakdown-card{
   background:var(--bg-card);border:1px solid var(--border);border-radius:16px;
   padding:18px;margin-top:12px;
@@ -405,6 +414,12 @@ header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px s
 
   <!-- شريط التنبيهات — يظهر فقط عند وجود تنبيهات فعلية، لا عنصر وهمي دائم الظهور -->
   <div class="alert-strip" id="alertStrip" style="display:none"></div>
+
+  <!-- رابط صفحة قياس زمن الطلبات (تشخيص) — Link to the request-timing page (diagnostics) -->
+  <div class="perf-link-bar">
+    <a href="perf.html" target="_blank" rel="noopener" class="perf-link-btn">📈 قياس زمن الطلبات</a>
+    <span class="perf-link-note">يعرض قياسات هذا الجهاز والمتصفح فقط — افتح الموقع بتبويب آخر واستخدمه، والجدول يتحدّث تلقائيًا</span>
+  </div>
 
   <div id="opsMain">
     <div class="loading-overlay"><div class="spinner"></div> جاري التحميل...</div>
@@ -744,6 +759,17 @@ function renderAlertStrip(alertsSummary){
 function renderOpsMain(d){
   const quotaPct = Math.min(100, Math.round((d.dailyRequests / d.dailyRequestLimit) * 100));
   const qualityPct = d.dataQualityPct;
+  /* بطاقة عمليات "خصائص السكربت" مقابل حد جوجل اليومي — تظهر فقط إن أرسلها الخادم (نسخة خادم أقدم لا ترسلها)
+   * Script Properties operations vs Google's daily limit — shown only if the server sends it (older server versions don't) */
+  const propOpsCard = (typeof d.propOpsToday === 'number' && d.propOpsLimit) ? `
+    <div class="ops-status-card">
+      <div class="ops-status-ring">${renderRing(Math.min(100, Math.round((d.propOpsToday / d.propOpsLimit) * 100)), 'quota', 84)}</div>
+      <div class="ops-status-info">
+        <div class="ops-status-title">🗄️ عمليات خصائص السكربت اليوم</div>
+        <div class="ops-status-count-line"><b class="ops-status-count">${d.propOpsToday}</b> من <b class="ops-status-count">${d.propOpsLimit}</b> عملية</div>
+        <div class="ops-status-note">عدّاد داخلي حقيقي لكل قراءة/كتابة بخصائص السكربت — حد جوجل المنشور للحسابات المجانية ${d.propOpsLimit} يوميًا. يبدأ العدّ من لحظة نشر هذا التحديث.</div>
+      </div>
+    </div>` : '';
 
   /* ترجمة أسماء الإجراءات التقنية لتسميات عربية مفهومة بالعرض — لا تُخزَّن بالكود كبيانات عمل، فقط تسميات عرض ثابتة لواجهة تقنية / Technical action names translated to readable Arabic labels for display — not business data, just fixed display labels for a technical interface */
   const ACTION_LABELS = {
@@ -769,6 +795,7 @@ function renderOpsMain(d){
         <div class="ops-status-sub">${d.currentShiftLabel}</div>
       </div>
     </div>
+    ${propOpsCard}
     ${breakdownRows ? `<div class="ops-breakdown-card">
       <div class="ops-breakdown-title">📊 أكثر ٥ أنواع طلبات اليوم (يوضّح سبب أي ارتفاع بالعدد)</div>
       ${breakdownRows}

@@ -1004,6 +1004,13 @@ footer{
   text-align:center;padding:12px 20px;font-size:10px;color:var(--text-secondary);opacity:.7;
   border-top:1px solid var(--border);
 }
+/* آيفون (Safari) يكبّر الصفحة كلها عند الضغط على أي حقل خطه أقل من 16px، فيبدو مربع البحث ممتدًا ومقصوصًا
+ * عند طرف الشاشة ويلزم السحب — 16px على الجوال يمنع ذلك دون تعطيل تكبير الأصابع لضعاف البصر.
+ * iPhone Safari zooms the whole page when focusing any field under 16px, making the search box look stretched
+ * and cut at the screen edge — 16px on mobile prevents it without disabling pinch-zoom for low-vision users. */
+@media (max-width:767px){
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), textarea, select{font-size:16px !important;}
+}
 @media (max-width:600px){
   .search-lens.open{width:88vw;}
   .login-btn{padding:7px 12px;font-size:12px;}
@@ -2051,6 +2058,15 @@ function syncHeaderHeight(){
 window.addEventListener('load', syncHeaderHeight);
 window.addEventListener('resize', syncHeaderHeight);
 setTimeout(syncHeaderHeight, 300);
+// الشريط العلوي قد يطول بعد التحميل (نص الحالة يلتف لسطر ثانٍ بالجوال) دون تغيّر حجم النافذة — فيُراقَب ارتفاعه
+// فعليًا حتى لا ينزلق المحتوى (مثل مربع بحث الخريطة) تحته. The header can grow after load (status text wraps
+// to a second line on mobile) without a window resize — so its height is observed directly, keeping content (e.g. the map search box) from sliding under it.
+try{
+  const _headerEl = document.querySelector('header');
+  if(_headerEl && typeof ResizeObserver !== 'undefined'){
+    new ResizeObserver(()=>{ syncHeaderHeight(); layoutMapActive(); }).observe(_headerEl);
+  }
+}catch(err){ console.warn('header ResizeObserver:', err); }
 
 function layoutMapActive(){
   try{
