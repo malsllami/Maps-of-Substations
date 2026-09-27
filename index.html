@@ -1423,6 +1423,41 @@ async function callBackend(action, payload){
   renewSessionActivity_(); // كل نشاط فعلي يجدد نافذة الوردية (12 ساعة) من جديد
   return await res.json();
 }
+/* ============================================================
+ *  حفظ مقاوم لأعطال جوجل المؤقتة (إضافة/تعديل محطة). أحيانًا يكتمل الحفظ بالخادم لكن جوجل يرجع
+ *  صفحة خطأ (404) بدل الرد، أو ينقطع الاتصال ("Load failed")، فيظهر للمستخدم خطأ متصفح غامض رغم
+ *  أن المحطة حُفظت. الحل: إعادة الإرسال تلقائيًا بنفس مفتاح العملية (opKey) — الخادم يتعرّف عليه
+ *  فيرد "تم" دون تكرار الصف إن كانت المحاولة الأولى حُفظت، أو يحفظ الآن إن لم تُحفظ.
+ *  يُعاد فقط عند غياب رد سليم؛ رد الخادم بخطأ صريح (مثل "موجود مسبقًا") نهائي ولا يُعاد.
+ *  Save that survives Google's transient faults (add/edit station). Sometimes the save completes on
+ *  the server but Google returns an error page (404) instead of the reply, or the connection drops
+ *  ("Load failed"), showing a cryptic browser error although the station was saved. Fix: resend
+ *  automatically with the SAME operation key (opKey) — the server recognizes it and replies "done"
+ *  without duplicating the row if the first attempt saved, or saves now if it didn't.
+ *  Retried only when no valid reply arrived; an explicit server error (e.g. "already exists") is final.
+ * ============================================================ */
+const SAVE_RETRY_DELAYS_MS = [5000, 8000]; // أطول من زمن الحفظ بالخادم (~4 ث) حتى لا تتزامن المحاولتان / longer than the server save (~4 s) so attempts don't overlap
+const SAVE_UNCONFIRMED_MSG = 'تعذّر التأكد من الحفظ بسبب خلل مؤقت في الاتصال بخادم جوجل. ابحث عن رقم المحطة للتأكد قبل إعادة المحاولة.';
+async function saveWithRetry_(action, payload, onRetry){
+  for(let attempt = 0; ; attempt++){
+    let res;
+    try{
+      res = await callBackend(action, payload);
+    }catch(networkOrParseErr){
+      if(attempt >= SAVE_RETRY_DELAYS_MS.length) throw new Error(SAVE_UNCONFIRMED_MSG);
+      if(onRetry) onRetry(attempt + 1);
+      await new Promise(r => setTimeout(r, SAVE_RETRY_DELAYS_MS[attempt]));
+      continue;
+    }
+    // إعادة إضافة تصادف "موجود مسبقًا" = المحاولة السابقة هي من حفظتها (نفس الرقم قبل ثوانٍ) / a retried add hitting "already exists" = our earlier attempt saved it
+    if(attempt > 0 && action === 'addNewStation' && res && res.error && res.error.indexOf('موجود مسبقًا') !== -1){
+      return { success: true, confirmedByRetry: true };
+    }
+    return res;
+  }
+}
+const SAVE_RETRY_NOTE = 'الخادم لم يرد بشكل سليم، جارٍ التحقق من الحفظ…';
+
 function renewSessionActivity_(){
   const raw = localStorage.getItem('sec-session');
   if(!raw) return;
@@ -3280,23 +3315,23 @@ document.getElementById('addStationSubmitBtn').addEventListener('click', async f
   progressLabel.style.display = 'block';
   progressFill.style.width = '0%';
   progressLabel.textContent = '0%';
-  let p = 0;
+  let p = 0, retryNote = '';
   const tick = setInterval(()=>{
     p = Math.min(p + Math.random()*12, 90);
     progressFill.style.width = p+'%';
-    progressLabel.textContent = Math.round(p)+'%';
+    progressLabel.textContent = retryNote || Math.round(p)+'%';
   }, 150);
 
   const session = JSON.parse(localStorage.getItem('sec-session') || '{}');
   const opKey = 'addnew_' + stationId + '_' + Date.now();
   try{
-    const res = await callBackend('addNewStation', {
+    const res = await saveWithRetry_('addNewStation', {
       opKey, phone: session.phone, stationId, type: newStationType,
       lat, lng,
       feeder: newStationType === 'توزيع' ? document.getElementById('newStationFeeder').value.trim() : undefined,
       region: newStationType === 'توزيع' ? region : undefined,
       reason: document.getElementById('newStationReason').value.trim()
-    });
+    }, ()=>{ retryNote = SAVE_RETRY_NOTE; });
     clearInterval(tick);
     if(!res.success){ throw new Error(res.error || 'فشل الحفظ'); }
 
@@ -3587,23 +3622,23 @@ function openEditForm(){
     progressLabel.style.display = 'block';
     progressFill.style.width = '0%';
     progressLabel.textContent = '0%';
-    let p = 0;
+    let p = 0, retryNote = '';
     const tick = setInterval(()=>{
       p = Math.min(p + Math.random()*12, 90);
       progressFill.style.width = p+'%';
-      progressLabel.textContent = Math.round(p)+'%';
+      progressLabel.textContent = retryNote || Math.round(p)+'%';
     }, 150);
 
     const session = JSON.parse(localStorage.getItem('sec-session') || '{}');
     const opKey = 'edit_' + s.id + '_' + Date.now();
     try{
-      const res = await callBackend('updateCoordinates', {
+      const res = await saveWithRetry_('updateCoordinates', {
         opKey, phone: session.phone, stationId: s.id, type: s.type,
         lat, lng, method: 'يدوي/GPS',
         feeder: isDistribution ? document.getElementById('editFeeder').value.trim() : undefined,
         region: isDistribution ? document.getElementById('editRegion').value.trim() : undefined,
         reason: document.getElementById('editReason').value.trim()
-      });
+      }, ()=>{ retryNote = SAVE_RETRY_NOTE; });
       clearInterval(tick);
       if(!res.success) throw new Error(res.error || 'فشل الحفظ');
       progressFill.style.width = '100%';
