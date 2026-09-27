@@ -22,6 +22,8 @@
   const API_MARKER = 'script.google.com/macros/';
   const originalFetch = global.fetch.bind(global);
   let inFlight = 0;
+  let leavingPage = false;
+  global.addEventListener && global.addEventListener('pagehide', function () { leavingPage = true; });
 
   function pageName_() {
     return (location.pathname.split('/').pop() || 'index.html');
@@ -52,7 +54,10 @@
       const nav = performance.getEntriesByType('navigation')[0];
       if (nav) navType = nav.type;
     } catch (e) {}
-    appendLog_({ at: clockTime_(), page: pageName_(), kind: 'open', action: 'فتح الصفحة (' + navType + ')' });
+    // حالة الجلسة لحظة الفتح — تكشف فورًا لو كان القياس تم كزائر غير مسجّل / session state at open — reveals at once if a test ran as a logged-out guest
+    let sessionState = 'زائر (غير مسجّل)';
+    try { if (localStorage.getItem('sec-session')) sessionState = 'مسجّل دخول'; } catch (e) {}
+    appendLog_({ at: clockTime_(), page: pageName_(), kind: 'open', action: 'فتح الصفحة (' + navType + ') — ' + sessionState });
   }
 
   function isApiPost_(input, init) {
@@ -91,12 +96,17 @@
           const json = JSON.parse(text);
           if (json && json._timing) serverMs = json._timing.serverMs;
           else status = 'بلا _timing (نسخة خادم قديمة؟)';
+          // التمييز بين وصول الرد ونجاح العملية نفسها — Distinguish "a reply arrived" from "the operation succeeded"
+          if (json && json.error) status = 'رد بخطأ: ' + String(json.error).slice(0, 45);
+          else if (json && json.success === false) status = 'رد بفشل';
         } catch (e) { status = 'رد غير JSON (HTTP ' + res.status + ')'; }
         finish_(serverMs, status);
       }).catch(function () { finish_(null, 'تعذّر قراءة الرد'); });
       return res;
     }, function (err) {
-      finish_(null, err && err.name === 'AbortError' ? 'أُلغي (انتهت المهلة)' : 'فشل شبكة');
+      let status = err && err.name === 'AbortError' ? 'أُلغي (انتهت المهلة)' : 'فشل شبكة';
+      if (leavingPage) status = 'أُلغي (مغادرة/إعادة تحميل الصفحة)'; // ليس عطلًا — المتصفح يلغي الطلبات الجارية / not a fault — the browser cancels in-flight requests
+      finish_(null, status);
       throw err;
     });
   };
