@@ -1697,8 +1697,25 @@ document.addEventListener('visibilitychange', ()=>{
 
 let lastStatsFetch = 0;
 const STATS_STALE_MS = 3 * 60 * 1000;
+let statsInFlight = null;
 
-async function loadStats(){
+/* طلب إحصاءات واحد فقط في أي لحظة: أي استدعاء أثناء طلب جارٍ ينتظر نفس الطلب بدل إرسال طلب جديد
+ * (العودة للصفحة تُطلق visibilitychange وfocus معًا فكانا يرسلان طلبين أو ثلاثة متزامنة)
+ * One stats request at a time: any call while one is running awaits it instead of sending another
+ * (returning to the page fires visibilitychange and focus together, which sent two or three concurrent requests) */
+function loadStats(){
+  if(!statsInFlight){
+    statsInFlight = fetchStats_().finally(()=>{ statsInFlight = null; });
+  }
+  return statsInFlight;
+}
+
+/* عند العودة للصفحة: تحديث الإحصاءات إن مرّت 3 دقائق على آخر جلب — Returning to the page: refresh stats if 3 minutes passed since the last fetch */
+function refreshStatsIfStale_(){
+  if((Date.now() - lastStatsFetch) > STATS_STALE_MS) loadStats();
+}
+
+async function fetchStats_(){
   try{
     const stats = await callBackend('getStats', { phone: getSessionPhone_() });
     lastStatsFetch = Date.now();
@@ -1724,15 +1741,9 @@ async function loadStats(){
 loadStats();
 
 document.addEventListener('visibilitychange', ()=>{
-  if(document.visibilityState === 'visible' && (Date.now() - lastStatsFetch) > STATS_STALE_MS){
-    loadStats();
-  }
+  if(document.visibilityState === 'visible') refreshStatsIfStale_();
 });
-window.addEventListener('focus', ()=>{
-  if((Date.now() - lastStatsFetch) > STATS_STALE_MS){
-    loadStats();
-  }
-});
+window.addEventListener('focus', refreshStatsIfStale_);
 
 const refreshBtn = document.getElementById('refreshStatsBtn');
 const refreshIcon = document.getElementById('refreshIcon');
