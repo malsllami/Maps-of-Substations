@@ -1400,6 +1400,7 @@ footer{
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
 <script src="services/timing.js"></script>
 <script src="services/session.js"></script>
+<script src="services/connection.js"></script>
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyxZUSLZNa6UlZLINsfAEe8CmQPoNGJbpnNtUDxP019TfL8uLh_5fuP0e5HE6daP8dh1w/exec';
 // احتياط لو تعذّر تحميل services/session.js (لم يُرفع أو فشل الشبكة) — الصفحة تعمل بدون تجديد بدل أن تتوقف بالكامل
@@ -1643,19 +1644,25 @@ function refreshPanelUpdateLabels(){
 }
 setInterval(()=>{ refreshLastUpdateLabel(); refreshPanelUpdateLabels(); }, 30 * 1000);
 
+/* فحص الاتصال يُتخطّى إن نجح أي طلب خلال آخر 3 دقائق (services/connection.js)؛ وبدون الملف يُرسل ping كالسابق
+ * Connection check is skipped if any request succeeded in the last 3 minutes (services/connection.js); without the file, ping is sent as before */
+function pingIfNeeded_(pingFn){
+  return window.SecConnection ? SecConnection.pingUnlessRecent(pingFn, CONN_CHECK_INTERVAL_MS) : pingFn();
+}
+
 async function checkConnection(){
   connDot.className = 'conn-dot checking';
   connLabel.textContent = 'جاري الاتصال...';
   try{
     const res = await Promise.race([
-      callBackend('ping'),
+      pingIfNeeded_(()=>callBackend('ping')),
       new Promise((_, reject)=> setTimeout(()=> reject(new Error('timeout')), CONN_CHECK_TIMEOUT_MS))
     ]);
     if(res && res.success){
       connDot.className = 'conn-dot online';
       connLabel.textContent = 'متصل';
       statusBar.title = 'متصل بقاعدة البيانات — البيانات محدثة';
-      lastSuccessfulCheckAt = new Date();
+      lastSuccessfulCheckAt = new Date(res.at || Date.now()); // وقت آخر رد فعلي عند التخطي / real last-reply time when skipped
       refreshLastUpdateLabel();
     } else {
       throw new Error('backend-error');
@@ -1672,7 +1679,7 @@ function renderHeaderDate(){
 }
 renderHeaderDate();
 setInterval(renderHeaderDate, 60 * 60 * 1000);
-setTimeout(checkConnection, 1500);
+setTimeout(checkConnection, 4000); // بعد طلبات فتح الصفحة، فيكفي نجاحها غالبًا بلا ping / after the page-load requests, whose success usually makes ping unnecessary
 setInterval(()=>{ if(document.visibilityState === 'visible') checkConnection(); }, CONN_CHECK_INTERVAL_MS);
 
 document.getElementById('dataRefreshBtn').addEventListener('click', async ()=>{
