@@ -375,6 +375,7 @@ header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px s
   </div>
 </div>
 
+<script src="services/session.js"></script>
 <script>
 function stripInvisibleChars_(str){
   return String(str).replace(/[\u200B-\u200F\u202A-\u202E\u2060-\u2069\uFEFF]/g, '');
@@ -566,6 +567,14 @@ document.getElementById('nextMonthBtn').addEventListener('click', ()=>{
  * فقط يوقف تكرار طلب البصمة على نفس الجهاز الموثوق بالفعل */
 const SESSION_MAX_AGE_MS = 10 * 365 * 24 * 60 * 60 * 1000; // 10 سنوات — عمليًا بلا انتهاء
 const API_URL = 'https://script.google.com/macros/s/AKfycbyxZUSLZNa6UlZLINsfAEe8CmQPoNGJbpnNtUDxP019TfL8uLh_5fuP0e5HE6daP8dh1w/exec';
+// احتياط لو تعذّر تحميل services/session.js (لم يُرفع أو فشل الشبكة) — الصفحة تعمل بدون تجديد بدل أن تتوقف بالكامل
+// Fallback if services/session.js failed to load (not uploaded / network) — the page keeps working without renewal instead of halting entirely
+window.SecSession = window.SecSession || {
+  ensureFresh: async ()=> true,
+  handleExpired: ()=>{ localStorage.removeItem('sec-session'); location.href = 'auth.html?expired=1'; },
+  isTokenInvalid: (res)=> !!res && res.code === 'TOKEN_INVALID',
+  getToken: ()=>{ try{ return JSON.parse(localStorage.getItem('sec-session') || '{}').identityToken || ''; }catch(e){ return ''; } }
+};
 async function callBackend(action, payload){
   const res = await fetch(API_URL, { method:'POST', body: JSON.stringify({ action, ...payload }) });
   let json;
@@ -630,7 +639,7 @@ document.getElementById('dataRefreshBtn').addEventListener('click', async ()=>{
     if(raw){
       const session = JSON.parse(raw);
       if(session.identityToken){
-        const res = await callBackend('getMemberProfile', { identityToken: session.identityToken });
+        const res = await callBackend('getMemberProfile', { identityToken: SecSession.getToken() });
         if(res && res.success && ['أ','ب','ج','د'].includes(res.shift)){
           selectedGroup = res.shift;
           syncGroupTabs();
@@ -685,7 +694,9 @@ document.getElementById('dataRefreshBtn').addEventListener('click', async ()=>{
     // Auto-linking the member's own shift — fetched fresh from the server (never cached locally) to always reflect the latest value even if just edited on the account page
     // إصلاح: هذا الاستدعاء الآن معزول تمامًا ولا يمكن أن يمس الجلسة إطلاقًا مهما فشل — لا حذف، لا إعادة توجيه
     if(session.identityToken){
-      callBackend('getMemberProfile', { identityToken: session.identityToken }).then(res=>{
+      // تجديد صامت للتذكرة أولًا بلا أي توجيه (الصفحة تعمل كضيف أيضًا) — silent renewal first, never redirects (page also works as guest)
+      SecSession.ensureFresh(API_URL, { redirectOnExpired:false })
+        .then(()=> callBackend('getMemberProfile', { identityToken: SecSession.getToken() })).then(res=>{
         if(res && res.success && ['أ','ب','ج','د'].includes(res.shift)){
           selectedGroup = res.shift;
           syncGroupTabs();

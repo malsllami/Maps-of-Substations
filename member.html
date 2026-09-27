@@ -409,8 +409,17 @@ h2{font-size:17px;font-weight:700;margin-bottom:4px;}
   </div>
 </div>
 
+<script src="services/session.js"></script>
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyxZUSLZNa6UlZLINsfAEe8CmQPoNGJbpnNtUDxP019TfL8uLh_5fuP0e5HE6daP8dh1w/exec';
+// احتياط لو تعذّر تحميل services/session.js (لم يُرفع أو فشل الشبكة) — الصفحة تعمل بدون تجديد بدل أن تتوقف بالكامل
+// Fallback if services/session.js failed to load (not uploaded / network) — the page keeps working without renewal instead of halting entirely
+window.SecSession = window.SecSession || {
+  ensureFresh: async ()=> true,
+  handleExpired: ()=>{ localStorage.removeItem('sec-session'); location.href = 'auth.html?expired=1'; },
+  isTokenInvalid: (res)=> !!res && res.code === 'TOKEN_INVALID',
+  getToken: ()=>{ try{ return JSON.parse(localStorage.getItem('sec-session') || '{}').identityToken || ''; }catch(e){ return ''; } }
+};
 async function callBackend(action, payload){
   const res = await fetch(API_URL, {method:'POST', body: JSON.stringify({action, ...(payload||{})})});
   return await res.json();
@@ -451,7 +460,6 @@ function enableLiveDigitConversion_(inputEl){
 
 const session = JSON.parse(localStorage.getItem('sec-session') || '{}');
 const phone = session.phone;
-const identityToken = session.identityToken;
 
 function setTheme(mode){
   document.body.setAttribute('data-theme', mode);
@@ -647,7 +655,8 @@ function renderContributionTable_(list, tbodyId, cardId, emptyMsg){
 
 async function loadProfile(){
   document.getElementById('dataRefreshIcon').style.animation = 'spin .7s linear infinite';
-  const res = await callBackend('getMemberProfile', {identityToken});
+  const res = await callBackend('getMemberProfile', {identityToken: SecSession.getToken()});
+  if(SecSession.isTokenInvalid(res)){ SecSession.handleExpired(); return; }
   document.getElementById('dataRefreshIcon').style.animation = '';
   if(!res.success){ showError(res.error || 'تعذّر تحميل البيانات'); return; }
   document.getElementById('profileName').textContent = res.name;
@@ -675,7 +684,8 @@ async function loadProfile(){
   renderContributionTable_(res.additionsList, 'additionsTableBody', 'additionsCard', 'ما فيه إضافات بعد');
   renderContributionTable_(res.editsList, 'editsTableBody', 'editsCard', 'ما فيه تعديلات بعد');
 }
-loadProfile();
+// تجديد التذكرة قبل أول طلب — Renew the ticket before the first request
+SecSession.ensureFresh(API_URL).then(ok=>{ if(ok) loadProfile(); });
 document.getElementById('dataRefreshBtn').addEventListener('click', ()=> loadProfile());
 
 const saveBtn = document.getElementById('saveBtn');
@@ -710,13 +720,16 @@ saveBtn.addEventListener('click', async ()=>{
   const tick = setInterval(()=>{ p=Math.min(p+Math.random()*15,92); saveFill.style.width=p+'%'; savePct.textContent=Math.round(p)+'%'; },120);
 
   try{
-    const res = await callBackend('updateMemberProfile', {identityToken, name, email, shift, department});
+    const res = await callBackend('updateMemberProfile', {identityToken: SecSession.getToken(), name, email, shift, department});
+    if(SecSession.isTokenInvalid(res)){ SecSession.handleExpired(); return; }
     clearInterval(tick);
     saveFill.style.width='100%'; savePct.textContent='100%';
     if(!res.success) throw new Error(res.error || 'فشل الحفظ');
     document.getElementById('successBanner').classList.add('show');
-    session.name = name;
-    localStorage.setItem('sec-session', JSON.stringify(session));
+    // دمج بالجلسة الأحدث حتى لا تُستبدل تذكرة مجدَّدة بنسخة قديمة — Merge into the latest session so a renewed ticket isn't overwritten by a stale copy
+    const latestSession = JSON.parse(localStorage.getItem('sec-session') || '{}');
+    session.name = latestSession.name = name;
+    localStorage.setItem('sec-session', JSON.stringify(latestSession));
   }catch(err){
     saveBtn.classList.add('error');
     showError(err.message);

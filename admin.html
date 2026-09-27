@@ -451,6 +451,14 @@ header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px s
 <script src="services/session.js"></script>
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyxZUSLZNa6UlZLINsfAEe8CmQPoNGJbpnNtUDxP019TfL8uLh_5fuP0e5HE6daP8dh1w/exec';
+// احتياط لو تعذّر تحميل services/session.js (لم يُرفع أو فشل الشبكة) — الصفحة تعمل بدون تجديد بدل أن تتوقف بالكامل
+// Fallback if services/session.js failed to load (not uploaded / network) — the page keeps working without renewal instead of halting entirely
+window.SecSession = window.SecSession || {
+  ensureFresh: async ()=> true,
+  handleExpired: ()=>{ localStorage.removeItem('sec-session'); location.href = 'auth.html?expired=1'; },
+  isTokenInvalid: (res)=> !!res && res.code === 'TOKEN_INVALID',
+  getToken: ()=>{ try{ return JSON.parse(localStorage.getItem('sec-session') || '{}').identityToken || ''; }catch(e){ return ''; } }
+};
 
 function escapeHtml(str){
   return String(str).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));

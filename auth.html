@@ -147,6 +147,7 @@ h2{font-size:18px; font-weight:700; margin-bottom:6px;}
   padding:10px 12px; border-radius:8px; margin-bottom:16px; display:none; line-height:1.6;
 }
 .error-banner.show{display:block;}
+.error-banner.info{background:var(--card-2, rgba(20,184,166,.10)); color:var(--teal);}
 .member-type-btn.active{border-color:var(--teal)!important;background:var(--teal)!important;color:#fff!important;font-weight:500;}
 
 .btn-progress{
@@ -660,9 +661,14 @@ bindSwitchLinks();
 
 function showError(msg){
   const el = document.getElementById('errorBanner');
-  el.textContent = msg; el.classList.add('show');
+  el.textContent = msg; el.classList.remove('info'); el.classList.add('show');
 }
-function hideError(){ document.getElementById('errorBanner').classList.remove('show'); }
+/* رسالة معلومات (غير خطأ) بنفس الشريط — Informational (non-error) note in the same banner */
+function showInfo(msg){
+  const el = document.getElementById('errorBanner');
+  el.textContent = msg; el.classList.add('show', 'info');
+}
+function hideError(){ document.getElementById('errorBanner').classList.remove('show', 'info'); }
 
 /* ============================================================
  *  مكوّن زر التقدم القابل لإعادة الاستخدام
@@ -756,23 +762,68 @@ setMode('login'); // يضبط نص الزر الرئيسي وظهور خيار �
  *  استدعاء الباكند الفعلي
  * ============================================================ */
 const API_URL = 'https://script.google.com/macros/s/AKfycbyxZUSLZNa6UlZLINsfAEe8CmQPoNGJbpnNtUDxP019TfL8uLh_5fuP0e5HE6daP8dh1w/exec';
-async function callBackend(action, payload){
-  const res = await fetch(API_URL, {
-    method:'POST',
-    body: JSON.stringify({ action, ...payload })
-  });
-  let json;
+/* إعدادات مرونة الاتصال — Apps Script يتأخر أحيانًا (تشغيل بارد/ضغط بالشيت) فيرجع HTML بدل JSON أو يعلّق طويلًا
+ * Connection-resilience settings — Apps Script sometimes stalls (cold start / sheet load) and returns HTML instead of JSON */
+const REQUEST_TIMEOUT_MS = 30000;
+const RETRY_DELAYS_MS = [1500, 3000]; // عدد عناصرها = عدد إعادات المحاولة / its length = number of retries
+// إجراءات آمنة للتكرار فقط (registerUser محمي بالخادم من التكرار: "مسجّل مسبقًا") — لا تُعاد verifyAssertion/registerCredential لأن التحدي يُستهلك مرة واحدة
+// Only repeat-safe actions (registerUser is duplicate-guarded server-side) — never retry verifyAssertion/registerCredential (single-use challenge)
+const RETRYABLE_ACTIONS = ['loginByPhone', 'getAdminContactInfo', 'generateLoginChallenge', 'generateRegisterChallenge', 'registerUser'];
+const CONNECTION_ERROR_MSG = 'تعذّر الاتصال بالخادم مؤقتًا، حاول مرة أخرى بعد قليل';
+
+/* طلب واحد بمهلة صريحة؛ يرمي خطأ عند فشل الشبكة/المهلة/رد غير JSON — One request with an explicit timeout; throws on network/timeout/non-JSON */
+async function fetchJsonOnce_(body){
+  const controller = new AbortController();
+  const timeoutId = setTimeout(()=> controller.abort(), REQUEST_TIMEOUT_MS);
   try{
-    json = await res.json();
-  }catch(parseErr){
-    // الخادم رجّع HTML بدل JSON — يحصل أحيانًا بسبب ازدحام مؤقت بجوجل نفسها، مو خطأ بكودنا
-    // Server returned HTML instead of JSON — sometimes happens due to a transient hiccup on Google's side, not our code
-    return { success:false, error: 'تعذّر الاتصال بالخادم مؤقتًا، حاول مرة أخرى بعد قليل' };
+    const res = await fetch(API_URL, { method:'POST', body, signal: controller.signal });
+    const text = await res.text();
+    try{ return JSON.parse(text); }
+    catch(parseErr){ throw new Error('non-json response (HTTP ' + res.status + ')'); }
+  }finally{
+    clearTimeout(timeoutId);
   }
+}
+
+/* تسجيل فشل الاتصال بسجل الأخطاء (أفضل جهد بلا انتظار) — Best-effort, fire-and-forget logging of the connection failure */
+function reportConnectionFailure_(action, err, attempts){
+  try{
+    fetch(API_URL, { method:'POST', body: JSON.stringify({
+      action:'logClientError', source:'client/connection',
+      message: 'auth/' + action + ': ' + String(err && err.message || err),
+      details: 'attempts=' + attempts + ', ua=' + navigator.userAgent
+    })}).catch(()=>{});
+  }catch(e){}
+}
+
+async function callBackend(action, payload){
+  const body = JSON.stringify({ action, ...payload });
+  const maxAttempts = RETRYABLE_ACTIONS.includes(action) ? RETRY_DELAYS_MS.length + 1 : 1;
+  const isBackground = action === 'getAdminContactInfo'; // طلب خلفي عند التحميل — لا يلمس شريط الرسائل / background call on load — never touches the banner
+  let json, lastErr;
+  for(let attempt = 1; attempt <= maxAttempts; attempt++){
+    try{
+      json = await fetchJsonOnce_(body);
+      break;
+    }catch(err){
+      lastErr = err;
+      if(attempt < maxAttempts){
+        if(!isBackground) showInfo('الخادم بطيء حاليًا، جارٍ إعادة المحاولة تلقائيًا…');
+        await new Promise(r=> setTimeout(r, RETRY_DELAYS_MS[attempt - 1]));
+      }
+    }
+  }
+  if(!json){
+    if(!isBackground) hideError();
+    reportConnectionFailure_(action, lastErr, maxAttempts);
+    return { success:false, error: CONNECTION_ERROR_MSG, connectionError: true };
+  }
+  const retried = !!lastErr;
+  if(retried && !isBackground) hideError();
   if(json.error){
-    return { success:false, error: json.error, ...json };
+    return { ...json, success:false, error: json.error, retried };
   }
-  return { success:true, ...json };
+  return { success:true, ...json, retried };
 }
 loadAdminContact(); // يُستدعى هنا بعد تعريف API_URL وcallBackend مباشرة — استدعاؤه مبكرًا بمكان تعريفه السابق كان يسبب خطأ "الوصول قبل التهيئة"
 
@@ -835,6 +886,13 @@ mainBtn.addEventListener('click', async ()=>{
         const departmentSelect = document.getElementById('regDepartmentInput').value;
         const department = departmentSelect==='أخرى' ? document.getElementById('regDepartmentOther').value.trim() : departmentSelect;
         const reg = await callBackend('registerUser', {name, email, phone, memberType: selectedMemberType, shift, department});
+        // المحاولة الأولى ربما نجحت بالخادم رغم تعليق ردها، فتردّ الإعادة "مسجّل مسبقًا" — نكمل بدخول عادي بدل عرض خطأ مضلّل
+        // The first attempt may have succeeded server-side despite its stalled reply, so the retry says "already registered" — continue with a normal login instead of a misleading error
+        if(!reg.success && reg.retried && String(reg.error || '').includes('مسجل مسبقًا')){
+          await loginByPhoneOnly_(phone);
+          window.location.href = 'index.html';
+          return { success: true };
+        }
         if(!reg.success) throw new Error(reg.error || 'تعذّر إنشاء الحساب');
         // البصمة اختيارية، وليست جزءًا إجباريًا من التسجيل — العضو يدخل
         // مباشرة بحساب فعّال، ويقدر يفعّل البصمة لاحقًا من خيار الدخول
@@ -1111,6 +1169,10 @@ function setAuthIcon(){
 
 /* ===== اقتراح آخر رقم جوال مستخدم تلقائيًا ===== */
 window.addEventListener('load', ()=>{
+  // وصول من صفحة أخرى بسبب انتهاء التذكرة (12 ساعة) — Arrived here from another page because the identity ticket expired (12h)
+  if(new URLSearchParams(location.search).get('expired') === '1'){
+    showInfo('انتهت الجلسة، سجّل الدخول من جديد');
+  }
   const saved = localStorage.getItem('sec-phone');
   if(saved){
     const match = countries.find(c => saved.startsWith(c.code));
