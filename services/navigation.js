@@ -35,7 +35,9 @@
   const MSG = {
     refused: 'يلزم السماح بتحديد موقعك لبدء الملاحة.',
     settings: 'صلاحية تحديد الموقع غير مفعلة. فعّلها من إعدادات المتصفح أو الجهاز للمتابعة.',
-    inaccurate: 'تعذّر تحديد موقعك بدقة كافية. تأكد من تفعيل خدمات الموقع و«الموقع الدقيق» ثم حاول مرة أخرى.',
+    // الموقع محدد لكن دقته لا تكفي — تُعرض الدقة الفعلية لتسهيل معرفة السبب / located but not precise enough — the real accuracy is shown to ease diagnosis
+    inaccurate: acc => 'دقة موقعك غير كافية للملاحة (الدقة الحالية ' + fmtAcc(acc) + '). تأكد من تفعيل خدمات الموقع و«الموقع الدقيق»، ثم حاول مرة أخرى.',
+    noFix: 'تعذّر الحصول على موقعك. تأكد من تفعيل خدمات الموقع، ثم حاول مرة أخرى.',
     unsupported: 'المتصفح لا يدعم تحديد الموقع',
     locating: '📍 جارٍ تحديد موقعك…'
   };
@@ -89,6 +91,7 @@
     return best;
   }
 
+  function fmtAcc(m) { return m >= 1000 ? '±' + (m / 1000).toFixed(1) + ' كم' : '±' + Math.round(m) + ' م'; }
   function fmtDist(m) { return m >= 1000 ? { v: (m / 1000).toFixed(1), u: 'كم' } : { v: String(Math.max(0, Math.round(m / 10) * 10)), u: 'م' }; }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
@@ -111,7 +114,8 @@
       const finish = function (fn, arg) { if (done) return; done = true; clearTimeout(timer); if (watchId != null) navigator.geolocation.clearWatch(watchId); fn(arg); };
       const timer = setTimeout(function () {
         if (best && best.coords.accuracy <= FIRST_FIX_OK_M) finish(resolve, best);
-        else finish(reject, { kind: 'inaccurate' });
+        else if (best) finish(reject, { kind: 'inaccurate', accuracy: best.coords.accuracy });
+        else finish(reject, { kind: 'noFix' });
       }, FIRST_FIX_WAIT_MS);
       watchId = navigator.geolocation.watchPosition(function (pos) {
         if (!best || pos.coords.accuracy < best.coords.accuracy) best = pos;
@@ -146,8 +150,10 @@
     } catch (e) {
       if (token !== startToken) return; // أُلغي (محطة أخرى/رجوع) / cancelled (another station / back)
       starting = false;
+      // الصلاحية شيء ودقة الموقع شيء آخر — لا خلط بين الرسالتين / permission and accuracy are separate — never mixed
       if (e.kind === 'denied') deps.hint(perm === 'prompt' || (perm === 'unknown' && !e.quick) ? MSG.refused : MSG.settings);
-      else deps.hint(MSG.inaccurate);
+      else if (e.kind === 'inaccurate') deps.hint(MSG.inaccurate(e.accuracy));
+      else deps.hint(MSG.noFix);
       return;
     }
     if (token !== startToken) return;
