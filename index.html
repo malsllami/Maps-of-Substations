@@ -567,6 +567,14 @@ body.guest-mode h1{
 .nav-stt{font-size:12.5px;font-weight:700;color:#18A957;}
 .nav-stt.wait{color:var(--text-secondary);}
 .nav-stt.warn{color:#C98A0B;}
+.nav-stt.bad{color:#E5484D;}
+.nav-note{font-size:11px;color:var(--text-secondary);text-align:center;margin-top:-4px;}
+.nav-note[hidden],.nav-band-wrap[hidden],.nav-band i[hidden]{display:none;}
+/* الأخضر ±30° (41.7%–58.3%)، الأصفر ±70° (30.6%–69.4%) — مطابق لحدود services/direction-tracker.js */
+.nav-band{direction:ltr;position:relative;height:8px;border-radius:99px;background:linear-gradient(90deg,#E5484D 0 30.6%,#E8A317 30.6% 41.7%,#18A957 41.7% 58.3%,#E8A317 58.3% 69.4%,#E5484D 69.4% 100%);}
+.nav-band i{position:absolute;top:-4px;width:6px;height:16px;border-radius:4px;background:#fff;border:1.5px solid #8FA3B8;transform:translateX(-50%);transition:left .4s;}
+.nav-lbl{display:flex;justify-content:space-between;font-size:9.5px;font-weight:600;margin-top:3px;}
+.nav-lbl .ok{color:#18A957;}.nav-lbl .warn{color:#B98200;}.nav-lbl .bad{color:#E5484D;}
 .nav-details{display:grid;gap:10px;}
 .nav-details[hidden]{display:none;}
 .nav-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
@@ -1439,6 +1447,7 @@ footer{
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
 <script src="services/stations-db.js"></script>
+<script src="services/direction-tracker.js"></script>
 <script src="services/navigation.js"></script>
 <script src="services/timing.js"></script>
 <script src="services/session.js"></script>
@@ -4014,12 +4023,14 @@ if(window.SecNavigation){
     relayout: layoutMapActive,
     osrmUrl: OSRM_URL,
     googleMapsUrl: s => `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}&travelmode=driving`,
-    hint: text => {
+    // persist: يبقى ظاهرًا (مثل «جارٍ تحديد موقعك…») حتى يُستبدل أو يُخفى — stays shown (e.g. «locating…») until replaced or hidden
+    hint: (text, persist) => {
       mapToolHint.textContent = text;
       mapToolHint.classList.add('show');
       clearTimeout(navHintTimer);
-      navHintTimer = setTimeout(()=> mapToolHint.classList.remove('show'), 6000);
-    }
+      if(!persist) navHintTimer = setTimeout(()=> mapToolHint.classList.remove('show'), 8000);
+    },
+    hideHint: () => { clearTimeout(navHintTimer); mapToolHint.classList.remove('show'); }
   });
 }
 </script>
