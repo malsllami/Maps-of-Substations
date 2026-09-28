@@ -1419,9 +1419,58 @@ window.SecSession = window.SecSession || {
   getToken: ()=>{ try{ return JSON.parse(localStorage.getItem('sec-session') || '{}').identityToken || ''; }catch(e){ return ''; } }
 };
 async function callBackend(action, payload){
-  const res = await fetch(API_URL, { method:'POST', body: JSON.stringify({ action, ...(payload||{}) }) });
+  const json = HEDGED_READ_ACTIONS.has(action) ? await hedgedRead_(action, payload) : await callBackendOnce_(action, payload);
   renewSessionActivity_(); // كل نشاط فعلي يجدد نافذة الوردية (12 ساعة) من جديد
+  return json;
+}
+async function callBackendOnce_(action, payload, signal){
+  const res = await fetch(API_URL, { method:'POST', body: JSON.stringify({ action, ...(payload||{}) }), signal });
   return await res.json();
+}
+
+/* ============================================================
+ *  طلب احتياطي لطلبات القراءة فقط: إن لم يصل رد خلال 8 ثوانٍ يُرسل نفس الطلب مرة ثانية بالتوازي،
+ *  وإن فشل الأول صراحة (404 من جوجل / انقطاع) قبلها يُرسل الاحتياطي فورًا. أول رد سليم يُعتمد ويُلغى
+ *  الآخر. الخادم ينهي هذه الطلبات بأقل من ثانية عادة، فالانتظار الطويل سببه طريق الطلب لا الحساب —
+ *  وطلب ثانٍ غالبًا يسلك طريقًا سليمًا. القراءة لا تغيّر بيانات فتكرارها آمن؛ الحفظ لا يُكرر هكذا أبدًا.
+ *  Backup request for READ requests only: if no reply within 8 s, the same request is sent again in
+ *  parallel; if the first fails outright (Google 404 / dropped) before that, the backup goes at once.
+ *  The first valid reply wins and the other is cancelled. The server usually finishes these in under a
+ *  second, so long waits come from the request's path, not the work — a second request usually takes a
+ *  healthy path. Reads change no data so repeating them is safe; saves are never repeated this way.
+ * ============================================================ */
+const HEDGED_READ_ACTIONS = new Set(['getStats', 'getDataVersion', 'getUpdatedStationsSince', 'getMemberProfileLite',
+  'getAllStations', 'searchStation', 'getNearbyStations', 'getFeederStations', 'ping']);
+const HEDGE_AFTER_MS = 8000;
+function hedgedRead_(action, payload){
+  return new Promise((resolve, reject)=>{
+    const controllers = [];
+    let launched = 0, failures = 0, settled = false, hedgeTimer = null;
+    const launch = ()=>{
+      if(settled || launched >= 2) return;
+      launched++;
+      const controller = new AbortController();
+      controllers.push(controller);
+      callBackendOnce_(action, payload, controller.signal).then(json=>{
+        if(settled) return;
+        settled = true;
+        clearTimeout(hedgeTimer);
+        controllers.forEach(c=>{
+          if(c === controller) return;
+          c.signal.__secHedgeLoser = true; // إلغاء مقصود — لا يُسجَّل كعطل / intentional cancel — not logged as a fault
+          c.abort();
+        });
+        resolve(json);
+      }, err=>{
+        if(settled) return;
+        failures++;
+        if(launched < 2){ clearTimeout(hedgeTimer); launch(); }   // فشل صريح قبل 8 ث ← الاحتياطي فورًا / outright failure before 8 s ← backup now
+        else if(failures >= launched){ settled = true; reject(err); } // فشل الطلبان / both failed
+      });
+    };
+    launch();
+    hedgeTimer = setTimeout(launch, HEDGE_AFTER_MS);
+  });
 }
 /* ============================================================
  *  حفظ مقاوم لأعطال جوجل المؤقتة (إضافة/تعديل محطة). أحيانًا يكتمل الحفظ بالخادم لكن جوجل يرجع
@@ -2096,10 +2145,23 @@ setTimeout(syncHeaderHeight, 300);
 // الشريط العلوي قد يطول بعد التحميل (نص الحالة يلتف لسطر ثانٍ بالجوال) دون تغيّر حجم النافذة — فيُراقَب ارتفاعه
 // فعليًا حتى لا ينزلق المحتوى (مثل مربع بحث الخريطة) تحته. The header can grow after load (status text wraps
 // to a second line on mobile) without a window resize — so its height is observed directly, keeping content (e.g. the map search box) from sliding under it.
+// إعادة الترتيب بالإطار التالي وفقط عند تغيّر الارتفاع فعلًا — تغيير الأحجام داخل نفس إشعار المراقبة كان يطلق
+// تحذير المتصفح "ResizeObserver loop". Relayout on the next frame and only on a real height change — resizing
+// inside the same observer notification triggered the browser's "ResizeObserver loop" warning.
 try{
   const _headerEl = document.querySelector('header');
   if(_headerEl && typeof ResizeObserver !== 'undefined'){
-    new ResizeObserver(()=>{ syncHeaderHeight(); layoutMapActive(); }).observe(_headerEl);
+    let lastHeaderH = 0, headerFrame = 0;
+    new ResizeObserver(()=>{
+      if(headerFrame) return;
+      headerFrame = requestAnimationFrame(()=>{
+        headerFrame = 0;
+        const h = _headerEl.getBoundingClientRect().height;
+        if(Math.abs(h - lastHeaderH) < 0.5) return;
+        lastHeaderH = h;
+        syncHeaderHeight(); layoutMapActive();
+      });
+    }).observe(_headerEl);
   }
 }catch(err){ console.warn('header ResizeObserver:', err); }
 

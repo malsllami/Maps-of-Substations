@@ -132,6 +132,7 @@
       return res;
     }, function (err) {
       let status = err && err.name === 'AbortError' ? 'أُلغي (انتهت المهلة)' : 'فشل شبكة';
+      if (init && init.signal && init.signal.__secHedgeLoser) status = 'أُلغي (وصل رد الطلب الاحتياطي أولًا)'; // إلغاء مقصود / intentional cancel
       if (leavingPage) status = 'أُلغي (مغادرة/إعادة تحميل الصفحة)'; // ليس عطلًا — المتصفح يلغي الطلبات الجارية / not a fault — the browser cancels in-flight requests
       finish_(null, status);
       throw err;

@@ -133,7 +133,9 @@
       }
       return res;
     }, function (err) {
-      if (!leavingPage) {
+      // إلغاء الطلب الاحتياطي الأبطأ مقصود وليس عطلًا / cancelling the slower backup request is intentional, not a fault
+      const hedgeLoser = init && init.signal && init.signal.__secHedgeLoser;
+      if (!leavingPage && !hedgeLoser) {
         const kind = err && err.name === 'AbortError' ? 'انتهت المهلة' : 'انقطاع الاتصال';
         queueError_('client/connection', 'فشل طلب ' + action + ': ' + kind,
           'الانتظار: ' + waited() + ' | رسالة المتصفح: ' + String(err && err.message || err).slice(0, 80));
@@ -150,6 +152,7 @@
   }
   function queueJsError_(msg, where) {
     if (!msg || msg === 'Script error.' || isConnectionSideEffect_(msg)) return; // "Script error." = سكربت خارجي بلا تفاصيل / cross-origin script with no details
+    if (/ResizeObserver loop/i.test(msg)) return; // تحذير متصفح معروف غير ضار، لا خلل ظاهر / a known harmless browser warning, no visible fault
     const key = msg + '|' + where;
     if (seenJsErrors[key]) return;
     seenJsErrors[key] = true;
