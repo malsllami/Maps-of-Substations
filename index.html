@@ -1663,7 +1663,7 @@ async function initStationsLocalSearch(){
   try{
     const versionRes = await callBackend('getDataVersion');
     if(!isStationsLoaded){
-      await refreshStationsLocalCache_(showLoadProgress_);
+      endLoadProgress_(await refreshStationsLocalCache_(showLoadProgress_));
     } else if(versionRes.success && versionRes.version !== cachedVersion){
       await syncIncrementalUpdates_();
     }
@@ -1676,6 +1676,17 @@ async function initStationsLocalSearch(){
 function showLoadProgress_(loaded, total){
   const el = document.getElementById('lastUpdateLabel');
   if(el) el.textContent = total ? `جاري تحميل بيانات المحطات: ${loaded}/${total}` : `جاري تحميل بيانات المحطات: ${loaded}`;
+}
+/* انتهاء التحميل: يُزال نص التقدم فورًا ويعود «آخر تحديث» (كان يبقى حتى 30 ثانية). النجاح رد فعلي من الخادم للتو.
+ * Load finished: the progress text is removed at once and «آخر تحديث» returns (it used to linger up to 30 s).
+ * Success is a real server reply just now. */
+function endLoadProgress_(loadedOk){
+  if(loadedOk) lastSuccessfulCheckAt = new Date();
+  if(!loadedOk && !isStationsLoaded){
+    document.getElementById('lastUpdateLabel').textContent = 'آخر تحديث: تعذّر التحميل الأول';
+    return;
+  }
+  refreshLastUpdateLabel();
 }
 
 /* ============================================================
@@ -1933,8 +1944,8 @@ document.getElementById('dataRefreshBtn').addEventListener('click', async ()=>{
   btn.disabled = true;
   try{
     await callBackend('clearSearchCache', { phone: session.phone });
-    await refreshStationsLocalCache_(showLoadProgress_);
-  }catch(e){}
+    endLoadProgress_(await refreshStationsLocalCache_(showLoadProgress_));
+  }catch(e){ endLoadProgress_(false); }
   btn.classList.remove('spinning');
   btn.disabled = false;
 });
