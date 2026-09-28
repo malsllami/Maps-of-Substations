@@ -99,6 +99,8 @@ header{
 .conn-dot.checking{background:#C8A24E;box-shadow:0 0 6px rgba(200,162,78,.6);}
 .conn-dot.online{background:#2ECC71;box-shadow:0 0 6px rgba(46,204,113,.6);}
 .conn-dot.offline{background:#E0654F;box-shadow:0 0 6px rgba(224,101,79,.6);}
+/* بدون اتصال مع بيانات محفوظة بالجهاز (البحث والأعطال تعمل) — Offline with on-device data (search and faults work) */
+.conn-dot.saved{background:#E8A317;box-shadow:0 0 6px rgba(232,163,23,.6);}
 @media (max-width:600px){
   .header-row-status{padding:0 14px 10px;}
   .conn-status-pill{padding:8px 12px;font-size:10.5px;gap:10px;flex-wrap:wrap;}
@@ -1411,6 +1413,7 @@ footer{
 <script src="services/timing.js"></script>
 <script src="services/session.js"></script>
 <script src="services/connection.js"></script>
+<script src="services/pwa.js"></script>
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyxZUSLZNa6UlZLINsfAEe8CmQPoNGJbpnNtUDxP019TfL8uLh_5fuP0e5HE6daP8dh1w/exec';
 // احتياط لو تعذّر تحميل services/session.js (لم يُرفع أو فشل الشبكة) — الصفحة تعمل بدون تجديد بدل أن تتوقف بالكامل
@@ -1523,6 +1526,12 @@ async function saveWithRetry_(action, payload, onRetry){
   }
 }
 const SAVE_RETRY_NOTE = 'الخادم لم يرد بشكل سليم، جارٍ التحقق من الحفظ…';
+/* الإضافة والتعديل لا يُرسلان والجهاز بلا إنترنت فعليًا — النموذج يبقى بما فيه ليُحفظ عند عودة الاتصال.
+ * الجهاز المتصل يُرسل كالسابق تمامًا (مع إعادة المحاولة عند أعطال جوجل المؤقتة).
+ * Add/edit aren't sent while the device is truly offline — the form keeps its contents to save once back online.
+ * An online device sends exactly as before (with retries on Google's transient faults). */
+const OFFLINE_WRITE_MSG = 'هذه العملية تحتاج إلى اتصال بالإنترنت';
+function isDeviceOffline_(){ return navigator.onLine === false; }
 
 function renewSessionActivity_(){
   const raw = localStorage.getItem('sec-session');
@@ -1736,7 +1745,10 @@ function formatRelativeTime(date){
   const diffMin = Math.floor(diffSec / 60);
   if(diffMin < 60) return diffMin === 1 ? 'قبل دقيقة' : `قبل ${diffMin} دقائق`;
   const diffHour = Math.floor(diffMin / 60);
-  return diffHour === 1 ? 'قبل ساعة' : `قبل ${diffHour} ساعات`;
+  if(diffHour < 24) return diffHour === 1 ? 'قبل ساعة' : `قبل ${diffHour} ساعات`;
+  // بيانات محفوظة من أيام (فتح الموقع بدون إنترنت) — Data saved days ago (site opened offline)
+  const diffDay = Math.floor(diffHour / 24);
+  return diffDay === 1 ? 'قبل يوم' : diffDay === 2 ? 'قبل يومين' : `قبل ${diffDay} أيام`;
 }
 function refreshLastUpdateLabel(){
   lastUpdateLabel.textContent = lastSuccessfulCheckAt
@@ -1758,12 +1770,33 @@ function pingIfNeeded_(pingFn){
   return window.SecConnection ? SecConnection.pingUnlessRecent(pingFn, CONN_CHECK_INTERVAL_MS) : pingFn();
 }
 
-async function checkConnection(){
+/* حالة الانقطاع حسب وجود بيانات محفوظة بالجهاز: 🟠 البحث والأعطال تعمل منها / 🔴 لا شيء محفوظ.
+ * "آخر تحديث" يبقى صادقًا: وقت آخر رد فعلي من الخادم (محفوظ بين الصفحات والفتحات).
+ * Offline state by on-device data: 🟠 search and faults work from it / 🔴 nothing saved.
+ * "Last update" stays truthful: the time of the last real server reply (kept across pages and opens). */
+function showOfflineState_(){
+  if(isStationsLoaded){
+    connDot.className = 'conn-dot saved';
+    connLabel.textContent = 'بدون اتصال · البيانات محفوظة';
+    statusBar.title = 'بدون اتصال — البحث والأعطال تعمل من البيانات المحفوظة بالجهاز';
+  } else {
+    connDot.className = 'conn-dot offline';
+    connLabel.textContent = 'بدون اتصال · لا توجد بيانات محفوظة';
+    statusBar.title = 'تعذّر الوصول لقاعدة البيانات — تحميل البيانات يحتاج اتصالًا بالإنترنت';
+  }
+  const lastOk = window.SecConnection ? SecConnection.lastOkAt() : 0;
+  if(!lastSuccessfulCheckAt && lastOk) lastSuccessfulCheckAt = new Date(lastOk);
+  refreshLastUpdateLabel();
+}
+
+async function checkConnection(forceRealRequest){
+  // الجهاز بلا إنترنت فعليًا: الحالة فورًا بلا طلب محكوم بالفشل — Device truly offline: state at once, no doomed request
+  if(navigator.onLine === false){ showOfflineState_(); return; }
   connDot.className = 'conn-dot checking';
   connLabel.textContent = 'جاري الاتصال...';
   try{
     const res = await Promise.race([
-      pingIfNeeded_(()=>callBackend('ping')),
+      forceRealRequest === true ? callBackend('ping') : pingIfNeeded_(()=>callBackend('ping')),
       new Promise((_, reject)=> setTimeout(()=> reject(new Error('timeout')), CONN_CHECK_TIMEOUT_MS))
     ]);
     if(res && res.success){
@@ -1776,11 +1809,12 @@ async function checkConnection(){
       throw new Error('backend-error');
     }
   }catch(err){
-    connDot.className = 'conn-dot offline';
-    connLabel.textContent = 'بدون اتصال';
-    statusBar.title = 'تعذّر الوصول لقاعدة البيانات — قد تكون البيانات غير محدثة';
+    showOfflineState_(); // يشمل: الجهاز متصل والخادم لا يرد / includes: device online but the server doesn't reply
   }
 }
+// انقطاع/عودة الإنترنت: تحديث المؤشر فورًا؛ العودة تُفحص بطلب فعلي — Internet lost/back: update at once; coming back is verified by a real request
+window.addEventListener('offline', ()=> showOfflineState_());
+window.addEventListener('online', ()=> checkConnection(true));
 function renderHeaderDate(){
   const el = document.getElementById('headerDateLine');
   if(el) el.textContent = new Date().toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', {day:'numeric', month:'long', year:'numeric'});
@@ -3383,6 +3417,7 @@ document.getElementById('addStationSubmitBtn').addEventListener('click', async f
     errEl.textContent = 'الإحداثية إجبارية — حدّد موقعك أو أدخلها يدوياً قبل الحفظ';
     return;
   }
+  if(isDeviceOffline_()){ errEl.textContent = OFFLINE_WRITE_MSG; return; }
 
   lockNavigationDuringSave();
   document.getElementById('addStationFormBody').style.display = 'none';
@@ -3688,6 +3723,7 @@ function openEditForm(){
     if(isNaN(lat) || isNaN(lng)){
       errEl.textContent = 'الرجاء إدخال إحداثية صحيحة'; errEl.style.display='block'; return;
     }
+    if(isDeviceOffline_()){ errEl.textContent = OFFLINE_WRITE_MSG; errEl.style.display='block'; return; }
     errEl.style.display='none';
     btn.disabled = true;
     document.getElementById('cancelEditBtn').disabled = true;

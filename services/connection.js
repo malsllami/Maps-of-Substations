@@ -145,7 +145,10 @@
     }, function (err) {
       // إلغاء الطلب الاحتياطي الأبطأ مقصود وليس عطلًا / cancelling the slower backup request is intentional, not a fault
       const hedgeLoser = init && init.signal && init.signal.__secHedgeLoser;
-      if (!leavingPage && !hedgeLoser) {
+      // الجهاز بلا إنترنت فعليًا (وضع الطيران / لا شبكة): فشل متوقع وليس عطلًا بالموقع أو بجوجل — لا يُسجَّل
+      // The device is truly offline (airplane mode / no network): an expected failure, not a site or Google fault — not logged
+      const deviceOffline = navigator.onLine === false;
+      if (!leavingPage && !hedgeLoser && !deviceOffline) {
         const kind = err && err.name === 'AbortError' ? 'انتهت المهلة' : 'انقطاع الاتصال';
         queueError_('client/connection', 'فشل طلب ' + action + ': ' + kind,
           'الانتظار: ' + waited() + ' | رسالة المتصفح: ' + String(err && err.message || err).slice(0, 80));
@@ -189,7 +192,8 @@
    */
   function pingUnlessRecent(pingFn, maxAgeMs) {
     const at = lastOkAt();
-    if (at && Date.now() - at < maxAgeMs) return Promise.resolve({ success: true, skipped: true, at: at });
+    // نجاح قديم لا يثبت الاتصال إن كان الجهاز بلا إنترنت الآن — A recent success proves nothing if the device is offline now
+    if (at && Date.now() - at < maxAgeMs && navigator.onLine !== false) return Promise.resolve({ success: true, skipped: true, at: at });
     return pingFn();
   }
 
