@@ -9,10 +9,10 @@
  * - Site pages/files: network first (as before), refreshing the stored copy on each success; offline ← stored copy.
  * - Pinned-version CDN libraries and fonts: stored copy first (a pinned URL never changes).
  * - Everything else (Apps Script, map tiles, OSRM, satellite): not intercepted at all. */
-const CACHE_NAME = 'sec-shell-v6';
+const CACHE_NAME = 'sec-shell-v7';
 const APP_SHELL = [
   'index.html', 'auth.html', 'member.html', 'shifts.html', 'admin.html', 'manifest.json',
-  'services/session.js', 'services/timing.js', 'services/connection.js', 'services/pwa.js', 'services/stations-db.js',
+  'services/session.js', 'services/timing.js', 'services/connection.js', 'services/pwa.js', 'services/stations-db.js', 'services/navigation.js',
   'assets/logo-icon.png', 'assets/icon-192.png', 'assets/icon-512.png', 'assets/icon-maskable-512.png', 'assets/member-icon.png'
 ];
 // نفس الروابط المستخدمة بالصفحات حرفيًا — The exact URLs the pages use

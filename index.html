@@ -550,6 +550,34 @@ body.guest-mode h1{
 /* المظهر الليلي: طبقة لونية فوق خريطة OSM نفسها (صور الخريطة فقط — العلامات والمسارات لا تتأثر)، بلا مزوّد يحتاج مفتاح API
    Night look: a color filter over the same OSM tiles (tiles only — markers/routes untouched), no API-key provider needed */
 .map-night-tiles{filter:invert(1) hue-rotate(180deg) brightness(.92) contrast(.88) saturate(.7);}
+/* ===== الملاحة (services/navigation.js) — نفس التصميم المعتمد بالصور — Navigation, as in the approved screenshots ===== */
+#topContentArea.nav-collapsed{display:none !important;}
+.nav-sheet{position:absolute;inset-inline:8px;bottom:8px;z-index:900;background:var(--bg-card);color:var(--text-primary);
+  border:1px solid var(--border-strong);border-radius:22px;box-shadow:0 -6px 22px rgba(0,0,0,.18);padding:8px 14px 12px;display:grid;gap:10px;}
+.nav-grab{width:40px;height:4px;border-radius:9px;background:var(--border-strong);margin:0 auto;}
+.nav-x{position:absolute;top:10px;left:12px;width:30px;height:30px;border-radius:50%;border:1px solid var(--border-strong);background:var(--bg-elev);color:var(--text-primary);font-size:15px;line-height:1;display:grid;place-items:center;cursor:pointer;}
+.nav-head{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;padding-inline-end:34px;}
+.nav-dial{width:64px;height:64px;border-radius:50%;border:1px solid var(--border-strong);position:relative;display:grid;place-items:center;background:var(--bg-elev);}
+.nav-dial b{position:absolute;top:2px;font-size:10px;}
+.nav-arrow{transition:transform .4s;}
+.nav-d{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;line-height:1.1;}
+.nav-d small{font-family:'IBM Plex Sans Arabic',sans-serif;font-size:14px;margin-inline-start:4px;}
+.nav-kind{font-size:12px;font-weight:700;color:var(--text-secondary);}
+.nav-dir{font-size:14px;font-weight:700;color:var(--blue-mid);}
+.nav-stt{font-size:12.5px;font-weight:700;color:#18A957;}
+.nav-stt.wait{color:var(--text-secondary);}
+.nav-stt.warn{color:#C98A0B;}
+.nav-details{display:grid;gap:10px;}
+.nav-details[hidden]{display:none;}
+.nav-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+.nav-tile{background:var(--bg-elev);border-radius:12px;padding:6px 8px;}
+.nav-tile .k{display:block;font-size:9.5px;color:var(--text-secondary);}
+.nav-tile .v{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;}
+.nav-tile .v.ar{font-family:'IBM Plex Sans Arabic',sans-serif;}
+.nav-gm{display:block;text-align:center;text-decoration:none;border-radius:14px;padding:10px;font-weight:700;font-size:13px;background:var(--teal);color:#fff;}
+.nav-more{border:0;border-top:1px solid var(--border-strong);background:none;padding-top:8px;font-family:inherit;font-size:12px;font-weight:700;color:var(--teal);cursor:pointer;}
+.nav-follow{position:absolute;left:14px;z-index:901;border:1px solid var(--border-strong);background:var(--bg-card);color:var(--text-primary);border-radius:99px;padding:8px 14px;font-family:inherit;font-weight:700;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.18);cursor:pointer;}
+.nav-follow[hidden]{display:none;}
 .map-mode-opt{
   display:flex;align-items:center;gap:9px;text-align:right;background:transparent;border:none;
   padding:9px 10px;border-radius:8px;font-size:12.5px;color:var(--text-primary);cursor:pointer;font-family:inherit;
@@ -1411,6 +1439,7 @@ footer{
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
 <script src="services/stations-db.js"></script>
+<script src="services/navigation.js"></script>
 <script src="services/timing.js"></script>
 <script src="services/session.js"></script>
 <script src="services/connection.js"></script>
@@ -3635,6 +3664,7 @@ document.getElementById('addStationDoneBtn').addEventListener('click', ()=>{
 
 let currentStation = null;
 function goToStation(s){
+  if(window.SecNavigation) SecNavigation.stop(); // الانتقال لمحطة أخرى ينهي الملاحة السابقة / moving to another station ends the previous navigation
   currentStation = s;
   addRecentStation(s);
   if(!leafletMap) initMap();
@@ -3696,6 +3726,7 @@ function renderStationOnMap(s){
         </div>` : ''}
       </div>
       <div class="st-actions">
+        <button class="st-btn primary" id="navFromMeBtn">المسار من موقعي 🧭</button>
         <a class="st-btn primary" href="${mapsUrl}" target="_blank" rel="noopener">قوقل ماب 🧭</a>
         <button class="st-btn" id="shareStationBtn">مشاركة 📤</button>
         <button class="st-btn" id="openEditBtn">تعديل ✏️</button>
@@ -3710,6 +3741,7 @@ function renderStationOnMap(s){
   document.getElementById('stationSearchBar').classList.add('compact');
   document.getElementById('shareStationBtn').addEventListener('click', () => shareStation_(s));
   document.getElementById('openEditBtn').addEventListener('click', openEditForm);
+  document.getElementById('navFromMeBtn').addEventListener('click', () => { if(window.SecNavigation) SecNavigation.start(s); });
 }
 
 let editPreviewMap = null, editPreviewMarker = null;
@@ -3934,6 +3966,7 @@ function openEditForm(){
 }
 
 function goBackToSearch(){
+  if(window.SecNavigation) SecNavigation.stop(); // الرجوع للبحث ينهي الملاحة / going back to search ends navigation
   document.getElementById('addStationOverlay').classList.remove('show');
   document.getElementById('editStationOverlay').classList.remove('show');
   mapContainer.classList.remove('active');
@@ -3970,6 +4003,25 @@ document.getElementById('homeMenuLink').addEventListener('click', (e)=>{
     goBackToSearch();
   }
 });
+
+/* ربط الملاحة بعناصر الصفحة الحالية (services/navigation.js) — Wire navigation to the existing page elements */
+if(window.SecNavigation){
+  let navHintTimer = null;
+  SecNavigation.init({
+    getMap: ()=> leafletMap,
+    stage: document.getElementById('globeStage'),
+    topArea: document.getElementById('topContentArea'),
+    relayout: layoutMapActive,
+    osrmUrl: OSRM_URL,
+    googleMapsUrl: s => `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}&travelmode=driving`,
+    hint: text => {
+      mapToolHint.textContent = text;
+      mapToolHint.classList.add('show');
+      clearTimeout(navHintTimer);
+      navHintTimer = setTimeout(()=> mapToolHint.classList.remove('show'), 6000);
+    }
+  });
+}
 </script>
 </body>
 </html>
