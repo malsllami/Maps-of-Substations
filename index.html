@@ -545,6 +545,9 @@ body.guest-mode h1{
   padding:6px 14px;
 }
 .map-mode-panel.show{display:flex;}
+/* المظهر الليلي: طبقة لونية فوق خريطة OSM نفسها (صور الخريطة فقط — العلامات والمسارات لا تتأثر)، بلا مزوّد يحتاج مفتاح API
+   Night look: a color filter over the same OSM tiles (tiles only — markers/routes untouched), no API-key provider needed */
+.map-night-tiles{filter:invert(1) hue-rotate(180deg) brightness(.92) contrast(.88) saturate(.7);}
 .map-mode-opt{
   display:flex;align-items:center;gap:9px;text-align:right;background:transparent;border:none;
   padding:9px 10px;border-radius:8px;font-size:12.5px;color:var(--text-primary);cursor:pointer;font-family:inherit;
@@ -2590,7 +2593,6 @@ document.getElementById('stationSearchLensIcon').addEventListener('click', perfo
 let leafletMap = null, currentTileLayer = null, marker = null;
 
 const TILE_URL_LIGHT = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-const TILE_URL_DARK = 'https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
 const SATELLITE_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
 const MAP_MODE_STORAGE_KEY = 'sec-map-mode';
 let mapMode = localStorage.getItem(MAP_MODE_STORAGE_KEY) || 'auto';
@@ -2621,8 +2623,7 @@ function resolvedTileMode(){
 }
 function tileUrlFor(tileMode){
   if(tileMode === 'satellite') return SATELLITE_URL;
-  if(tileMode === 'dark') return TILE_URL_DARK;
-  return TILE_URL_LIGHT;
+  return TILE_URL_LIGHT; // الليلي = نفس الخريطة + طبقة .map-night-tiles — Night = same tiles + .map-night-tiles filter
 }
 function updateMapModeUI(){
   const tileMode = resolvedTileMode();
@@ -2640,9 +2641,10 @@ function updateMapModeUI(){
 }
 function applyMapMode(){
   if(!leafletMap) return;
-  const tileUrl = tileUrlFor(resolvedTileMode());
+  const tileMode = resolvedTileMode();
+  const tileUrl = tileUrlFor(tileMode);
   if(currentTileLayer) leafletMap.removeLayer(currentTileLayer);
-  currentTileLayer = L.tileLayer(tileUrl, {maxZoom:19}).addTo(leafletMap);
+  currentTileLayer = L.tileLayer(tileUrl, {maxZoom:19, className: tileMode === 'dark' ? 'map-night-tiles' : ''}).addTo(leafletMap);
   updateMapModeUI();
 }
 function setMapMode(mode){
