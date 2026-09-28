@@ -25,7 +25,7 @@
   const PENDING_ERRORS_KEY = 'sec-pending-errors';
   const API_MARKER = 'script.google.com/macros/';
   const MAX_PENDING = 20;          // حد الأخطاء المنتظرة بالجهاز / max queued errors on the device
-  const MAX_SEND_PER_FLUSH = 5;    // حد الإرسال بعد كل رد سليم (لا يُغرق الخادم) / max sent per healthy reply (never floods the server)
+  const MAX_SEND_PER_FLUSH = 20;   // كلها في طلب واحد / all in a single request
   const originalFetch = global.fetch.bind(global);
   let lastApiUrl = '';
   let flushing = false;
@@ -70,6 +70,7 @@
   function queueError_(source, message, details) {
     const queue = readQueue_();
     queue.push({
+      id: newErrorId_(),
       source: source,
       message: String(message).slice(0, 180),
       details: ('وقت الحدوث: ' + clock_() + ' | الصفحة: ' + pageName_() + ' | ' + details + ' | الجهاز: ' + deviceSummary_()).slice(0, 500)
@@ -77,23 +78,32 @@
     writeQueue_(queue);
   }
 
-  /* يرسل الأخطاء المنتظرة بعد رد سليم من الخادم؛ ما يفشل إرساله يبقى للمرة القادمة — Sends queued errors after a healthy reply; unsent ones stay for next time */
+  /* رقم فريد لكل خطأ: الخادم يتجاهل أي خطأ سجّله من قبل. إعادة الإرسال بعد 404 من جوجل (حيث يكون الخطأ قد
+   * سُجّل فعلًا) لا تكرر الصف. A unique id per error: the server ignores any error it already logged. Resending
+   * after a Google 404 (when the error was in fact logged) never duplicates the row. */
+  function newErrorId_() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  }
+
+  /* يرسل كل الأخطاء المنتظرة في طلب واحد بعد رد سليم من الخادم؛ إن فشل الإرسال تعود للطابور للمرة القادمة
+   * Sends all queued errors in ONE request after a healthy reply; if sending fails they go back for next time */
   function flushQueue_() {
     if (flushing || !lastApiUrl) return;
     const queue = readQueue_();
     if (!queue.length) return;
     flushing = true;
-    const batch = queue.slice(0, MAX_SEND_PER_FLUSH);
+    const batch = queue.slice(0, MAX_SEND_PER_FLUSH).map(function (item) {
+      if (!item.id) item.id = newErrorId_(); // أخطاء محفوظة قبل هذا التحديث بلا رقم / errors queued before this update have no id
+      return item;
+    });
     writeQueue_(queue.slice(batch.length));
-    Promise.all(batch.map(function (item) {
-      return originalFetch(lastApiUrl, {
-        method: 'POST',
-        body: JSON.stringify({ action: 'logClientError', source: item.source, message: item.message, details: item.details })
-      }).then(function (res) { if (!res.ok) throw new Error('HTTP ' + res.status); })
-        .catch(function () { return item; }); // فشل الإرسال — يُعاد للطابور / send failed — back to the queue
-    })).then(function (results) {
-      const failed = results.filter(Boolean);
-      if (failed.length) writeQueue_(failed.concat(readQueue_()));
+    originalFetch(lastApiUrl, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'logClientError', errors: batch })
+    }).then(function (res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+    }).catch(function () {
+      writeQueue_(batch.concat(readQueue_())); // فشل الإرسال — تعود للطابور بنفس أرقامها / send failed — back to the queue with the same ids
     }).finally(function () { flushing = false; });
   }
 

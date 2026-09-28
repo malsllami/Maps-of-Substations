@@ -1442,6 +1442,17 @@ async function callBackendOnce_(action, payload, signal){
 const HEDGED_READ_ACTIONS = new Set(['getStats', 'getDataVersion', 'getUpdatedStationsSince', 'getMemberProfileLite',
   'getAllStations', 'searchStation', 'getNearbyStations', 'getFeederStations', 'ping']);
 const HEDGE_AFTER_MS = 8000;
+// بعد فشل فوري (مثل "Load failed" خلال أجزاء من الثانية عند الرجوع من الخلفية) يُنتظر قليلًا حتى تجهز الشبكة —
+// الإعادة الفورية تفشل بنفس اللحظة. After an instant failure (e.g. "Load failed" within a fraction of a second when
+// resuming from background) wait briefly for the network to be ready — an immediate retry fails at the same instant.
+const HEDGE_RETRY_AFTER_FAIL_MS = 1500;
+/* رد حقيقي من خادمنا يحمل دائمًا success أو error؛ غيره (مثل {"status":"ok"} الذي يصل عندما يعيد المتصفح إرسال
+ * الطلب بشكل خاطئ بعد الرجوع من الخلفية) ليس ردًا على الطلب. A real reply from our server always carries success or
+ * error; anything else (e.g. {"status":"ok"} that arrives when the browser wrongly re-sends the request after
+ * resuming from background) is not a reply to the request. */
+function isApiReply_(json){
+  return !!json && typeof json === 'object' && ('success' in json || 'error' in json);
+}
 function hedgedRead_(action, payload){
   return new Promise((resolve, reject)=>{
     const controllers = [];
@@ -1452,6 +1463,9 @@ function hedgedRead_(action, payload){
       const controller = new AbortController();
       controllers.push(controller);
       callBackendOnce_(action, payload, controller.signal).then(json=>{
+        if(!isApiReply_(json)) throw new Error('invalid-reply'); // يُعامل كفشل فيُرسل الاحتياطي / treated as a failure so the backup is sent
+        return json;
+      }).then(json=>{
         if(settled) return;
         settled = true;
         clearTimeout(hedgeTimer);
@@ -1464,7 +1478,7 @@ function hedgedRead_(action, payload){
       }, err=>{
         if(settled) return;
         failures++;
-        if(launched < 2){ clearTimeout(hedgeTimer); launch(); }   // فشل صريح قبل 8 ث ← الاحتياطي فورًا / outright failure before 8 s ← backup now
+        if(launched < 2){ clearTimeout(hedgeTimer); hedgeTimer = setTimeout(launch, HEDGE_RETRY_AFTER_FAIL_MS); } // فشل صريح قبل 8 ث ← الاحتياطي بعد 1.5 ث / outright failure before 8 s ← backup after 1.5 s
         else if(failures >= launched){ settled = true; reject(err); } // فشل الطلبان / both failed
       });
     };
