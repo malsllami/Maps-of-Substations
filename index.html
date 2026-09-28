@@ -1410,6 +1410,7 @@ footer{
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
+<script src="services/stations-db.js"></script>
 <script src="services/timing.js"></script>
 <script src="services/session.js"></script>
 <script src="services/connection.js"></script>
@@ -1580,12 +1581,81 @@ function loadStationsFromLocalCache_(){
   }catch(e){ return null; }
 }
 
-async function initStationsLocalSearch(){
-  const cachedVersion = localStorage.getItem(STATIONS_VERSION_KEY);
-  const cachedStations = loadStationsFromLocalCache_();
+/* ============================================================
+ *  مخزن المحطات بالجهاز: IndexedDB أساسي (services/stations-db.js) بنسخة واحدة تُعتمد كاملة؛
+ *  localStorage احتياط يعمل تمامًا كالسابق إن تعذّرت IndexedDB على الجهاز. أول فتح بعد التحديث
+ *  ينقل نسخة localStorage الحالية بعد التحقق منها، ولا يحذفها ولا يعدّلها.
+ *  On-device stations store: IndexedDB primary (services/stations-db.js) with one copy committed
+ *  whole; localStorage as a fallback that works exactly as before if IndexedDB isn't usable. The
+ *  first open after this update migrates the current localStorage copy after verifying it, never
+ *  deleting or editing it.
+ * ============================================================ */
+let stationsStore_ = 'local';                                   // 'idb' | 'local'
+let stationsMeta_ = { version: null, lastSync: null, sizeBytes: 0 }; // بيانات النسخة المعتمدة فعليًا / the actually committed copy's info
+let stationsWriteQueue_ = Promise.resolve();
 
-  if(cachedStations && cachedStations.length && cachedVersion){
-    allStationsLocal = cachedStations;
+/* كل كتابة للنسخة تنتظر السابقة — فلا تتداخل مزامنة مع إضافة/تعديل — Each write waits for the previous one, so a sync never interleaves with an add/edit */
+function withStationsWriteLock_(job){
+  const run = stationsWriteQueue_.then(job, job);
+  stationsWriteQueue_ = run.catch(()=>{});
+  return run;
+}
+
+async function loadStationsSnapshot_(){
+  if(window.SecStationsDB){
+    try{
+      let rec = await SecStationsDB.read();
+      if(!rec){
+        const legacy = loadStationsFromLocalCache_();
+        const legacyVersion = localStorage.getItem(STATIONS_VERSION_KEY);
+        if(legacy && legacy.length && legacyVersion){
+          rec = await SecStationsDB.migrate({ stations: legacy, version: legacyVersion, lastSync: localStorage.getItem(STATIONS_LAST_SYNC_KEY) });
+        }
+      }
+      stationsStore_ = 'idb';
+      return rec; // null = جهاز بلا بيانات: التحميل الكامل يُعتمد في IndexedDB / device without data: the full load commits to IndexedDB
+    }catch(e){
+      console.warn('IndexedDB غير متاحة — الاستمرار على localStorage كما كان / IndexedDB unavailable — using localStorage as before:', e);
+    }
+  }
+  stationsStore_ = 'local';
+  const stations = loadStationsFromLocalCache_();
+  const version = localStorage.getItem(STATIONS_VERSION_KEY);
+  return (stations && stations.length && version)
+    ? { stations, version, lastSync: localStorage.getItem(STATIONS_LAST_SYNC_KEY), sizeBytes: 0 }
+    : null;
+}
+
+/* يعتمد نسخة كاملة (المحطات + الإصدار + وقت المزامنة معًا). فشل الاعتماد في IndexedDB ← تبقى السابقة كما هي
+ * ولا يُكتب شيء في نسخة localStorage القديمة (تبقى احتياطًا كما هي)؛ localStorage تُستخدم فقط لجهاز تعذّرت فيه IndexedDB أصلًا.
+ * Commits a complete copy (stations + version + sync time together). A failed IndexedDB commit ← the previous copy
+ * stays as is and nothing is written to the old localStorage copy (kept as-is as a fallback); localStorage is used
+ * only on a device where IndexedDB isn't usable at all. */
+async function commitStationsSnapshot_(stations, version, lastSync){
+  if(stationsStore_ === 'idb'){
+    try{
+      const rec = await SecStationsDB.commit({ stations, version, lastSync });
+      stationsMeta_ = { version: rec.version, lastSync: rec.lastSync, sizeBytes: rec.sizeBytes };
+      return true;
+    }catch(e){
+      console.warn('تعذّر اعتماد النسخة الجديدة — السابقة سليمة وتُعاد المزامنة لاحقًا / new copy not committed — previous intact, sync retried later:', e);
+      return false;
+    }
+  }
+  if(!saveStationsToLocalCache_(stations)) return false;
+  localStorage.setItem(STATIONS_VERSION_KEY, version);
+  localStorage.setItem(STATIONS_LAST_SYNC_KEY, lastSync);
+  stationsMeta_ = { version, lastSync, sizeBytes: 0 };
+  return true;
+}
+
+async function initStationsLocalSearch(){
+  const snapshot = await loadStationsSnapshot_();
+  const cachedVersion = snapshot ? snapshot.version : null;
+
+  if(snapshot && snapshot.stations.length && cachedVersion){
+    allStationsLocal = snapshot.stations;
+    stationsMeta_ = { version: snapshot.version, lastSync: snapshot.lastSync, sizeBytes: snapshot.sizeBytes || 0 };
     isStationsLoaded = true;
     updateStationsCacheInfo();
   }
@@ -1623,8 +1693,14 @@ function showLoadProgress_(loaded, total){
 function updateStationsCacheInfo(){
   const el = document.getElementById('stationsCacheInfo');
   if(!el) return;
-  const raw = localStorage.getItem(STATIONS_CACHE_KEY);
   const count = allStationsLocal.length;
+  if(stationsStore_ === 'idb'){
+    if(!count){ el.textContent = 'بيانات المحطات المحمّلة بالذاكرة المؤقتة: لم تُحمَّل بعد'; return; }
+    const sizeMB = stationsMeta_.sizeBytes / (1024*1024);
+    el.innerHTML = `بيانات المحطات المحمّلة بالذاكرة المؤقتة: <b>${count}</b> محطة (${sizeMB.toFixed(2)} MB بقاعدة بيانات الجهاز)`;
+    return;
+  }
+  const raw = localStorage.getItem(STATIONS_CACHE_KEY);
   if(!raw || !count){
     el.textContent = 'بيانات المحطات المحمّلة بالذاكرة المؤقتة: لم تُحمَّل بعد';
     return;
@@ -1634,22 +1710,43 @@ function updateStationsCacheInfo(){
 }
 
 let _isRefreshingStationsCache = false;
+/* دمج التحديثات في نسخة جديدة كاملة (لا تعديل على الحالية) — نفس المطابقة القديمة: الرقم بلا حساسية حالة + النوع
+ * Merge updates into a complete NEW copy (the current one untouched) — same matching as before: case-insensitive id + type */
+function applyStationUpdates_(base, updates){
+  if(window.SecStationsDB) return SecStationsDB.applyUpdates(base, updates);
+  const next = base.slice(); let added = 0;
+  updates.forEach(function(st){
+    const idx = next.findIndex(s => String(s.id).toUpperCase() === String(st.id).toUpperCase() && s.type === st.type);
+    if(idx === -1){ next.push(st); added++; } else next[idx] = st;
+  });
+  return { stations: next, added };
+}
+
+/* مزامنة ذرية: جلب المتغيّر ← بناء نسخة جديدة كاملة ← التحقق ← اعتمادها مع الإصدار ووقت المزامنة بعملية واحدة.
+ * أي خطأ قبل الاعتماد ← النسخة المحفوظة كما هي، ووقت المزامنة لا يتقدم فتُجلب نفس التحديثات بالمرة القادمة.
+ * Atomic sync: fetch changes ← build a complete new copy ← verify ← commit it with version and sync time in one
+ * transaction. Any error before the commit ← the stored copy stays as is and the sync time doesn't advance, so the
+ * same changes are fetched next time. */
 async function syncIncrementalUpdates_(){
   try{
-    const lastSync = localStorage.getItem(STATIONS_LAST_SYNC_KEY);
-    const res = await callBackend('getUpdatedStationsSince', { since: lastSync || null });
+    const res = await callBackend('getUpdatedStationsSince', { since: stationsMeta_.lastSync || null });
     if(!res.success || !Array.isArray(res.updated)) return false;
 
-    res.updated.forEach(function(st){
-      const idx = allStationsLocal.findIndex(s => String(s.id).toUpperCase() === String(st.id).toUpperCase() && s.type === st.type);
-      if(idx === -1) allStationsLocal.push(st);
-      else allStationsLocal[idx] = st;
+    return await withStationsWriteLock_(async ()=>{
+      if(!isStationsLoaded) return false; // مُسحت البيانات أثناء الجلب / data was cleared during the fetch
+      const base = allStationsLocal;
+      const built = applyStationUpdates_(base, res.updated);
+      if(built.stations.length !== base.length + built.added){
+        console.warn('نسخة المزامنة لم تطابق العدد المتوقع — أُلغيت وبقيت السابقة / sync copy failed the count check — discarded, previous kept');
+        return false;
+      }
+      const committed = await commitStationsSnapshot_(built.stations, res.version, res.serverTime);
+      // الذاكرة تتحدث كالسابق؛ إن أُضيفت محطة يدويًا أثناء الاعتماد تُدمج التحديثات فوقها فلا تضيع
+      // Memory updates as before; if a station was added by hand during the commit, updates merge on top so it isn't lost
+      allStationsLocal = (allStationsLocal === base) ? built.stations : applyStationUpdates_(allStationsLocal, res.updated).stations;
+      updateStationsCacheInfo();
+      return committed;
     });
-
-    saveStationsToLocalCache_(allStationsLocal);
-    localStorage.setItem(STATIONS_LAST_SYNC_KEY, res.serverTime);
-    localStorage.setItem(STATIONS_VERSION_KEY, res.version);
-    return true;
   }catch(e){
     return false;
   }
@@ -1694,11 +1791,12 @@ async function refreshStationsLocalCache_(onProgress){
       return false;
     }
 
+    // التحميل الكامل يُعتمد كنسخة واحدة؛ فشل أي دفعة أعلاه يترك النسخة المحفوظة كما هي
+    // The full load is committed as one copy; any failed batch above leaves the stored copy as is
+    await withStationsWriteLock_(()=> commitStationsSnapshot_(collected, version, serverTime));
     allStationsLocal = collected;
     isStationsLoaded = true;
-    saveStationsToLocalCache_(allStationsLocal);
-    localStorage.setItem(STATIONS_VERSION_KEY, version);
-    localStorage.setItem(STATIONS_LAST_SYNC_KEY, serverTime);
+    updateStationsCacheInfo();
     return true;
   } finally {
     _isRefreshingStationsCache = false;
@@ -1933,6 +2031,10 @@ document.getElementById('clearStorageBtn').addEventListener('click', ()=>{
   Object.entries(preserved).forEach(([k,v])=> localStorage.setItem(k,v));
   allStationsLocal = [];
   isStationsLoaded = false;
+  stationsMeta_ = { version: null, lastSync: null, sizeBytes: 0 };
+  // نسخة المحطات انتقلت إلى IndexedDB — تُمسح معها كما كان هذا الزر يمسحها من localStorage
+  // The stations copy moved to IndexedDB — cleared there too, just as this button cleared it from localStorage
+  if(window.SecStationsDB) withStationsWriteLock_(()=> SecStationsDB.clear()).catch(()=>{});
   updateStorageDisplay();
   renderRecentPanel();
 });
@@ -2438,12 +2540,17 @@ async function searchStationSmart(query){
   return await callBackend('searchStation', { query, phone: getSessionPhone_() });
 }
 
+/* بعد إضافة/تعديل ناجح: الذاكرة فورًا (البحث يجدها مباشرة كالسابق)، ثم اعتماد نسخة كاملة بالدور بعد أي مزامنة جارية.
+ * الإصدار ووقت المزامنة لا يتغيّران، فالمزامنة القادمة تجلب نسخة الخادم الرسمية لنفس المحطة.
+ * After a successful add/edit: memory at once (search finds it immediately, as before), then a complete copy is
+ * committed in turn after any running sync. Version and sync time don't change, so the next sync fetches the
+ * server's official record for the same station. */
 function upsertStationInLocalCache_(station){
   if(!isStationsLoaded) return;
-  const idx = allStationsLocal.findIndex(s => String(s.id).toUpperCase() === String(station.id).toUpperCase() && s.type === station.type);
-  if(idx === -1) allStationsLocal.push(station);
-  else allStationsLocal[idx] = station;
-  saveStationsToLocalCache_(allStationsLocal);
+  allStationsLocal = applyStationUpdates_(allStationsLocal, [station]).stations;
+  updateStationsCacheInfo();
+  withStationsWriteLock_(()=> isStationsLoaded // مُسحت البيانات بالانتظار ← لا شيء يُحفظ / data was cleared meanwhile ← nothing to save
+    ? commitStationsSnapshot_(allStationsLocal, stationsMeta_.version, stationsMeta_.lastSync) : false);
 }
 
 let isSearching = false;
