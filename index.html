@@ -1658,6 +1658,7 @@ async function initStationsLocalSearch(){
     stationsMeta_ = { version: snapshot.version, lastSync: snapshot.lastSync, sizeBytes: snapshot.sizeBytes || 0 };
     isStationsLoaded = true;
     updateStationsCacheInfo();
+    refreshLastUpdateLabel(); // وقت النسخة المحفوظة فورًا (مهم بدون إنترنت) / the stored copy's time at once (matters offline)
   }
 
   try{
@@ -1665,12 +1666,12 @@ async function initStationsLocalSearch(){
     if(!isStationsLoaded){
       endLoadProgress_(await refreshStationsLocalCache_(showLoadProgress_));
     } else if(versionRes.success && versionRes.version !== cachedVersion){
-      await syncIncrementalUpdates_();
+      if(await syncIncrementalUpdates_()) markStationsSynced_();
+    } else if(versionRes.success){
+      markStationsSynced_(); // الخادم أكّد أن النسخة المحفوظة مطابقة لآخر إصدار / the server confirmed the stored copy matches the latest version
     }
   }catch(e){
-    if(!isStationsLoaded){
-      document.getElementById('lastUpdateLabel').textContent = 'آخر تحديث: تعذّر التحميل الأول';
-    }
+    endLoadProgress_(false);
   }
 }
 function showLoadProgress_(loaded, total){
@@ -1681,12 +1682,39 @@ function showLoadProgress_(loaded, total){
  * Load finished: the progress text is removed at once and «آخر تحديث» returns (it used to linger up to 30 s).
  * Success is a real server reply just now. */
 function endLoadProgress_(loadedOk){
-  if(loadedOk) lastSuccessfulCheckAt = new Date();
-  if(!loadedOk && !isStationsLoaded){
-    document.getElementById('lastUpdateLabel').textContent = 'آخر تحديث: تعذّر التحميل الأول';
-    return;
-  }
+  if(loadedOk){ markStationsSynced_(); return; }
+  if(!isStationsLoaded) firstLoadFailed_ = true;
   refreshLastUpdateLabel();
+}
+
+/* ============================================================
+ *  «آخر تحديث» = وقت آخر تحميل/مزامنة ناجحة لبيانات المحطات فقط — نجاح فحص الاتصال وحده لا يغيّره.
+ *  - تحميل/مزامنة ناجحة، أو تأكيد الخادم أن النسخة مطابقة لآخر إصدار ← «الآن»
+ *  - نسخة محفوظة سابقة ← وقتها (يبقى بعد إعادة الفتح، ومع انقطاع الإنترنت)
+ *  - فشل التحميل الأول ولا بيانات ← «تعذّر التحميل الأول»
+ *  «Last update» = the time of the last successful stations load/sync only — a successful connection check alone never changes it.
+ *  - successful load/sync, or the server confirming the stored copy is the latest version ← «now»
+ *  - a previously stored copy ← its time (kept across reopens and while offline)
+ *  - first load failed and no data ← «first load failed»
+ * ============================================================ */
+const STATIONS_SYNCED_AT_KEY = 'sec-stations-synced-at-v1';
+let lastDataSyncAt = null;
+let firstLoadFailed_ = false;
+
+function markStationsSynced_(){
+  lastDataSyncAt = new Date();
+  firstLoadFailed_ = false;
+  try{ localStorage.setItem(STATIONS_SYNCED_AT_KEY, String(lastDataSyncAt.getTime())); }catch(e){}
+  refreshLastUpdateLabel();
+}
+/* وقت النسخة المحفوظة: آخر نجاح مسجّل، أو وقت آخر مزامنة بالنسخة نفسها (للنسخ الأقدم من هذا التحديث)
+ * Stored copy time: the last recorded success, or the copy's own last-sync time (for copies older than this update) */
+function storedStationsTime_(){
+  let t = 0;
+  try{ t = Number(localStorage.getItem(STATIONS_SYNCED_AT_KEY)) || 0; }catch(e){}
+  const fromCopy = Date.parse(stationsMeta_.lastSync || '');
+  if(!isNaN(fromCopy) && fromCopy > t) t = fromCopy;
+  return t ? new Date(t) : null;
 }
 
 /* ============================================================
@@ -1845,7 +1873,6 @@ const statusBar = document.getElementById('statusBar');
 const lastUpdateLabel = document.getElementById('lastUpdateLabel');
 const CONN_CHECK_INTERVAL_MS = 3 * 60 * 1000;
 const CONN_CHECK_TIMEOUT_MS = 15 * 1000;
-let lastSuccessfulCheckAt = null;
 
 function formatRelativeTime(date){
   const diffSec = Math.floor((Date.now() - date.getTime()) / 1000);
@@ -1860,9 +1887,13 @@ function formatRelativeTime(date){
   return diffDay === 1 ? 'قبل يوم' : diffDay === 2 ? 'قبل يومين' : `قبل ${diffDay} أيام`;
 }
 function refreshLastUpdateLabel(){
-  lastUpdateLabel.textContent = lastSuccessfulCheckAt
-    ? `آخر تحديث: ${formatRelativeTime(lastSuccessfulCheckAt)}`
-    : 'آخر تحديث: —';
+  if(!isStationsLoaded){
+    if(_isRefreshingStationsCache) return; // نص التقدم ظاهر أثناء التحميل الأول — لا يُستبدل / the first-load progress text stays
+    lastUpdateLabel.textContent = firstLoadFailed_ ? 'آخر تحديث: تعذّر التحميل الأول' : 'آخر تحديث: —';
+    return;
+  }
+  const at = lastDataSyncAt || storedStationsTime_();
+  lastUpdateLabel.textContent = at ? `آخر تحديث: ${formatRelativeTime(at)}` : 'آخر تحديث: —';
 }
 function refreshPanelUpdateLabels(){
   const txt = lastStatsFetch ? formatRelativeTime(new Date(lastStatsFetch)) : '—';
@@ -1880,9 +1911,9 @@ function pingIfNeeded_(pingFn){
 }
 
 /* حالة الانقطاع حسب وجود بيانات محفوظة بالجهاز: 🟠 البحث والأعطال تعمل منها / 🔴 لا شيء محفوظ.
- * "آخر تحديث" يبقى صادقًا: وقت آخر رد فعلي من الخادم (محفوظ بين الصفحات والفتحات).
+ * "آخر تحديث" يعرض وقت النسخة المحفوظة (انظر refreshLastUpdateLabel).
  * Offline state by on-device data: 🟠 search and faults work from it / 🔴 nothing saved.
- * "Last update" stays truthful: the time of the last real server reply (kept across pages and opens). */
+ * "Last update" shows the stored copy's time (see refreshLastUpdateLabel). */
 function showOfflineState_(){
   if(isStationsLoaded){
     connDot.className = 'conn-dot saved';
@@ -1893,8 +1924,6 @@ function showOfflineState_(){
     connLabel.textContent = 'بدون اتصال · لا توجد بيانات محفوظة';
     statusBar.title = 'تعذّر الوصول لقاعدة البيانات — تحميل البيانات يحتاج اتصالًا بالإنترنت';
   }
-  const lastOk = window.SecConnection ? SecConnection.lastOkAt() : 0;
-  if(!lastSuccessfulCheckAt && lastOk) lastSuccessfulCheckAt = new Date(lastOk);
   refreshLastUpdateLabel();
 }
 
@@ -1911,9 +1940,8 @@ async function checkConnection(forceRealRequest){
     if(res && res.success){
       connDot.className = 'conn-dot online';
       connLabel.textContent = 'متصل';
-      statusBar.title = 'متصل بقاعدة البيانات — البيانات محدثة';
-      lastSuccessfulCheckAt = new Date(res.at || Date.now()); // وقت آخر رد فعلي عند التخطي / real last-reply time when skipped
-      refreshLastUpdateLabel();
+      statusBar.title = 'متصل بقاعدة البيانات';
+      // نجاح فحص الاتصال وحده لا يغيّر «آخر تحديث» — Connection success alone never changes «آخر تحديث»
     } else {
       throw new Error('backend-error');
     }
