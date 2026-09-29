@@ -1723,7 +1723,7 @@ async function commitStationsSnapshot_(stations, version, lastSync){
   if(stationsStore_ === 'idb'){
     try{
       const rec = await SecStationsDB.commit({ stations, version, lastSync });
-      stationsMeta_ = { version: rec.version, lastSync: rec.lastSync, sizeBytes: rec.sizeBytes };
+      stationsMeta_ = { version: rec.version, lastSync: rec.lastSync, sizeBytes: rec.sizeBytes, savedAt: rec.savedAt };
       return true;
     }catch(e){
       console.warn('تعذّر اعتماد النسخة الجديدة — السابقة سليمة وتُعاد المزامنة لاحقًا / new copy not committed — previous intact, sync retried later:', e);
@@ -1733,7 +1733,7 @@ async function commitStationsSnapshot_(stations, version, lastSync){
   if(!saveStationsToLocalCache_(stations)) return false;
   localStorage.setItem(STATIONS_VERSION_KEY, version);
   localStorage.setItem(STATIONS_LAST_SYNC_KEY, lastSync);
-  stationsMeta_ = { version, lastSync, sizeBytes: 0 };
+  stationsMeta_ = { version, lastSync, sizeBytes: 0, savedAt: Date.now() };
   return true;
 }
 
@@ -1778,7 +1778,7 @@ async function initStationsLocalSearch(){
 
   if(snapshot && snapshot.stations.length && cachedVersion){
     allStationsLocal = snapshot.stations;
-    stationsMeta_ = { version: snapshot.version, lastSync: snapshot.lastSync, sizeBytes: snapshot.sizeBytes || 0 };
+    stationsMeta_ = { version: snapshot.version, lastSync: snapshot.lastSync, sizeBytes: snapshot.sizeBytes || 0, savedAt: snapshot.savedAt || null };
     isStationsLoaded = true;
     updateStationsCacheInfo();
     refreshLastUpdateLabel(); // وقت النسخة المحفوظة فورًا (مهم بدون إنترنت) / the stored copy's time at once (matters offline)
@@ -1853,23 +1853,37 @@ function storedStationsTime_(){
  *  compressed cache size inside localStorage, separate from the
  *  general "storage used" bar which lumps every key together
  * ============================================================ */
-/* سطر «آخر نسخة محمّلة» تحت سطر البيانات: من سجل النسخ الناجحة، بنفس وحدة الحجم والتاريخين الميلادي والهجري
- * The «last loaded copy» line under the data line: from the successful-copies log, same size unit, Gregorian + Hijri dates */
+/* ============================================================
+ *  وصف مختصر للنسخة المحفوظة فعليًا (لا البيانات نفسها): الإصدار، عدد المحطات، الحجم، وقت الحفظ.
+ *  يُكتب عند كل فتح وكل اعتماد ناجح، فتقرؤه لوحة العضو دون تحميل 5 ميجابايت — ويعمل للنسخ المحفوظة قبل سجل التحميل.
+ *  A short descriptor of the actually stored copy (not the data itself): version, station count, size, save time.
+ *  Written on every open and every successful commit, so the member page reads it without loading 5 MB — and it works
+ *  for copies stored before the load log existed.
+ * ============================================================ */
+const STATIONS_COPY_META_KEY = 'sec-stations-copy-meta-v1';
+function writeCopyMeta_(){
+  if(!isStationsLoaded && !allStationsLocal.length) return;
+  let bytes = stationsMeta_.sizeBytes || 0;
+  if(!bytes){ const raw = localStorage.getItem(STATIONS_CACHE_KEY); bytes = raw ? raw.length * 2 : 0; }
+  try{ localStorage.setItem(STATIONS_COPY_META_KEY, JSON.stringify({ version: stationsMeta_.version, count: allStationsLocal.length, bytes, savedAt: stationsMeta_.savedAt || null, store: stationsStore_ })); }catch(e){}
+}
+/* سطر «آخر نسخة محمّلة» تحت سطر البيانات — من النسخة الفعلية: الإصدار، عدد المحطات، الحجم، وتاريخ آخر مزامنة ناجحة (ميلادي وهجري)
+ * The «last loaded copy» line — from the actual copy: version, station count, size, last successful sync date (Gregorian + Hijri) */
 function renderLatestCopyLine_(){
   const el = document.getElementById('stationsLatestInfo');
   if(!el) return;
-  let latest = null;
-  try{ latest = (JSON.parse(localStorage.getItem(STATIONS_LOAD_LOG_KEY) || '[]'))[0] || null; }catch(e){}
-  if(!latest || !isStationsLoaded){ el.hidden = true; return; }
-  const d = new Date(latest.at);
-  const greg = d.toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', { day:'numeric', month:'long', year:'numeric' });
-  const hijri = d.toLocaleDateString('ar-SA-u-ca-islamic-umalqura-nu-latn', { day:'numeric', month:'long', year:'numeric' });
-  el.innerHTML = `آخر نسخة محمّلة: النسخة <b>${escapeHtml(latest.version)}</b> · ${(latest.bytes / (1024*1024)).toFixed(2)} MB · ${greg} · ${hijri}`;
+  if(!isStationsLoaded || !allStationsLocal.length){ el.hidden = true; return; }
+  const at = lastDataSyncAt || storedStationsTime_() || (stationsMeta_.savedAt ? new Date(stationsMeta_.savedAt) : null);
+  let bytes = stationsMeta_.sizeBytes || 0;
+  if(!bytes){ const raw = localStorage.getItem(STATIONS_CACHE_KEY); bytes = raw ? raw.length * 2 : 0; }
+  const dates = at ? ' · ' + at.toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', { day:'numeric', month:'long', year:'numeric' }) + ' · ' + at.toLocaleDateString('ar-SA-u-ca-islamic-umalqura-nu-latn', { day:'numeric', month:'long', year:'numeric' }) : '';
+  el.innerHTML = `آخر نسخة محمّلة: النسخة <b>${escapeHtml(stationsMeta_.version == null ? '—' : stationsMeta_.version)}</b> · ${allStationsLocal.length.toLocaleString('en')} محطة · ${(bytes / (1024*1024)).toFixed(2)} MB${dates}`;
   el.hidden = false;
 }
 
 function updateStationsCacheInfo(){
   renderLatestCopyLine_();
+  if(isStationsLoaded) writeCopyMeta_(); // بعد تحديث الذاكرة دائمًا — نسخ ما قبل هذا التحديث تظهر من أول فتح / always after memory updates — pre-update copies show from the first open
   const el = document.getElementById('stationsCacheInfo');
   if(!el) return;
   const count = allStationsLocal.length;
@@ -2747,7 +2761,7 @@ function upsertStationInLocalCache_(station){
   allStationsLocal = applyStationUpdates_(allStationsLocal, [station]).stations;
   updateStationsCacheInfo();
   withStationsWriteLock_(()=> isStationsLoaded // مُسحت البيانات بالانتظار ← لا شيء يُحفظ / data was cleared meanwhile ← nothing to save
-    ? commitStationsSnapshot_(allStationsLocal, stationsMeta_.version, stationsMeta_.lastSync) : false);
+    ? commitStationsSnapshot_(allStationsLocal, stationsMeta_.version, stationsMeta_.lastSync).then(ok => { if(ok) updateStationsCacheInfo(); return ok; }) : false);
 }
 
 let isSearching = false;

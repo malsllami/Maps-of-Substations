@@ -125,6 +125,9 @@ h2{font-size:17px;font-weight:700;margin-bottom:4px;}
 .cache-op{display:grid;grid-template-columns:auto 1fr;gap:8px;background:var(--bg-elev);border-radius:12px;padding:9px 12px;font-size:12px;}
 .cache-op .t{font-weight:700;color:var(--text-primary);}
 .cache-op .s{color:var(--text-secondary);font-size:11px;}
+.cache-copy{background:var(--bg-elev);border:1px solid var(--border);border-radius:12px;padding:10px 12px;display:grid;gap:3px;font-size:12px;color:var(--text-secondary);}
+.cache-copy .v{font-weight:700;color:var(--text-primary);font-size:13px;}
+.cache-copy .n{font-weight:700;color:var(--text-primary);font-family:'JetBrains Mono',monospace;}
 .meta-row span:last-child{color:var(--text-primary);font-family:'JetBrains Mono',monospace;}
 .error-banner{background:var(--danger-bg);color:var(--danger);font-size:12.5px;padding:10px 12px;border-radius:8px;margin-bottom:14px;display:none;}
 .error-banner.show{display:block;}
@@ -321,10 +324,10 @@ h2{font-size:17px;font-weight:700;margin-bottom:4px;}
       <span>آخر دخول ناجح</span>
       <span id="lastLoginVal">—</span>
     </div>
-    <!-- آخر نسخة بالذاكرة المؤقتة (من سجل هذا الجهاز) — the last cached copy (from this device's log) -->
-    <div class="meta-row">
+    <!-- آخر نسخة بالذاكرة المؤقتة (بيانات المحطات على هذا الجهاز — مستقلة عن خريطة جدة) — the last cached copy (stations data on this device — separate from the Jeddah map) -->
+    <div class="meta-row" style="flex-direction:column;gap:6px">
       <span>آخر نسخة بالذاكرة المؤقتة</span>
-      <span id="lastCacheCopyVal" style="text-align:left">—</span>
+      <div class="cache-copy" id="lastCacheCopyVal">—</div>
     </div>
   </div>
 
@@ -692,10 +695,7 @@ function renderCacheLog_(){
   const clock = ts => new Date(ts).toLocaleTimeString('ar-SA-u-nu-latn', {hour:'numeric', minute:'2-digit'});
   const size = b => (b / (1024*1024)).toFixed(2) + ' MB'; // نفس وحدة الصفحة الرئيسية / the same unit as the home page
   const typeName = e => e.type === 'full' ? 'تحميل كامل' : e.type === 'sync' ? 'مزامنة' + (e.changes != null ? ' (' + e.changes + ' تغيير)' : '') : 'نقل لقاعدة الجهاز';
-  const latest = copies[0];
-  document.getElementById('lastCacheCopyVal').innerHTML = latest
-    ? 'النسخة ' + escapeHtml(latest.version) + ' · ' + size(latest.bytes) + '<br>' + greg(latest.at) + '<br>' + hijri(latest.at)
-    : 'لم تُحمَّل بعد على هذا الجهاز';
+  renderLastCacheCopy_(size, greg, hijri, clock);
   if(!copies.length && !issues.length) return;
   document.getElementById('cacheLogBody').innerHTML = copies.length ? copies.map(e =>
     `<tr><td class="mono">${escapeHtml(e.version)}</td><td><span class="cache-type ${e.type === 'sync' || e.type === 'full' ? e.type : 'migrate'}">${typeName(e)}</span></td>` +
@@ -709,6 +709,39 @@ function renderCacheLog_(){
   document.getElementById('cacheOpsList').innerHTML = ops.map(o =>
     `<div class="cache-op"><span>${o.icon}</span><div><div class="t">${o.title}</div><div class="s">${o.sub}</div><div class="s">${greg(o.at)} · ${hijri(o.at)} · ${clock(o.at)}</div></div></div>`).join('');
   document.getElementById('cacheLogCard').style.display = 'block';
+}
+/* بطاقة «آخر نسخة بالذاكرة المؤقتة» من النسخة المحفوظة فعليًا (لا من السجل): الوصف المختصر الذي تكتبه الرئيسية، وإن لم يوجد
+ * (لم تُفتح الرئيسية منذ هذا التحديث) تُقرأ النسخة من IndexedDB مباشرة. «لم تُحمَّل بعد» فقط إن لم توجد نسخة فعلًا.
+ * The «last cached copy» card from the actually stored copy (not the log): the descriptor the home page writes, or if missing
+ * (home not opened since this update) the copy is read from IndexedDB directly. «not loaded yet» only when there truly is no copy. */
+async function renderLastCacheCopy_(size, greg, hijri, clock){
+  const el = document.getElementById('lastCacheCopyVal');
+  let meta = null;
+  try{ meta = JSON.parse(localStorage.getItem('sec-stations-copy-meta-v1') || 'null'); }catch(e){}
+  if(!meta && window.indexedDB){
+    meta = await new Promise(resolve => {
+      try{
+        const req = indexedDB.open('sec-stations', 1);
+        req.onupgradeneeded = () => { req.transaction.abort(); resolve(null); }; // لا قاعدة ← لا تُنشأ هنا / no database ← not created here
+        req.onerror = () => resolve(null);
+        req.onsuccess = () => {
+          const db = req.result;
+          try{
+            const g = db.transaction('snapshots').objectStore('snapshots').get('current');
+            g.onsuccess = () => { const r = g.result; db.close(); resolve(r ? { version: r.version, count: r.count, bytes: r.sizeBytes, savedAt: r.savedAt } : null); };
+            g.onerror = () => { db.close(); resolve(null); };
+          }catch(e){ db.close(); resolve(null); }
+        };
+      }catch(e){ resolve(null); }
+    });
+  }
+  if(!meta || !meta.count){ el.innerHTML = '<span>⚪ لم تُحمَّل بعد على هذا الجهاز</span>'; return; }
+  let syncedAt = 0;
+  try{ syncedAt = Number(localStorage.getItem('sec-stations-synced-at-v1')) || 0; }catch(e){}
+  const at = syncedAt || meta.savedAt || 0;
+  el.innerHTML = '<span class="v">🟢 النسخة ' + escapeHtml(meta.version == null ? '—' : meta.version) + '</span>' +
+    '<span><span class="n">' + Number(meta.count).toLocaleString('en') + '</span> محطة · <span class="n">' + size(meta.bytes || 0) + '</span></span>' +
+    (at ? '<span>' + greg(at) + ' · ' + hijri(at) + '</span><span>آخر مزامنة ناجحة: <b>' + clock(at) + '</b></span>' : '');
 }
 renderCacheLog_();
 function isValidEmail_(email){
