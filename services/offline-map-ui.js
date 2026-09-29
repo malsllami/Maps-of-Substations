@@ -2,13 +2,13 @@
  * services/offline-map-ui.js — مسؤول عن واجهة خريطة جدة بدون إنترنت فقط (المحرك في services/offline-map.js):
  * - بطاقة صغيرة مطوية أعلى الخريطة تحت الشريط: الحالة والحجم (لا تتمدد إلا بطلب المستخدم، ومطوية أثناء الملاحة).
  * - نافذة من الأسفل (النموذج أ + شريط التخزين من النموذج ج): الحالة، معلومات النسخة، التنزيل/الإيقاف/الاستكمال،
- *   التحديث، الحذف، مساحة التخزين، وسجل الخريطة (🟢 مكتمل · 🟠 غير مكتمل · 🔴 فشل). تُغلق بالضغط خارجها أو السحب للأسفل.
+ *   التحديث، الحذف، مساحة التخزين، وسجل الخريطة (🟢 مكتمل · 🟠 متوقف يدويًا يُستكمل · 🟠 فشل يُعاد من البداية). تُغلق بالضغط خارجها أو السحب للأسفل.
  * - اختيار الطبقة: بدون إنترنت + الخريطة محفوظة ← الخريطة المحفوظة تلقائيًا (نهاري/ليلي من نفس الملف).
  *
  * Owns the offline Jeddah map UI only (the engine is services/offline-map.js):
  * - A small collapsed card at the top of the map under the toolbar: state and size (expands only on request, collapsed while navigating).
  * - A bottom sheet (design A + the storage bar from design C): state, copy info, download/pause/resume, update, delete,
- *   storage space, and the map log (complete · incomplete · failed). Closes on outside tap or swipe down.
+ *   storage space, and the map log (complete · paused, resumable · failed, restart from zero). Closes on outside tap or swipe down.
  * - Layer choice: offline + map saved ← the saved map automatically (day/night from the same file).
  * ============================================================ */
 (function (global) {
@@ -33,14 +33,17 @@
   function updateAvailable() { return !!(meta && isReady() && meta.version !== state.version); }
 
   // ===== البطاقة المطوية — The collapsed card =====
+  // الحالات: جارٍ التنزيل 🟢 · غير مكتملة (إيقاف يدوي) 🟠 · تعذّر الإكمال (فشل) 🟠 · جاهزة 🟢 · غير محفوظة ⬇
+  // States: downloading · incomplete (manual pause) · could not complete (failure) · ready · not saved
   function cardLine_() {
-    if (controller && progress) return { dot: '⬇', text: 'جارٍ التنزيل ' + Math.round(progress.got / progress.total * 100) + '٪' };
-    if (state.pending) return { dot: '🟠', text: 'تحديث غير مكتمل · ' + mb(state.pending.receivedBytes) + ' / ' + mb(state.pending.bytes) };
+    if (controller && progress) return { dot: '🟢', text: 'جارٍ التنزيل ' + Math.round(progress.got / progress.total * 100) + '٪' };
     if (state.state === 'complete') {
       const inUse = deps.isUsingOffline();
-      return { dot: '🟢', text: (inUse ? 'مستخدمة الآن' : 'جاهزة') + ' · ' + mb(state.bytes) + (updateAvailable() ? ' · تحديث متاح' : '') };
+      const upd = state.pending ? (state.pending.state === 'paused' ? ' · تحديث متوقف' : ' · تعذّر التحديث') : updateAvailable() ? ' · تحديث متاح' : '';
+      return { dot: '🟢', text: (inUse ? 'مستخدمة الآن' : 'جاهزة') + ' · ' + mb(state.bytes) + upd };
     }
-    if (state.state === 'partial') return { dot: '🟠', text: 'غير مكتملة · ' + mb(state.receivedBytes) + ' / ' + mb(state.bytes) };
+    if (state.state === 'paused') return { dot: '🟠', text: 'غير مكتملة · ' + mb(state.receivedBytes) + ' / ' + mb(state.bytes) };
+    if (state.state === 'failed') return { dot: '🟠', text: 'تعذّر إكمال التنزيل' };
     return { dot: '⬇', text: 'غير محفوظة' + (meta ? ' · ' + mb(meta.bytes) : '') };
   }
   function renderCard_() {
@@ -68,23 +71,31 @@
 
   async function renderSheet_() {
     if (!sheet) return;
-    const s = state, rows = [];
-    const statusText = controller ? '⬇ جارٍ التنزيل' : s.pending ? '🟠 تحديث غير مكتمل — النسخة الحالية تعمل' : s.state === 'complete' ? '<span class="om-ok">✓ محفوظة وجاهزة بدون إنترنت</span>'
-      : s.state === 'partial' ? '🟠 غير مكتملة — يمكن استكمالها' : 'غير محفوظة على الجهاز';
+    const s = state, rows = [], p = s.pending;
+    const statusText = controller ? '<span class="om-ok">🟢 جارٍ التنزيل</span>'
+      : s.state === 'complete' ? '<span class="om-ok">✓ محفوظة وجاهزة بدون إنترنت</span>'
+      : s.state === 'paused' ? '🟠 غير مكتملة، يمكن استكمالها'
+      : s.state === 'failed' ? '🟠 تعذّر إكمال التنزيل، يمكن إعادة المحاولة'
+      : 'غير محفوظة على الجهاز';
     rows.push(['الحالة', statusText]);
     if (s.state === 'complete') {
-      rows.push(['إصدار الخريطة', '<span class="om-num">' + esc(s.version) + '</span>' + (updateAvailable() ? ' <span class="om-warn">(متاح ' + esc(meta.version) + ')</span>' : '')]);
+      rows.push(['إصدار الخريطة', '<span class="om-num">' + esc(s.version) + '</span>' + (updateAvailable() && !p ? ' <span class="om-warn">(متاح ' + esc(meta.version) + ')</span>' : '')]);
       rows.push(['الحجم', '<span class="om-num">' + mb(s.bytes) + '</span>']);
       if (s.completedAt) rows.push(['تاريخ التنزيل', greg(s.completedAt) + '<br><span class="om-dim-text">' + hijri(s.completedAt) + '</span>']);
-    } else rows.push(['حجم التنزيل', '<span class="om-num">' + (meta ? mb(meta.bytes) : '—') + '</span>']);
+      // تحديث متوقف أو فاشل — الخريطة الحالية سليمة وتعمل / a paused or failed update — the current map is intact and in use
+      if (p && !controller) rows.push(['التحديث ' + esc(p.version), p.state === 'paused' ? '🟠 متوقف (' + mb(p.receivedBytes) + ' / ' + mb(p.bytes) + ') — الخريطة الحالية تعمل' : '🟠 تعذّر الإكمال — الخريطة الحالية سليمة وتعمل']);
+    } else rows.push(['حجم الخريطة', '<span class="om-num">' + (meta ? mb(meta.bytes) : s.bytes ? mb(s.bytes) : '—') + '</span>']);
+    const failedReason = s.state === 'failed' ? s.failedReason : p && p.state === 'failed' ? p.failedReason : null;
+    if (failedReason && !controller) rows.push(['السبب', '<span class="om-dim-text">' + esc(failedReason) + ' — حُذف الجزء المؤقت</span>']);
 
+    // التقدم: أثناء التنزيل، أو المحفوظ بعد إيقاف يدوي (لا بعد فشل — حُذف) — progress: while downloading, or what's kept after a manual pause (not after a failure — deleted)
     let prog = '';
-    const showProg = controller || s.state === 'partial' || s.pending;
-    if (showProg) {
-      const got = progress ? progress.got : (s.pending ? s.pending.receivedBytes : s.receivedBytes || 0);
-      const total = progress ? progress.total : (s.pending ? s.pending.bytes : s.bytes || (meta && meta.bytes) || 1);
+    const pausedPart = !controller && (s.state === 'paused' ? s : p && p.state === 'paused' ? p : null);
+    if (controller || pausedPart) {
+      const got = progress ? progress.got : pausedPart.receivedBytes;
+      const total = progress ? progress.total : pausedPart.bytes;
       const pct = Math.round(got / total * 100);
-      prog = '<div><div class="om-bar"><i style="width:' + pct + '%"></i></div><div class="om-bar-lbl"><span>' + (controller ? 'جارٍ التنزيل — ' : 'تم تنزيل ') + pct + '٪ (' + mb(got) + ' / ' + mb(total) + ')</span><span>يُستكمل من حيث توقف</span></div></div>';
+      prog = '<div><div class="om-bar"><i style="width:' + pct + '%"></i></div><div class="om-bar-lbl"><span>' + mb(got) + ' / ' + mb(total) + ' · ' + pct + '٪</span><span>' + (controller ? 'جارٍ التنزيل' : 'يُستكمل من ' + mb(got)) + '</span></div></div>';
     }
 
     let est = null;
@@ -92,10 +103,16 @@
     const storage = est && est.quota ? '<div><div class="om-bar-lbl" style="margin:0 0 4px"><span>مساحة التخزين المستخدمة للموقع</span><span class="om-num">' + mb(est.usage || 0) + '</span></div><div class="om-bar om-bar-thin"><i style="width:' + Math.max(2, Math.min(100, (est.usage || 0) / est.quota * 100)).toFixed(1) + '%"></i></div></div>' : '';
 
     const warn = s.state !== 'complete' && !controller ? '<div class="om-note-warn">قد يستهلك هذه الكمية من بياناتك — Wi‑Fi أو بيانات الجوال.</div>' : '';
+    const del = '<button type="button" class="om-btn dan" data-act="delete">حذف من الجهاز</button>';
     let btns;
-    if (controller) btns = '<button type="button" class="om-btn sec" data-act="pause">إيقاف مؤقت</button>';
-    else if (s.state === 'complete') btns = '<button type="button" class="om-btn sec" data-act="' + (updateAvailable() || s.pending ? 'download' : 'check') + '">' + (s.pending ? 'متابعة التحديث' : updateAvailable() ? 'تحديث الخريطة' : 'التحقق من تحديث') + '</button><button type="button" class="om-btn dan" data-act="delete">حذف من الجهاز</button>';
-    else if (s.state === 'partial') btns = '<button type="button" class="om-btn pri" data-act="download">متابعة التنزيل</button><button type="button" class="om-btn dan" data-act="delete">حذف الجزء المنزّل</button>';
+    if (controller) btns = '<button type="button" class="om-btn sec" data-act="pause" style="grid-column:1/-1">إيقاف مؤقت</button>';
+    else if (s.state === 'complete') {
+      if (p && p.state === 'paused') btns = '<button type="button" class="om-btn pri" data-act="download">استكمال التحديث</button>' + del;
+      else if (p) btns = '<button type="button" class="om-btn pri" data-act="download">إعادة تحميل التحديث</button>' + del;
+      else btns = '<button type="button" class="om-btn sec" data-act="' + (updateAvailable() ? 'download' : 'check') + '">' + (updateAvailable() ? 'تحديث الخريطة' : 'التحقق من تحديث') + '</button>' + del;
+    }
+    else if (s.state === 'paused') btns = '<button type="button" class="om-btn pri" data-act="download">استكمال التنزيل</button><button type="button" class="om-btn dan" data-act="delete">حذف الجزء المنزّل</button>';
+    else if (s.state === 'failed') btns = '<button type="button" class="om-btn pri" data-act="download" style="grid-column:1/-1">إعادة التحميل</button>';
     else btns = '<button type="button" class="om-btn pri" data-act="download" style="grid-column:1/-1">تنزيل الخريطة</button>';
 
     sheet.innerHTML = '<div class="om-grab"></div><h3 class="om-h">🗺 خريطة جدة بدون إنترنت</h3>' +
@@ -105,14 +122,17 @@
     sheet.querySelectorAll('[data-act]').forEach(b => b.addEventListener('click', () => act_(b.dataset.act)));
   }
 
-  /* سجل الخريطة: الإصدارات المكتملة (🟢) ومشكلات التنزيل (🟠/🔴) معروضة معًا بالوقت — يبقيان سجلين منفصلين داخليًا
-   * The map log: completed versions and download issues shown together by time — they stay two separate logs internally */
+  /* سجل الخريطة: 🟢 تنزيل/تحديث مكتمل · 🟠 تنزيل متوقف مؤقتًا (يُستكمل) · 🟠 فشل التنزيل (من البداية) — سجلان منفصلان داخليًا
+   * The map log: complete · paused (resumable) · failed (from the start) — two separate logs internally */
   async function historyHtml_() {
     let h = { versions: [], issues: [] };
     try { h = await global.SecOfflineMap.history(); } catch (e) {}
     const items = h.versions.map(v => ({ at: v.at, icon: '🟢', title: (v.kind === 'update' ? 'تحديث مكتمل' : 'تنزيل مكتمل') + ' · ' + esc(v.version), sub: mb(v.bytes) }))
-      .concat(h.issues.map(i => ({ at: i.at, icon: i.result === 'incomplete' ? '🟠' : '🔴', title: (i.result === 'incomplete' ? 'غير مكتمل' : 'فشل') + (i.version ? ' · ' + esc(i.version) : ''),
-        sub: esc(i.reason) + (i.result === 'incomplete' && i.bytes ? ' · ' + mb(i.receivedBytes || 0) + ' / ' + mb(i.bytes) : '') })))
+      .concat(h.issues.map(i => {
+        const paused = i.result === 'paused' || i.result === 'incomplete'; // incomplete: سجلات أقدم من هذا القرار / entries older than this decision
+        return { at: i.at, icon: '🟠', title: (paused ? 'تنزيل متوقف مؤقتًا' : 'فشل التنزيل') + (i.version ? ' · ' + esc(i.version) : ''),
+          sub: paused ? mb(i.receivedBytes || 0) + ' / ' + mb(i.bytes || 0) + ' — يمكن استكماله' : esc(i.reason) + ' — يلزم إعادة التحميل من البداية' };
+      }))
       .sort((a, b) => b.at - a.at).slice(0, 20);
     if (!items.length) return '';
     return '<div class="om-log"><div class="om-log-h">سجل الخريطة</div>' + items.map(it =>
@@ -147,7 +167,8 @@
         message_('✓ اكتمل التنزيل وتم التحقق من الخريطة');
       } catch (e) {
         controller = null; progress = null; await refresh_();
-        message_(e.name === 'AbortError' ? 'أُوقف التنزيل — يمكنك متابعته لاحقًا من حيث توقف' : e instanceof TypeError ? 'انقطع الاتصال — يمكنك متابعة التنزيل لاحقًا من حيث توقف' : e.message, e.name !== 'AbortError');
+        message_(e.name === 'AbortError' ? 'أُوقف التنزيل — يمكنك استكماله من حيث توقف'
+          : 'تعذّر إكمال التنزيل (' + e.message + ') — حُذف الجزء المؤقت، ويمكن إعادة التحميل من البداية', e.name !== 'AbortError');
       }
     }
   }
@@ -157,7 +178,7 @@
     const pct = Math.round(progress.got / progress.total * 100);
     const bar = sheet.querySelector('.om-bar i'), lbl = sheet.querySelector('.om-bar-lbl span');
     if (bar) bar.style.width = pct + '%';
-    if (lbl) lbl.textContent = 'جارٍ التنزيل — ' + pct + '٪ (' + mb(progress.got) + ' / ' + mb(progress.total) + ')';
+    if (lbl) lbl.textContent = mb(progress.got) + ' / ' + mb(progress.total) + ' · ' + pct + '٪';
   }
 
   async function refresh_() {

@@ -1018,7 +1018,11 @@ body.guest-mode h1{
 }
 .stations-cache-info b{color:var(--teal);font-weight:700;}
 .stations-cache-info[hidden]{display:none;}
-#stationsLatestInfo{flex-wrap:wrap;text-align:center;}
+/* سطر نصي عادي لا عناصر مرنة — كل جزء في <bdi> فلا يتبادل التاريخ والأرقام مواقعها بالاتجاه من اليمين
+   A plain text line, not flex items — each part in <bdi> so dates and numbers never swap places in RTL */
+#stationsLatestInfo{display:block;text-align:center;line-height:1.8;font-family:'IBM Plex Sans Arabic',sans-serif;}
+#stationsLatestInfo bdi{white-space:nowrap;}
+#stationsLatestInfo[hidden]{display:none;}
 [data-theme="light"] .stations-cache-info b{color:var(--teal);}
 
 body.guest-mode #cardsSection{display:none;}
@@ -1830,6 +1834,7 @@ function markStationsSynced_(){
   firstLoadFailed_ = false;
   try{ localStorage.setItem(STATIONS_SYNCED_AT_KEY, String(lastDataSyncAt.getTime())); }catch(e){}
   refreshLastUpdateLabel();
+  renderLatestCopyLine_(); // نفس وقت «آخر تحديث» بالشريط العلوي دائمًا / always the same time as the header's «آخر تحديث»
 }
 /* وقت النسخة المحفوظة: آخر نجاح مسجّل، أو وقت آخر مزامنة بالنسخة نفسها (للنسخ الأقدم من هذا التحديث)
  * Stored copy time: the last recorded success, or the copy's own last-sync time (for copies older than this update) */
@@ -1873,11 +1878,15 @@ function renderLatestCopyLine_(){
   const el = document.getElementById('stationsLatestInfo');
   if(!el) return;
   if(!isStationsLoaded || !allStationsLocal.length){ el.hidden = true; return; }
+  // العدد والحجم في السطر الذي فوقه — هنا تاريخ آخر تحديث/تحميل ناجح ورقم النسخة فقط (بلا تكرار)
+  // The count and size are in the line above — here only the last successful update/load date and the copy version (no repeat)
   const at = lastDataSyncAt || storedStationsTime_() || (stationsMeta_.savedAt ? new Date(stationsMeta_.savedAt) : null);
-  let bytes = stationsMeta_.sizeBytes || 0;
-  if(!bytes){ const raw = localStorage.getItem(STATIONS_CACHE_KEY); bytes = raw ? raw.length * 2 : 0; }
-  const dates = at ? ' · ' + at.toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', { day:'numeric', month:'long', year:'numeric' }) + ' · ' + at.toLocaleDateString('ar-SA-u-ca-islamic-umalqura-nu-latn', { day:'numeric', month:'long', year:'numeric' }) : '';
-  el.innerHTML = `آخر نسخة محمّلة: النسخة <b>${escapeHtml(stationsMeta_.version == null ? '—' : stationsMeta_.version)}</b> · ${allStationsLocal.length.toLocaleString('en')} محطة · ${(bytes / (1024*1024)).toFixed(2)} MB${dates}`;
+  if(!at){ el.hidden = true; return; }
+  const greg = at.toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', { day:'numeric', month:'long', year:'numeric' });
+  const hijri = at.toLocaleDateString('ar-SA-u-ca-islamic-umalqura-nu-latn', { day:'numeric', month:'long', year:'numeric' });
+  const time = at.toLocaleTimeString('ar-SA-u-nu-latn', { hour:'numeric', minute:'2-digit' });
+  el.innerHTML = `آخر تحديث لبيانات المحطات: <bdi>${greg}</bdi> · <bdi>${hijri}</bdi> · <bdi>${time}</bdi>` +
+    (stationsMeta_.version == null ? '' : ` · النسخة <b><bdi>${escapeHtml(stationsMeta_.version)}</bdi></b>`);
   el.hidden = false;
 }
 

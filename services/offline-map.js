@@ -1,14 +1,14 @@
 /* ============================================================
  * services/offline-map.js — مسؤول عن خريطة جدة بدون إنترنت فقط (المحرك، بلا واجهة):
  * 1) معرفة الخريطة المتاحة من maps/jeddah.json (الإصدار، الحجم الحقيقي، البصمة).
- * 2) التنزيل بأجزاء (Range) إلى IndexedDB: إيقاف واستكمال من حيث توقف، ولا يُعاد تنزيل جزء محفوظ.
+ * 2) التنزيل بأجزاء (Range) إلى IndexedDB: الإيقاف اليدوي يُستكمل من حيث توقف؛ أي فشل يحذف الأجزاء المؤقتة ويبدأ من الصفر.
  * 3) التحقق قبل الاعتماد: الحجم + بصمة SHA-256 + رأس الملف — ملف ناقص أو تالف لا يُعتمد أبدًا.
  * 4) التحديث بأمان: الإصدار الجديد يُنزَّل بجانب القديم، والقديم يبقى صالحًا حتى يكتمل الجديد ويُتحقق منه.
  * 5) قراءة الخريطة من الجهاز لمكتبة pmtiles (مصدر بيانات محلي) ورسمها بـprotomaps-leaflet فوق Leaflet الحالي.
  *
  * Owns the offline Jeddah map only (the engine, no UI):
  * 1) Learns the available map from maps/jeddah.json (version, real size, fingerprint).
- * 2) Downloads in parts (Range) into IndexedDB: pause and resume where it stopped; a saved part is never re-downloaded.
+ * 2) Downloads in parts (Range) into IndexedDB: a manual pause resumes where it stopped; any failure deletes the temporary parts and starts from zero.
  * 3) Verifies before committing: size + SHA-256 + file header — an incomplete or corrupt file is never committed.
  * 4) Updates safely: the new version downloads beside the old one, which stays usable until the new one is complete and verified.
  * 5) Serves the map from the device to pmtiles (a local data source) and draws it with protomaps-leaflet over the existing Leaflet map.
@@ -80,35 +80,57 @@
     });
   }
 
+  /* ===== قاعدة التنزيل (قرار مقفل) — The download rule (locked decision) =====
+   * - إيقاف يدوي ← الأجزاء موثوقة حتى آخر جزء مكتمل ← «استكمال التنزيل» من نفس الموضع.
+   * - أي فشل (انقطاع، خطأ شبكة، انتهاء مهلة، فشل الأجزاء، جزء ناقص، فشل الحفظ، فشل التحقق) ← حذف الأجزاء المؤقتة
+   *   لهذا التنزيل ← «إعادة التحميل» من الصفر. لا استكمال بعد فشل.
+   * - تنزيل انقطع دون إيقاف يدوي (أُغلقت الصفحة أثناءه) ← يُعامل كفشل.
+   * - لا شيء يبدأ تلقائيًا عند عودة الإنترنت — المستخدم يقرر.
+   * - «🟢 جاهزة» فقط بعد اكتمال الملف + نجاح التحقق. النسخة المكتملة الموجودة لا تتأثر بفشل تحديث.
+   * - Manual pause ← parts trusted up to the last complete part ← "resume" from the same point.
+   * - Any failure (drop, network error, timeout, range failure, short part, save failure, verification failure) ← this
+   *   download's temporary parts are deleted ← "download again" from zero. No resume after a failure.
+   * - A download cut without a manual pause (page closed during it) ← treated as a failure.
+   * - Nothing starts automatically when the internet returns — the user decides.
+   * - "Ready" only after the full file + a passed verification. An existing complete copy is untouched by a failed update. */
+  const CHUNK_TIMEOUT_MS = 30000;  // جزء لم يكتمل خلال 30 ث = فشل (انتهاء المهلة) / a part not done within 30 s = failure (timeout)
+  let active = null;               // تنزيل جارٍ في هذه الصفحة: { version } / a download running in this page
+
+  /* حالة التنزيل الهدف (الأول أو التحديث) — the target download's state (first or update) */
+  function targetState_(t) {
+    if (active && active.version === t.version) return 'downloading';
+    if (t.failed) return 'failed';
+    if (t.paused) return 'paused';
+    return 'failed'; // انقطع دون إيقاف يدوي — لا يُعتمد عليه / cut without a manual pause — not trusted
+  }
+
   /**
-   * حالة الخريطة على الجهاز: { state: 'none'|'partial'|'complete', version, bytes, receivedBytes, completedAt, pending }
-   * pending = تنزيل تحديث غير مكتمل بجانب نسخة مكتملة. — pending = an incomplete update download beside a complete copy.
+   * حالة الخريطة: { state: 'none'|'downloading'|'paused'|'failed'|'complete', version, bytes, receivedBytes, completedAt, failedReason, pending }
+   * pending (تحديث بجانب نسخة مكتملة): { version, bytes, receivedBytes, state: 'downloading'|'paused'|'failed', failedReason }
+   * Map state; pending = an update beside a complete copy.
    */
   async function status() {
     const rec = await getRecord_();
     if (!rec) return { state: 'none' };
-    const out = { state: rec.complete ? 'complete' : 'partial', version: rec.version, bytes: rec.bytes, completedAt: rec.completedAt || null };
-    const target = rec.pending || (rec.complete ? null : rec);
-    if (target) {
-      const keys = await chunkKeys_(target.version);
-      out.receivedBytes = receivedBytes_(keys.length, target.bytes);
-      if (rec.pending) out.pending = { version: rec.pending.version, bytes: rec.pending.bytes, receivedBytes: out.receivedBytes };
-    } else out.receivedBytes = rec.bytes;
-    return out;
+    if (rec.complete) {
+      const out = { state: 'complete', version: rec.version, bytes: rec.bytes, receivedBytes: rec.bytes, completedAt: rec.completedAt || null };
+      if (rec.pending) {
+        const ps = targetState_(rec.pending);
+        out.pending = { version: rec.pending.version, bytes: rec.pending.bytes, state: ps, failedReason: failedReason_(rec.pending),
+          receivedBytes: ps === 'failed' ? 0 : receivedBytes_((await chunkKeys_(rec.pending.version)).length, rec.pending.bytes) };
+      }
+      return out;
+    }
+    const st = targetState_(rec);
+    return { state: st, version: rec.version, bytes: rec.bytes, failedReason: failedReason_(rec),
+      receivedBytes: st === 'failed' ? 0 : receivedBytes_((await chunkKeys_(rec.version)).length, rec.bytes) };
   }
+  function failedReason_(t) { return t.failed ? t.failed.reason : (!t.paused && !(active && active.version === t.version) ? 'انقطع التنزيل قبل اكتماله (دون إيقاف يدوي)' : null); }
   function chunkCount_(bytes) { return Math.ceil(bytes / CHUNK_BYTES); }
   function receivedBytes_(have, bytes) { const n = chunkCount_(bytes); return have >= n ? bytes : have * CHUNK_BYTES; }
 
-  // ===== التنزيل بأجزاء مع الاستكمال — Chunked download with resume =====
-  /**
-   * ينزّل الإصدار المتاح (أو يستكمله). options: { onProgress(received, total), signal (للإيقاف المؤقت) }.
-   * يُرجع حالة الخريطة بعد الاعتماد. الإيقاف (signal) يترك الأجزاء المحفوظة لاستكمالها لاحقًا.
-   * Downloads (or resumes) the available version. Returns the map state after commit. Aborting keeps saved parts for later.
-   */
-  /* ===== سجلان منفصلان: الإصدارات المكتملة (versions) ومشكلات التنزيل (issues) — لا خلط بينهما =====
-   * issues: 🟠 incomplete = توقف/انقطع ويمكن استكماله (الأجزاء محفوظة) · 🔴 failed = لم ينتج نسخة صالحة (تحقق/خادم)
-   * Two separate logs: completed versions and download issues — never mixed.
-   * incomplete = paused/dropped and resumable (parts kept) · failed = produced no valid copy (verification/server) */
+  /* ===== سجلان منفصلان: الإصدارات المكتملة (versions) وأحداث التنزيل (issues: paused/failed) — لا خلط بينهما =====
+   * Two separate logs: completed versions and download events (issues: paused/failed) — never mixed */
   const LOG_MAX = 20;
   function readLog_(key) {
     return db_().then(function (d) { return reqValue_(d.transaction('meta').objectStore('meta').get(key)); }).then(function (r) { return (r && r.entries) || []; });
@@ -120,95 +142,116 @@
       await tx_(['meta'], 'readwrite', function (t) { t.objectStore('meta').put({ key: key, entries: entries.slice(0, LOG_MAX) }); });
     } catch (e) { /* السجل وصفي فقط — لا يوقف التنزيل / the log is descriptive only — never blocks the download */ }
   }
-  /* الإصدارات المكتملة + مشكلات التنزيل، الأحدث أولًا — completed versions + download issues, newest first */
+  /* الإصدارات المكتملة + أحداث التنزيل، الأحدث أولًا — completed versions + download events, newest first */
   async function history() {
     return { versions: await readLog_('versions'), issues: await readLog_('issues') };
   }
 
-  /**
-   * ينزّل الإصدار المتاح (أو يستكمله) ويسجّل النتيجة: اكتمال ← الإصدارات؛ إيقاف/انقطاع ← 🟠؛ فشل ← 🔴.
-   * Downloads (or resumes) the available version and logs the outcome: complete ← versions; pause/drop ← incomplete; failure ← failed.
-   */
-  async function download(options) {
-    const before = await getRecord_();
-    const wasComplete = !!(before && before.complete);
+  // ===== التنزيل — Download =====
+  function abortError_() { const e = new Error('أُوقف التنزيل مؤقتًا'); e.name = 'AbortError'; return e; }
+  function failure_(reason) { const e = new Error(reason); e.name = 'DownloadFailed'; return e; }
+
+  /* جلب جزء بمهلة 30 ث؛ الإيقاف اليدوي يُميَّز عن انتهاء المهلة — fetch one part with a 30 s limit; a manual pause is told apart from a timeout */
+  async function fetchPart_(url, start, end, total, userSignal) {
+    const ctl = new AbortController();
+    let why = null;
+    const onUser = function () { why = 'pause'; ctl.abort(); };
+    if (userSignal) { if (userSignal.aborted) throw abortError_(); userSignal.addEventListener('abort', onUser); }
+    const timer = setTimeout(function () { why = 'timeout'; ctl.abort(); }, CHUNK_TIMEOUT_MS);
     try {
-      const st = await downloadInner_(options);
-      const after = await getRecord_();
-      if (after && after.complete && (!before || !before.complete || before.version !== after.version)) {
-        await appendLog_('versions', { at: Date.now(), version: after.version, bytes: after.bytes, kind: wasComplete ? 'update' : 'download' });
-      }
-      return st;
-    } catch (e) {
-      const st = await status().catch(function () { return {}; });
-      const target = st.pending || st;
-      // 🟠 غير مكتمل: بقيت أجزاء محفوظة يمكن استكمالها (إيقاف، انقطاع، خطأ خادم بمنتصف التنزيل)؛ 🔴 فشل: لا شيء يُستكمل (تحقق فاشل حذف الأجزاء، أو فشل من أول جزء)
-      // incomplete: saved parts remain to resume (pause, drop, server error mid-way); failed: nothing to resume (failed verification removed the parts, or failure at the first part)
-      const partsKept = (st.state === 'partial' || !!st.pending) && (target.receivedBytes || 0) > 0;
-      const resumable = e.name === 'AbortError' || partsKept || ((e instanceof TypeError || navigator.onLine === false) && st.state !== 'none');
-      let ver = target.version, bytes = target.bytes;
-      if (!ver) { try { const m = await fetchMeta(); ver = m.version; bytes = m.bytes; } catch (ignore) {} } // فشل التحقق يحذف السجل — نأخذ الإصدار من معلومات الموقع / a failed verification removes the record — take the version from the site info
-      await appendLog_('issues', {
-        at: Date.now(), version: ver || null, bytes: bytes || null, receivedBytes: resumable ? (target.receivedBytes || 0) : 0,
-        result: resumable ? 'incomplete' : 'failed',
-        reason: e.name === 'AbortError' ? 'أوقفه المستخدم مؤقتًا' : (e instanceof TypeError || navigator.onLine === false) ? 'انقطع الاتصال أثناء التنزيل' : String(e.message || e).slice(0, 120)
-      });
-      throw e;
-    }
-  }
-
-  async function downloadInner_(options) {
-    const opts = options || {};
-    const meta = await fetchMeta();
-    const url = new URL(meta.file, new URL(META_URL, location.href)).href;
-    let rec = await getRecord_();
-    const isUpdate = !!(rec && rec.complete && rec.version !== meta.version);
-    if (rec && rec.complete && rec.version === meta.version) return status(); // مكتملة ومحدّثة — لا شيء / complete and current — nothing to do
-    // مكان التنزيل: تحديث ← بجانب القديمة (pending)، وإلا ← السجل نفسه — where to download: update ← beside the old (pending), else ← the record itself
-    const target = { version: meta.version, bytes: meta.bytes, sha256: meta.sha256, url: url };
-    // أجزاء إصدار أقدم لم يكتمل تُحذف (لا تشغل مساحة بلا فائدة) — parts of an older incomplete version are removed (no wasted space)
-    if (isUpdate) {
-      if (rec.pending && rec.pending.version !== meta.version) await removeVersion_(rec.pending.version);
-      rec.pending = target; await putRecord_(rec);
-    } else if (!rec || rec.version !== meta.version) {
-      if (rec && !rec.complete) await removeVersion_(rec.version);
-      rec = Object.assign({ complete: false, startedAt: Date.now() }, target); await putRecord_(rec);
-    }
-    loadLibs().catch(function () {}); // مكتبتا الرسم تُحفظان الآن (مع الإنترنت) لتعملا لاحقًا بدونه / the two libraries get stored now (online) to work offline later
-    if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () {}); // يقلل حذف المتصفح للخريطة عند امتلاء التخزين / reduces browser eviction under storage pressure
-
-    const total = meta.bytes, n = chunkCount_(total);
-    const have = new Set((await chunkKeys_(meta.version)).map(function (k) { return Number(String(k).split(':')[1]); }));
-    const report = function () { if (opts.onProgress) opts.onProgress(receivedBytes_(have.size, total), total); };
-    report();
-    for (let i = 0; i < n; i++) {
-      if (have.has(i)) continue; // محفوظ سابقًا — لا يُعاد / saved before — never re-downloaded
-      if (opts.signal && opts.signal.aborted) throw abortError_();
-      const start = i * CHUNK_BYTES, end = Math.min(total, start + CHUNK_BYTES) - 1;
-      const res = await fetch(url, { headers: { Range: 'bytes=' + start + '-' + end }, cache: 'no-store', signal: opts.signal });
+      const res = await fetch(url, { headers: { Range: 'bytes=' + start + '-' + end }, cache: 'no-store', signal: ctl.signal });
       let buf;
       if (res.status === 206) {
         const cr = res.headers.get('content-range') || '';
-        if (cr && !cr.endsWith('/' + total)) throw new Error('حجم الملف على الموقع لا يطابق معلوماته — أعد المحاولة لاحقًا');
+        if (cr && !cr.endsWith('/' + total)) throw failure_('حجم الملف على الموقع لا يطابق معلوماته');
         buf = await res.arrayBuffer();
       } else if (res.status === 200) {
         // الخادم تجاهل الأجزاء: يُقتطع الجزء المطلوب من الملف كاملًا — the server ignored Range: slice the part from the whole file
         const whole = await res.arrayBuffer();
-        if (whole.byteLength !== total) throw new Error('حجم الملف على الموقع لا يطابق معلوماته — أعد المحاولة لاحقًا');
+        if (whole.byteLength !== total) throw failure_('حجم الملف على الموقع لا يطابق معلوماته');
         buf = whole.slice(start, end + 1);
-      } else throw new Error('تعذّر تنزيل جزء من الخريطة (HTTP ' + res.status + ')');
-      if (buf.byteLength !== end - start + 1) throw new Error('جزء ناقص من الخريطة — سيُعاد تنزيله');
-      await tx_(['chunks'], 'readwrite', function (t) { t.objectStore('chunks').put(buf, meta.version + ':' + i); });
-      have.add(i);
-      report();
+      } else throw failure_('فشل طلب جزء من الخريطة (HTTP ' + res.status + ')');
+      if (buf.byteLength !== end - start + 1) throw failure_('وصل جزء ناقص من الخريطة');
+      return buf;
+    } catch (e) {
+      if (why === 'pause') throw abortError_();
+      if (why === 'timeout') throw failure_('انتهت مهلة تنزيل جزء من الخريطة');
+      if (e.name === 'DownloadFailed') throw e;
+      throw failure_(navigator.onLine === false ? 'انقطع الاتصال بالإنترنت أثناء التنزيل' : 'خطأ في الشبكة أثناء التنزيل');
+    } finally {
+      clearTimeout(timer);
+      if (userSignal) userSignal.removeEventListener('abort', onUser);
     }
-    await verifyAndCommit_(meta, isUpdate);
-    return status();
   }
-  function abortError_() { const e = new Error('أُوقف التنزيل مؤقتًا'); e.name = 'AbortError'; return e; }
 
-  /* التحقق ثم الاعتماد بعملية واحدة؛ الفشل يحذف أجزاء الإصدار الجديد فقط — Verify then commit in one transaction; failure removes the new version's parts only */
-  async function verifyAndCommit_(meta, isUpdate) {
+  /**
+   * ينزّل الإصدار المتاح: يستكمل بعد إيقاف يدوي، ويبدأ من الصفر بعد أي فشل. options: { onProgress(got, total), signal (إيقاف يدوي) }.
+   * Downloads the available version: resumes after a manual pause, starts from zero after any failure.
+   */
+  async function download(options) {
+    if (active) throw failure_('يوجد تنزيل جارٍ بالفعل');
+    const opts = options || {};
+    const meta = await fetchMeta();
+    const url = new URL(meta.file, new URL(META_URL, location.href)).href;
+    let rec = await getRecord_();
+    if (rec && rec.complete && rec.version === meta.version && !rec.pending) return status(); // مكتملة ومحدّثة / complete and current
+    const isUpdate = !!(rec && rec.complete);
+    let target = isUpdate ? rec.pending : rec;
+    // لا استكمال إلا بعد إيقاف يدوي لنفس الإصدار؛ غير ذلك ← حذف الأجزاء المؤقتة والبدء من الصفر
+    // Resume only after a manual pause of the same version; otherwise ← delete the temporary parts and start from zero
+    const canResume = !!(target && target.version === meta.version && target.paused && !target.failed);
+    if (target && !canResume) await removeVersion_(target.version);
+    target = { version: meta.version, bytes: meta.bytes, sha256: meta.sha256, url: url, paused: false, failed: null, startedAt: canResume ? target.startedAt : Date.now() };
+    if (isUpdate) { rec.pending = target; } else { rec = Object.assign({ complete: false }, target); }
+    await putRecord_(rec);
+    active = { version: meta.version };
+    loadLibs().catch(function () {}); // مكتبتا الرسم تُحفظان الآن (مع الإنترنت) لتعملا لاحقًا بدونه / the two libraries get stored now (online) for offline use
+    if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () {}); // يقلل حذف المتصفح للخريطة / reduces browser eviction
+
+    const total = meta.bytes, n = chunkCount_(total);
+    const have = new Set((await chunkKeys_(meta.version)).map(function (k) { return Number(String(k).split(':')[1]); }));
+    const report = function () { if (opts.onProgress) opts.onProgress(receivedBytes_(have.size, total), total); };
+    const markTarget_ = async function (patch) {
+      const r = await getRecord_();
+      if (!r) return;
+      if (r.complete && r.pending) Object.assign(r.pending, patch); else if (!r.complete) Object.assign(r, patch);
+      await putRecord_(r);
+    };
+    try {
+      report();
+      for (let i = 0; i < n; i++) {
+        if (have.has(i)) continue; // محفوظ من قبل الإيقاف اليدوي — لا يُعاد / saved before the manual pause — never re-downloaded
+        const start = i * CHUNK_BYTES, end = Math.min(total, start + CHUNK_BYTES) - 1;
+        const buf = await fetchPart_(url, start, end, total, opts.signal);
+        try { await tx_(['chunks'], 'readwrite', function (t) { t.objectStore('chunks').put(buf, meta.version + ':' + i); }); }
+        catch (e) { throw failure_('تعذّر حفظ جزء من الخريطة في ذاكرة الجهاز'); }
+        have.add(i);
+        report();
+      }
+      await verifyAndCommit_(meta);
+      await appendLog_('versions', { at: Date.now(), version: meta.version, bytes: meta.bytes, kind: isUpdate ? 'update' : 'download' });
+      return await status();
+    } catch (e) {
+      const got = receivedBytes_(have.size, total);
+      if (e.name === 'AbortError') { // إيقاف يدوي ← الأجزاء تبقى للاستكمال / manual pause ← parts kept to resume
+        await markTarget_({ paused: true, failed: null });
+        await appendLog_('issues', { at: Date.now(), version: meta.version, bytes: total, receivedBytes: got, result: 'paused', reason: 'أوقفه المستخدم مؤقتًا' });
+        throw e;
+      }
+      // فشل ← حذف الأجزاء المؤقتة لهذا التنزيل فقط (النسخة المكتملة السابقة تبقى) — failure ← delete this download's temporary parts only (a previous complete copy stays)
+      const reason = e.name === 'DownloadFailed' ? e.message : 'تعذّر إكمال التنزيل';
+      await removeVersion_(meta.version).catch(function () {});
+      await markTarget_({ paused: false, failed: { at: Date.now(), reason: reason } }).catch(function () {});
+      await appendLog_('issues', { at: Date.now(), version: meta.version, bytes: total, receivedBytes: got, result: 'failed', reason: reason });
+      throw failure_(reason);
+    } finally {
+      active = null;
+    }
+  }
+
+  /* التحقق ثم الاعتماد بعملية واحدة؛ فشل التحقق يُعامل كأي فشل (حذف الأجزاء + البدء من الصفر)
+   * Verify then commit in one transaction; a failed verification is treated like any failure (delete the parts + start from zero) */
+  async function verifyAndCommit_(meta) {
     const bytes = await readAll_(meta.version, meta.bytes);
     const head = new Uint8Array(bytes.slice(0, 8));
     const magicOk = String.fromCharCode.apply(null, Array.from(head.slice(0, 7))) === 'PMTiles' && head[7] === 3;
@@ -217,16 +260,10 @@
       const digest = await global.crypto.subtle.digest('SHA-256', bytes);
       shaOk = Array.from(new Uint8Array(digest)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('') === meta.sha256;
     }
-    if (bytes.byteLength !== meta.bytes || !magicOk || !shaOk) {
-      await removeVersion_(meta.version);
-      const rec = await getRecord_();
-      if (rec && isUpdate) { delete rec.pending; await putRecord_(rec); }
-      else await tx_(['meta'], 'readwrite', function (t) { t.objectStore('meta').delete(MAP_KEY); });
-      throw new Error('فشل التحقق من الخريطة بعد التنزيل — لم تُعتمد، أعد التنزيل');
-    }
+    if (bytes.byteLength !== meta.bytes || !magicOk || !shaOk) throw failure_('فشل التحقق من سلامة الملف بعد التنزيل');
     const old = await getRecord_();
     await putRecord_({ version: meta.version, bytes: meta.bytes, sha256: meta.sha256, url: (old && old.pending ? old.pending.url : old && old.url), complete: true, completedAt: Date.now() });
-    if (isUpdate && old && old.version !== meta.version) await removeVersion_(old.version); // القديمة تُحذف فقط بعد اعتماد الجديدة / the old one goes only after the new one is committed
+    if (old && old.complete && old.version !== meta.version) await removeVersion_(old.version); // القديمة تُحذف فقط بعد اعتماد الجديدة / the old one goes only after the new one is committed
     cache = null;
   }
 
