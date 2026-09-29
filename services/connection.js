@@ -124,12 +124,13 @@
    * طلب مرّ بالخلفية (أو نام الجوال أثناءه) زمنه ليس زمن شبكة، ويُصنَّف منفصلًا. يُقاس بساعة الجهاز لأن النوم يوقف المؤقتات.
    * A request that went through background (or the phone slept) isn't network time, and is classified separately.
    * Measured with the wall clock because sleep stops timers. */
+  const doc = global.document || { visibilityState: 'visible', addEventListener: function () {} }; // خارج المتصفح (اختبارات) / outside a browser (tests)
   let hiddenTotalMs = 0;
-  let hiddenSince = document.visibilityState === 'hidden' ? Date.now() : 0;
+  let hiddenSince = doc.visibilityState === 'hidden' ? Date.now() : 0;
   let lastVisibleAt = Date.now();
-  document.addEventListener('visibilitychange', function () {
+  doc.addEventListener('visibilitychange', function () {
     const now = Date.now();
-    if (document.visibilityState === 'hidden') { if (!hiddenSince) hiddenSince = now; return; }
+    if (doc.visibilityState === 'hidden') { if (!hiddenSince) hiddenSince = now; return; }
     if (hiddenSince) { hiddenTotalMs += now - hiddenSince; hiddenSince = 0; }
     lastVisibleAt = now;
   });
@@ -139,7 +140,7 @@
   /* ===== محاولة طلب: كل ما نعرفه عنها — A request attempt: everything we know about it ===== */
   function startAttempt_(action, requestId) {
     return { action: action, requestId: requestId, startedAt: Date.now(), hiddenAtStart: hiddenClock_(),
-      hiddenAtStartNow: document.visibilityState === 'hidden', sinceVisibleSec: (Date.now() - lastVisibleAt) / 1000, kind: 'pending' };
+      hiddenAtStartNow: doc.visibilityState === 'hidden', sinceVisibleSec: (Date.now() - lastVisibleAt) / 1000, kind: 'pending' };
   }
   function endAttempt_(a, fields) {
     a.ms = Date.now() - a.startedAt;
@@ -167,8 +168,8 @@
       'الصفحة بالخلفية أثناء الطلب: ' + (a.hiddenDuring ? 'نعم (مدة الخلفية: ' + sec_(a.hiddenMs) + ')' : 'لا'),
       'منذ ظهور الصفحة عند بدء الطلب: ' + a.sinceVisibleSec.toFixed(1) + ' ث'];
     if (a.kind === 'http') {
-      parts.push('الحالة: ' + a.status, 'عنوان الرد: ' + (a.responseUrl || '—'), 'تحويل: ' + (a.redirected ? 'نعم' : 'لا'), 'نوع الرد: ' + (a.contentType || 'غير محدد'));
-      if (a.title) parts.push('عنوان الصفحة: ' + a.title);
+      parts.push('الحالة: ' + a.status, 'رابط الرد: ' + (a.responseUrl || '—'), 'تحويل: ' + (a.redirected ? 'نعم' : 'لا'), 'نوع الرد: ' + (a.contentType || 'غير محدد'));
+      if (a.title) parts.push('عنوان الرد: ' + a.title); // نفس معنى «عنوان الرد» بالسجل القديم / same meaning as «عنوان الرد» in the old log
     } else if (a.kind !== 'ok' && a.kind !== 'cancelled' && a.kind !== 'invalid-reply') {
       parts.push('رسالة المتصفح: ' + String(a.errMessage || '').slice(0, 80));
     }

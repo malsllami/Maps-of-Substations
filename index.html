@@ -1516,8 +1516,9 @@ window.SecSession = window.SecSession || {
   isTokenInvalid: (res)=> !!res && res.code === 'TOKEN_INVALID',
   getToken: ()=>{ try{ return JSON.parse(localStorage.getItem('sec-session') || '{}').identityToken || ''; }catch(e){ return ''; } }
 };
-async function callBackend(action, payload){
-  const json = HEDGED_READ_ACTIONS.has(action) ? await hedgedRead_(action, payload) : await callBackendOnce_(action, payload);
+// signal اختياري لطلبات غير القراءة (إعادة الحفظ تمرّره ليُسجَّل الفشل بنتيجته النهائية) / optional signal for non-read requests (the save retry passes it so a failure is logged with its final outcome)
+async function callBackend(action, payload, signal){
+  const json = HEDGED_READ_ACTIONS.has(action) ? await hedgedRead_(action, payload) : await callBackendOnce_(action, payload, signal);
   renewSessionActivity_(); // كل نشاط فعلي يجدد نافذة الوردية (12 ساعة) من جديد
   return json;
 }
@@ -1565,7 +1566,7 @@ function hedgedRead_(action, payload){
       if(a && t.invalid) a.kind = 'invalid-reply';
       return a;
     };
-    const conn = ()=> window.SecConnection && window.SecConnection.reportRecovered ? window.SecConnection : null;
+    const conn = ()=> globalThis.SecConnection && globalThis.SecConnection.reportRecovered ? globalThis.SecConnection : null;
     const launch = ()=>{
       if(settled || launched >= 2) return;
       launched++;
@@ -1627,14 +1628,13 @@ const SAVE_UNCONFIRMED_MSG = 'تعذّر التأكد من الحفظ بسبب �
  * is logged as "write result unconfirmed" with what the same-opKey resend concluded — never a plain "write failed". */
 async function saveWithRetry_(action, payload, onRetry){
   const attempts = [];
-  const record = outcome => { if(window.SecConnection && window.SecConnection.reportWrite) window.SecConnection.reportWrite(action, attempts, outcome); };
+  const record = outcome => { if(globalThis.SecConnection && globalThis.SecConnection.reportWrite) globalThis.SecConnection.reportWrite(action, attempts, outcome); };
   for(let attempt = 0; ; attempt++){
     let res;
     const controller = new AbortController();
     controller.signal.__secManaged = true; // النتيجة تُسجَّل هنا / the outcome is logged here
     try{
-      res = await callBackendOnce_(action, payload, controller.signal);
-      renewSessionActivity_(); // كما كان callBackend يفعل / as callBackend did
+      res = await callBackend(action, payload, controller.signal);
     }catch(networkOrParseErr){
       if(controller.signal.__secAttempt) attempts.push(controller.signal.__secAttempt);
       if(attempt >= SAVE_RETRY_DELAYS_MS.length){
