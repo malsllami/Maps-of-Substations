@@ -31,7 +31,9 @@
     firstConfirmReadings: 2,
     approachM: 10,         // تناقص المسافة الذي يُعتبر اقترابًا / distance drop that counts as approaching
     approachWindowMs: 10000, // مدة قياس الاقتراب / how far back approaching is measured
-    nearM: 80              // قرب المحطة: لا «غير صحيح» / near the station: no «wrong»
+    nearM: 80,             // قرب المحطة: لا «غير صحيح» / near the station: no «wrong»
+    farM: 5000,            // ≤ هذا = قريب: شريط الانحراف و«عدّل قليلًا» / ≤ this = near: deviation bar and «adjust»
+    farMarginM: 50         // البعيد فقط فوق 5050 م — لا تذبذب عند الحد مع تذبذب GPS / far only above 5050 m — no flicker at the limit with GPS jitter
   };
 
   const R = 6371000, rad = d => d * Math.PI / 180;
@@ -64,7 +66,8 @@
     let history = [];       // قراءات جيدة فقط / good fixes only
     let stable = null;      // الحالة المؤكدة / the confirmed state
     let pending = null;     // { cat, count }
-    let last = { state: 'init', deviation: null, course: null, approaching: false };
+    let near = null;        // قرب المحطة بهامش (5 كم) / near the station, with a margin (5 km)
+    let last = { state: 'init', deviation: null, course: null, approaching: false, near: null };
 
     function categorize_(absDev) {
       // حد 30°: مغادرة «صحيح» تحتاج > 35°، والعودة إليه < 25° — 30° limit: leaving «ok» needs > 35°, returning < 25°
@@ -84,6 +87,11 @@
       }
       history.push({ p: p, t: t, acc: fix.acc });
       history = history.filter(h => t - h.t <= o.windowMs);
+      const distNow = distM(p, target); // المسافة المباشرة الحالية — لا مسافة الطرق / the current direct distance — not the road distance
+      const distRounded = Math.round(distNow); // لأقرب متر — 5 كم بالضبط تُعتبر 5 كم / to the nearest metre — exactly 5 km counts as 5 km
+      if (near === null) near = distRounded <= o.farM;
+      else if (near && distRounded > o.farM + o.farMarginM) near = false;
+      else if (!near && distRounded <= o.farM) near = true;
 
       // الوقوف: متوسط موقع أول 5 ث من النافذة ومتوسط آخر 5 ث متقاربان (< 10 م) — المتوسط يلغي تذبذب GPS فلا يُقرأ المشي البطيء وقوفًا
       // Standing: the mean position of the window's first 5 s and of its last 5 s are close (< 10 m) — averaging cancels GPS jitter so slow walking isn't read as standing
@@ -97,7 +105,7 @@
       }
       if (stopped) {
         stable = null; pending = null; // بعد الوقوف يُعاد التأكيد من جديد / after standing, confirm afresh
-        return (last = { state: 'stopped', deviation: null, course: null, approaching: false, reason: 'stopped' });
+        return (last = { state: 'stopped', deviation: null, course: null, approaching: false, near: near, reason: 'stopped' });
       }
 
       // اتجاه الحركة: من أحدث قراءة تبعد 15 م على الأقل و1.5× دقة القراءتين (آخر مقطع حركة فعلي، فيلتقط الانعطاف بسرعة)
@@ -108,24 +116,26 @@
         const need = Math.max(o.courseMinMoveM, 1.5 * Math.max(history[i].acc, fix.acc));
         if (distM(history[i].p, p) >= need) { from = history[i]; break; }
       }
-      if (!from) return (last = { state: stable || 'init', deviation: last.deviation, course: last.course, approaching: last.approaching, reason: 'moving-little' });
+      if (!from) return (last = { state: stable || 'init', deviation: last.deviation, course: last.course, approaching: last.approaching, near: near, reason: 'moving-little' });
 
       const course = bearingDeg(from.p, p);
       const deviation = angleDiff(bearingDeg(p, target), course);
-      const distNow = distM(p, target);
       // الاقتراب خلال آخر 10 ث — يحمي الطرق المنحنية من «غير صحيح» ويلتقط الدوران للخلف — Approaching over the last 10 s — shields curving roads from «wrong», still catches a U-turn
       const trendFrom = history.find(h => t - h.t <= o.approachWindowMs) || history[0];
       const approaching = distM(trendFrom.p, target) - distNow >= o.approachM;
 
       let cat = categorize_(Math.abs(deviation));
       if (cat === 'wrong' && (approaching || distNow < o.nearM)) cat = 'adjust';
+      // بعيدًا عن المحطة لا يوجد مسار واضح، فالانحراف الدقيق مزعج: «صحيح» أو «غير صحيح» فقط
+      // Far from the station there's no clear path, so fine deviation is noise: «right» or «wrong» only
+      if (!near && cat === 'adjust') cat = 'ok';
 
       if (cat === stable) pending = null;
       else {
         pending = pending && pending.cat === cat ? { cat: cat, count: pending.count + 1 } : { cat: cat, count: 1 };
         if (pending.count >= (stable ? o.confirmReadings : o.firstConfirmReadings)) { stable = cat; pending = null; }
       }
-      return (last = { state: stable || 'init', deviation: deviation, course: course, approaching: approaching, reason: 'ok' });
+      return (last = { state: stable || 'init', deviation: deviation, course: course, approaching: approaching, near: near, reason: 'ok' });
     }
 
     return { push: push, current: function () { return last; } };

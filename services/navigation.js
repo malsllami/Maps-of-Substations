@@ -233,11 +233,13 @@
     nav.mode = 'road';
     if (nav.directLine) { nav.map.removeLayer(nav.directLine); nav.directLine = null; }
   }
+  /* خط مستقيم متصل من موقعي إلى المحطة بسماكة مسار الطرق — يقصر بالاقتراب ويطول بالابتعاد لأنه يُعاد رسمه من موقعي الحالي دائمًا
+   * A solid straight line from me to the station, as thick as the road route — it shrinks when approaching and grows when
+   * moving away, since it's always redrawn from my current position */
   function drawDirectLine_() {
     if (!nav || !nav.me || nav.mode !== 'smart') return;
     if (nav.directLine) nav.directLine.setLatLngs([nav.me, nav.st]);
-    else nav.directLine = L.polyline([nav.me, nav.st], { color: ME_COLOR, weight: 4, dashArray: '9 8', interactive: false }).addTo(nav.map);
-    if (nav.meDot) nav.meDot.bringToFront();
+    else nav.directLine = L.polyline([nav.me, nav.st], { color: ME_COLOR, weight: 6, opacity: 0.9, interactive: false, className: 'nav-direct-line' }).addTo(nav.map);
   }
 
   function stop() {
@@ -281,14 +283,25 @@
     if (!nav.me) setStatus_('جارٍ تحديد موقعك… (الإشارة ضعيفة)', 'wait');
   }
 
+  /* موقعي: سهم يدور مع اتجاه الحركة الفعلي (من services/direction-tracker.js)، ونقطة عند الوقوف أو قبل معرفة الاتجاه
+   * Me: an arrow turning with the real direction of travel (from the tracker), a dot when standing or before the direction is known */
   function drawMe_() {
     const map = nav.map;
     if (!nav.meDot) {
       nav.accCircle = L.circle(nav.me, { radius: nav.acc, color: ME_COLOR, weight: 1, fillColor: ME_COLOR, fillOpacity: 0.15, interactive: false }).addTo(map);
-      nav.meDot = L.circleMarker(nav.me, { radius: 8, color: '#fff', weight: 3, fillColor: ME_COLOR, fillOpacity: 1, interactive: false }).addTo(map);
+      nav.meDot = L.marker(nav.me, { interactive: false, keyboard: false, zIndexOffset: 1000, icon: L.divIcon({
+        className: 'nav-me', iconSize: [34, 34], iconAnchor: [17, 17],
+        html: '<span class="nav-me-dot"></span><svg class="nav-me-arrow" width="34" height="34" viewBox="0 0 24 24"><path d="M12 2.5l7 18-7-4.2-7 4.2z" fill="' + ME_COLOR + '" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg>'
+      }) }).addTo(map);
     } else {
       nav.accCircle.setLatLng(nav.me).setRadius(nav.acc);
       nav.meDot.setLatLng(nav.me);
+    }
+    const d = nav.dir, el = nav.meDot.getElement();
+    const moving = !!(d && d.course != null && d.state !== 'stopped' && d.state !== 'weak');
+    if (el) {
+      el.classList.toggle('moving', moving);
+      if (moving) el.querySelector('.nav-me-arrow').style.transform = 'rotate(' + Math.round(d.course) + 'deg)';
     }
   }
 
@@ -316,7 +329,6 @@
       enterRoad_();
       if (n.routeLine) n.routeLine.setLatLngs(pts);
       else n.routeLine = L.polyline(pts, { color: ME_COLOR, weight: 6, opacity: 0.9, interactive: false }).addTo(n.map);
-      if (n.meDot) n.meDot.bringToFront();
       evaluate_();
     } catch (e) {
       if (nav !== n) return;
@@ -459,7 +471,11 @@
       q('.nav-acc').textContent = '±' + Math.round(nav.acc) + ' م';
     }
     q('.nav-note').hidden = !smart;
-    q('.nav-band-wrap').hidden = !smart;
+    // شريط الانحراف ومؤشره قرب المحطة فقط (5 كم) — بعيدًا: «صحيح/غير صحيح» فقط / the deviation bar near the station only (5 km) — far: right/wrong only
+    // نفس حالة القرب بهامشها من services/direction-tracker.js — الشريط والحالات لا يختلفان أبدًا
+    // the same margin-aware near state from the tracker — the bar and the verdicts never disagree
+    const near = nav.dir && nav.dir.near != null ? nav.dir.near : !!nav.me && distM(nav.me, nav.st) <= 5000;
+    q('.nav-band-wrap').hidden = !smart || !near;
     const marker = q('.nav-band i');
     const dev = smart && nav.dir && nav.dir.deviation != null && ['ok', 'adjust', 'wrong'].indexOf(nav.dir.state) !== -1 ? nav.dir.deviation : null;
     marker.hidden = dev == null;

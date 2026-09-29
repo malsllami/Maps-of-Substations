@@ -586,6 +586,12 @@ body.guest-mode h1{
 .nav-more{border:0;border-top:1px solid var(--border-strong);background:none;padding-top:8px;font-family:inherit;font-size:12px;font-weight:700;color:var(--teal);cursor:pointer;}
 .nav-follow{position:absolute;left:14px;z-index:901;border:1px solid var(--border-strong);background:var(--bg-card);color:var(--text-primary);border-radius:99px;padding:8px 14px;font-family:inherit;font-weight:700;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.18);cursor:pointer;}
 .nav-follow[hidden]{display:none;}
+/* موقعي: نقطة عند الوقوف، سهم يدور مع اتجاه الحركة — Me: a dot when standing, an arrow turning with the direction of travel */
+.nav-me{background:none;border:0;}
+.nav-me .nav-me-dot{position:absolute;left:8px;top:8px;width:18px;height:18px;border-radius:50%;background:#2E7DD1;border:3px solid #fff;box-sizing:border-box;box-shadow:0 1px 4px rgba(0,0,0,.35);}
+.nav-me .nav-me-arrow{position:absolute;left:0;top:0;display:none;transition:transform .5s;filter:drop-shadow(0 1px 3px rgba(0,0,0,.4));}
+.nav-me.moving .nav-me-dot{display:none;}
+.nav-me.moving .nav-me-arrow{display:block;}
 .map-mode-opt{
   display:flex;align-items:center;gap:9px;text-align:right;background:transparent;border:none;
   padding:9px 10px;border-radius:8px;font-size:12.5px;color:var(--text-primary);cursor:pointer;font-family:inherit;
@@ -1697,6 +1703,7 @@ async function initStationsLocalSearch(){
     isStationsLoaded = true;
     updateStationsCacheInfo();
     refreshLastUpdateLabel(); // وقت النسخة المحفوظة فورًا (مهم بدون إنترنت) / the stored copy's time at once (matters offline)
+    refreshOfflineStateIfShown_();
   }
 
   try{
@@ -1874,6 +1881,7 @@ async function refreshStationsLocalCache_(onProgress){
     allStationsLocal = collected;
     isStationsLoaded = true;
     updateStationsCacheInfo();
+    refreshOfflineStateIfShown_();
     return true;
   } finally {
     _isRefreshingStationsCache = false;
@@ -1986,6 +1994,11 @@ async function checkConnection(forceRealRequest){
   }catch(err){
     showOfflineState_(); // يشمل: الجهاز متصل والخادم لا يرد / includes: device online but the server doesn't reply
   }
+}
+/* اكتمل تحميل البيانات والمؤشر أحمر («لا توجد بيانات محفوظة») ← يُعاد حسابه إلى 🟠 فورًا (طلب كان جاريًا لحظة الانقطاع)
+ * Data finished loading while the indicator is red («no saved data») ← recomputed to 🟠 at once (a request in flight at the drop) */
+function refreshOfflineStateIfShown_(){
+  if(connDot.classList.contains('offline')) showOfflineState_();
 }
 // انقطاع/عودة الإنترنت: تحديث المؤشر فورًا؛ العودة تُفحص بطلب فعلي — Internet lost/back: update at once; coming back is verified by a real request
 window.addEventListener('offline', ()=> showOfflineState_());
