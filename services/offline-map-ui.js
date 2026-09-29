@@ -1,12 +1,14 @@
 /* ============================================================
  * services/offline-map-ui.js — مسؤول عن واجهة خريطة جدة بدون إنترنت فقط (المحرك في services/offline-map.js):
- * - بطاقة صغيرة مطوية أعلى الخريطة تحت الشريط: الحالة والحجم (لا تتمدد إلا بطلب المستخدم، ومطوية أثناء الملاحة).
+ * - سطر الحالة والحجم لأي عنصر [data-om-status]: سطر بطاقة المحطة وبطاقة «حسابي» — كلاهما يفتح النافذة نفسها.
+ *   (البطاقة العائمة فوق الخريطة عبر attach ما زالت متاحة لكن الرئيسية لم تعد تستخدمها.)
  * - نافذة من الأسفل (النموذج أ + شريط التخزين من النموذج ج): الحالة، معلومات النسخة، التنزيل/الإيقاف/الاستكمال،
  *   التحديث، الحذف، مساحة التخزين، وسجل الخريطة (🟢 مكتمل · 🟠 متوقف يدويًا يُستكمل · 🟠 فشل يُعاد من البداية). تُغلق بالضغط خارجها أو السحب للأسفل.
  * - اختيار الطبقة: بدون إنترنت + الخريطة محفوظة ← الخريطة المحفوظة تلقائيًا (نهاري/ليلي من نفس الملف).
  *
  * Owns the offline Jeddah map UI only (the engine is services/offline-map.js):
- * - A small collapsed card at the top of the map under the toolbar: state and size (expands only on request, collapsed while navigating).
+ * - The state and size line for any [data-om-status] element: the station card row and the «حسابي» card — both open the same sheet.
+ *   (The floating card over the map via attach remains available, but the home page no longer uses it.)
  * - A bottom sheet (design A + the storage bar from design C): state, copy info, download/pause/resume, update, delete,
  *   storage space, and the map log (complete · paused, resumable · failed, restart from zero). Closes on outside tap or swipe down.
  * - Layer choice: offline + map saved ← the saved map automatically (day/night from the same file).
@@ -46,10 +48,14 @@
     if (state.state === 'failed') return { dot: '🟠', text: 'تعذّر إكمال التنزيل' };
     return { dot: '⬇', text: 'غير محفوظة' + (meta ? ' · ' + mb(meta.bytes) : '') };
   }
+  /* نفس سطر الحالة في كل مكان: البطاقة العائمة (إن وُجدت) وأي عنصر [data-om-status] — سطر بطاقة المحطة وبطاقة «حسابي»
+   * The same status line everywhere: the floating card (if any) and any [data-om-status] element — the station card row and «حسابي» */
+  function statusText() { const l = cardLine_(); return l.dot + ' ' + l.text; }
   function renderCard_() {
-    if (!card) return;
-    const l = cardLine_();
-    card.querySelector('.omc-line').textContent = l.dot + ' ' + l.text;
+    if (!deps) return;
+    const line = statusText();
+    if (card) card.querySelector('.omc-line').textContent = line;
+    document.querySelectorAll('[data-om-status]').forEach(el => { el.textContent = line; });
   }
 
   // ===== النافذة — The sheet =====
@@ -214,5 +220,5 @@
     renderCard_();
   }
 
-  global.SecOfflineMapUI = { init: init, attach: attach, isReady: isReady, open: open, close: close, refresh: refresh_, renderCard: renderCard_ };
+  global.SecOfflineMapUI = { init: init, attach: attach, isReady: isReady, open: open, close: close, refresh: refresh_, renderCard: renderCard_, statusText: statusText };
 })(window);

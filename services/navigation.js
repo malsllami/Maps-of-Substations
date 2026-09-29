@@ -180,8 +180,9 @@
     deps.topArea.classList.add('nav-collapsed');
     deps.stage.classList.add('nav-active'); // يرفع أزرار +/− فوق اللوحة / lifts +/− above the sheet
     deps.relayout();
-    // تكبير كسري أثناء الملاحة فقط ليأخذ الإطار أقرب تكبير فعلي؛ يعود كما كان عند الإيقاف / fractional zoom during navigation only so the frame takes the truly closest zoom; restored on stop
-    nav.prevZoomSnap = map.options.zoomSnap; map.options.zoomSnap = 0.25;
+    // خطوات التكبير تُضبط حسب نوع الخريطة الظاهرة (انظر applyZoomSnap_)؛ تعود كما كانت عند الإيقاف / zoom steps follow the map type shown (see applyZoomSnap_); restored on stop
+    nav.prevZoomSnap = map.options.zoomSnap;
+    applyZoomSnap_();
     buildSheet_();
     setStatus_('جارٍ تحديد موقعك…', 'wait');
 
@@ -393,11 +394,25 @@
    * the next whole level, and only the part of the map the sheet really covers is subtracted. Start and «follow» jump straight
    * to the frame; while following, zooming out is immediate and zooming in gradual as approved. */
   const FIT_PAD_SIDE = 36, FIT_PAD_TOP = 80, FIT_PAD_BOTTOM = 40, FRAME_SETTLE_MS = 900;
+  /* التكبير الكسري (خطوات 0.25) مع خريطة جدة المحلية فقط (رسم متجهي حاد بأي تكبير)؛ مع الخريطة العادية (صور مربعات) يبقى
+   * بدرجات صحيحة — التكبير الكسري يُظهر فواصل رفيعة بين المربعات (قيست: 11 بلا فواصل، 11.5 بفواصل كل 181 نقطة). عند
+   * التحول للخريطة العادية بتكبير كسري يُقرَّب لأقرب درجة صحيحة. Fractional zoom (0.25 steps) only with the saved Jeddah map
+   * (sharp vector rendering at any zoom); with the regular map (image tiles) it stays at whole levels — fractional zoom shows
+   * thin seams between tiles (measured: 11 without seams, 11.5 with seams every 181 px). Switching to the regular map at a
+   * fractional zoom rounds to the nearest whole level. */
+  function applyZoomSnap_() {
+    if (!nav) return;
+    const fractional = !!(deps.fractionalZoom && deps.fractionalZoom());
+    nav.map.options.zoomSnap = fractional ? 0.25 : 1;
+    const z = nav.map.getZoom();
+    if (!fractional && z % 1) { nav.cameraMovedAt = Date.now(); nav.map.setZoom(Math.round(z), { animate: false }); } // حركة آلية لا توقف المتابعة / an automatic move that never stops following
+  }
   function moveCamera_(force) {
     if (!nav || !nav.me || !nav.follow) return;
     if (!force && Date.now() - nav.lastCameraAt < CAMERA_EVERY_MS) return;
     nav.lastCameraAt = Date.now();
     const map = nav.map;
+    applyZoomSnap_(); // حسب الخريطة الظاهرة الآن / per the map shown now
     map.invalidateSize({ pan: false }); // حجم الخريطة الفعلي بعد أي تغيير بالتخطيط / the map's real size after any layout change
     const mapRect = map.getContainer().getBoundingClientRect();
     const sheetRect = nav.sheet ? nav.sheet.getBoundingClientRect() : null;
@@ -525,5 +540,5 @@
     placeFollowBtn_(); // ارتفاع اللوحة قد يتغيّر مع النص — the sheet height may change with the text
   }
 
-  global.SecNavigation = { init: init, start: start, stop: stop, isActive: isActive, _locateOnRoute: locateOnRoute };
+  global.SecNavigation = { init: init, start: start, stop: stop, isActive: isActive, refreshZoomSnap: applyZoomSnap_, _locateOnRoute: locateOnRoute };
 })(window);

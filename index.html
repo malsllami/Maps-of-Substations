@@ -6,6 +6,7 @@
 <title>محطات التوزيع | الشركة السعودية للطاقة</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="styles/offline-map.css">
 <style>
 :root{
   --blue-deep:#1B4D8C;
@@ -595,40 +596,6 @@ body.guest-mode h1{
 .nav-me .nav-me-arrow{position:absolute;left:0;top:0;display:none;transition:transform .5s;filter:drop-shadow(0 1px 3px rgba(0,0,0,.4));}
 .nav-me.moving .nav-me-dot{display:none;}
 .nav-me.moving .nav-me-arrow{display:block;}
-/* ===== خريطة جدة بدون إنترنت (services/offline-map-ui.js) — النموذج أ + شريط التخزين من ج — Offline Jeddah map: design A + storage bar from C ===== */
-.om-card{display:grid;gap:1px;text-align:right;background:var(--bg-card);color:var(--text-primary);border:1px solid var(--border-strong);border-radius:12px;padding:6px 10px 6px 26px;font-family:'IBM Plex Sans Arabic',sans-serif;box-shadow:0 3px 10px rgba(0,0,0,.18);cursor:pointer;position:relative;max-width:230px;}
-.om-card .omc-title{font-size:11.5px;font-weight:700;}
-.om-card .omc-line{font-size:11px;color:var(--text-secondary);}
-.om-card .omc-chev{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--text-secondary);font-size:12px;}
-.om-dim{position:fixed;inset:0;background:rgba(6,11,20,.55);z-index:1600;}
-.om-sheet{position:fixed;left:0;right:0;bottom:0;z-index:1601;max-height:82vh;overflow:auto;box-sizing:border-box;background:var(--bg-card);color:var(--text-primary);border-radius:22px 22px 0 0;padding:10px 18px calc(22px + env(safe-area-inset-bottom,0px));display:grid;gap:10px;font-family:'IBM Plex Sans Arabic',sans-serif;}
-.om-grab{width:40px;height:4px;border-radius:9px;background:var(--border-strong);margin:0 auto;}
-.om-h{margin:0;font-size:16px;font-weight:700;}
-.om-row{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--bg-elev);border-radius:12px;padding:9px 12px;font-size:12.5px;}
-.om-row b{text-align:left;}
-.om-num{font-family:'JetBrains Mono',monospace;font-weight:700;}
-.om-ok{color:#18A957;font-weight:700;}
-.om-warn{color:#C98A0B;font-weight:700;font-size:11.5px;}
-.om-dim-text{color:var(--text-secondary);font-size:11px;font-weight:400;}
-.om-sub{margin:0;font-size:11.5px;color:var(--text-secondary);}
-.om-note-warn{background:rgba(232,163,23,.14);border-radius:12px;padding:8px 10px;font-size:11.5px;}
-.om-bar{height:8px;border-radius:99px;background:var(--border-strong);overflow:hidden;}
-.om-bar i{display:block;height:100%;background:var(--teal);transition:width .3s;}
-.om-bar-thin{height:6px;}
-.om-bar-lbl{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--text-secondary);margin-top:4px;}
-.om-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.om-btn{border:0;border-radius:14px;padding:10px;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;}
-.om-btn.pri{background:var(--teal);color:#fff;}
-.om-btn.sec{background:var(--bg-elev);color:var(--text-primary);border:1px solid var(--border-strong);}
-.om-btn.dan{background:transparent;color:#E5484D;border:1px solid rgba(229,72,77,.45);}
-.om-msg{font-size:12px;font-weight:700;color:#18A957;text-align:center;}
-.om-msg.bad{color:#E5484D;}
-.om-msg[hidden]{display:none;}
-.om-log{border-top:1px solid var(--border-strong);padding-top:8px;display:grid;gap:8px;}
-.om-log-h{font-size:12.5px;font-weight:700;color:var(--text-secondary);}
-.om-log-i{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;font-size:12px;}
-.om-log-ic{font-size:13px;line-height:1.4;}
-.om-log-t{font-weight:700;}
 .map-mode-opt{
   display:flex;align-items:center;gap:9px;text-align:right;background:transparent;border:none;
   padding:9px 10px;border-radius:8px;font-size:12.5px;color:var(--text-primary);cursor:pointer;font-family:inherit;
@@ -931,6 +898,18 @@ body.guest-mode h1{
 .station-table td{padding:3px 0;color:var(--text-secondary);}
 .station-table td.v{color:var(--text-primary);font-weight:500;text-align:left;font-family:'JetBrains Mono',monospace;direction:ltr;}
 .station-table .st-actions{display:flex;gap:8px;flex-wrap:wrap;}
+/* ترتيب الإجراءات المعتمد: المسار رئيسي بارز، سطر خريطة جدة بحالتها، ثم ثلاثة أزرار مساعدة — the approved action order */
+.station-table .st-actions-v2{display:grid;grid-template-columns:1fr;gap:8px;}
+.station-table .st-btn.st-main{justify-content:center;padding:13px;font-size:15px;font-weight:700;background:var(--teal);border-color:var(--teal);color:#fff;}
+.station-table .st-btn.st-main:hover{background:var(--teal-light);color:#fff;}
+.station-table .st-btn.st-om{justify-content:space-between;text-align:right;padding:9px 14px;}
+.station-table .st-om-text{display:grid;gap:1px;}
+.station-table .st-om-text b{font-size:13px;color:var(--text-primary);}
+.station-table .st-om-text small{font-size:11.5px;color:var(--text-secondary);}
+.station-table .st-om-chev{color:var(--text-secondary);font-size:15px;}
+.station-table .st-sub{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.station-table .st-sub .st-btn{justify-content:center;}
+.station-table .st-btn[hidden]{display:none;}
 .station-table .st-btn{
   text-align:center;font-size:11px;padding:7px 14px;border-radius:8px;white-space:nowrap;
   border:1px solid var(--border-strong);background:var(--bg);color:var(--text-secondary);
@@ -1101,11 +1080,20 @@ footer{
 @media (max-width:767px){
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), textarea, select{font-size:16px !important;}
 }
+/* حافة جانبية موحدة 16 لكل الأقسام على الجوال (قيست: كانت 0 و4 و12 و24 ومتجاوزة للشاشة) — عرض الأقسام من حاويتها لا من الشاشة
+   One 16px side gutter for every section on phones (measured: was 0, 4, 12, 24 and overflowing) — widths from the container, not the screen */
+@media (max-width:767px){
+  .header-row-main{padding:12px 16px;}
+  .header-row-status{padding:0 16px 12px;}
+  .hero{padding-left:16px;padding-right:16px;}
+  .top-content-area{width:100%;}
+  .globe-stage.map-active{width:calc(100% - 32px);}
+}
 @media (max-width:600px){
   .search-lens.open{width:88vw;}
   .login-btn{padding:7px 12px;font-size:12px;}
   .theme-toggle{width:34px;height:34px;}
-  .station-table{width:99vw;}
+  .station-table{width:100%;} /* كان 99vw فيوسّع الصفحة ويزيح كل الأقسام — was 99vw, widening the page and shifting every section */
   .eyebrow{font-size:10px;padding:5px 12px;}
   h1{font-size:clamp(22px,6vw,32px);}
   .recent-panel{gap:6px;}
@@ -3058,6 +3046,7 @@ function applyMapMode(){
         if(!layer || offlineLayerFlavor_ !== flavor || !shouldUseOfflineMap_()) return;
         if(currentTileLayer) leafletMap.removeLayer(currentTileLayer);
         currentTileLayer = layer.addTo(leafletMap);
+        if(window.SecNavigation && SecNavigation.refreshZoomSnap) SecNavigation.refreshZoomSnap(); // أثناء الملاحة: تكبير كسري الآن / while navigating: fractional zoom now
         SecOfflineMapUI.renderCard();
       }).catch(err=>{ offlineLayerFlavor_ = null; console.warn('الخريطة المحفوظة / saved map:', err); });
     }
@@ -3069,6 +3058,7 @@ function applyMapMode(){
   if(currentTileLayer) leafletMap.removeLayer(currentTileLayer);
   currentTileLayer = L.tileLayer(tileUrl, {maxZoom:19, className: tileMode === 'dark' ? 'map-night-tiles' : ''}).addTo(leafletMap);
   watchTileErrors_(currentTileLayer);
+  if(window.SecNavigation && SecNavigation.refreshZoomSnap) SecNavigation.refreshZoomSnap(); // أثناء الملاحة: درجات صحيحة بلا فواصل / while navigating: whole levels, no seams
   updateMapModeUI();
   if(window.SecOfflineMapUI) SecOfflineMapUI.renderCard();
 }
@@ -3124,7 +3114,7 @@ setInterval(()=>{ if(mapMode === 'auto' && leafletMap) applyMapMode(); }, 5 * 60
 function initMap(){
   leafletMap = L.map('map-container', {zoomControl:false, attributionControl:false}).setView([21.54,39.19], 12);
   applyMapMode();
-  if(window.SecOfflineMapUI) SecOfflineMapUI.attach(leafletMap); // بطاقة خريطة جدة أعلى الخريطة / the Jeddah map card at the map's top
+  // خريطة جدة لم تعد بطاقة فوق الخريطة: مدخلها في بطاقة المحطة وفي «حسابي» — the Jeddah map is no longer a card over the map: its entries are the station card and «حسابي»
   leafletMap.on('click', (e)=>{
     if(measureActive) handleMeasureClick(e.latlng);
     else if(routeActive) handleRouteClick(e.latlng);
@@ -3958,11 +3948,17 @@ function renderStationOnMap(s){
           <div class="cell-value ar">${s.region}</div>
         </div>` : ''}
       </div>
-      <div class="st-actions">
-        <button class="st-btn primary" id="navFromMeBtn">المسار من موقعي 🧭</button>
-        <a class="st-btn primary" href="${mapsUrl}" target="_blank" rel="noopener">قوقل ماب 🧭</a>
-        <button class="st-btn" id="shareStationBtn">مشاركة 📤</button>
-        <button class="st-btn" id="openEditBtn">تعديل ✏️</button>
+      <!-- المسار الإجراء الرئيسي، ثم خريطة جدة (مدخل سريع)، ثم الإجراءات المساعدة — the route is the main action, then the Jeddah map (quick entry), then helpers -->
+      <div class="st-actions st-actions-v2">
+        <button class="st-btn primary st-main" id="navFromMeBtn">🧭 المسار من موقعي</button>
+        <button class="st-btn st-om" id="offlineMapEntryBtn" type="button">
+          <span class="st-om-text"><b>🗺️ خريطة جدة بدون إنترنت</b><small data-om-status></small></span><span class="st-om-chev">‹</span>
+        </button>
+        <div class="st-sub">
+          <a class="st-btn" href="${mapsUrl}" target="_blank" rel="noopener">🗺️ قوقل ماب</a>
+          <button class="st-btn" id="shareStationBtn">📤 مشاركة</button>
+          <button class="st-btn" id="openEditBtn">✏️ تعديل</button>
+        </div>
       </div>
       ${s._dataBuiltAt ? `<div class="db-freshness-note">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.5A8.5 8.5 0 1 1 3 12.5a8.38 8.38 0 0 1 .9-3.8"/><path d="M21 3v6h-6"/></svg>
@@ -3975,6 +3971,10 @@ function renderStationOnMap(s){
   document.getElementById('shareStationBtn').addEventListener('click', () => shareStation_(s));
   document.getElementById('openEditBtn').addEventListener('click', openEditForm);
   document.getElementById('navFromMeBtn').addEventListener('click', () => { if(window.SecNavigation) SecNavigation.start(s); });
+  // نفس نافذة إدارة خريطة جدة الحالية — the same existing Jeddah map management sheet
+  const omEntry = document.getElementById('offlineMapEntryBtn');
+  if(window.SecOfflineMapUI){ omEntry.addEventListener('click', () => SecOfflineMapUI.open()); SecOfflineMapUI.renderCard(); }
+  else omEntry.hidden = true;
 }
 
 let editPreviewMap = null, editPreviewMarker = null;
@@ -4257,6 +4257,8 @@ if(window.SecNavigation){
     relayout: layoutMapActive,
     osrmUrl: OSRM_URL,
     googleMapsUrl: s => `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}&travelmode=driving`,
+    // التكبير الكسري مع خريطة جدة المحلية فقط (المربعات العادية تُظهر فواصل به) / fractional zoom with the saved Jeddah map only (regular tiles show seams with it)
+    fractionalZoom: ()=> !!offlineLayerFlavor_,
     // persist: يبقى ظاهرًا (مثل «جارٍ تحديد موقعك…») حتى يُستبدل أو يُخفى — stays shown (e.g. «locating…») until replaced or hidden
     hint: (text, persist) => {
       mapToolHint.textContent = text;

@@ -1,0 +1,37 @@
+/* styles/offline-map.css — تنسيق واجهة خريطة جدة بدون إنترنت (services/offline-map-ui.js): سطر الحالة ونافذة الإدارة.
+ * مشترك بين الرئيسية و«حسابي» — نفس النافذة من المدخلين دون تكرار. Styles for the offline Jeddah map UI: the status line
+ * and the management sheet. Shared by the home page and «حسابي» — the same sheet from both entries, no duplication. */
+/* ===== خريطة جدة بدون إنترنت (services/offline-map-ui.js) — النموذج أ + شريط التخزين من ج — Offline Jeddah map: design A + storage bar from C ===== */
+.om-card{display:grid;gap:1px;text-align:right;background:var(--bg-card);color:var(--text-primary);border:1px solid var(--border-strong);border-radius:12px;padding:6px 10px 6px 26px;font-family:'IBM Plex Sans Arabic',sans-serif;box-shadow:0 3px 10px rgba(0,0,0,.18);cursor:pointer;position:relative;max-width:230px;}
+.om-card .omc-title{font-size:11.5px;font-weight:700;}
+.om-card .omc-line{font-size:11px;color:var(--text-secondary);}
+.om-card .omc-chev{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--text-secondary);font-size:12px;}
+.om-dim{position:fixed;inset:0;background:rgba(6,11,20,.55);z-index:1600;}
+.om-sheet{position:fixed;left:0;right:0;bottom:0;z-index:1601;max-height:82vh;overflow:auto;box-sizing:border-box;background:var(--bg-card);color:var(--text-primary);border-radius:22px 22px 0 0;padding:10px 18px calc(22px + env(safe-area-inset-bottom,0px));display:grid;gap:10px;font-family:'IBM Plex Sans Arabic',sans-serif;}
+.om-grab{width:40px;height:4px;border-radius:9px;background:var(--border-strong);margin:0 auto;}
+.om-h{margin:0;font-size:16px;font-weight:700;}
+.om-row{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--bg-elev);border-radius:12px;padding:9px 12px;font-size:12.5px;}
+.om-row b{text-align:left;}
+.om-num{font-family:'JetBrains Mono',monospace;font-weight:700;}
+.om-ok{color:#18A957;font-weight:700;}
+.om-warn{color:#C98A0B;font-weight:700;font-size:11.5px;}
+.om-dim-text{color:var(--text-secondary);font-size:11px;font-weight:400;}
+.om-sub{margin:0;font-size:11.5px;color:var(--text-secondary);}
+.om-note-warn{background:rgba(232,163,23,.14);border-radius:12px;padding:8px 10px;font-size:11.5px;}
+.om-bar{height:8px;border-radius:99px;background:var(--border-strong);overflow:hidden;}
+.om-bar i{display:block;height:100%;background:var(--teal);transition:width .3s;}
+.om-bar-thin{height:6px;}
+.om-bar-lbl{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--text-secondary);margin-top:4px;}
+.om-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.om-btn{border:0;border-radius:14px;padding:10px;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;}
+.om-btn.pri{background:var(--teal);color:#fff;}
+.om-btn.sec{background:var(--bg-elev);color:var(--text-primary);border:1px solid var(--border-strong);}
+.om-btn.dan{background:transparent;color:#E5484D;border:1px solid rgba(229,72,77,.45);}
+.om-msg{font-size:12px;font-weight:700;color:#18A957;text-align:center;}
+.om-msg.bad{color:#E5484D;}
+.om-msg[hidden]{display:none;}
+.om-log{border-top:1px solid var(--border-strong);padding-top:8px;display:grid;gap:8px;}
+.om-log-h{font-size:12.5px;font-weight:700;color:var(--text-secondary);}
+.om-log-i{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;font-size:12px;}
+.om-log-ic{font-size:13px;line-height:1.4;}
+.om-log-t{font-weight:700;}
