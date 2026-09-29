@@ -586,12 +586,49 @@ body.guest-mode h1{
 .nav-more{border:0;border-top:1px solid var(--border-strong);background:none;padding-top:8px;font-family:inherit;font-size:12px;font-weight:700;color:var(--teal);cursor:pointer;}
 .nav-follow{position:absolute;left:14px;z-index:901;border:1px solid var(--border-strong);background:var(--bg-card);color:var(--text-primary);border-radius:99px;padding:8px 14px;font-family:inherit;font-weight:700;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.18);cursor:pointer;}
 .nav-follow[hidden]{display:none;}
+/* أثناء الملاحة فقط: أزرار +/− عائمة على الطرف الأيمن فوق اللوحة (لا تحجبها اللوحة ولا تحجب زر المتابعة) — خارج الملاحة بمكانها الأصلي
+   Navigation only: +/− float on the right edge above the sheet (not covered by it, clear of the follow button) — outside navigation, their original place */
+.globe-stage.nav-active .zoom-controls{left:auto;right:14px;bottom:calc(var(--nav-sheet-h, 190px) + 20px);z-index:901;}
 /* موقعي: نقطة عند الوقوف، سهم يدور مع اتجاه الحركة — Me: a dot when standing, an arrow turning with the direction of travel */
 .nav-me{background:none;border:0;}
 .nav-me .nav-me-dot{position:absolute;left:8px;top:8px;width:18px;height:18px;border-radius:50%;background:#2E7DD1;border:3px solid #fff;box-sizing:border-box;box-shadow:0 1px 4px rgba(0,0,0,.35);}
 .nav-me .nav-me-arrow{position:absolute;left:0;top:0;display:none;transition:transform .5s;filter:drop-shadow(0 1px 3px rgba(0,0,0,.4));}
 .nav-me.moving .nav-me-dot{display:none;}
 .nav-me.moving .nav-me-arrow{display:block;}
+/* ===== خريطة جدة بدون إنترنت (services/offline-map-ui.js) — النموذج أ + شريط التخزين من ج — Offline Jeddah map: design A + storage bar from C ===== */
+.om-card{display:grid;gap:1px;text-align:right;background:var(--bg-card);color:var(--text-primary);border:1px solid var(--border-strong);border-radius:12px;padding:6px 10px 6px 26px;font-family:'IBM Plex Sans Arabic',sans-serif;box-shadow:0 3px 10px rgba(0,0,0,.18);cursor:pointer;position:relative;max-width:230px;}
+.om-card .omc-title{font-size:11.5px;font-weight:700;}
+.om-card .omc-line{font-size:11px;color:var(--text-secondary);}
+.om-card .omc-chev{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--text-secondary);font-size:12px;}
+.om-dim{position:fixed;inset:0;background:rgba(6,11,20,.55);z-index:1600;}
+.om-sheet{position:fixed;left:0;right:0;bottom:0;z-index:1601;max-height:82vh;overflow:auto;box-sizing:border-box;background:var(--bg-card);color:var(--text-primary);border-radius:22px 22px 0 0;padding:10px 18px calc(22px + env(safe-area-inset-bottom,0px));display:grid;gap:10px;font-family:'IBM Plex Sans Arabic',sans-serif;}
+.om-grab{width:40px;height:4px;border-radius:9px;background:var(--border-strong);margin:0 auto;}
+.om-h{margin:0;font-size:16px;font-weight:700;}
+.om-row{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--bg-elev);border-radius:12px;padding:9px 12px;font-size:12.5px;}
+.om-row b{text-align:left;}
+.om-num{font-family:'JetBrains Mono',monospace;font-weight:700;}
+.om-ok{color:#18A957;font-weight:700;}
+.om-warn{color:#C98A0B;font-weight:700;font-size:11.5px;}
+.om-dim-text{color:var(--text-secondary);font-size:11px;font-weight:400;}
+.om-sub{margin:0;font-size:11.5px;color:var(--text-secondary);}
+.om-note-warn{background:rgba(232,163,23,.14);border-radius:12px;padding:8px 10px;font-size:11.5px;}
+.om-bar{height:8px;border-radius:99px;background:var(--border-strong);overflow:hidden;}
+.om-bar i{display:block;height:100%;background:var(--teal);transition:width .3s;}
+.om-bar-thin{height:6px;}
+.om-bar-lbl{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--text-secondary);margin-top:4px;}
+.om-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.om-btn{border:0;border-radius:14px;padding:10px;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;}
+.om-btn.pri{background:var(--teal);color:#fff;}
+.om-btn.sec{background:var(--bg-elev);color:var(--text-primary);border:1px solid var(--border-strong);}
+.om-btn.dan{background:transparent;color:#E5484D;border:1px solid rgba(229,72,77,.45);}
+.om-msg{font-size:12px;font-weight:700;color:#18A957;text-align:center;}
+.om-msg.bad{color:#E5484D;}
+.om-msg[hidden]{display:none;}
+.om-log{border-top:1px solid var(--border-strong);padding-top:8px;display:grid;gap:8px;}
+.om-log-h{font-size:12.5px;font-weight:700;color:var(--text-secondary);}
+.om-log-i{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;font-size:12px;}
+.om-log-ic{font-size:13px;line-height:1.4;}
+.om-log-t{font-weight:700;}
 .map-mode-opt{
   display:flex;align-items:center;gap:9px;text-align:right;background:transparent;border:none;
   padding:9px 10px;border-radius:8px;font-size:12.5px;color:var(--text-primary);cursor:pointer;font-family:inherit;
@@ -980,6 +1017,8 @@ body.guest-mode h1{
   font-family:'JetBrains Mono',monospace;
 }
 .stations-cache-info b{color:var(--teal);font-weight:700;}
+.stations-cache-info[hidden]{display:none;}
+#stationsLatestInfo{flex-wrap:wrap;text-align:center;}
 [data-theme="light"] .stations-cache-info b{color:var(--teal);}
 
 body.guest-mode #cardsSection{display:none;}
@@ -1444,6 +1483,8 @@ footer{
     </div>
     <!-- سطر جديد: كمية بيانات المحطات المحمّلة فعليًا بالذاكرة المؤقتة -->
     <div class="stations-cache-info" id="stationsCacheInfo">بيانات المحطات المحمّلة بالذاكرة المؤقتة: —</div>
+    <!-- آخر نسخة ناجحة من سجل التحميل: الرقم والحجم والتاريخان — the last successful copy from the load log: number, size, both dates -->
+    <div class="stations-cache-info" id="stationsLatestInfo" hidden></div>
   </div>
 </section>
 
@@ -1455,6 +1496,8 @@ footer{
 <script src="services/stations-db.js"></script>
 <script src="services/direction-tracker.js"></script>
 <script src="services/navigation.js"></script>
+<script src="services/offline-map.js"></script>
+<script src="services/offline-map-ui.js"></script>
 <script src="services/timing.js"></script>
 <script src="services/session.js"></script>
 <script src="services/connection.js"></script>
@@ -1654,6 +1697,7 @@ async function loadStationsSnapshot_(){
         const legacyVersion = localStorage.getItem(STATIONS_VERSION_KEY);
         if(legacy && legacy.length && legacyVersion){
           rec = await SecStationsDB.migrate({ stations: legacy, version: legacyVersion, lastSync: localStorage.getItem(STATIONS_LAST_SYNC_KEY) });
+          recordStationsLoad_('migrate', { version: rec.version, count: rec.count, bytes: rec.sizeBytes, store: 'idb' });
         }
       }
       stationsStore_ = 'idb';
@@ -1691,6 +1735,41 @@ async function commitStationsSnapshot_(stations, version, lastSync){
   localStorage.setItem(STATIONS_LAST_SYNC_KEY, lastSync);
   stationsMeta_ = { version, lastSync, sizeBytes: 0 };
   return true;
+}
+
+/* ============================================================
+ *  سجل عمليات تحميل نسخة المحطات للذاكرة المؤقتة (بيانات وصفية فقط — البيانات نفسها نسخة واحدة):
+ *  كل تحميل كامل/مزامنة/نقل ناجح = سطر { الوقت، النوع، رقم النسخة، عدد المحطات، الحجم، عدد التغييرات }، آخر 20 عملية.
+ *  بـlocalStorage لأنه صغير (أقل من 3 كيلوبايت) وتقرؤه لوحة العضو (member.html) مباشرة.
+ *  Log of stations-copy loads into the cache (metadata only — the data itself stays one copy): each successful full
+ *  load/sync/migration = one line { time, type, version, station count, size, changes }, last 20. In localStorage since
+ *  it's tiny (< 3 KB) and the member page (member.html) reads it directly.
+ * ============================================================ */
+const STATIONS_LOAD_LOG_KEY = 'sec-stations-load-log-v1';
+const STATIONS_LOAD_LOG_MAX = 20;
+function recordStationsLoad_(type, info){
+  try{
+    // حجم نسخة localStorage (جهاز بلا IndexedDB) إن لم يُعرف — the localStorage copy size (device without IndexedDB) if unknown
+    let bytes = info.bytes || 0;
+    if(!bytes){ const raw = localStorage.getItem(STATIONS_CACHE_KEY); bytes = raw ? raw.length * 2 : 0; }
+    const log = JSON.parse(localStorage.getItem(STATIONS_LOAD_LOG_KEY) || '[]');
+    log.unshift({ at: Date.now(), type, version: info.version == null ? null : String(info.version), count: info.count, bytes, changes: info.changes == null ? null : info.changes, store: info.store || stationsStore_ });
+    localStorage.setItem(STATIONS_LOAD_LOG_KEY, JSON.stringify(log.slice(0, STATIONS_LOAD_LOG_MAX)));
+  }catch(e){ /* التخزين ممتلئ/محظور — السجل وصفي فقط ولا يؤثر على البيانات / storage full/blocked — the log is descriptive only */ }
+}
+
+/* سجل منفصل لعمليات تحميل المحطات التي فشلت ولم تنتج نسخة (🔴) — لا يُخلط بسجل النسخ الصالحة أعلاه.
+ * المحاولة والجهاز بلا إنترنت فعليًا لا تُسجَّل (فشل متوقع). تحميل المحطات لا يُستكمل من حيث توقف، فلا حالة «غير مكتمل» له.
+ * A separate log of stations loads that failed and produced no copy — never mixed with the valid-copies log above.
+ * Attempts while the device is truly offline aren't logged (an expected failure). Stations loads don't resume, so no "incomplete" state. */
+const STATIONS_ISSUES_LOG_KEY = 'sec-stations-issues-log-v1';
+function recordStationsIssue_(type, reason){
+  if(navigator.onLine === false) return;
+  try{
+    const log = JSON.parse(localStorage.getItem(STATIONS_ISSUES_LOG_KEY) || '[]');
+    log.unshift({ at: Date.now(), type, result: 'failed', reason: String(reason).slice(0, 120) });
+    localStorage.setItem(STATIONS_ISSUES_LOG_KEY, JSON.stringify(log.slice(0, STATIONS_LOAD_LOG_MAX)));
+  }catch(e){}
 }
 
 async function initStationsLocalSearch(){
@@ -1774,7 +1853,23 @@ function storedStationsTime_(){
  *  compressed cache size inside localStorage, separate from the
  *  general "storage used" bar which lumps every key together
  * ============================================================ */
+/* سطر «آخر نسخة محمّلة» تحت سطر البيانات: من سجل النسخ الناجحة، بنفس وحدة الحجم والتاريخين الميلادي والهجري
+ * The «last loaded copy» line under the data line: from the successful-copies log, same size unit, Gregorian + Hijri dates */
+function renderLatestCopyLine_(){
+  const el = document.getElementById('stationsLatestInfo');
+  if(!el) return;
+  let latest = null;
+  try{ latest = (JSON.parse(localStorage.getItem(STATIONS_LOAD_LOG_KEY) || '[]'))[0] || null; }catch(e){}
+  if(!latest || !isStationsLoaded){ el.hidden = true; return; }
+  const d = new Date(latest.at);
+  const greg = d.toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', { day:'numeric', month:'long', year:'numeric' });
+  const hijri = d.toLocaleDateString('ar-SA-u-ca-islamic-umalqura-nu-latn', { day:'numeric', month:'long', year:'numeric' });
+  el.innerHTML = `آخر نسخة محمّلة: النسخة <b>${escapeHtml(latest.version)}</b> · ${(latest.bytes / (1024*1024)).toFixed(2)} MB · ${greg} · ${hijri}`;
+  el.hidden = false;
+}
+
 function updateStationsCacheInfo(){
+  renderLatestCopyLine_();
   const el = document.getElementById('stationsCacheInfo');
   if(!el) return;
   const count = allStationsLocal.length;
@@ -1814,7 +1909,7 @@ function applyStationUpdates_(base, updates){
 async function syncIncrementalUpdates_(){
   try{
     const res = await callBackend('getUpdatedStationsSince', { since: stationsMeta_.lastSync || null });
-    if(!res.success || !Array.isArray(res.updated)) return false;
+    if(!res.success || !Array.isArray(res.updated)){ recordStationsIssue_('sync', 'رد غير صالح من الخادم'); return false; }
 
     return await withStationsWriteLock_(async ()=>{
       if(!isStationsLoaded) return false; // مُسحت البيانات أثناء الجلب / data was cleared during the fetch
@@ -1822,9 +1917,12 @@ async function syncIncrementalUpdates_(){
       const built = applyStationUpdates_(base, res.updated);
       if(built.stations.length !== base.length + built.added){
         console.warn('نسخة المزامنة لم تطابق العدد المتوقع — أُلغيت وبقيت السابقة / sync copy failed the count check — discarded, previous kept');
+        recordStationsIssue_('sync', 'عدد المحطات لم يطابق المتوقع — بقيت النسخة السابقة');
         return false;
       }
       const committed = await commitStationsSnapshot_(built.stations, res.version, res.serverTime);
+      if(!committed) recordStationsIssue_('sync', 'تعذّر الحفظ في ذاكرة الجهاز — بقيت النسخة السابقة');
+      if(committed) recordStationsLoad_('sync', { version: res.version, count: built.stations.length, bytes: stationsMeta_.sizeBytes, changes: res.updated.length });
       // الذاكرة تتحدث كالسابق؛ إن أُضيفت محطة يدويًا أثناء الاعتماد تُدمج التحديثات فوقها فلا تضيع
       // Memory updates as before; if a station was added by hand during the commit, updates merge on top so it isn't lost
       allStationsLocal = (allStationsLocal === base) ? built.stations : applyStationUpdates_(allStationsLocal, res.updated).stations;
@@ -1832,6 +1930,7 @@ async function syncIncrementalUpdates_(){
       return committed;
     });
   }catch(e){
+    recordStationsIssue_('sync', 'انقطع الاتصال بالخادم أثناء المزامنة');
     return false;
   }
 }
@@ -1855,11 +1954,13 @@ async function refreshStationsLocalCache_(onProgress){
       batchCount++;
       if(batchCount > MAX_BATCHES){
         console.warn('تجاوز الحد الأقصى الآمن لعدد الدفعات — تم إيقاف التحميل وإلغاؤه بأمان');
+        recordStationsIssue_('full', 'تجاوز الحد الآمن لعدد الدفعات');
         return false;
       }
       const res = await callBackend('getAllStations', { offset, phone: getSessionPhone_() });
       if(!res.success || !Array.isArray(res.stations)){
         console.warn('فشل تحميل دفعة من المحطات، تم إلغاء التحديث بأمان');
+        recordStationsIssue_('full', 'فشل تحميل دفعة ' + batchCount + ' من الخادم');
         return false;
       }
       collected = collected.concat(res.stations);
@@ -1872,17 +1973,23 @@ async function refreshStationsLocalCache_(onProgress){
 
     if(expectedTotal !== null && collected.length !== expectedTotal){
       console.warn('عدد المحطات المُحمَّلة لا يطابق العدد المتوقع، تم إلغاء التحديث بأمان');
+      recordStationsIssue_('full', 'عدد المحطات لم يطابق المتوقع');
       return false;
     }
 
     // التحميل الكامل يُعتمد كنسخة واحدة؛ فشل أي دفعة أعلاه يترك النسخة المحفوظة كما هي
     // The full load is committed as one copy; any failed batch above leaves the stored copy as is
-    await withStationsWriteLock_(()=> commitStationsSnapshot_(collected, version, serverTime));
+    if(await withStationsWriteLock_(()=> commitStationsSnapshot_(collected, version, serverTime))){
+      recordStationsLoad_('full', { version, count: collected.length, bytes: stationsMeta_.sizeBytes });
+    } else recordStationsIssue_('full', 'تعذّر الحفظ في ذاكرة الجهاز');
     allStationsLocal = collected;
     isStationsLoaded = true;
     updateStationsCacheInfo();
     refreshOfflineStateIfShown_();
     return true;
+  } catch(e) {
+    recordStationsIssue_('full', 'انقطع الاتصال بالخادم أثناء التحميل');
+    throw e;
   } finally {
     _isRefreshingStationsCache = false;
   }
@@ -2870,14 +2977,56 @@ function updateMapModeUI(){
     btn.classList.toggle('active', btn.dataset.mode === mapMode);
   });
 }
+/* خريطة جدة المحفوظة (services/offline-map.js): بدون إنترنت، أو تعذّر تحميل صور الخريطة مرارًا، والخريطة محفوظة ← المحفوظة
+ * تلقائيًا بنفس نمط النهاري/الليلي. مع الإنترنت ← الخريطة العادية كما كانت تمامًا.
+ * The saved Jeddah map: offline, or map images repeatedly failing, with the map saved ← the saved one automatically in the same
+ * day/night look. Online ← the regular map exactly as before. */
+let offlineLayerFlavor_ = null;   // نمط الخريطة المحفوظة المعروضة الآن (null = العادية) / look of the saved map shown now (null = regular)
+let tileFallbackUntil_ = 0;       // تعذّر تحميل الصور مع اتصال ظاهر ← المحفوظة مؤقتًا حتى هذا الوقت / images failing while "online" ← saved map until then
+function shouldUseOfflineMap_(){
+  return !!(window.SecOfflineMapUI && SecOfflineMapUI.isReady() && (navigator.onLine === false || Date.now() < tileFallbackUntil_));
+}
 function applyMapMode(){
   if(!leafletMap) return;
   const tileMode = resolvedTileMode();
+  if(shouldUseOfflineMap_()){
+    const flavor = tileMode === 'dark' ? 'dark' : 'light'; // الأقمار الصناعية بدون إنترنت ← النهاري / satellite offline ← day
+    if(offlineLayerFlavor_ !== flavor){
+      offlineLayerFlavor_ = flavor;
+      SecOfflineMap.createLayer(flavor).then(layer=>{
+        if(!layer || offlineLayerFlavor_ !== flavor || !shouldUseOfflineMap_()) return;
+        if(currentTileLayer) leafletMap.removeLayer(currentTileLayer);
+        currentTileLayer = layer.addTo(leafletMap);
+        SecOfflineMapUI.renderCard();
+      }).catch(err=>{ offlineLayerFlavor_ = null; console.warn('الخريطة المحفوظة / saved map:', err); });
+    }
+    updateMapModeUI();
+    return;
+  }
+  offlineLayerFlavor_ = null;
   const tileUrl = tileUrlFor(tileMode);
   if(currentTileLayer) leafletMap.removeLayer(currentTileLayer);
   currentTileLayer = L.tileLayer(tileUrl, {maxZoom:19, className: tileMode === 'dark' ? 'map-night-tiles' : ''}).addTo(leafletMap);
+  watchTileErrors_(currentTileLayer);
   updateMapModeUI();
+  if(window.SecOfflineMapUI) SecOfflineMapUI.renderCard();
 }
+/* 4 صور تعذّر تحميلها خلال 15 ث والخريطة محفوظة ← المحفوظة لدقيقة ثم إعادة محاولة العادية
+ * 4 images failing within 15 s with the map saved ← the saved map for a minute, then the regular one is retried */
+function watchTileErrors_(layer){
+  let errors = [];
+  layer.on('tileerror', ()=>{
+    const now = Date.now();
+    errors = errors.filter(t => now - t < 15000); errors.push(now);
+    if(errors.length >= 4 && layer === currentTileLayer && window.SecOfflineMapUI && SecOfflineMapUI.isReady()){
+      tileFallbackUntil_ = now + 60000;
+      applyMapMode();
+      setTimeout(()=>{ if(Date.now() >= tileFallbackUntil_) applyMapMode(); }, 61000);
+    }
+  });
+}
+window.addEventListener('offline', ()=> applyMapMode());
+window.addEventListener('online', ()=>{ tileFallbackUntil_ = 0; applyMapMode(); });
 function setMapMode(mode){
   mapMode = mode;
   localStorage.setItem(MAP_MODE_STORAGE_KEY, mode);
@@ -2914,6 +3063,7 @@ setInterval(()=>{ if(mapMode === 'auto' && leafletMap) applyMapMode(); }, 5 * 60
 function initMap(){
   leafletMap = L.map('map-container', {zoomControl:false, attributionControl:false}).setView([21.54,39.19], 12);
   applyMapMode();
+  if(window.SecOfflineMapUI) SecOfflineMapUI.attach(leafletMap); // بطاقة خريطة جدة أعلى الخريطة / the Jeddah map card at the map's top
   leafletMap.on('click', (e)=>{
     if(measureActive) handleMeasureClick(e.latlng);
     else if(routeActive) handleRouteClick(e.latlng);
@@ -4025,6 +4175,16 @@ document.getElementById('homeMenuLink').addEventListener('click', (e)=>{
     goBackToSearch();
   }
 });
+
+/* خريطة جدة بدون إنترنت (services/offline-map-ui.js) — تُقرأ حالتها فورًا لتعمل من أول فتح بدون إنترنت
+ * Offline Jeddah map — its state is read at once so it works from the very first offline open */
+if(window.SecOfflineMapUI && window.SecOfflineMap){
+  SecOfflineMapUI.init({
+    isUsingOffline: ()=> offlineLayerFlavor_ !== null,
+    onReadyChange: ()=> applyMapMode(),
+    hint: text => { mapToolHint.textContent = text; mapToolHint.classList.add('show'); setTimeout(()=> mapToolHint.classList.remove('show'), 6000); }
+  });
+}
 
 /* ربط الملاحة بعناصر الصفحة الحالية (services/navigation.js) — Wire navigation to the existing page elements */
 if(window.SecNavigation){

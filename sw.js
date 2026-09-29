@@ -9,10 +9,10 @@
  * - Site pages/files: network first (as before), refreshing the stored copy on each success; offline ← stored copy.
  * - Pinned-version CDN libraries and fonts: stored copy first (a pinned URL never changes).
  * - Everything else (Apps Script, map tiles, OSRM, satellite): not intercepted at all. */
-const CACHE_NAME = 'sec-shell-v9';
+const CACHE_NAME = 'sec-shell-v11';
 const APP_SHELL = [
   'index.html', 'auth.html', 'member.html', 'shifts.html', 'admin.html', 'manifest.json',
-  'services/session.js', 'services/timing.js', 'services/connection.js', 'services/pwa.js', 'services/stations-db.js', 'services/navigation.js', 'services/direction-tracker.js',
+  'services/session.js', 'services/timing.js', 'services/connection.js', 'services/pwa.js', 'services/stations-db.js', 'services/navigation.js', 'services/direction-tracker.js', 'services/offline-map.js', 'services/offline-map-ui.js',
   'assets/logo-icon.png', 'assets/icon-192.png', 'assets/icon-512.png', 'assets/icon-maskable-512.png', 'assets/member-icon.png'
 ];
 // نفس الروابط المستخدمة بالصفحات حرفيًا — The exact URLs the pages use
@@ -25,7 +25,8 @@ const CDN_ASSETS = [
   'https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap',
   'https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap'
 ];
-const CACHE_FIRST_HOSTS = ['cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
+// cdn.jsdelivr.net: مكتبتا خريطة جدة المحفوظة بإصدارات ثابتة (تُحفظ عند أول تحميل لهما) / the offline Jeddah map libraries at pinned versions (stored on first load)
+const CACHE_FIRST_HOSTS = ['cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com', 'cdn.jsdelivr.net'];
 
 /* كل ملف يُحفظ منفردًا: فشل ملف واحد لا يُسقط البقية (addAll كانت تُسقط الكل بصمت)
  * Each file is stored on its own: one failure doesn't drop the rest (addAll silently dropped everything) */
@@ -86,6 +87,9 @@ self.addEventListener('fetch', (event) => {
   const request = event.request;
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
+  // ملف خريطة جدة (9 ميجابايت) يُنزَّل بأجزاء إلى IndexedDB عبر services/offline-map.js — لا يُكرَّر بذاكرة عامل الخدمة
+  // The Jeddah map file (9 MB) downloads in parts to IndexedDB via services/offline-map.js — never duplicated in the SW cache
+  if (url.origin === self.location.origin && url.pathname.indexOf('/maps/') !== -1) return;
   if (url.origin === self.location.origin) {
     event.respondWith(networkFirst_(request));
   } else if (CACHE_FIRST_HOSTS.indexOf(url.hostname) !== -1) {

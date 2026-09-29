@@ -110,6 +110,21 @@ h2{font-size:17px;font-weight:700;margin-bottom:4px;}
 .input-base:disabled{opacity:.55;}
 .input-base:focus{border-color:var(--teal);}
 .meta-row{display:flex;justify-content:space-between;font-size:12.5px;padding:8px 0;border-top:1px solid var(--border);color:var(--text-secondary);}
+/* سجل نسخ الذاكرة المؤقتة: صف أول ثابت وملوّن، محاذاة للمنتصف، خط 12 عريض — cached-copies log: sticky coloured header, centred, 12px bold */
+.cache-table-wrap{max-height:280px;overflow:auto;border:1px solid var(--border);border-radius:12px;}
+.cache-table{width:100%;border-collapse:collapse;font-size:12px;font-weight:700;text-align:center;}
+.cache-table th{position:sticky;top:0;z-index:1;background:var(--teal);color:#fff;padding:8px 6px;white-space:nowrap;}
+.cache-table td{padding:8px 6px;border-top:1px solid var(--border);color:var(--text-primary);}
+.cache-table .mono{font-family:'JetBrains Mono',monospace;}
+.cache-table .sub{display:block;color:var(--text-secondary);font-size:10.5px;}
+.cache-type{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;}
+.cache-type.full{background:rgba(46,125,209,.15);color:var(--blue-mid);}
+.cache-type.sync{background:rgba(31,174,140,.15);color:var(--teal);}
+.cache-type.migrate{background:rgba(200,162,78,.18);color:#B98A2E;}
+.cache-ops{display:grid;gap:8px;}
+.cache-op{display:grid;grid-template-columns:auto 1fr;gap:8px;background:var(--bg-elev);border-radius:12px;padding:9px 12px;font-size:12px;}
+.cache-op .t{font-weight:700;color:var(--text-primary);}
+.cache-op .s{color:var(--text-secondary);font-size:11px;}
 .meta-row span:last-child{color:var(--text-primary);font-family:'JetBrains Mono',monospace;}
 .error-banner{background:var(--danger-bg);color:var(--danger);font-size:12.5px;padding:10px 12px;border-radius:8px;margin-bottom:14px;display:none;}
 .error-banner.show{display:block;}
@@ -306,6 +321,24 @@ h2{font-size:17px;font-weight:700;margin-bottom:4px;}
       <span>آخر دخول ناجح</span>
       <span id="lastLoginVal">—</span>
     </div>
+    <!-- آخر نسخة بالذاكرة المؤقتة (من سجل هذا الجهاز) — the last cached copy (from this device's log) -->
+    <div class="meta-row">
+      <span>آخر نسخة بالذاكرة المؤقتة</span>
+      <span id="lastCacheCopyVal" style="text-align:left">—</span>
+    </div>
+  </div>
+
+  <!-- سجل نسخ الذاكرة المؤقتة + حالة عمليات تحميل المحطات (على هذا الجهاز فقط) — cached copies log + stations load operations (this device only) -->
+  <div class="card" id="cacheLogCard" style="display:none">
+    <div style="font-size:13px;font-weight:700;margin-bottom:12px;color:var(--text-secondary)">سجل نسخ الذاكرة المؤقتة على هذا الجهاز</div>
+    <div class="cache-table-wrap">
+      <table class="cache-table">
+        <thead><tr><th>النسخة</th><th>العملية</th><th>المحطات</th><th>الحجم</th><th>التاريخ</th></tr></thead>
+        <tbody id="cacheLogBody"></tbody>
+      </table>
+    </div>
+    <div style="font-size:13px;font-weight:700;margin:16px 0 8px;color:var(--text-secondary)">حالة عمليات التنزيل</div>
+    <div id="cacheOpsList" class="cache-ops"></div>
   </div>
 
   <div class="card" id="statsCard" style="display:none">
@@ -643,6 +676,41 @@ function hideMsgs(){ document.getElementById('errorBanner').classList.remove('sh
 function escapeHtml(str){
   return String(str).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
+
+/* ============================================================
+ *  سجل نسخ الذاكرة المؤقتة لهذا الجهاز (يكتبه index.html): جدول النسخ الناجحة + حالة عمليات التحميل
+ *  (🟢 مكتمل من سجل النسخ · 🔴 فشل من سجل الفشل المنفصل). يُقرأ من الجهاز فلا يحتاج الخادم ولا الإنترنت.
+ *  This device's cached-copies log (written by index.html): the successful-copies table + load operations status
+ *  (complete from the copies log · failed from the separate failure log). Read from the device — no server or internet needed.
+ * ============================================================ */
+function renderCacheLog_(){
+  let copies = [], issues = [];
+  try{ copies = JSON.parse(localStorage.getItem('sec-stations-load-log-v1') || '[]'); }catch(e){}
+  try{ issues = JSON.parse(localStorage.getItem('sec-stations-issues-log-v1') || '[]'); }catch(e){}
+  const greg = ts => new Date(ts).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', {day:'numeric', month:'long', year:'numeric'});
+  const hijri = ts => new Date(ts).toLocaleDateString('ar-SA-u-ca-islamic-umalqura-nu-latn', {day:'numeric', month:'long', year:'numeric'});
+  const clock = ts => new Date(ts).toLocaleTimeString('ar-SA-u-nu-latn', {hour:'numeric', minute:'2-digit'});
+  const size = b => (b / (1024*1024)).toFixed(2) + ' MB'; // نفس وحدة الصفحة الرئيسية / the same unit as the home page
+  const typeName = e => e.type === 'full' ? 'تحميل كامل' : e.type === 'sync' ? 'مزامنة' + (e.changes != null ? ' (' + e.changes + ' تغيير)' : '') : 'نقل لقاعدة الجهاز';
+  const latest = copies[0];
+  document.getElementById('lastCacheCopyVal').innerHTML = latest
+    ? 'النسخة ' + escapeHtml(latest.version) + ' · ' + size(latest.bytes) + '<br>' + greg(latest.at) + '<br>' + hijri(latest.at)
+    : 'لم تُحمَّل بعد على هذا الجهاز';
+  if(!copies.length && !issues.length) return;
+  document.getElementById('cacheLogBody').innerHTML = copies.length ? copies.map(e =>
+    `<tr><td class="mono">${escapeHtml(e.version)}</td><td><span class="cache-type ${e.type === 'sync' || e.type === 'full' ? e.type : 'migrate'}">${typeName(e)}</span></td>` +
+    `<td class="mono">${Number(e.count).toLocaleString('en')}</td><td class="mono">${size(e.bytes)}</td>` +
+    `<td>${greg(e.at)}<span class="sub">${hijri(e.at)} · ${clock(e.at)}</span></td></tr>`).join('')
+    : '<tr><td colspan="5">لا توجد نسخ ناجحة بعد</td></tr>';
+  // 🟢 من سجل النسخ و🔴 من سجل الفشل — معروضان معًا بالوقت ويبقيان منفصلين داخليًا / complete + failed shown together by time, separate internally
+  const ops = copies.map(e => ({ at: e.at, icon: '🟢', title: 'مكتمل · ' + typeName(e) + ' · النسخة ' + escapeHtml(e.version), sub: Number(e.count).toLocaleString('en') + ' محطة · ' + size(e.bytes) }))
+    .concat(issues.map(i => ({ at: i.at, icon: '🔴', title: 'فشل · ' + (i.type === 'full' ? 'تحميل كامل' : 'مزامنة'), sub: escapeHtml(i.reason) + ' — لم تنتج نسخة، وبقيت السابقة كما هي' })))
+    .sort((a, b) => b.at - a.at).slice(0, 20);
+  document.getElementById('cacheOpsList').innerHTML = ops.map(o =>
+    `<div class="cache-op"><span>${o.icon}</span><div><div class="t">${o.title}</div><div class="s">${o.sub}</div><div class="s">${greg(o.at)} · ${hijri(o.at)} · ${clock(o.at)}</div></div></div>`).join('');
+  document.getElementById('cacheLogCard').style.display = 'block';
+}
+renderCacheLog_();
 function isValidEmail_(email){
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || '').trim());
 }

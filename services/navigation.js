@@ -178,6 +178,7 @@
     };
     // طي بطاقة المحطة — نفس دالة التخطيط الحالية تعيد حساب ارتفاع الخريطة / collapse the card — the existing layout function recomputes the map height
     deps.topArea.classList.add('nav-collapsed');
+    deps.stage.classList.add('nav-active'); // يرفع أزرار +/− فوق اللوحة / lifts +/− above the sheet
     deps.relayout();
     buildSheet_();
     setStatus_('جارٍ تحديد موقعك…', 'wait');
@@ -256,6 +257,8 @@
     if (n.sheet) n.sheet.remove();
     if (n.followBtn) n.followBtn.remove();
     deps.topArea.classList.remove('nav-collapsed');
+    deps.stage.classList.remove('nav-active');
+    deps.stage.style.removeProperty('--nav-sheet-h');
     deps.relayout();
   }
 
@@ -447,8 +450,12 @@
     placeFollowBtn_();
     moveCamera_(true);
   }
+  /* زر المتابعة (يسارًا) وأزرار +/− (يمينًا، عبر --nav-sheet-h) فوق اللوحة دائمًا — the follow button (left) and +/− (right, via --nav-sheet-h) always sit above the sheet */
   function placeFollowBtn_() {
-    if (nav && nav.followBtn) nav.followBtn.style.bottom = (nav.sheet.offsetHeight + 20) + 'px';
+    if (!nav || !nav.sheet) return;
+    const h = nav.sheet.offsetHeight;
+    if (nav.followBtn) nav.followBtn.style.bottom = (h + 20) + 'px';
+    deps.stage.style.setProperty('--nav-sheet-h', h + 'px');
   }
   function setStatus_(text, tone) { if (nav) { nav.status = text; nav.tone = tone; render_(); } }
 
@@ -484,6 +491,7 @@
     const stt = q('.nav-stt');
     stt.textContent = nav.status || '';
     stt.className = 'nav-stt ' + (nav.tone || '');
+    placeFollowBtn_(); // ارتفاع اللوحة قد يتغيّر مع النص — the sheet height may change with the text
   }
 
   global.SecNavigation = { init: init, start: start, stop: stop, isActive: isActive, _locateOnRoute: locateOnRoute };
