@@ -1551,33 +1551,56 @@ const HEDGE_RETRY_AFTER_FAIL_MS = 1500;
 function isApiReply_(json){
   return !!json && typeof json === 'object' && ('success' in json || 'error' in json);
 }
+/* تسجيل النتيجة النهائية (لا كل محاولة): فشل الأصلي ونجاح الاحتياطي ← «تأخر وعالجه الاحتياطي» (ليس خطأً)؛ فشل الاثنين ← خطأ.
+ * تفاصيل كل محاولة يضعها مراقب الاتصال على signal.__secAttempt. الطلبات نفسها وتوقيتها كما كانت تمامًا.
+ * Log the final outcome (not each attempt): original failed + backup succeeded ← "recovered by the backup" (not an error);
+ * both failed ← an error. Each attempt's details are set by the connection watcher on signal.__secAttempt. The requests
+ * themselves and their timing are exactly as before. */
 function hedgedRead_(action, payload){
   return new Promise((resolve, reject)=>{
-    const controllers = [];
+    const tries = [];
     let launched = 0, failures = 0, settled = false, hedgeTimer = null;
+    const attemptOf_ = t => {
+      const a = t.controller.signal.__secAttempt || null;
+      if(a && t.invalid) a.kind = 'invalid-reply';
+      return a;
+    };
+    const conn = ()=> window.SecConnection && window.SecConnection.reportRecovered ? window.SecConnection : null;
     const launch = ()=>{
       if(settled || launched >= 2) return;
       launched++;
       const controller = new AbortController();
-      controllers.push(controller);
+      controller.signal.__secManaged = true; // النتيجة تُسجَّل هنا لا بمراقب الاتصال / the outcome is logged here, not by the connection watcher
+      const t = { controller, invalid: false };
+      tries.push(t);
       callBackendOnce_(action, payload, controller.signal).then(json=>{
-        if(!isApiReply_(json)) throw new Error('invalid-reply'); // يُعامل كفشل فيُرسل الاحتياطي / treated as a failure so the backup is sent
+        if(!isApiReply_(json)){ t.invalid = true; throw new Error('invalid-reply'); } // يُعامل كفشل فيُرسل الاحتياطي / treated as a failure so the backup is sent
         return json;
       }).then(json=>{
         if(settled) return;
         settled = true;
         clearTimeout(hedgeTimer);
-        controllers.forEach(c=>{
-          if(c === controller) return;
-          c.signal.__secHedgeLoser = true; // إلغاء مقصود — لا يُسجَّل كعطل / intentional cancel — not logged as a fault
-          c.abort();
+        tries.forEach(o=>{
+          if(o === t) return;
+          o.controller.signal.__secHedgeLoser = true; // إلغاء مقصود — لا يُسجَّل كعطل / intentional cancel — not logged as a fault
+          o.controller.abort();
         });
         resolve(json);
+        // نجح الاحتياطي بعد فشل الأصلي أو تعلّقه — يُسجَّل بعد انتهاء إلغاء الأصلي / the backup won after the original failed or hung — logged once the original's cancel has ended
+        if(t !== tries[0]) setTimeout(()=>{
+          const c = conn(), a0 = attemptOf_(tries[0]), a1 = attemptOf_(t);
+          if(c && a0 && a1) c.reportRecovered(action, a0, a1);
+        }, 0);
       }, err=>{
         if(settled) return;
         failures++;
         if(launched < 2){ clearTimeout(hedgeTimer); hedgeTimer = setTimeout(launch, HEDGE_RETRY_AFTER_FAIL_MS); } // فشل صريح قبل 8 ث ← الاحتياطي بعد 1.5 ث / outright failure before 8 s ← backup after 1.5 s
-        else if(failures >= launched){ settled = true; reject(err); } // فشل الطلبان / both failed
+        else if(failures >= launched){ // فشل الطلبان — خطأ حقيقي / both failed — a real error
+          settled = true;
+          reject(err);
+          const c = conn(), attempts = tries.map(attemptOf_).filter(Boolean);
+          if(c && attempts.length) setTimeout(()=> c.reportFailure(action, attempts), 50); // مهلة قصيرة لعنوان صفحة الخطأ / a short wait for the error page title
+        }
       });
     };
     launch();
@@ -1599,21 +1622,36 @@ function hedgedRead_(action, payload){
  * ============================================================ */
 const SAVE_RETRY_DELAYS_MS = [5000, 8000]; // أطول من زمن الحفظ بالخادم (~4 ث) حتى لا تتزامن المحاولتان / longer than the server save (~4 s) so attempts don't overlap
 const SAVE_UNCONFIRMED_MSG = 'تعذّر التأكد من الحفظ بسبب خلل مؤقت في الاتصال بخادم جوجل. ابحث عن رقم المحطة للتأكد قبل إعادة المحاولة.';
+/* نفس سلوك الحفظ السابق تمامًا؛ الإضافة: محاولة بلا رد سليم تُسجَّل «نتيجة كتابة غير مؤكدة» مع ما انتهت إليه إعادة
+ * الإرسال بنفس opKey — لا «فشل كتابة» مباشرة. Exactly the previous save behavior; added: an attempt without a valid reply
+ * is logged as "write result unconfirmed" with what the same-opKey resend concluded — never a plain "write failed". */
 async function saveWithRetry_(action, payload, onRetry){
+  const attempts = [];
+  const record = outcome => { if(window.SecConnection && window.SecConnection.reportWrite) window.SecConnection.reportWrite(action, attempts, outcome); };
   for(let attempt = 0; ; attempt++){
     let res;
+    const controller = new AbortController();
+    controller.signal.__secManaged = true; // النتيجة تُسجَّل هنا / the outcome is logged here
     try{
-      res = await callBackend(action, payload);
+      res = await callBackendOnce_(action, payload, controller.signal);
+      renewSessionActivity_(); // كما كان callBackend يفعل / as callBackend did
     }catch(networkOrParseErr){
-      if(attempt >= SAVE_RETRY_DELAYS_MS.length) throw new Error(SAVE_UNCONFIRMED_MSG);
+      if(controller.signal.__secAttempt) attempts.push(controller.signal.__secAttempt);
+      if(attempt >= SAVE_RETRY_DELAYS_MS.length){
+        record('لم تتأكد بعد ' + attempts.length + ' محاولات بنفس opKey — طُلب من المستخدم التحقق من المحطة');
+        throw new Error(SAVE_UNCONFIRMED_MSG);
+      }
       if(onRetry) onRetry(attempt + 1);
       await new Promise(r => setTimeout(r, SAVE_RETRY_DELAYS_MS[attempt]));
       continue;
     }
+    if(controller.signal.__secAttempt) attempts.push(controller.signal.__secAttempt);
     // إعادة إضافة تصادف "موجود مسبقًا" = المحاولة السابقة هي من حفظتها (نفس الرقم قبل ثوانٍ) / a retried add hitting "already exists" = our earlier attempt saved it
     if(attempt > 0 && action === 'addNewStation' && res && res.error && res.error.indexOf('موجود مسبقًا') !== -1){
+      record('تأكد الحفظ بإعادة الإرسال: «موجود مسبقًا» — المحاولة الأولى هي التي حفظت');
       return { success: true, confirmedByRetry: true };
     }
+    if(attempt > 0) record(res && res.success ? 'تأكد الحفظ بإعادة الإرسال بنفس opKey (بلا تكرار)' : 'رد الخادم بعد إعادة الإرسال: ' + String(res && res.error || 'فشل').slice(0, 80));
     return res;
   }
 }

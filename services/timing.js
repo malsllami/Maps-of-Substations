@@ -86,7 +86,8 @@
 
     let payload;
     try { payload = JSON.parse(init.body); } catch (e) { return originalFetch(input, init); }
-    const requestId = newRequestId_();
+    // نفس الرقم الذي وضعه مراقب الاتصال إن وُجد — فيتطابق جدول القياس وسجل الأخطاء / the same id the connection watcher set, if any — so the timing table and the error log match
+    const requestId = payload.requestId || newRequestId_();
     payload.requestId = requestId;
     const action = payload.action || 'غير معروف';
     const newInit = Object.assign({}, init, { body: JSON.stringify(payload) });
