@@ -1,13 +1,15 @@
 /* ============================================================
  * services/navigation.js — مسؤول عن "🧭 المسار من موقعي" فقط: الملاحة مع الإنترنت عبر OSRM.
  * يتابع موقع المستخدم (watchPosition)، يرسم مسار الطرق الفعلي، يعرض المسافة عبر الطرق والوقت
- * التقريبي، ويعيد حساب المسار عند الخروج عنه (~150 م) أو كل ~60 ثانية. أثناء الملاحة تُطوى بطاقة
- * المحطة، والكاميرا تتابع المستخدم والمحطة بتكبير تدريجي؛ تحريك الخريطة يدويًا يوقف الكاميرا فقط
+ * التقريبي، ويعيد حساب المسار عند الخروج عنه (~150 م) أو كل ~60 ثانية. الملاحة بشاشة كاملة: الخريطة
+ * تملأ الشاشة، ✕ عائم أعلاها، ولوحة سفلية صغيرة تُسحب للتفاصيل ومظهر اللوحة (واضحة/متوازنة/معتمة).
+ * الكاميرا تتابع المستخدم والمحطة بتكبير تدريجي؛ تحريك الخريطة يدويًا يوقف الكاميرا فقط
  * (GPS والمسافة مستمرة) ويظهر «⌖ متابعة». لا يغيّر أي ميزة قائمة، وزر قوقل ماب يبقى كما هو.
  *
  * Owns "🧭 route from my location" only: online navigation via OSRM. Tracks the user (watchPosition),
  * draws the real road route, shows road distance and approximate time, and recomputes the route when
- * the user leaves it (~150 m) or every ~60 s. While navigating the station card collapses and the camera
+ * the user leaves it (~150 m) or every ~60 s. Full-screen navigation: the map fills the screen, a floating ✕
+ * on top, a small bottom sheet pulled up for details and the panel look (clear/balanced/solid). The camera
  * follows user + station with gradual zoom; dragging the map stops the camera only (GPS and distance
  * keep updating) and shows «⌖ متابعة». Changes no existing feature; the Google Maps button stays as is.
  * ============================================================ */
@@ -179,6 +181,7 @@
     // طي بطاقة المحطة — نفس دالة التخطيط الحالية تعيد حساب ارتفاع الخريطة / collapse the card — the existing layout function recomputes the map height
     deps.topArea.classList.add('nav-collapsed');
     deps.stage.classList.add('nav-active'); // يرفع أزرار +/− فوق اللوحة / lifts +/− above the sheet
+    document.body.classList.add('nav-full'); // شاشة ملاحة كاملة: الخريطة تملأ الشاشة / full-screen navigation: the map fills the screen
     deps.relayout();
     // خطوات التكبير تُضبط حسب نوع الخريطة الظاهرة (انظر applyZoomSnap_)؛ تعود كما كانت عند الإيقاف / zoom steps follow the map type shown (see applyZoomSnap_); restored on stop
     nav.prevZoomSnap = map.options.zoomSnap;
@@ -207,7 +210,7 @@
 
     // انقطاع الإنترنت ← توجيه مباشر فورًا؛ عودته ← محاولة مسار الطرق فورًا — internet lost ← direct guidance at once; back ← try the road route at once
     nav.onOffline = function () { enterSmart_(); };
-    nav.onOnline = function () { if (nav) { nav.lastRouteAt = 0; requestRoute_('online'); } };
+    nav.onOnline = function () { if (nav) { nav.lastRouteAt = 0; render_(); requestRoute_('online'); } }; // الشارة تختفي فورًا / the chip hides at once
     global.addEventListener('offline', nav.onOffline);
     global.addEventListener('online', nav.onOnline);
     if (nav.mode === 'smart') enterSmart_(true);
@@ -267,6 +270,9 @@
     n.map.options.zoomSnap = n.prevZoomSnap; // كما كان قبل الملاحة / as before navigation
     if (n.sheet) n.sheet.remove();
     if (n.followBtn) n.followBtn.remove();
+    if (n.xBtn) n.xBtn.remove();
+    if (n.chip) n.chip.remove();
+    document.body.classList.remove('nav-full');
     deps.topArea.classList.remove('nav-collapsed');
     deps.stage.classList.remove('nav-active');
     deps.stage.style.removeProperty('--nav-sheet-h');
@@ -396,16 +402,17 @@
   const FIT_PAD_SIDE = 36, FIT_PAD_TOP = 80, FIT_PAD_BOTTOM = 40, FRAME_SETTLE_MS = 900;
   /* التكبير الكسري (خطوات 0.25) مع خريطة جدة المحلية فقط (رسم متجهي حاد بأي تكبير)؛ مع الخريطة العادية (صور مربعات) يبقى
    * بدرجات صحيحة — التكبير الكسري يُظهر فواصل رفيعة بين المربعات (قيست: 11 بلا فواصل، 11.5 بفواصل كل 181 نقطة). عند
-   * التحول للخريطة العادية بتكبير كسري يُقرَّب لأقرب درجة صحيحة. Fractional zoom (0.25 steps) only with the saved Jeddah map
+   * التحول للخريطة العادية بتكبير كسري يُقرَّب للدرجة الأدنى (تبقى النقطتان ظاهرتين). Fractional zoom (0.25 steps) only with the saved Jeddah map
    * (sharp vector rendering at any zoom); with the regular map (image tiles) it stays at whole levels — fractional zoom shows
    * thin seams between tiles (measured: 11 without seams, 11.5 with seams every 181 px). Switching to the regular map at a
-   * fractional zoom rounds to the nearest whole level. */
+   * fractional zoom rounds down to the whole level below (both points stay visible). */
   function applyZoomSnap_() {
     if (!nav) return;
     const fractional = !!(deps.fractionalZoom && deps.fractionalZoom());
     nav.map.options.zoomSnap = fractional ? 0.25 : 1;
     const z = nav.map.getZoom();
-    if (!fractional && z % 1) { nav.cameraMovedAt = Date.now(); nav.map.setZoom(Math.round(z), { animate: false }); } // حركة آلية لا توقف المتابعة / an automatic move that never stops following
+    // للأسفل لا لأقرب درجة: التقريب للأعلى قد يُخرج إحدى النقطتين من الشاشة — down, not to the nearest: rounding up could push a point off screen
+    if (!fractional && z % 1) { nav.cameraMovedAt = Date.now(); nav.map.setZoom(Math.floor(z), { animate: false }); } // حركة آلية لا توقف المتابعة / an automatic move that never stops following
   }
   function moveCamera_(force) {
     if (!nav || !nav.me || !nav.follow) return;
@@ -445,34 +452,55 @@
   }
 
   // ===== اللوحة — The sheet =====
+  /* شاشة الملاحة الكاملة (التصميم الهجين المعتمد): ✕ عائم أعلى الشاشة، شارة «بدون اتصال»، ولوحة سفلية صغيرة:
+   * المسافة + مؤشر الاتجاه دائمًا + حالة الاتجاه؛ شريط الانحراف عند 5 كم أو أقل؛ التفاصيل والمظهر وإنهاء الملاحة عند السحب.
+   * Full-screen navigation (the approved hybrid design): a floating ✕ on top, an «offline» chip, and a small bottom sheet:
+   * distance + the direction indicator always + the direction verdict; the deviation bar at 5 km or less; details, look and
+   * ending navigation when pulled up. */
+  const GLASS_KEY = 'sec-nav-glass';
+  const GLASS_MODES = [['clear', 'واضحة'], ['bal', 'متوازنة'], ['solid', 'معتمة']];
+  function readGlass_() { try { const g = localStorage.getItem(GLASS_KEY); return GLASS_MODES.some(m => m[0] === g) ? g : 'bal'; } catch (e) { return 'bal'; } }
+  function setGlass_(g) {
+    if (!nav) return;
+    try { localStorage.setItem(GLASS_KEY, g); } catch (e) { /* تخزين محظور — يبقى للجلسة فقط / storage blocked — this session only */ }
+    GLASS_MODES.forEach(function (m) { nav.sheet.classList.toggle('glass-' + m[0], m[0] === g); });
+    nav.sheet.querySelectorAll('.nav-glass button').forEach(function (b) { b.classList.toggle('on', b.dataset.glass === g); });
+  }
+
   function buildSheet_() {
     const s = nav.station;
     const sheet = document.createElement('div');
     sheet.className = 'nav-sheet';
     sheet.innerHTML =
       '<div class="nav-grab"></div>' +
-      '<button type="button" class="nav-x" aria-label="إيقاف الملاحة" title="إيقاف الملاحة">✕</button>' +
-      '<div class="nav-head"><div class="nav-dial"><b>N</b><svg class="nav-arrow" width="30" height="30" viewBox="0 0 24 24"><path d="M12 2l6.5 18L12 16l-6.5 4z" fill="' + ME_COLOR + '"/></svg></div>' +
-      '<div class="nav-big"><div class="nav-d"><span class="nav-dv">—</span><small class="nav-du"></small></div>' +
-      '<div class="nav-kind"></div><div class="nav-dir"></div><div class="nav-stt"></div></div></div>' +
-      '<div class="nav-note" hidden>اتجاه مباشر، وليس مسار طرق</div>' +
-      '<div class="nav-details" hidden>' +
-      // شريط الانحراف (التوجيه المباشر فقط): الأخضر ±30°، الأصفر ±70° — deviation bar (direct guidance only): green ±30°, yellow ±70°
+      '<div class="nav-head"><div class="nav-big"><div class="nav-d"><span class="nav-dv">—</span><small class="nav-du"></small></div></div>' +
+      '<div class="nav-dirbox"><div class="nav-dir"></div><div class="nav-dial"><b>N</b><svg class="nav-arrow" width="26" height="26" viewBox="0 0 24 24"><path d="M12 2l6.5 18L12 16l-6.5 4z" fill="' + ME_COLOR + '"/></svg></div></div></div>' +
+      '<div class="nav-line2"><div class="nav-stt"></div><div class="nav-kind"></div></div>' +
+      '<div class="nav-note" hidden>🟠 اتجاه مباشر، وليس مسار طرق</div>' +
+      // شريط الانحراف (التوجيه المباشر، 5 كم أو أقل): الأخضر ±30°، الأصفر ±70° — deviation bar (direct guidance, 5 km or less)
       '<div class="nav-band-wrap" hidden><div class="nav-band"><i hidden></i></div>' +
       '<div class="nav-lbl"><span class="bad">يمين كثيرًا</span><span class="warn">يمين</span><span class="ok">في الاتجاه الصحيح</span><span class="warn">يسار</span><span class="bad">يسار كثيرًا</span></div></div>' +
-      '<div class="nav-tiles">' +
-      '<div class="nav-tile"><span class="k">رقم المحطة</span><span class="v">' + esc(s.id) + '</span></div>' +
-      '<div class="nav-tile"><span class="k">' + (s.region ? 'المنطقة' : 'النوع') + '</span><span class="v ar">' + esc(s.region || s.type) + '</span></div>' +
-      '<div class="nav-tile"><span class="k">دقة الموقع</span><span class="v nav-acc">—</span></div></div>' +
-      '<a class="nav-gm" href="' + deps.googleMapsUrl(s) + '" target="_blank" rel="noopener">🧭 افتح بقوقل ماب</a></div>' +
-      '<button type="button" class="nav-more">⌃ تفاصيل المحطة</button>';
+      '<div class="nav-details" hidden>' +
+      '<div class="nav-rows">' +
+      '<div class="nav-row"><span class="k">حالة الاتصال</span><span class="v nav-conn">—</span></div>' +
+      '<div class="nav-row"><span class="k">نوع الملاحة</span><span class="v nav-type">—</span></div>' +
+      '<div class="nav-row"><span class="k">رقم المحطة</span><span class="v num">' + esc(s.id) + '</span></div>' +
+      '<div class="nav-row"><span class="k">' + (s.region ? 'المنطقة' : 'النوع') + '</span><span class="v">' + esc(s.region || s.type) + '</span></div>' +
+      '<div class="nav-row"><span class="k">دقة الموقع</span><span class="v num nav-acc">—</span></div></div>' +
+      '<div class="nav-lbl2">🌓 مظهر اللوحة</div>' +
+      '<div class="nav-glass">' + GLASS_MODES.map(function (m) { return '<button type="button" data-glass="' + m[0] + '">' + m[1] + '</button>'; }).join('') + '</div>' +
+      '<a class="nav-gm" href="' + deps.googleMapsUrl(s) + '" target="_blank" rel="noopener">🧭 فتح المحطة في قوقل ماب</a>' +
+      '<button type="button" class="nav-end">🔴 إنهاء الملاحة</button></div>' +
+      '<button type="button" class="nav-more">⌃ التفاصيل</button>';
     deps.stage.appendChild(sheet);
     nav.sheet = sheet;
-    sheet.querySelector('.nav-x').addEventListener('click', stop);
+    setGlass_(readGlass_());
+    sheet.querySelector('.nav-end').addEventListener('click', stop);
     sheet.querySelector('.nav-more').addEventListener('click', function () { setExpanded_(!nav.expanded); });
+    sheet.querySelectorAll('.nav-glass button').forEach(function (b) { b.addEventListener('click', function () { setGlass_(b.dataset.glass); }); });
     // سحب للأعلى/للأسفل — swipe up/down
     let y0 = null;
-    sheet.addEventListener('touchstart', function (e) { y0 = e.touches[0].clientY; }, { passive: true });
+    sheet.addEventListener('touchstart', function (e) { y0 = sheet.scrollTop <= 0 ? e.touches[0].clientY : null; }, { passive: true });
     sheet.addEventListener('touchend', function (e) {
       if (y0 == null || !nav) return;
       const dy = e.changedTouches[0].clientY - y0; y0 = null;
@@ -480,6 +508,20 @@
     });
     // لمس اللوحة لا يُعتبر تحريكًا للخريطة — touching the sheet isn't moving the map
     L.DomEvent.disableClickPropagation(sheet); L.DomEvent.disableScrollPropagation(sheet);
+
+    // ✕ عائم أعلى الشاشة: إنهاء الملاحة والرجوع لبطاقة المحطة — a floating ✕ on top: ends navigation, back to the station card
+    const x = document.createElement('button');
+    x.type = 'button'; x.className = 'nav-x'; x.textContent = '✕';
+    x.setAttribute('aria-label', 'إنهاء الملاحة'); x.title = 'إنهاء الملاحة';
+    x.addEventListener('click', stop);
+    L.DomEvent.disableClickPropagation(x);
+    deps.stage.appendChild(x);
+    nav.xBtn = x;
+    // شارة الانقطاع أعلى الخريطة — the offline chip at the top of the map
+    const chip = document.createElement('div');
+    chip.className = 'nav-chip'; chip.textContent = '🟠 بدون اتصال · اتجاه مباشر'; chip.hidden = true;
+    deps.stage.appendChild(chip);
+    nav.chip = chip;
 
     const btn = document.createElement('button');
     btn.type = 'button'; btn.className = 'nav-follow'; btn.textContent = '⌖ متابعة'; btn.hidden = true;
@@ -492,7 +534,7 @@
     if (!nav) return;
     nav.expanded = on;
     nav.sheet.querySelector('.nav-details').hidden = !on;
-    nav.sheet.querySelector('.nav-more').textContent = on ? '⌄ إخفاء التفاصيل' : '⌃ تفاصيل المحطة';
+    nav.sheet.querySelector('.nav-more').textContent = on ? '⌄ إخفاء التفاصيل' : '⌃ التفاصيل';
     placeFollowBtn_();
     moveCamera_(true);
   }
@@ -535,8 +577,15 @@
     if (dev != null) marker.style.left = (50 + dev / 180 * 50).toFixed(1) + '%'; // المحطة يمينك ← المؤشر يمينًا / station to your right ← marker to the right
     q('.nav-arrow path').setAttribute('fill', smart && TONE_COLOR[nav.tone] ? TONE_COLOR[nav.tone] : ME_COLOR);
     const stt = q('.nav-stt');
-    stt.textContent = nav.status || '';
+    // «عدّل قليلًا» لا تظهر إلا قرب المحطة (5 كم) — ومعها الجهة من نفس الانحراف الذي يرسم المؤشر
+    // «adjust slightly» only appears near the station (5 km) — with the side from the same deviation that draws the marker
+    const side = smart && nav.dir && nav.dir.state === 'adjust' && dev != null ? (dev > 0 ? ' يمينًا' : ' يسارًا') : '';
+    stt.textContent = (nav.status || '') + side;
     stt.className = 'nav-stt ' + (nav.tone || '');
+    // التفاصيل وشارة الانقطاع — the details and the offline chip
+    q('.nav-conn').textContent = online ? '🟢 متصل' : '🟠 بدون اتصال';
+    q('.nav-type').textContent = hasRoute ? '🛣 مسار طرق' : '📍 اتجاه مباشر';
+    if (nav.chip) nav.chip.hidden = online;
     placeFollowBtn_(); // ارتفاع اللوحة قد يتغيّر مع النص — the sheet height may change with the text
   }
 
