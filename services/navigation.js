@@ -180,6 +180,8 @@
     deps.topArea.classList.add('nav-collapsed');
     deps.stage.classList.add('nav-active'); // يرفع أزرار +/− فوق اللوحة / lifts +/− above the sheet
     deps.relayout();
+    // تكبير كسري أثناء الملاحة فقط ليأخذ الإطار أقرب تكبير فعلي؛ يعود كما كان عند الإيقاف / fractional zoom during navigation only so the frame takes the truly closest zoom; restored on stop
+    nav.prevZoomSnap = map.options.zoomSnap; map.options.zoomSnap = 0.25;
     buildSheet_();
     setStatus_('جارٍ تحديد موقعك…', 'wait');
 
@@ -237,10 +239,17 @@
   /* خط مستقيم متصل من موقعي إلى المحطة بسماكة مسار الطرق — يقصر بالاقتراب ويطول بالابتعاد لأنه يُعاد رسمه من موقعي الحالي دائمًا
    * A solid straight line from me to the station, as thick as the road route — it shrinks when approaching and grows when
    * moving away, since it's always redrawn from my current position */
+  /* أرفع في المسافة البعيدة (أكثر من 5 كم) حتى لا يطغى على شبكة الطرق التي يختار منها المستخدم، ويعود لسماكته (6) عند الاقتراب —
+   * بهامش 50 م كحد الـ5 كم المعتمد. Thinner at long range (over 5 km) so it doesn't drown the road network the user picks from,
+   * back to its thickness (6) when near — with a 50 m margin like the approved 5 km rule. */
+  const DIRECT_LINE_FAR_M = 5000, DIRECT_LINE_MARGIN_M = 50, DIRECT_LINE_W = 6, DIRECT_LINE_FAR_W = 4;
   function drawDirectLine_() {
     if (!nav || !nav.me || nav.mode !== 'smart') return;
-    if (nav.directLine) nav.directLine.setLatLngs([nav.me, nav.st]);
-    else nav.directLine = L.polyline([nav.me, nav.st], { color: ME_COLOR, weight: 6, opacity: 0.9, interactive: false, className: 'nav-direct-line' }).addTo(nav.map);
+    const d = Math.round(L.latLng(nav.me).distanceTo(nav.st));
+    nav.lineFar = nav.lineFar ? d > DIRECT_LINE_FAR_M : d > DIRECT_LINE_FAR_M + DIRECT_LINE_MARGIN_M;
+    const weight = nav.lineFar ? DIRECT_LINE_FAR_W : DIRECT_LINE_W;
+    if (nav.directLine) { nav.directLine.setLatLngs([nav.me, nav.st]); if (nav.directLine.options.weight !== weight) nav.directLine.setStyle({ weight: weight }); }
+    else nav.directLine = L.polyline([nav.me, nav.st], { color: ME_COLOR, weight: weight, opacity: 0.9, interactive: false, className: 'nav-direct-line' }).addTo(nav.map);
   }
 
   function stop() {
@@ -254,6 +263,7 @@
     global.removeEventListener('offline', n.onOffline);
     global.removeEventListener('online', n.onOnline);
     [n.meDot, n.accCircle, n.routeLine, n.directLine].forEach(function (l) { if (l) n.map.removeLayer(l); });
+    n.map.options.zoomSnap = n.prevZoomSnap; // كما كان قبل الملاحة / as before navigation
     if (n.sheet) n.sheet.remove();
     if (n.followBtn) n.followBtn.remove();
     deps.topArea.classList.remove('nav-collapsed');
@@ -370,20 +380,41 @@
   }
 
   // ===== الكاميرا: متابعة المستخدم والمحطة بتكبير تدريجي — Camera: follow user + station with gradual zoom =====
+  /* الإطار: أقرب تكبير يُظهر موقعي والمحطة معًا بهامش مريح فوق لوحة الملاحة. سبب الإطار البعيد سابقًا: أول إطار كان يُحسب
+   * قبل أن يُحدِّث Leaflet حجم الخريطة بعد طي بطاقة المحطة (458 بدل 619 نقطة) وقبل اكتمال ارتفاع اللوحة، فيخرج أبعد بدرجة كاملة،
+   * ولا يُصحَّح لأن التكبير أثناء المتابعة تدريجي. الآن: تحديث حجم الخريطة قبل كل إطار، وإطار مباشر ثانٍ بعد استقرار التخطيط،
+   * وتكبير كسري أثناء الملاحة (خطوات 0.25) بدل النزول لأقرب درجة صحيحة، ويُطرح من الخريطة الجزء الذي تغطيه اللوحة فعلًا.
+   * البدء وزر «متابعة» ينتقلان للإطار مباشرة؛ أثناء المتابعة التصغير فوري والتكبير تدريجي كما اعتمد.
+   * The frame: the closest zoom showing me and the station together with a comfortable margin above the navigation sheet.
+   * Why the frame used to be far: the first frame was computed before Leaflet updated the map size after the station card
+   * collapsed (458 instead of 619 px) and before the sheet reached its height, so it came out a whole level farther, and was
+   * never corrected because zooming in while following is gradual. Now: the map size is refreshed before every frame, a second
+   * direct frame follows once the layout settles, a fractional zoom is used while navigating (0.25 steps) instead of dropping to
+   * the next whole level, and only the part of the map the sheet really covers is subtracted. Start and «follow» jump straight
+   * to the frame; while following, zooming out is immediate and zooming in gradual as approved. */
+  const FIT_PAD_SIDE = 36, FIT_PAD_TOP = 80, FIT_PAD_BOTTOM = 40, FRAME_SETTLE_MS = 900;
   function moveCamera_(force) {
     if (!nav || !nav.me || !nav.follow) return;
     if (!force && Date.now() - nav.lastCameraAt < CAMERA_EVERY_MS) return;
     nav.lastCameraAt = Date.now();
     const map = nav.map;
-    const sheetH = nav.sheet ? nav.sheet.offsetHeight : 180;
+    map.invalidateSize({ pan: false }); // حجم الخريطة الفعلي بعد أي تغيير بالتخطيط / the map's real size after any layout change
+    const mapRect = map.getContainer().getBoundingClientRect();
+    const sheetRect = nav.sheet ? nav.sheet.getBoundingClientRect() : null;
+    const covered = sheetRect ? Math.max(0, Math.min(mapRect.bottom, sheetRect.bottom) - Math.max(mapRect.top, sheetRect.top)) : 0;
     const bounds = L.latLngBounds([nav.me, nav.st]);
-    const tl = L.point(30, 80), br = L.point(30, sheetH + 30);
+    const tl = L.point(FIT_PAD_SIDE, FIT_PAD_TOP), br = L.point(FIT_PAD_SIDE, covered + FIT_PAD_BOTTOM);
     const target = Math.min(MAX_FOLLOW_ZOOM, map.getBoundsZoom(bounds, false, tl.add(br)));
     const cur = map.getZoom();
+    const jump = force || !nav.framed; // أول إطار أو «متابعة» ← مباشرة / first frame or «follow» ← straight there
     // التصغير فوري (ليبقى الاثنان ظاهرين)، والتكبير درجة واحدة كل مرة — zoom out at once (keep both visible), zoom in one level at a time
-    const zoom = target < cur ? target : Math.min(target, cur + 1);
+    const zoom = jump || target < cur ? target : Math.min(target, cur + 1);
+    const first = !nav.framed;
+    nav.framed = true;
     nav.cameraMovedAt = Date.now();
     map.fitBounds(bounds, { paddingTopLeft: tl, paddingBottomRight: br, maxZoom: zoom, animate: true, duration: 0.8 });
+    // إطار مباشر ثانٍ بعد استقرار التخطيط (ارتفاع اللوحة النهائي) — ما لم يحرّك المستخدم الخريطة / a second direct frame once the layout settles (the sheet's final height) — unless the user moved the map
+    if (first) setTimeout(function () { if (nav && nav.follow) moveCamera_(true); }, FRAME_SETTLE_MS);
   }
   function pauseFollow_() {
     if (!nav || !nav.follow) return;
