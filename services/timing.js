@@ -234,6 +234,4 @@
       if (ev.key === LOG_KEY && document.getElementById('secPerfViewer')) renderViewer_();
     });
   }
-
-  global.SecTiming = { show: renderViewer_ };
 })(window);

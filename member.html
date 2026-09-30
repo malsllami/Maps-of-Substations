@@ -208,7 +208,7 @@ h2{font-size:17px;font-weight:700;margin-bottom:4px;}
           <span id="mobileMenuName">القائمة</span>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </button>
-        <div class="mobile-menu-panel" id="mobileMenuPanel">
+        <div class="mobile-menu-panel">
           <div class="mobile-menu-row">
             <span class="menu-icon" style="color:#8B6DD6">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v1M12 20v1M4.2 4.2l.7.7M18.4 18.4l.7.7M3 12h1M20 12h1M4.2 19.8l.7-.7M18.4 5.6l.7-.7"/><circle cx="12" cy="12" r="4"/></svg>
@@ -325,8 +325,8 @@ h2{font-size:17px;font-weight:700;margin-bottom:4px;}
 </div>
 
 <div class="wrap">
-  <div class="card" id="profileCard">
-    <div class="avatar" id="avatarInitial"><img src="assets/member-icon.png" alt="أيقونة العضو"></div>
+  <div class="card">
+    <div class="avatar"><img src="assets/member-icon.png" alt="أيقونة العضو"></div>
     <h2 id="profileName">...</h2>
     <div style="font-size:12.5px;color:var(--text-secondary);font-family:'JetBrains Mono',monospace;direction:ltr;text-align:right" id="profilePhone">-</div>
     <span class="role-badge" id="memberTypeBadge"></span>
@@ -535,7 +535,6 @@ function enableLiveDigitConversion_(inputEl){
  document.getElementById('departmentOtherInput')].forEach(enableLiveDigitConversion_);
 
 const session = JSON.parse(localStorage.getItem('sec-session') || '{}');
-const phone = session.phone;
 
 function setTheme(mode){
   document.body.setAttribute('data-theme', mode);

@@ -1,14 +1,12 @@
 /* ============================================================
  * services/offline-map-ui.js — مسؤول عن واجهة خريطة جدة بدون إنترنت فقط (المحرك في services/offline-map.js):
  * - سطر الحالة والحجم لأي عنصر [data-om-status]: سطر بطاقة المحطة وبطاقة «حسابي» — كلاهما يفتح النافذة نفسها.
- *   (البطاقة العائمة فوق الخريطة عبر attach ما زالت متاحة لكن الرئيسية لم تعد تستخدمها.)
  * - نافذة من الأسفل (النموذج أ + شريط التخزين من النموذج ج): الحالة، معلومات النسخة، التنزيل/الإيقاف/الاستكمال،
  *   التحديث، الحذف، مساحة التخزين، وسجل الخريطة (🟢 مكتمل · 🟠 متوقف يدويًا يُستكمل · 🟠 فشل يُعاد من البداية). تُغلق بالضغط خارجها أو السحب للأسفل.
  * - اختيار الطبقة: بدون إنترنت + الخريطة محفوظة ← الخريطة المحفوظة تلقائيًا (نهاري/ليلي من نفس الملف).
  *
  * Owns the offline Jeddah map UI only (the engine is services/offline-map.js):
  * - The state and size line for any [data-om-status] element: the station card row and the «حسابي» card — both open the same sheet.
- *   (The floating card over the map via attach remains available, but the home page no longer uses it.)
  * - A bottom sheet (design A + the storage bar from design C): state, copy info, download/pause/resume, update, delete,
  *   storage space, and the map log (complete · paused, resumable · failed, restart from zero). Closes on outside tap or swipe down.
  * - Layer choice: offline + map saved ← the saved map automatically (day/night from the same file).
@@ -21,7 +19,7 @@
   let meta = null;                 // معلومات الخريطة على الموقع — the map info on the site
   let controller = null;           // تنزيل جارٍ — a running download
   let progress = null;             // { got, total }
-  let card = null, sheet = null, dim = null;
+  let sheet = null, dim = null;
 
   // ===== تنسيق — Formatting =====
   // نفس وحدة سطر «بيانات المحطات المحمّلة» الحالي (1024×1024) — the same unit as the existing cache line
@@ -48,13 +46,12 @@
     if (state.state === 'failed') return { dot: '🟠', text: 'تعذّر إكمال التنزيل' };
     return { dot: '⬇', text: 'غير محفوظة' + (meta ? ' · ' + mb(meta.bytes) : '') };
   }
-  /* نفس سطر الحالة في كل مكان: البطاقة العائمة (إن وُجدت) وأي عنصر [data-om-status] — سطر بطاقة المحطة وبطاقة «حسابي»
-   * The same status line everywhere: the floating card (if any) and any [data-om-status] element — the station card row and «حسابي» */
+  /* نفس سطر الحالة في كل مكان: أي عنصر [data-om-status] — سطر بطاقة المحطة وبطاقة «حسابي»
+   * The same status line everywhere: any [data-om-status] element — the station card row and «حسابي» */
   function statusText() { const l = cardLine_(); return l.dot + ' ' + l.text; }
   function renderCard_() {
     if (!deps) return;
     const line = statusText();
-    if (card) card.querySelector('.omc-line').textContent = line;
     document.querySelectorAll('[data-om-status]').forEach(el => { el.textContent = line; });
   }
 
@@ -205,20 +202,5 @@
     return refresh_().then(() => { deps.onReadyChange(); });
   }
 
-  /* البطاقة كأداة خريطة أعلى يمين الخريطة (تحت الشريط دائمًا وتتبع الخريطة أينما كانت) — The card as a map control at the map's top right (always under the toolbar, following the map wherever it is) */
-  function attach(map) {
-    if (card || !global.L) return;
-    const Ctl = L.Control.extend({ options: { position: 'topright' }, onAdd: function () {
-      card = L.DomUtil.create('button', 'om-card');
-      card.type = 'button';
-      card.innerHTML = '<span class="omc-title">🗺️ خريطة جدة بدون إنترنت</span><span class="omc-line"></span><span class="omc-chev">⌄</span>';
-      L.DomEvent.disableClickPropagation(card); L.DomEvent.disableScrollPropagation(card);
-      card.addEventListener('click', open);
-      return card;
-    } });
-    new Ctl().addTo(map);
-    renderCard_();
-  }
-
-  global.SecOfflineMapUI = { init: init, attach: attach, isReady: isReady, open: open, close: close, refresh: refresh_, renderCard: renderCard_, statusText: statusText };
+  global.SecOfflineMapUI = { init: init, isReady: isReady, open: open, close: close, refresh: refresh_, renderCard: renderCard_, statusText: statusText };
 })(window);

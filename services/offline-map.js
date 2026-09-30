@@ -264,7 +264,6 @@
     const old = await getRecord_();
     await putRecord_({ version: meta.version, bytes: meta.bytes, sha256: meta.sha256, url: (old && old.pending ? old.pending.url : old && old.url), complete: true, completedAt: Date.now() });
     if (old && old.complete && old.version !== meta.version) await removeVersion_(old.version); // القديمة تُحذف فقط بعد اعتماد الجديدة / the old one goes only after the new one is committed
-    cache = null;
   }
 
   async function readAll_(version, total) {
@@ -284,15 +283,12 @@
   /* حذف الخريطة من الجهاز بالكامل (بطلب المستخدم) — Remove the map from the device entirely (user request) */
   async function remove() {
     await tx_(['meta', 'chunks'], 'readwrite', function (t) { t.objectStore('meta').delete(MAP_KEY); t.objectStore('chunks').clear(); });
-    cache = null;
   }
 
   // ===== القراءة من الجهاز لمكتبة pmtiles — Reading from the device for pmtiles =====
-  let cache = null; // الأجزاء المقروءة بالذاكرة (الملف كله ~9 ميجابايت) / parts read into memory (the whole file is ~9 MB)
   /* مصدر بيانات pmtiles يقرأ النطاق المطلوب من أجزاء IndexedDB — A pmtiles data source reading the requested range from IndexedDB parts */
   function localSource_(rec) {
-    const parts = new Map();
-    cache = parts;
+    const parts = new Map(); // الأجزاء المقروءة بالذاكرة (الملف كله ~9 ميجابايت) / parts read into memory (the whole file is ~9 MB)
     return {
       getKey: function () { return 'idb://jeddah/' + rec.version; },
       getBytes: async function (offset, length) {

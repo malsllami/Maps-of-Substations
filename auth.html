@@ -232,7 +232,7 @@ h2{font-size:18px; font-weight:700; margin-bottom:6px;}
     </button>
   </div>
 
-  <div class="tabs" id="tabsWrap">
+  <div class="tabs">
     <div class="tab-indicator" id="tabIndicator"></div>
     <div class="tab active" id="tabLogin" role="tab" tabindex="0" aria-selected="true">تسجيل الدخول</div>
     <div class="tab" id="tabRegister" role="tab" tabindex="0" aria-selected="false">عضو جديد</div>
@@ -446,7 +446,6 @@ function enableLiveDigitConversion_(inputEl){
  document.getElementById('contactMessage')].forEach(enableLiveDigitConversion_);
 
 /* ===== الثيم ===== */
-const phone10ToFull = (code, local) => code + local.replace(/^0+/, '');
 const goToIndexFromAuth = ()=>{ location.href = 'index.html'; };
 document.getElementById('brandLink').addEventListener('click', goToIndexFromAuth);
 document.getElementById('brandLink').addEventListener('keydown', (e)=>{
