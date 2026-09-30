@@ -81,6 +81,8 @@ header{
   font-size:11.5px;color:var(--text-primary);
 }
 .status-bar-item{display:flex;align-items:center;gap:6px;}
+/* تحميل متوقف قابل للمتابعة — a stopped load that can be continued */
+#lastUpdateLabel.resume-load{cursor:pointer;text-decoration:underline;text-underline-offset:3px;font-weight:700;}
 .conn-refresh-group{display:flex;align-items:center;gap:8px;margin-right:auto;}
 .conn-pill-div{width:1px;height:14px;background:var(--border-strong);}
 .status-refresh-btn{
@@ -1817,9 +1819,11 @@ function recordStationsLoad_(type, info){
 }
 
 /* سجل منفصل لعمليات تحميل المحطات التي فشلت ولم تنتج نسخة (🔴) — لا يُخلط بسجل النسخ الصالحة أعلاه.
- * المحاولة والجهاز بلا إنترنت فعليًا لا تُسجَّل (فشل متوقع). تحميل المحطات لا يُستكمل من حيث توقف، فلا حالة «غير مكتمل» له.
+ * المحاولة والجهاز بلا إنترنت فعليًا لا تُسجَّل (فشل متوقع). التحميل المتوقف يُستكمل من مكانه بنفس الجلسة (انظر fetchStationsBatch_)،
+ * وسبب توقفه يُسجَّل هنا؛ لا نسخة جزئية تُحفظ بالجهاز أبدًا.
  * A separate log of stations loads that failed and produced no copy — never mixed with the valid-copies log above.
- * Attempts while the device is truly offline aren't logged (an expected failure). Stations loads don't resume, so no "incomplete" state. */
+ * Attempts while the device is truly offline aren't logged (an expected failure). A stopped load resumes from where it
+ * stopped within the same session (see fetchStationsBatch_), and why it stopped is logged here; no partial copy is ever stored. */
 const STATIONS_ISSUES_LOG_KEY = 'sec-stations-issues-log-v1';
 function recordStationsIssue_(type, reason){
   if(navigator.onLine === false) return;
@@ -2012,6 +2016,32 @@ async function syncIncrementalUpdates_(){
   }
 }
 
+/* ============================================================
+ *  دفعة فشلت لا تُلغي التحميل كله (حادثة 30 سبتمبر: توقف عند 5000 ورُميت الدفعات الناجحة):
+ *  - الدفعة الفاشلة تُعاد وحدها مرتين (بعد 2 ث ثم 5 ث) — فوق الطلب الاحتياطي الموجود لكل دفعة.
+ *  - إن استمر الفشل تُحفظ الدفعات الناجحة بالذاكرة (لا بالجهاز) ويظهر «توقف التحميل عند …/… — اضغط للمتابعة»؛
+ *    المتابعة (أو زر تحديث البيانات) تكمل من نفس الدفعة. إن تغيّر إصدار البيانات بالخادم بين المحاولتين يبدأ التحميل
+ *    من الصفر (الدفعات القديمة قد لا تطابق الترتيب الجديد).
+ *  - الاعتماد كما هو: نسخة واحدة كاملة بعد التحقق من العدد؛ قبلها تبقى النسخة المحفوظة كما هي تمامًا.
+ *  A failed batch no longer cancels the whole load (30 Sep incident: stopped at 5000 and the good batches were thrown away):
+ *  - the failed batch alone is retried twice (after 2 s then 5 s) — on top of each batch's existing backup request.
+ *  - if it keeps failing, the good batches are kept in memory (not on the device) and «stopped at …/… — tap to continue»
+ *    shows; continuing (or the data refresh button) resumes from the same batch. If the server's data version changed in
+ *    between, the load starts over (old batches may not match the new order).
+ *  - the commit is unchanged: one complete copy after the count check; until then the stored copy stays exactly as is.
+ * ============================================================ */
+const STATIONS_BATCH_RETRY_DELAYS_MS = [2000, 5000];
+let stationsLoadResume_ = null; // { offset, collected, expectedTotal, version, serverTime, batchCount }
+async function fetchStationsBatch_(offset){
+  for(let retry = 0; ; retry++){
+    let res = null;
+    try{ res = await callBackend('getAllStations', { offset, phone: getSessionPhone_() }); }catch(e){ res = null; }
+    if(res && res.success && Array.isArray(res.stations)) return res;
+    if(retry >= STATIONS_BATCH_RETRY_DELAYS_MS.length || navigator.onLine === false) return null;
+    await new Promise(r => setTimeout(r, STATIONS_BATCH_RETRY_DELAYS_MS[retry]));
+  }
+}
+
 async function refreshStationsLocalCache_(onProgress){
   if(_isRefreshingStationsCache){
     console.warn('تحميل الفهرس شغّال أصلًا — تم تجاهل طلب تحميل مكرّر لمنع مضاعفة البيانات');
@@ -2019,13 +2049,18 @@ async function refreshStationsLocalCache_(onProgress){
   }
   _isRefreshingStationsCache = true;
   try{
-    let offset = 0;
-    let collected = [];
-    let expectedTotal = null;
-    let version = null;
-    let serverTime = new Date().toISOString();
+    // متابعة تحميل توقف سابقًا بهذه الجلسة، أو بدء جديد / resume a load that stopped earlier in this session, or start fresh
+    const resume = stationsLoadResume_;
+    stationsLoadResume_ = null;
+    let offset = resume ? resume.offset : 0;
+    let collected = resume ? resume.collected : [];
+    let expectedTotal = resume ? resume.expectedTotal : null;
+    let version = resume ? resume.version : null;
+    let serverTime = resume ? resume.serverTime : new Date().toISOString();
     const MAX_BATCHES = 30;
-    let batchCount = 0;
+    let batchCount = resume ? resume.batchCount : 0;
+    let resumed = !!resume;
+    if(resumed && typeof onProgress === 'function') onProgress(collected.length, expectedTotal);
 
     while(true){
       batchCount++;
@@ -2034,12 +2069,19 @@ async function refreshStationsLocalCache_(onProgress){
         recordStationsIssue_('full', 'تجاوز الحد الآمن لعدد الدفعات');
         return false;
       }
-      const res = await callBackend('getAllStations', { offset, phone: getSessionPhone_() });
-      if(!res.success || !Array.isArray(res.stations)){
-        console.warn('فشل تحميل دفعة من المحطات، تم إلغاء التحديث بأمان');
-        recordStationsIssue_('full', 'فشل تحميل دفعة ' + batchCount + ' من الخادم');
+      const res = await fetchStationsBatch_(offset);
+      if(!res){
+        console.warn('فشل تحميل دفعة من المحطات بعد إعادة المحاولة — حُفظ ما وصل للمتابعة، والنسخة المحفوظة كما هي');
+        stationsLoadResume_ = { offset, collected, expectedTotal, version, serverTime, batchCount: batchCount - 1 };
+        recordStationsIssue_('full', 'فشل تحميل دفعة ' + batchCount + ' بعد إعادة المحاولة — توقف عند ' + collected.length + (expectedTotal ? '/' + expectedTotal : '') + ' ويُستكمل من مكانه');
         return false;
       }
+      if(resumed && res.version !== version){
+        // تغيّرت البيانات بالخادم منذ التوقف — بدء التحميل من الصفر / data changed on the server since the stop — start over
+        resumed = false; offset = 0; collected = []; batchCount = 0; serverTime = new Date().toISOString();
+        continue;
+      }
+      resumed = false;
       collected = collected.concat(res.stations);
       expectedTotal = res.totalCount;
       version = res.version;
@@ -2119,9 +2161,18 @@ function formatRelativeTime(date){
 function refreshLastUpdateLabel(){
   if(!isStationsLoaded){
     if(_isRefreshingStationsCache) return; // نص التقدم ظاهر أثناء التحميل الأول — لا يُستبدل / the first-load progress text stays
+    const r = stationsLoadResume_;
+    // توقف التحميل الأول بعد وصول جزء منه ← يُكمل من مكانه بالضغط / the first load stopped part-way ← tap to continue from there
+    if(firstLoadFailed_ && r && r.collected.length){
+      lastUpdateLabel.textContent = 'توقف التحميل عند ' + r.collected.length + (r.expectedTotal ? '/' + r.expectedTotal : '') + ' — اضغط للمتابعة';
+      lastUpdateLabel.classList.add('resume-load');
+      return;
+    }
+    lastUpdateLabel.classList.remove('resume-load');
     lastUpdateLabel.textContent = firstLoadFailed_ ? 'آخر تحديث: تعذّر التحميل الأول' : 'آخر تحديث: —';
     return;
   }
+  lastUpdateLabel.classList.remove('resume-load');
   const at = lastDataSyncAt || storedStationsTime_();
   lastUpdateLabel.textContent = at ? `آخر تحديث: ${formatRelativeTime(at)}` : 'آخر تحديث: —';
 }
@@ -2133,6 +2184,12 @@ function refreshPanelUpdateLabels(){
   });
 }
 setInterval(()=>{ refreshLastUpdateLabel(); refreshPanelUpdateLabels(); }, 30 * 1000);
+/* «اضغط للمتابعة»: يكمل التحميل المتوقف من نفس الدفعة — «tap to continue»: resumes the stopped load from the same batch */
+lastUpdateLabel.addEventListener('click', async ()=>{
+  if(!lastUpdateLabel.classList.contains('resume-load') || _isRefreshingStationsCache || navigator.onLine === false) return;
+  lastUpdateLabel.classList.remove('resume-load');
+  try{ endLoadProgress_(await refreshStationsLocalCache_(showLoadProgress_)); }catch(e){ endLoadProgress_(false); }
+});
 
 /* فحص الاتصال يُتخطّى إن نجح أي طلب خلال آخر 3 دقائق (services/connection.js)؛ وبدون الملف يُرسل ping كالسابق
  * Connection check is skipped if any request succeeded in the last 3 minutes (services/connection.js); without the file, ping is sent as before */

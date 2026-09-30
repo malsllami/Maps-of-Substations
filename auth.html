@@ -774,23 +774,106 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbyxZUSLZNa6UlZLINsfAEe8
 const REQUEST_TIMEOUT_MS = 75000;
 const RETRY_DELAYS_MS = [1000]; // عدد عناصرها = عدد إعادات المحاولة / its length = number of retries
 const SLOW_NOTICE_AFTER_MS = 8000;
-// إجراءات آمنة للتكرار فقط (registerUser محمي بالخادم من التكرار: "مسجّل مسبقًا") — لا تُعاد verifyAssertion/registerCredential لأن التحدي يُستهلك مرة واحدة
-// Only repeat-safe actions (registerUser is duplicate-guarded server-side) — never retry verifyAssertion/registerCredential (single-use challenge)
-const RETRYABLE_ACTIONS = ['loginByPhone', 'getAdminContactInfo', 'generateLoginChallenge', 'generateRegisterChallenge', 'registerUser'];
+/* طلب احتياطي (نفس آلية الصفحة الرئيسية): إن لم يصل رد خلال 8 ث يُرسل نفس الطلب بالتوازي، وإن فشل الأول صراحة
+ * (404 من جوجل / انقطاع) يُرسل الاحتياطي بعد 1.5 ث. أول رد سليم يُعتمد ويُلغى الآخر. ثبت يوم 30 سبتمبر أن الطلب قد
+ * يُنفَّذ بالخادم ويضيع رده، فتكرار هذه الإجراءات آمن: الدخول برقم الجوال أسوأ أثره سطر زيارة مكرر، وطلب رمز البصمة
+ * لم يعد يلغي الرمز السابق (يُحفظ باسمه بالخادم).
+ * Backup request (same mechanism as the home page): no reply within 8 s ← the same request is sent in parallel; an
+ * outright failure (Google 404 / dropped) ← the backup after 1.5 s. The first valid reply wins, the other is cancelled.
+ * Proven on 30 Sep that a request can run on the server while its reply is lost, so repeating these is safe: a phone
+ * login's worst effect is a duplicate visit row, and a new fingerprint challenge no longer cancels the previous one. */
+const HEDGE_AFTER_MS = 8000;
+const HEDGE_RETRY_AFTER_FAIL_MS = 1500;
+const HEDGED_ACTIONS = ['loginByPhone', 'getAdminContactInfo', 'generateLoginChallenge', 'generateRegisterChallenge'];
+// كتابتا التسجيل تُعادان بالتتابع (لا بالتوازي) بنفس مفتاح العملية opKey — الخادم يرجع نتيجة التنفيذ الأول بلا تكرار.
+// verifyAssertion لا يُعاد: توقيع البصمة مرتبط برمز لمرة واحدة.
+// The two sign-up writes are resent sequentially (never in parallel) with the same opKey — the server returns the first
+// run's result without repeating it. verifyAssertion is never resent: the signature is bound to a single-use challenge.
+const RETRYABLE_ACTIONS = ['registerUser', 'registerCredential'];
 const CONNECTION_ERROR_MSG = 'تعذّر الاتصال بالخادم مؤقتًا، حاول مرة أخرى بعد قليل';
 
-/* طلب واحد بمهلة صريحة؛ يرمي خطأ عند فشل الشبكة/المهلة/رد غير JSON — One request with an explicit timeout; throws on network/timeout/non-JSON */
-async function fetchJsonOnce_(body){
-  const controller = new AbortController();
+/* مفتاح عملية عشوائي (يربط إعادة الإرسال بالتنفيذ الأول) — a random operation key (ties a resend to the first run) */
+function newOpKey_(prefix){
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return prefix + '_' + Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+}
+
+/* رد حقيقي من خادمنا يحمل success أو error؛ غيره (مثل {"status":"ok"}) ليس ردًا على الطلب
+ * A real reply from our server carries success or error; anything else (e.g. {"status":"ok"}) is not a reply to the request */
+function isApiReply_(json){
+  return !!json && typeof json === 'object' && ('success' in json || 'error' in json);
+}
+
+/* طلب واحد بمهلة صريحة؛ يرمي خطأ عند فشل الشبكة/المهلة/رد غير JSON/رد ليس من خادمنا
+ * One request with an explicit timeout; throws on network/timeout/non-JSON/a reply that isn't from our server */
+async function fetchJsonOnce_(body, controller){
+  controller = controller || new AbortController();
   const timeoutId = setTimeout(()=> controller.abort(), REQUEST_TIMEOUT_MS);
   try{
     const res = await fetch(API_URL, { method:'POST', body, signal: controller.signal });
     const text = await res.text();
-    try{ return JSON.parse(text); }
+    let json;
+    try{ json = JSON.parse(text); }
     catch(parseErr){ throw new Error('non-json response (HTTP ' + res.status + ')'); }
+    if(!isApiReply_(json)) throw new Error('invalid-reply');
+    return json;
   }finally{
     clearTimeout(timeoutId);
   }
+}
+
+/* الطلب الأصلي + الاحتياطي؛ النتيجة النهائية فقط تُسجَّل (تأخر وعالجه الاحتياطي / فشل الاثنين) عبر services/connection.js
+ * The original + backup request; only the final outcome is logged (recovered by the backup / both failed) via services/connection.js */
+function hedgedFetch_(action, body, onBackup){
+  return new Promise((resolve, reject)=>{
+    const tries = [];
+    let launched = 0, failures = 0, settled = false, hedgeTimer = null;
+    const conn = ()=> window.SecConnection && window.SecConnection.reportRecovered ? window.SecConnection : null;
+    const attemptOf_ = t => {
+      const a = t.controller.signal.__secAttempt || null;
+      if(a && t.invalid) a.kind = 'invalid-reply';
+      return a;
+    };
+    const launch = ()=>{
+      if(settled || launched >= 2) return;
+      launched++;
+      const controller = new AbortController();
+      controller.signal.__secManaged = true; // النتيجة تُسجَّل هنا لا بمراقب الاتصال / the outcome is logged here, not by the connection watcher
+      const t = { controller, invalid: false };
+      tries.push(t);
+      if(launched === 2 && onBackup) onBackup();
+      fetchJsonOnce_(body, controller).then(json=>{
+        if(settled) return;
+        settled = true;
+        clearTimeout(hedgeTimer);
+        tries.forEach(o=>{
+          if(o === t) return;
+          o.controller.signal.__secHedgeLoser = true; // إلغاء مقصود — لا يُسجَّل كعطل / intentional cancel — not logged as a fault
+          o.controller.abort();
+        });
+        const backupWon = t !== tries[0];
+        resolve({ json, backupWon });
+        if(backupWon) setTimeout(()=>{
+          const c = conn(), a0 = attemptOf_(tries[0]), a1 = attemptOf_(t);
+          if(c && a0 && a1) c.reportRecovered(action, a0, a1);
+        }, 0);
+      }, err=>{
+        if(err && err.message === 'invalid-reply') t.invalid = true;
+        if(settled) return;
+        failures++;
+        if(launched < 2){ clearTimeout(hedgeTimer); hedgeTimer = setTimeout(launch, HEDGE_RETRY_AFTER_FAIL_MS); }
+        else if(failures >= launched){ // فشل الطلبان — خطأ حقيقي / both failed — a real error
+          settled = true;
+          reject(err);
+          const c = conn(), attempts = tries.map(attemptOf_).filter(Boolean);
+          if(c && attempts.length) setTimeout(()=> c.reportFailure(action, attempts), 50); // مهلة قصيرة لعنوان صفحة الخطأ / a short wait for the error page title
+        }
+      });
+    };
+    launch();
+    hedgeTimer = setTimeout(launch, HEDGE_AFTER_MS);
+  });
 }
 
 /* تسجيل فشل الاتصال بسجل الأخطاء (أفضل جهد بلا انتظار) — Best-effort, fire-and-forget logging of the connection failure */
@@ -809,7 +892,8 @@ function reportConnectionFailure_(action, err, attempts){
 
 async function callBackend(action, payload){
   const body = JSON.stringify({ action, ...payload });
-  const maxAttempts = RETRYABLE_ACTIONS.includes(action) ? RETRY_DELAYS_MS.length + 1 : 1;
+  const hedged = HEDGED_ACTIONS.includes(action);
+  const maxAttempts = hedged ? 2 : RETRYABLE_ACTIONS.includes(action) ? RETRY_DELAYS_MS.length + 1 : 1;
   const isBackground = action === 'getAdminContactInfo'; // طلب خلفي عند التحميل — لا يلمس شريط الرسائل / background call on load — never touches the banner
   let json, lastErr, slowNoticeShown = false;
   // تنبيه مبكر لو تأخر الرد — حتى لا يظن المستخدم أن الصفحة علّقت / Early notice on a slow reply so the page doesn't look frozen
@@ -818,7 +902,16 @@ async function callBackend(action, payload){
     showInfo('الخادم بطيء حاليًا، يرجى الانتظار قليلًا…');
   }, SLOW_NOTICE_AFTER_MS);
   try{
-    for(let attempt = 1; attempt <= maxAttempts; attempt++){
+    if(hedged){
+      try{
+        const r = await hedgedFetch_(action, body, ()=>{
+          if(!isBackground){ slowNoticeShown = true; showInfo('الخادم بطيء حاليًا، جارٍ إعادة المحاولة تلقائيًا…'); }
+        });
+        json = r.json;
+        if(r.backupWon) lastErr = new Error('backup-won');
+      }catch(err){ lastErr = err; }
+    }
+    for(let attempt = 1; !hedged && attempt <= maxAttempts; attempt++){
       try{
         json = await fetchJsonOnce_(body);
         break;
@@ -904,7 +997,7 @@ mainBtn.addEventListener('click', async ()=>{
         const shift = document.getElementById('regShiftInput').value;
         const departmentSelect = document.getElementById('regDepartmentInput').value;
         const department = departmentSelect==='أخرى' ? document.getElementById('regDepartmentOther').value.trim() : departmentSelect;
-        const reg = await callBackend('registerUser', {name, email, phone, memberType: selectedMemberType, shift, department});
+        const reg = await callBackend('registerUser', {name, email, phone, memberType: selectedMemberType, shift, department, opKey: newOpKey_('reg')});
         // المحاولة الأولى ربما نجحت بالخادم رغم تعليق ردها، فتردّ الإعادة "مسجّل مسبقًا" — نكمل بدخول عادي بدل عرض خطأ مضلّل
         // The first attempt may have succeeded server-side despite its stalled reply, so the retry says "already registered" — continue with a normal login instead of a misleading error
         if(!reg.success && reg.retried && String(reg.error || '').includes('مسجل مسبقًا')){
@@ -984,6 +1077,24 @@ biometricLoginBtn.addEventListener('click', async ()=>{
  *  هذا تحديدًا يمنع مشكلة "تتكرر نافذة البصمة بعدد الضغطات"
  * ============================================================ */
 let activeAbortController = null;
+
+/* نوع خطأ البصمة من المتصفح (NotAllowedError، InvalidStateError…) ومدته — كان يضيع خلف رسالة عامة. يُسجَّل بسجل الأخطاء
+ * عبر طابور services/connection.js الموجود (يُرسل بعد أول رد سليم)، بلا بيانات شخصية. المصدر يحوي assertion/credential
+ * فيُصنَّف بالخادم «محاولة دخول خاطئة» كما هو.
+ * The browser's fingerprint error type (NotAllowedError, InvalidStateError…) and its duration — it used to be lost behind a
+ * generic message. Logged to the error log through the existing services/connection.js queue (sent after the next valid
+ * reply), with no personal data. The source contains assertion/credential, so the server classifies it as it already does. */
+function reportWebAuthnError_(kind, err, startedAt){
+  try{
+    if(!window.SecConnection || !window.SecConnection.reportEvent) return;
+    const name = (err && err.name) || 'غير معروف';
+    window.SecConnection.reportEvent(kind === 'get' ? 'client/webauthn-assertion' : 'client/webauthn-credential',
+      'خطأ البصمة (' + (kind === 'get' ? 'دخول' : 'تسجيل') + '): ' + name,
+      'اسم الخطأ: ' + name + ' | رسالة المتصفح: ' + String(err && err.message || '').slice(0, 120) +
+      ' | المدة حتى الخطأ: ' + ((Date.now() - startedAt) / 1000).toFixed(1) + ' ث');
+  }catch(e){ /* التسجيل لا يعطّل الدخول أبدًا / logging never blocks sign-in */ }
+}
+
 function abortPendingWebAuthn(){
   if(activeAbortController){
     activeAbortController.abort();
@@ -1009,6 +1120,7 @@ async function startWebAuthnRegistration(phone, displayName){
   activeAbortController = new AbortController();
 
   let credential;
+  const promptStartedAt = Date.now();
   try{
     credential = await navigator.credentials.create({
       signal: activeAbortController.signal,
@@ -1027,6 +1139,7 @@ async function startWebAuthnRegistration(phone, displayName){
       }
     });
   }catch(err){
+    reportWebAuthnError_('create', err, promptStartedAt);
     throw new Error(err.name==='NotAllowedError' ? 'تم إلغاء العملية أو رفض البصمة' : 'تعذّر تسجيل البصمة على هذا الجهاز');
   }finally{
     activeAbortController = null;
@@ -1040,7 +1153,8 @@ async function startWebAuthnRegistration(phone, displayName){
     credentialId: bufferToB64url(credential.rawId),
     attestationObjectB64: bufferToB64url(credential.response.attestationObject),
     clientDataJSONB64: bufferToB64url(credential.response.clientDataJSON),
-    deviceName: guessDeviceName()
+    deviceName: guessDeviceName(),
+    opKey: newOpKey_('cred')
   });
   if(!result.success){ fpProgress.fail(); throw new Error(result.error || 'فشل حفظ البصمة بالخادم'); }
   fpProgress.finish();
@@ -1082,6 +1196,7 @@ async function startWebAuthnLogin(phone){
   activeAbortController = new AbortController();
 
   let credential;
+  const promptStartedAt = Date.now();
   try{
     credential = await navigator.credentials.get({
       signal: activeAbortController.signal,
@@ -1094,6 +1209,7 @@ async function startWebAuthnLogin(phone){
       }
     });
   }catch(err){
+    reportWebAuthnError_('get', err, promptStartedAt);
     throw new Error(err.name==='NotAllowedError' ? 'تم إلغاء العملية أو رفض البصمة' : 'تعذّر التحقق من البصمة على هذا الجهاز');
   }finally{
     activeAbortController = null;

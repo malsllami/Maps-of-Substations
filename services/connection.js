@@ -269,8 +269,9 @@
   /* ===== الأخطاء البرمجية بالصفحة — Page JavaScript errors ===== */
   const seenJsErrors = {}; // نفس الخطأ مرة واحدة لكل فتح صفحة / the same error once per page open
   function isConnectionSideEffect_(msg) {
-    // أخطاء ناتجة عن فشل اتصال مسجّل أصلًا أعلاه — لا تُكرر / side effects of a connection failure already logged above — not duplicated
-    return /Load failed|Failed to fetch|NetworkError|did not match the expected pattern|Unexpected token|JSON/i.test(msg);
+    // أخطاء ناتجة عن فشل اتصال مسجّل أصلًا أعلاه — لا تُكرر (ومنها «invalid-reply» الذي يسجّله الطلب الاحتياطي بنتيجته)
+    // side effects of a connection failure already logged above — not duplicated (including «invalid-reply», logged by the backup request with its outcome)
+    return /Load failed|Failed to fetch|NetworkError|did not match the expected pattern|Unexpected token|JSON|invalid-reply/i.test(msg);
   }
   function queueJsError_(msg, where) {
     if (!msg || msg === 'Script error.' || isConnectionSideEffect_(msg)) return; // "Script error." = سكربت خارجي بلا تفاصيل / cross-origin script with no details
@@ -306,6 +307,13 @@
     return pingFn();
   }
 
+  /* حدث تشخيصي تعرفه الصفحة وحدها (مثل نوع خطأ البصمة) — بنفس الطابور والتفاصيل الموحدة
+   * A diagnostic event only the page knows about (e.g. the fingerprint error type) — through the same queue and standard details */
+  function reportEvent(source, message, details) {
+    if (leavingPage) return;
+    queueError_(String(source), String(message), String(details || ''));
+  }
+
   global.SecConnection = { lastOkAt: lastOkAt, pingUnlessRecent: pingUnlessRecent,
-    reportFailure: reportFailure, reportRecovered: reportRecovered, reportWrite: reportWrite };
+    reportFailure: reportFailure, reportRecovered: reportRecovered, reportWrite: reportWrite, reportEvent: reportEvent };
 })(window);
