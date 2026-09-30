@@ -1559,12 +1559,14 @@ const HEDGE_AFTER_MS = 8000;
 // الإعادة الفورية تفشل بنفس اللحظة. After an instant failure (e.g. "Load failed" within a fraction of a second when
 // resuming from background) wait briefly for the network to be ready — an immediate retry fails at the same instant.
 const HEDGE_RETRY_AFTER_FAIL_MS = 1500;
-/* رد حقيقي من خادمنا يحمل دائمًا success أو error؛ غيره (مثل {"status":"ok"} الذي يصل عندما يعيد المتصفح إرسال
- * الطلب بشكل خاطئ بعد الرجوع من الخلفية) ليس ردًا على الطلب. A real reply from our server always carries success or
- * error; anything else (e.g. {"status":"ok"} that arrives when the browser wrongly re-sends the request after
- * resuming from background) is not a reply to the request. */
+/* رد حقيقي من خادمنا يحمل success أو error — أو found لبحث المحطة (searchStation يرد {found:…} بلا success؛ كان يُرفض
+ * خطأً كـ«رد ليس من خادمنا» فيفشل كل بحث عبر الخادم). غيره (مثل {"status":"ok"} الذي يصل عندما يعيد المتصفح إرسال
+ * الطلب بشكل خاطئ بعد الرجوع من الخلفية) ليس ردًا على الطلب. A real reply from our server carries success or error —
+ * or found for a station search (searchStation replies {found:…} without success; it was wrongly rejected as "not
+ * from our server", failing every server-side search). Anything else (e.g. {"status":"ok"} that arrives when the
+ * browser wrongly re-sends the request after resuming from background) is not a reply to the request. */
 function isApiReply_(json){
-  return !!json && typeof json === 'object' && ('success' in json || 'error' in json);
+  return !!json && typeof json === 'object' && ('success' in json || 'error' in json || 'found' in json);
 }
 /* تسجيل النتيجة النهائية (لا كل محاولة): فشل الأصلي ونجاح الاحتياطي ← «تأخر وعالجه الاحتياطي» (ليس خطأً)؛ فشل الاثنين ← خطأ.
  * تفاصيل كل محاولة يضعها مراقب الاتصال على signal.__secAttempt. الطلبات نفسها وتوقيتها كما كانت تمامًا.
