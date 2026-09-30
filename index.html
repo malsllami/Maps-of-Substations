@@ -1992,6 +1992,16 @@ async function syncIncrementalUpdates_(){
     const res = await callBackend('getUpdatedStationsSince', { since: stationsMeta_.lastSync || null });
     if(!res.success || !Array.isArray(res.updated)){ recordStationsIssue_('sync', 'رد غير صالح من الخادم'); return false; }
 
+    // ح٢: عدد النسخة بعد الدمج لا يطابق العدد الكلي بالخادم (محطة حُذفت أو تغيّر رقمها — المزامنة لا تحذف) ← تحميل كامل
+    // تلقائي بدل اعتماد نسخة ناقصة التصحيح. رد خادم أقدم بلا totalCount ← كالسابق تمامًا.
+    // H2: the copy's count after merging doesn't match the server total (a deleted/renumbered station — sync never deletes)
+    // ← an automatic full reload instead of committing an uncorrected copy. An older server reply without totalCount ← as before.
+    if(typeof res.totalCount === 'number' && isStationsLoaded
+       && applyStationUpdates_(allStationsLocal, res.updated).stations.length !== res.totalCount){
+      console.warn('عدد النسخة لا يطابق الخادم (' + res.totalCount + ') — تحميل كامل تلقائي / copy count differs from the server — automatic full reload');
+      return await refreshStationsLocalCache_(); // يُسجَّل بسجل النسخ «تحميل كامل» عند نجاحه / logged as a «full load» in the copies log on success
+    }
+
     return await withStationsWriteLock_(async ()=>{
       if(!isStationsLoaded) return false; // مُسحت البيانات أثناء الجلب / data was cleared during the fetch
       const base = allStationsLocal;
@@ -2866,10 +2876,115 @@ document.getElementById('profileGateOpenMenuBtn').addEventListener('click', ()=>
   mobileUserMenu.classList.add('open');
 });
 
-async function searchStationSmart(query){
-  if(isStationsLoaded) return searchStationLocal(query);
-  return await callBackend('searchStation', { query, phone: getSessionPhone_() });
+/* ============================================================
+ *  ح٢ — النسخة المحلية للتسريع لا مصدر الحقيقة (قرار محمد 30 سبتمبر):
+ *  قبل الوثوق بنتيجة البحث المحلي: إن لم يؤكد الخادم مطابقة النسخة خلال آخر 5 دقائق ← getDataVersion
+ *  (طلب واحد مشترك لكل عمليات البحث المتزامنة، مثل بحث الأعطال المتعدد)؛ مطابق ← النتيجة نهائية؛
+ *  تغيّر ← المزامنة التزايدية الموجودة ثم إعادة البحث محليًا.
+ *  - وُجدت محليًا ← تُعرض فورًا ويُتحقق بالخلفية؛ تغيّرت إحداثياتها ← تنتقل العلامة (ووجهة الملاحة الجارية)
+ *    مع تنبيه «تم تحديث إحداثيات المحطة».
+ *  - لم توجد محليًا ← «جارٍ التأكد من الخادم…» ثم الحكم النهائي؛ تعذّر التأكد (بلا إنترنت/لا رد خلال 10 ث)
+ *    ← «غير موجودة في النسخة المحفوظة (آخر تحديث: …) — تعذّر التأكد من الخادم».
+ *  - خلال 5 دقائق من آخر تأكيد: لا أي طلب إضافي. النسخة غير محمّلة ← searchStation بالخادم كما كان.
+ *  H2 — the local copy is an accelerator, not the source of truth (approved 30 Sep):
+ *  before trusting a local search result: if the server hasn't confirmed the copy within 5 minutes ← getDataVersion
+ *  (one shared request for all concurrent searches, e.g. the multi-station outage search); same ← final; changed ←
+ *  the existing incremental sync, then search locally again.
+ *  - found locally ← shown at once, verified in the background; coordinates changed ← the marker (and a running
+ *    navigation's target) move with the notice «تم تحديث إحداثيات المحطة».
+ *  - not found locally ← «checking with the server…» then the final verdict; unverifiable (offline / no reply in
+ *    10 s) ← «not in the saved copy (last update: …) — couldn't confirm with the server».
+ *  - within 5 minutes of the last confirmation: no extra request. Copy not loaded ← server searchStation as before.
+ * ============================================================ */
+const STATIONS_CONFIRM_MAX_AGE_MS = 5 * 60 * 1000;
+const NOT_FOUND_VERIFY_WAIT_MS = 10000;
+function lastStationsConfirmAt_(){
+  let t = lastDataSyncAt ? lastDataSyncAt.getTime() : 0;
+  try{ t = Math.max(t, Number(localStorage.getItem(STATIONS_SYNCED_AT_KEY)) || 0); }catch(e){}
+  return t;
 }
+function isStationsCopyConfirmed_(){
+  return Date.now() - lastStationsConfirmAt_() < STATIONS_CONFIRM_MAX_AGE_MS;
+}
+/* تأكيد النسخة مع الخادم — طلب واحد مشترك. النتيجة: 'fresh' | 'updated' | 'unverified'
+ * Confirm the copy with the server — one shared request. Result: 'fresh' | 'updated' | 'unverified' */
+let stationsFreshCheck_ = null, stationsFreshCheckAt_ = 0;
+// طلب تحقق معلّق (بلا رد) لا يحجز كل التحققات التالية: بعد 30 ث يُبدأ غيره — a hung check never blocks later ones: a new one after 30 s
+const STATIONS_FRESH_CHECK_STALE_MS = 30000;
+function ensureStationsFresh_(){
+  if(!isStationsLoaded) return Promise.resolve('unverified');
+  if(isStationsCopyConfirmed_()) return Promise.resolve('fresh');
+  if(navigator.onLine === false) return Promise.resolve('unverified');
+  if(stationsFreshCheck_ && Date.now() - stationsFreshCheckAt_ > STATIONS_FRESH_CHECK_STALE_MS) stationsFreshCheck_ = null;
+  if(!stationsFreshCheck_){
+    stationsFreshCheckAt_ = Date.now();
+    const check = (async ()=>{
+      try{
+        const v = await callBackend('getDataVersion');
+        if(!v || !v.success) return 'unverified';
+        if(v.version === stationsMeta_.version){ markStationsSynced_(); return 'fresh'; }
+        if(await syncIncrementalUpdates_()){ markStationsSynced_(); return 'updated'; }
+        return 'unverified';
+      }catch(e){ return 'unverified'; }
+    })().finally(()=>{ if(stationsFreshCheck_ === check) stationsFreshCheck_ = null; });
+    stationsFreshCheck_ = check;
+  }
+  return stationsFreshCheck_;
+}
+/* نفس التأكيد بحد انتظار 10 ث (يكمل بالخلفية بعدها) — the same check capped at 10 s (it carries on in the background after) */
+function ensureStationsFreshBounded_(){
+  return Promise.race([ensureStationsFresh_(), new Promise(r => setTimeout(()=> r('unverified'), NOT_FOUND_VERIFY_WAIT_MS))]);
+}
+/* بعد تحقق بالخلفية: المحطة المعروضة تغيّرت إحداثياتها ← العلامة والبطاقة (أو وجهة الملاحة) + تنبيه
+ * After a background check: the shown station's coordinates changed ← marker and card (or navigation target) + notice */
+const STATION_COORDS_UPDATED_MSG = 'تم تحديث إحداثيات المحطة';
+function applyVerifiedStation_(fresh){
+  const s = currentStation;
+  if(!s || !fresh || !fresh.found || String(s.id) !== String(fresh.id) || s.type !== fresh.type) return false;
+  if(Math.abs(s.lat - fresh.lat) < 1e-7 && Math.abs(s.lng - fresh.lng) < 1e-7) return false;
+  Object.assign(s, { lat: fresh.lat, lng: fresh.lng, feeder: fresh.feeder, region: fresh.region, name: fresh.name });
+  const navigating = window.SecNavigation && SecNavigation.isActive();
+  if(navigating){
+    if(marker) marker.setLatLng([s.lat, s.lng]);
+    SecNavigation.updateTarget(s);
+  } else if(leafletMap && mapContainer.classList.contains('active')){
+    renderStationOnMap(s);
+  }
+  showMapNotice_(STATION_COORDS_UPDATED_MSG);
+  return true;
+}
+let mapNoticeTimer_ = null;
+function showMapNotice_(text){
+  mapToolHint.textContent = text;
+  mapToolHint.classList.add('show');
+  clearTimeout(mapNoticeTimer_);
+  // يُخفى بعد 8 ث ما لم تستبدله رسالة أخرى — hidden after 8 s unless another message replaced it
+  mapNoticeTimer_ = setTimeout(()=>{ if(mapToolHint.textContent === text) mapToolHint.classList.remove('show'); }, 8000);
+}
+
+/* opts.onChecking: يُستدعى عند انتظار تأكيد الخادم لنتيجة «غير موجودة» — called while waiting for the server to confirm «not found».
+ * النتيجة «غير موجودة» غير المؤكدة تحمل unverified: true — an unconfirmed «not found» carries unverified: true */
+async function searchStationSmart(query, opts){
+  if(!isStationsLoaded) return await callBackend('searchStation', { query, phone: getSessionPhone_() });
+  const local = searchStationLocal(query);
+  if(isStationsCopyConfirmed_()) return local;
+  if(local.found){
+    ensureStationsFresh_().then(state => { if(state === 'updated') applyVerifiedStation_(searchStationLocal(query)); });
+    return local;
+  }
+  if(navigator.onLine === false) return Object.assign(local, { unverified: true });
+  if(opts && typeof opts.onChecking === 'function') opts.onChecking();
+  const state = await ensureStationsFreshBounded_();
+  const again = searchStationLocal(query);
+  if(!again.found && state === 'unverified') again.unverified = true;
+  return again;
+}
+/* نص «غير موجودة» غير المؤكدة مع وقت آخر تحديث للنسخة — the unconfirmed «not found» note with the copy's last-update time */
+function unverifiedNotFoundNote_(){
+  const at = lastDataSyncAt || storedStationsTime_();
+  return 'غير موجودة في النسخة المحفوظة' + (at ? ' (آخر تحديث: ' + formatRelativeTime(at) + ')' : '') + ' — تعذّر التأكد من الخادم';
+}
+const CHECKING_SERVER_MSG = 'جارٍ التأكد من الخادم…';
 
 /* بعد إضافة/تعديل ناجح: الذاكرة فورًا (البحث يجدها مباشرة كالسابق)، ثم اعتماد نسخة كاملة بالدور بعد أي مزامنة جارية.
  * الإصدار ووقت المزامنة لا يتغيّران، فالمزامنة القادمة تجلب نسخة الخادم الرسمية لنفس المحطة.
@@ -2919,12 +3034,14 @@ function setSearchProgress(active, prefix){
   };
 }
 
-function renderNotFoundCard(container, rawQuery, onRetry){
+/* unverified: «غير موجودة» لم يؤكدها الخادم — صياغة غير قاطعة بدل «المحطة غير موجودة»
+ * unverified: a «not found» the server couldn't confirm — non-definitive wording instead of «not found» */
+function renderNotFoundCard(container, rawQuery, onRetry, unverified){
   container.innerHTML = `
     <div class="not-found-card">
       <div class="nfc-head">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        <span>المحطة غير موجودة</span>
+        <span>${unverified ? escapeHtml(unverifiedNotFoundNote_()) : 'المحطة غير موجودة'}</span>
       </div>
       <div class="nfc-id">رقم المحطة: <b>${escapeHtml(rawQuery)}</b></div>
       <div class="nfc-question">هل تريد إضافتها؟</div>
@@ -2977,9 +3094,10 @@ async function performSearch(){
   const progress = setSearchProgress(true);
 
   try{
-    const result = await searchStationSmart(raw);
+    const result = await searchStationSmart(raw, { onChecking: ()=>{ searchHint.textContent = CHECKING_SERVER_MSG; } });
     if(result.found){
       progress.finish();
+      searchHint.textContent = '';
       goToStation({
         id: result.id, name: result.name, type: result.type,
         lat: result.lat, lng: result.lng,
@@ -2988,7 +3106,7 @@ async function performSearch(){
       });
     } else {
       progress.stop();
-      renderNotFoundCard(searchHint, raw, retryMainSearch);
+      renderNotFoundCard(searchHint, raw, retryMainSearch, !!result.unverified);
     }
   }catch(err){
     progress.stop();
@@ -3035,9 +3153,10 @@ async function performStationPageSearch(){
   const progress = setSearchProgress(true, 'stationSearch');
 
   try{
-    const result = await searchStationSmart(raw);
+    const result = await searchStationSmart(raw, { onChecking: ()=>{ stationSearchHint.textContent = CHECKING_SERVER_MSG; } });
     if(result.found){
       progress.finish();
+      stationSearchHint.textContent = '';
       stationSearchInput.value = '';
       goToStation({
         id: result.id, name: result.name, type: result.type,
@@ -3047,7 +3166,7 @@ async function performStationPageSearch(){
       });
     } else {
       progress.stop();
-      renderNotFoundCard(stationSearchHint, raw, retryStationSearch);
+      renderNotFoundCard(stationSearchHint, raw, retryStationSearch, !!result.unverified);
     }
   }catch(err){
     progress.stop();
@@ -3633,6 +3752,8 @@ document.getElementById('outageSubmitBtn').addEventListener('click', async ()=>{
   mapToolHint.classList.add('show');
   mapToolHint.textContent = 'جاري البحث عن المحطات...';
 
+  // ح٢: تأكيد واحد للنسخة قبل البحث عن كل الأرقام (طلب واحد لكل المحطات) / H2: one copy check before looking up all the numbers (one request for all)
+  await ensureStationsFreshBounded_();
   const results = await Promise.all(ids.map(id => searchStationSmart(id)));
 
   const found = [];
@@ -3665,6 +3786,8 @@ document.getElementById('homepageOutageSubmitBtn').addEventListener('click', asy
   if(!hasValidSession()){ errEl.textContent = 'سجّل دخول للاستخدام'; return; }
 
   errEl.textContent = 'جاري البحث...';
+  // ح٢: تأكيد واحد للنسخة قبل البحث عن كل الأرقام (طلب واحد لكل المحطات) / H2: one copy check before looking up all the numbers (one request for all)
+  await ensureStationsFreshBounded_();
   const results = await Promise.all(ids.map(id => searchStationSmart(id)));
   const found = [];
   const notFound = [];

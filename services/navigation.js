@@ -279,6 +279,29 @@
     deps.relayout();
   }
 
+  /* ح٢: تحديث وجهة الملاحة الجارية دون إيقافها — تغيّرت إحداثيات المحطة بعد التحقق من الخادم. مسار الطرق القديم يُزال
+   * ويُطلب مسار للوجهة الجديدة (أو يُعاد رسم الخط المباشر بدون إنترنت)، ومتتبع الاتجاه يبدأ من جديد نحو الوجهة الجديدة.
+   * H2: update the running navigation's destination without stopping it — the station's coordinates changed after server
+   * verification. The old road route is removed and one to the new target requested (or the direct line redrawn offline),
+   * and the direction tracker restarts toward the new target. */
+  function updateTarget(station) {
+    if (!nav || !station || isNaN(station.lat) || isNaN(station.lng)) return false;
+    nav.st = [station.lat, station.lng];
+    nav.station = station;
+    if (global.SecDirectionTracker) { nav.tracker = global.SecDirectionTracker.create(nav.st); nav.dir = null; }
+    nav.arrived = false; nav.route = null; nav.offRoute = false; nav.remaining = null;
+    if (nav.routeLine) { nav.map.removeLayer(nav.routeLine); nav.routeLine = null; }
+    const gm = nav.sheet && nav.sheet.querySelector('.nav-gm');
+    if (gm) gm.href = deps.googleMapsUrl(station);
+    if (nav.me) {
+      if (nav.mode === 'smart' || navigator.onLine === false) drawDirectLine_();
+      else requestRoute_('first');
+      evaluate_();
+      moveCamera_(true);
+    }
+    return true;
+  }
+
   // ===== GPS =====
   function onFix_(pos) {
     if (!nav) return;
@@ -331,6 +354,7 @@
     if (navigator.onLine === false) { enterSmart_(); return; } // بدون إنترنت: لا طلب — offline: no request
     if (reason !== 'first' && Date.now() - nav.lastRouteAt < MIN_REROUTE_GAP_MS) return;
     const n = nav; n.routing = true; n.lastRouteAt = Date.now();
+    const target = n.st;
     if (!n.route) setStatus_('جارٍ حساب المسار…', 'wait');
     try {
       const url = deps.osrmUrl + n.me[1] + ',' + n.me[0] + ';' + n.st[1] + ',' + n.st[0] + '?overview=full&geometries=geojson';
@@ -338,6 +362,7 @@
       if (!res.ok) throw new Error('osrm-http-' + res.status);
       const data = await res.json();
       if (nav !== n) return; // أُوقفت الملاحة أثناء الطلب / navigation stopped during the request
+      if (n.st !== target) { n.retarget = true; return; } // تغيّرت الوجهة أثناء الطلب — مسار للوجهة الجديدة / the target changed mid-request — route to the new one
       if (data.code !== 'Ok' || !data.routes || !data.routes[0]) throw new Error('osrm-no-route');
       const r = data.routes[0];
       const pts = r.geometry.coordinates.map(function (c) { return [c[1], c[0]]; });
@@ -352,12 +377,14 @@
       evaluate_();
     } catch (e) {
       if (nav !== n) return;
+      if (n.st !== target) { n.retarget = true; return; }
       n.routeFailed = true;
       // لا مسار صالح (أول طلب، أو خارج المسار) ← توجيه مباشر مؤقتًا مع إعادة المحاولة؛ مسار صالح قائم ← يبقى كما هو
       // No usable route (first request, or off it) ← direct guidance for now, with retries; a usable route in hand ← kept as is
       if (!n.route || n.offRoute) enterSmart_();
     } finally {
       n.routing = false;
+      if (n.retarget && nav === n) { n.retarget = false; requestRoute_('first'); }
     }
   }
 
@@ -589,5 +616,5 @@
     placeFollowBtn_(); // ارتفاع اللوحة قد يتغيّر مع النص — the sheet height may change with the text
   }
 
-  global.SecNavigation = { init: init, start: start, stop: stop, isActive: isActive, refreshZoomSnap: applyZoomSnap_, _locateOnRoute: locateOnRoute };
+  global.SecNavigation = { init: init, start: start, stop: stop, isActive: isActive, refreshZoomSnap: applyZoomSnap_, updateTarget: updateTarget, _locateOnRoute: locateOnRoute };
 })(window);
