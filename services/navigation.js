@@ -187,6 +187,11 @@
     nav.prevZoomSnap = map.options.zoomSnap;
     applyZoomSnap_();
     buildSheet_();
+    // دوران الخريطة: يبدأ بالشمال لأعلى حتى يُعرف اتجاه سيرك من الحركة / rotation: starts north-up until your direction is known from movement
+    nav.bearing = 0;
+    nav.prevOpts = { touchZoom: map.options.touchZoom, scrollWheelZoom: map.options.scrollWheelZoom, doubleClickZoom: map.options.doubleClickZoom };
+    bindRotDrag_();
+    setRotateMode_(readRotateMode_());
     setStatus_('جارٍ تحديد موقعك…', 'wait');
 
     // تحريك المستخدم للخريطة يوقف الكاميرا فقط: السحب لا يأتي إلا من المستخدم؛ والتكبير يُعتبر منه فقط إن سبقه لمس/نقر/تمرير
@@ -268,6 +273,16 @@
     global.removeEventListener('online', n.onOnline);
     [n.meDot, n.accCircle, n.routeLine, n.directLine].forEach(function (l) { if (l) n.map.removeLayer(l); });
     n.map.options.zoomSnap = n.prevZoomSnap; // كما كان قبل الملاحة / as before navigation
+    // إلغاء الدوران وإعادة السحب والتكبير كما كانا / undo the rotation, restore dragging and zooming
+    const mc = n.map.getContainer();
+    mc.classList.remove('nav-rot'); deps.stage.classList.remove('nav-rot-on');
+    ['--rot-d', '--rot-left', '--rot-top', '--rot-a'].forEach(function (p) { mc.style.removeProperty(p); });
+    mc.removeEventListener('pointerdown', n.onRotDown);
+    global.removeEventListener('pointermove', n.onRotMove);
+    global.removeEventListener('pointerup', n.onRotUp);
+    global.removeEventListener('pointercancel', n.onRotUp);
+    n.map.dragging.enable();
+    Object.keys(n.prevOpts || {}).forEach(function (k) { n.map.options[k] = n.prevOpts[k]; });
     if (n.sheet) n.sheet.remove();
     if (n.followBtn) n.followBtn.remove();
     if (n.xBtn) n.xBtn.remove();
@@ -311,6 +326,8 @@
     nav.acc = pos.coords.accuracy;
     // كل قراءة تُسجَّل بالمتتبع دائمًا، فيكون جاهزًا لحظة التحويل للتوجيه المباشر — every fix feeds the tracker, so it's ready the moment direct guidance kicks in
     if (nav.tracker) nav.dir = nav.tracker.push({ lat: nav.me[0], lng: nav.me[1], acc: nav.acc, t: pos.timestamp || Date.now() });
+    trackSpeed_(pos);
+    updateBearing_();
     drawMe_();
     drawDirectLine_();
     if (first) { requestRoute_('first'); moveCamera_(true); }
@@ -447,6 +464,7 @@
     nav.lastCameraAt = Date.now();
     const map = nav.map;
     applyZoomSnap_(); // حسب الخريطة الظاهرة الآن / per the map shown now
+    if (rotating_()) { moveCameraRot_(force); return; } // الخريطة مُدارة: موقعي عند نقطة الدوران / rotated map: me at the pivot
     map.invalidateSize({ pan: false }); // حجم الخريطة الفعلي بعد أي تغيير بالتخطيط / the map's real size after any layout change
     const mapRect = map.getContainer().getBoundingClientRect();
     const sheetRect = nav.sheet ? nav.sheet.getBoundingClientRect() : null;
@@ -465,6 +483,139 @@
     // إطار مباشر ثانٍ بعد استقرار التخطيط (ارتفاع اللوحة النهائي) — ما لم يحرّك المستخدم الخريطة / a second direct frame once the layout settles (the sheet's final height) — unless the user moved the map
     if (first) setTimeout(function () { if (nav && nav.follow) moveCamera_(true); }, FRAME_SETTLE_MS);
   }
+  // ===== دوران الخريطة مع اتجاه السير — Map rotation with the direction of travel =====
+  /* الوضعان: 'course' الخريطة تدور فيبقى اتجاه سيرك لأعلى (الافتراضي) / 'north' الشمال لأعلى كما كان. بلا مكتبة ولا مفتاح API:
+   * حاوية الخريطة تُكبَّر لقطر يغطي الشاشة من أي زاوية وتُدار بـCSS حول موقعي (مركزها). مصدر الاتجاه: حركة GPS الفعلية من
+   * services/direction-tracker.js (لا البوصلة). تحت 10 كم/س أو عند التوقف تبقى على آخر اتجاه. مؤشر الاتجاه في اللوحة هو
+   * البوصلة: يدور مع الخريطة، والضغط عليه يبدّل بين الوضعين، والاختيار محفوظ.
+   * Two modes: 'course' the map turns so your travel direction is up (default) / 'north' north up as before. No library, no API
+   * key: the map container is enlarged to a diagonal covering the screen at any angle and rotated by CSS around me (its centre).
+   * Direction source: real GPS movement from the tracker (not the compass). Under 10 km/h or when stopped the last direction stays.
+   * The sheet's direction indicator is the compass: it turns with the map, tapping it switches modes, and the choice is saved. */
+  const ROTATE_KEY = 'sec-nav-rotate';
+  const ROT_PIVOT = 0.68;          // موقعي عند 68٪ من المساحة الظاهرة بين أعلى الشاشة واللوحة / me at 68% of the visible area between the top and the sheet
+  const ROT_TOP = 70;              // أسفل ✕ والشارة / below ✕ and the chip
+  const ROT_MIN_TURN_DEG = 8;      // تغيّر أقل من 8° لا يدير الخريطة (لا اهتزاز) / a change under 8° never turns the map (no jitter)
+  const ROT_MIN_SPEED_MPS = 10 / 3.6; // تحت 10 كم/س لا دوران (زحام، إشارة) / no turning under 10 km/h (traffic, lights)
+  const SPEED_WINDOW_MS = 5000;    // السرعة من آخر 5 ث إن لم يعطها الجهاز / speed over the last 5 s if the device doesn't give it
+  function readRotateMode_() { try { return localStorage.getItem(ROTATE_KEY) === 'north' ? 'north' : 'course'; } catch (e) { return 'course'; } }
+  function rotating_() { return !!nav && nav.rotMode === 'course'; }
+  /* متجه من إطار الخريطة إلى الشاشة (دوران −الاتجاه) — a vector from the map frame to the screen (rotation by −bearing) */
+  function toScreen_(v, bearing) { const a = rad(-bearing), c = Math.cos(a), s = Math.sin(a); return L.point(v.x * c - v.y * s, v.x * s + v.y * c); }
+
+  /* السرعة الحالية (م/ث): من الجهاز إن أعطاها، وإلا من الإزاحة خلال آخر 5 ث — the current speed (m/s): from the device if given, else displacement over the last 5 s */
+  function trackSpeed_(pos) {
+    const t = pos.timestamp || Date.now();
+    nav.speedFixes = (nav.speedFixes || []).concat([{ p: nav.me, t: t }]).filter(function (f) { return t - f.t <= SPEED_WINDOW_MS; });
+    const s = pos.coords.speed;
+    if (typeof s === 'number' && isFinite(s) && s >= 0) { nav.speed = s; return; }
+    const first = nav.speedFixes[0];
+    nav.speed = t - first.t >= 1000 ? distM(first.p, nav.me) / ((t - first.t) / 1000) : null;
+  }
+
+  function rotLayout_() {
+    if (!nav) return;
+    const c = nav.map.getContainer(), stage = deps.stage;
+    if (!rotating_()) {
+      c.classList.remove('nav-rot'); stage.classList.remove('nav-rot-on');
+      ['--rot-d', '--rot-left', '--rot-top', '--rot-a'].forEach(function (p) { c.style.removeProperty(p); });
+      return;
+    }
+    const W = stage.clientWidth, H = stage.clientHeight, sr = stage.getBoundingClientRect();
+    const sheetTop = nav.sheet ? nav.sheet.getBoundingClientRect().top - sr.top : H;
+    const py = Math.round(ROT_TOP + (sheetTop - ROT_TOP) * ROT_PIVOT);
+    // أبعد زاوية من موقعي ×2 = قطر يغطي الشاشة كلها بأي دوران / farthest corner from me ×2 = a diameter covering the screen at any angle
+    const D = Math.ceil(2 * Math.hypot(W / 2, Math.max(py, H - py))) + 2;
+    const changed = !nav.pivot || nav.pivot.y !== py || nav.pivot.x !== W / 2 || nav.rotD !== D;
+    nav.pivot = L.point(W / 2, py); nav.rotD = D; nav.sheetTop = sheetTop;
+    c.style.setProperty('--rot-d', D + 'px');
+    c.style.setProperty('--rot-left', Math.round(W / 2 - D / 2) + 'px');
+    c.style.setProperty('--rot-top', Math.round(py - D / 2) + 'px');
+    c.classList.add('nav-rot'); stage.classList.add('nav-rot-on');
+    applyBearing_();
+    if (changed) { nav.map.invalidateSize({ pan: false }); if (nav.follow && nav.me) nav.map.setView(nav.me, nav.map.getZoom(), { animate: false }); }
+  }
+  function applyBearing_() {
+    if (!nav) return;
+    const b = rotating_() ? nav.bearing : 0;
+    nav.map.getContainer().style.setProperty('--rot-a', (-b).toFixed(1) + 'deg');
+    if (nav.dial) nav.dial.style.transform = b ? 'rotate(' + (-b).toFixed(1) + 'deg)' : ''; // N للشمال الحقيقي والسهم للمحطة نسبةً لاتجاهك / N to true north, the arrow to the station relative to your heading
+  }
+  /* اتجاه جديد من المتتبع: أقصر التفاف، وبلا اهتزاز ولا دوران تحت 10 كم/س — a new heading: shortest turn, no jitter, no turning under 10 km/h */
+  function updateBearing_() {
+    if (!rotating_() || !nav.follow) return;
+    const d = nav.dir;
+    if (!d || d.course == null || d.state === 'stopped' || d.state === 'weak') return;
+    if (nav.speed == null || nav.speed < ROT_MIN_SPEED_MPS) return;
+    const delta = ((d.course - nav.bearing) % 360 + 540) % 360 - 180;
+    if (Math.abs(delta) < ROT_MIN_TURN_DEG) return;
+    nav.bearing += delta; // بلا لفّة كاملة عند عبور 0/360 / no full spin across 0/360
+    applyBearing_();
+  }
+  /* السحب في الوضع المُدار: حركة الإصبع على الشاشة ← نفس الاتجاه على الخريطة — drag in rotated mode: finger movement on screen ← same direction on the map */
+  function bindRotDrag_() {
+    const c = nav.map.getContainer();
+    let last = null, moved = 0;
+    nav.onRotDown = function (e) { if (!rotating_() || !e.isPrimary) return; last = { x: e.clientX, y: e.clientY }; moved = 0; };
+    nav.onRotMove = function (e) {
+      if (!last || !rotating_() || !e.isPrimary) return;
+      const dx = e.clientX - last.x, dy = e.clientY - last.y;
+      last = { x: e.clientX, y: e.clientY };
+      moved += Math.abs(dx) + Math.abs(dy);
+      if (moved < 6) return; // لمسة لا سحب / a tap, not a drag
+      pauseFollow_();
+      const a = rad(nav.bearing), cs = Math.cos(a), sn = Math.sin(a);
+      nav.map.panBy(L.point(-(dx * cs - dy * sn), -(dx * sn + dy * cs)), { animate: false });
+    };
+    nav.onRotUp = function () { last = null; };
+    c.addEventListener('pointerdown', nav.onRotDown);
+    global.addEventListener('pointermove', nav.onRotMove);
+    global.addEventListener('pointerup', nav.onRotUp);
+    global.addEventListener('pointercancel', nav.onRotUp);
+  }
+  function setRotateMode_(mode) {
+    if (!nav) return;
+    nav.rotMode = mode;
+    try { localStorage.setItem(ROTATE_KEY, mode); } catch (e) { /* للجلسة فقط / this session only */ }
+    const map = nav.map, on = mode === 'course';
+    // الوضع المُدار: السحب بمعالجنا، والتكبير حول موقعي (المركز) / rotated: our drag handler, zoom around me (the centre)
+    if (on) map.dragging.disable(); else map.dragging.enable();
+    ['touchZoom', 'scrollWheelZoom', 'doubleClickZoom'].forEach(function (k) { map.options[k] = on ? 'center' : nav.prevOpts[k]; });
+    if (!on) nav.bearing = 0;
+    rotLayout_();
+    if (!on) { nav.pivot = null; map.invalidateSize({ pan: false }); }
+    applyBearing_();
+    if (nav.dial) {
+      nav.dial.classList.toggle('north', !on);
+      nav.dial.title = on ? 'الخريطة تدور معك — اضغط لتثبيت الشمال لأعلى' : 'الشمال لأعلى — اضغط لتدور الخريطة معك';
+      nav.dial.setAttribute('aria-label', nav.dial.title);
+    }
+    moveCamera_(true);
+  }
+  /* أقرب تكبير يُظهر المحطة داخل المساحة الظاهرة وموقعي ثابت عند نقطة الدوران — the closest zoom showing the station in the visible area with me fixed at the pivot */
+  function rotTargetZoom_() {
+    const map = nav.map, W = deps.stage.clientWidth, step = map.options.zoomSnap || 1;
+    for (let z = MAX_FOLLOW_ZOOM; z >= 3; z -= step) {
+      const v = toScreen_(map.project(nav.st, z).subtract(map.project(nav.me, z)), nav.bearing);
+      const x = nav.pivot.x + v.x, y = nav.pivot.y + v.y;
+      if (x >= FIT_PAD_SIDE && x <= W - FIT_PAD_SIDE && y >= ROT_TOP && y <= nav.sheetTop - FIT_PAD_BOTTOM) return z;
+    }
+    return 3;
+  }
+  function moveCameraRot_(force) {
+    const map = nav.map;
+    rotLayout_();
+    const target = rotTargetZoom_(), cur = map.getZoom();
+    const jump = force || !nav.framed;
+    // نفس قاعدة الوضع العادي: التصغير فوري والتكبير درجة كل مرة / the same rule as north-up: zoom out at once, zoom in one level at a time
+    const zoom = jump || target < cur ? target : Math.min(target, cur + 1);
+    const first = !nav.framed;
+    nav.framed = true;
+    nav.cameraMovedAt = Date.now();
+    map.setView(nav.me, zoom, { animate: true, duration: 0.8 });
+    if (first) setTimeout(function () { if (nav && nav.follow) moveCamera_(true); }, FRAME_SETTLE_MS);
+  }
+
   function pauseFollow_() {
     if (!nav || !nav.follow) return;
     nav.follow = false;
@@ -525,6 +676,10 @@
     sheet.querySelector('.nav-end').addEventListener('click', stop);
     sheet.querySelector('.nav-more').addEventListener('click', function () { setExpanded_(!nav.expanded); });
     sheet.querySelectorAll('.nav-glass button').forEach(function (b) { b.addEventListener('click', function () { setGlass_(b.dataset.glass); }); });
+    // مؤشر الاتجاه هو البوصلة: الضغط يبدّل «تدور معي» / «الشمال لأعلى» — the direction indicator is the compass: a tap switches modes
+    nav.dial = sheet.querySelector('.nav-dial');
+    nav.dial.setAttribute('role', 'button'); nav.dial.tabIndex = 0;
+    nav.dial.addEventListener('click', function () { setRotateMode_(rotating_() ? 'north' : 'course'); });
     // سحب للأعلى/للأسفل — swipe up/down
     let y0 = null;
     sheet.addEventListener('touchstart', function (e) { y0 = sheet.scrollTop <= 0 ? e.touches[0].clientY : null; }, { passive: true });
@@ -571,6 +726,7 @@
     const h = nav.sheet.offsetHeight;
     if (nav.followBtn) nav.followBtn.style.bottom = (h + 20) + 'px';
     deps.stage.style.setProperty('--nav-sheet-h', h + 'px');
+    if (rotating_()) rotLayout_(); // نقطة الدوران تتبع ارتفاع اللوحة / the pivot follows the sheet height
   }
   function setStatus_(text, tone) { if (nav) { nav.status = text; nav.tone = tone; render_(); } }
 

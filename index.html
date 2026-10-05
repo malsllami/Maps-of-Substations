@@ -561,6 +561,15 @@ body.nav-full{overflow:hidden;}
 body.nav-full header, body.nav-full .map-toolbar-bar{display:none !important;}
 body.nav-full .globe-stage.map-active{position:fixed;inset:0;top:0 !important;left:0;transform:none;width:100%;height:100%;min-height:0;z-index:1500;}
 body.nav-full .globe-stage.map-active #map-container{height:100% !important;border-radius:0;}
+/* دوران الخريطة مع اتجاه السير (services/navigation.js): حاوية بقطر يغطي الشاشة تُدار حول موقعي — map rotation with the travel direction: a container as wide as the screen diagonal, turned around me */
+body.nav-full .globe-stage.map-active.nav-rot-on{overflow:hidden;}
+/* touch-action:none: سحب Leaflet معطّل في هذا الوضع فكان المتصفح يأخذ اللمسة ويقطع السحب — Leaflet dragging is off here, so the browser took the touch and cut our drag */
+body.nav-full .globe-stage.map-active #map-container.nav-rot{position:absolute !important;width:var(--rot-d) !important;height:var(--rot-d) !important;max-width:none;left:var(--rot-left);top:var(--rot-top);transform:rotate(var(--rot-a, 0deg));transform-origin:50% 50%;transition:transform .9s ease-out;touch-action:none;}
+/* رقم المحطة يبقى معتدلًا رغم الدوران — the station number stays upright despite the rotation */
+#map-container.nav-rot .selected-station-marker{transform:rotate(calc(-1 * var(--rot-a, 0deg)));transition:transform .9s ease-out;}
+/* مؤشر الاتجاه = البوصلة: يدور بنعومة، وإطار مميز عند تثبيت الشمال لأعلى — the indicator = the compass: turns smoothly, highlighted ring when north is pinned up */
+.nav-dial{cursor:pointer;transition:transform .9s ease-out, box-shadow .2s;}
+.nav-dial.north{box-shadow:0 0 0 2px var(--teal);}
 body.nav-full .map-tool-hint{position:absolute;top:calc(env(safe-area-inset-top, 0px) + 66px);left:12px;right:12px;width:auto;border:1px solid var(--border-strong);border-radius:12px;z-index:905;}
 .nav-x{position:absolute;top:calc(env(safe-area-inset-top, 0px) + 12px);right:12px;z-index:906;width:46px;height:46px;border-radius:50%;
   border:1px solid rgba(229,72,77,.5);background:color-mix(in srgb, var(--bg-card) 80%, transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
