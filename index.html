@@ -2045,8 +2045,13 @@ let stationsLoadResume_ = null; // { offset, collected, expectedTotal, version, 
 async function fetchStationsBatch_(offset){
   for(let retry = 0; ; retry++){
     let res = null;
-    try{ res = await callBackend('getAllStations', { offset, phone: getSessionPhone_() }); }catch(e){ res = null; }
-    if(res && res.success && Array.isArray(res.stations)) return res;
+    try{ res = await callBackend('getAllStations', { offset, phone: getSessionPhone_(), compact: true }); }catch(e){ res = null; }
+    if(res && res.success && Array.isArray(res.stations)){
+      // الشكل المضغوط (مصفوفات) يُعاد لنفس كائنات المحطة السابقة حرفيًا قبل أي استخدام؛ خادم أقدم بلا compact يرد بالكائنات كما هي
+      // The compact shape (arrays) is turned back into the exact previous station objects before any use; an older server replies with objects as is
+      if(res.compact) res.stations = res.stations.map(a => ({ id: a[0], type: a[1], feeder: a[2], region: a[3], lat: a[4], lng: a[5] }));
+      return res;
+    }
     if(retry >= STATIONS_BATCH_RETRY_DELAYS_MS.length || navigator.onLine === false) return null;
     await new Promise(r => setTimeout(r, STATIONS_BATCH_RETRY_DELAYS_MS[retry]));
   }
@@ -2270,11 +2275,18 @@ document.getElementById('dataRefreshBtn').addEventListener('click', async ()=>{
     alert('سجّل دخول أولًا لاستخدام تحديث البيانات');
     return;
   }
+  // تحميل جارٍ أصلًا ← لا شيء (القياس: ضغطة أثناء تحميل أعادت بناء الفهرس بالخادم في منتصفه) / a load already running ← nothing (measured: a click mid-load rebuilt the server index in the middle of it)
+  if(_isRefreshingStationsCache) return;
   btn.classList.add('spinning');
   btn.disabled = true;
   try{
+    // الخادم يعيد بناء فهرسه من الشيت فوق النسخة الحالية (بلا حذف)، ثم يُجلب المتغيّر فقط —
+    // والمزامنة نفسها تتحول لتحميل كامل تلقائيًا إن لم يطابق العدد الخادم. بلا نسخة بالجهاز ← تحميل كامل كالسابق.
+    // The server rebuilds its index from the sheet over the current copy (no drop), then only changes are fetched —
+    // and the sync itself switches to a full load automatically if the count doesn't match the server. No copy on the device ← full load as before.
     await callBackend('clearSearchCache', { phone: session.phone });
-    endLoadProgress_(await refreshStationsLocalCache_(showLoadProgress_));
+    if(isStationsLoaded) endLoadProgress_(await syncIncrementalUpdates_());
+    else endLoadProgress_(await refreshStationsLocalCache_(showLoadProgress_));
   }catch(e){ endLoadProgress_(false); }
   btn.classList.remove('spinning');
   btn.disabled = false;
@@ -2488,6 +2500,20 @@ themeToggle.addEventListener('click', ()=>{
   syncThemeSwitch();
 });
 
+/* سجل الأخطاء: «THREE is not defined» (Android/4g) — فشل تحميل three.js من CDN كان يُسقط كل ما بعد هذا السطر بنفس السكربت
+ * (أحداث وأزرار وتحميل) بسبب كرة زخرفية. بدون المكتبة: تُخفى الكرة ويحل محلها كائن خامل يقبل أي استدعاء بلا أثر، فتعمل بقية الصفحة.
+ * Error log: «THREE is not defined» (Android/4g) — three.js failing to load from the CDN dropped everything after this line in the
+ * same script (events, buttons, loading) because of a decorative globe. Without the library: the globe is hidden and an inert object
+ * that accepts any call with no effect stands in, so the rest of the page works. */
+if(!window.THREE){
+  const inert = new Proxy(function(){}, {
+    get: (t, k) => k === Symbol.toPrimitive ? () => 0 : inert,
+    set: () => true, apply: () => inert, construct: () => inert
+  });
+  window.THREE = inert;
+  const globeCanvas = document.getElementById('globe-canvas');
+  if(globeCanvas) globeCanvas.style.display = 'none';
+}
 const canvas = document.getElementById('globe-canvas');
 const stageEl = document.getElementById('globeStage');
 const heroSection = document.getElementById('heroSection');

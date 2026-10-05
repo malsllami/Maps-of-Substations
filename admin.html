@@ -1166,7 +1166,8 @@ async function loadRegionActivity(){
 }
 
 /* ===== جلب بيانات لوحة العمليات الرئيسية ===== */
-async function loadDashboard(){
+// fresh: من زر التحديث فقط — يتجاوز كاش اللوحة بالخادم لهذا الطلب / fresh: from the refresh button only — bypasses the server dashboard cache for this request
+async function loadDashboard(fresh){
   if(fetching) return;
   fetching = true;
   lastFetch = Date.now(); // كان مفقودًا بالكامل — بدونه، فحص "مضى وقت كافٍ" يفشل دائمًا ويُعيد التحميل عند كل رجوع للتبويب مهما كان قريبًا
@@ -1180,7 +1181,7 @@ async function loadDashboard(){
     const controller = new AbortController();
     const timeoutId = setTimeout(()=> controller.abort(), 25000);
     try{
-      const res = await fetch(API_URL, {method:'POST', body: JSON.stringify({action:'getOperationsDashboard', identityToken: SecSession.getToken()}), signal: controller.signal});
+      const res = await fetch(API_URL, {method:'POST', body: JSON.stringify({action:'getOperationsDashboard', identityToken: SecSession.getToken(), fresh: fresh === true}), signal: controller.signal});
       const data = await res.json();
       if(!data.success){
         const err = new Error(data.error || 'خطأ غير معروف');
@@ -1242,8 +1243,9 @@ SecSession.ensureFresh(API_URL).then(ok=>{
 });
 document.getElementById('dataRefreshBtn').addEventListener('click', async ()=>{
   lastFetch = 0;
-  try{ await fetch(API_URL, {method:'POST', body: JSON.stringify({action:'clearSearchCache', phone: session.phone})}); }catch(e){}
-  if(await SecSession.ensureFresh(API_URL)) loadDashboard();
+  // لم يعد يمسح فهرس المحطات (كان يُبطئ كل المستخدمين ولا يحدّث اللوحة) — يطلب لوحة جديدة متجاوزة للكاش
+  // No longer drops the stations index (it slowed every user and didn't refresh the dashboard) — requests a cache-bypassing dashboard
+  if(await SecSession.ensureFresh(API_URL)) loadDashboard(true);
 });
 document.addEventListener('visibilitychange', ()=>{
   if(document.visibilityState==='visible' && (Date.now()-lastFetch)>STALE){ loadDashboard(); }
