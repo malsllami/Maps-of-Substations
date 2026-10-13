@@ -1,0 +1,101 @@
+<!doctype html>
+<!-- member.html — «حسابي» في V2: تجمع المكوّنات فقط (لا منطق أعمال هنا)
+     الرأس وشريط الاتصال (app-header + connection-status)، بطاقة العضو والمساهمات والنموذج (member-profile)، آخر نسخة وسجل
+     الجهاز (device-copies)، وبطاقة خريطة جدة التي تفتح نفس نافذة الإدارة (offline-map-ui) — كما في V1 وبترتيبه.
+     «My account» in V2: assembles components only (no business logic here), in V1's order. -->
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>حسابي | محطات التوزيع</title>
+<script src="config/الإعدادات.js"></script>
+<script src="services/theme.js"></script>
+<!-- تطبيق قابل للتثبيت: الملف والأيقونة ولون الشريط، وتسجيل عامل الخدمة بعد التحميل — installable app: manifest, icon, bar colour, SW registered after load -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D1826">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+<script src="services/pwa.js"></script>
+<link rel="stylesheet" href="styles/update-sheet.css">
+<script src="components/update-sheet.js"></script>
+<link rel="stylesheet" href="styles/install-sheet.css">
+<script src="components/install-sheet.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/base.css">
+<link rel="stylesheet" href="styles/app-header.css">
+<link rel="stylesheet" href="styles/connection-status.css">
+<link rel="stylesheet" href="styles/contact-admin.css">
+<link rel="stylesheet" href="styles/offline-map.css">
+<link rel="stylesheet" href="styles/tables.css">
+<link rel="stylesheet" href="styles/member.css">
+</head>
+<body class="member-page">
+<header id="appHeader"></header>
+<main class="wrap">
+  <div class="card" id="profileCard">
+    <div id="profileSlot"></div>
+    <!-- آخر نسخة بالذاكرة المؤقتة (بيانات المحطات على هذا الجهاز — مستقلة عن خريطة جدة) -->
+    <div class="meta-row meta-col"><span>آخر نسخة بالذاكرة المؤقتة</span><div class="cache-copy" id="lastCopySlot">—</div></div>
+  </div>
+  <!-- خريطة جدة بدون إنترنت: مدخل دائم يفتح نفس نافذة الإدارة التي في بطاقة المحطة -->
+  <div class="card om-account" id="offlineMapCard" hidden>
+    <div class="om-account-head"><div class="om-account-ic">🗺️</div><div><b>خريطة جدة بدون إنترنت</b><div class="om-account-st" data-om-status>—</div></div></div>
+    <div class="om-account-sub">تظهر تلقائيًا عند انقطاع الإنترنت · حدود محافظة جدة الرسمية</div>
+    <button type="button" class="om-account-btn" id="offlineMapManageBtn">إدارة الخريطة ←</button>
+  </div>
+  <div class="card" id="copiesLogCard" hidden></div>
+  <div id="contributionsSlot"></div>
+  <div class="card" id="formSlot"></div>
+</main>
+<script src="utils/dates.js"></script>
+<script src="utils/html.js"></script>
+<script src="utils/text-input.js"></script>
+<script src="services/timing.js"></script>
+<script src="services/connection.js"></script>
+<script src="services/session.js"></script>
+<script src="services/api-client.js"></script>
+<script src="services/settings-lists.js"></script>
+<script src="services/offline-map.js"></script>
+<script src="components/contact-admin.js"></script>
+<script src="components/connection-status.js"></script>
+<script src="components/app-header.js"></script>
+<script src="components/offline-map-ui.js"></script>
+<script src="components/device-copies.js"></script>
+<script src="components/member-profile.js"></script>
+<script>
+  (function () {
+    // الزائر يُحوَّل لصفحة الدخول (V1) — a guest goes to the login page (V1)
+    if (!SecSession.isLoggedIn()) { location.replace('auth.html'); return; }
+    SecTiming.recordPageOpen();
+    const header = SecAppHeader.mount(document.getElementById('appHeader'), {
+      page: 'member', title: 'حسابي', subtitle: 'الشركة السعودية للطاقة — محطات التوزيع', contact: true, refreshTitle: 'تحديث بيانات الحساب'
+    });
+    const copies = SecDeviceCopies.mount({ copy: document.getElementById('lastCopySlot'), log: document.getElementById('copiesLogCard') });
+    SecConnStatus.mount(header.status, {
+      hasLocalData: function () { try { return !!JSON.parse(localStorage.getItem(SEC2_CONFIG.STORAGE_KEYS.STATIONS_META) || 'null'); } catch (e) { return false; } },
+      lastUpdateAt: function () { return null; }
+    });
+    SecContactAdmin.loadInfo();
+    const profile = SecMemberProfile.mount({
+      profile: document.getElementById('profileSlot'), contributions: document.getElementById('contributionsSlot'), form: document.getElementById('formSlot')
+    }, { onNameChange: function () { header.render(); } });
+
+    // خريطة جدة: نفس المحرك ونفس النافذة (V1) — the Jeddah map: the same engine and sheet (V1)
+    const omCard = document.getElementById('offlineMapCard');
+    if (window.SecOfflineMap && window.SecOfflineMapUI && window.indexedDB) {
+      omCard.hidden = false;
+      SecOfflineMapUI.init({ isUsingOffline: function () { return false; }, onReadyChange: function () {}, hint: function () {} });
+      document.getElementById('offlineMapManageBtn').addEventListener('click', function () { SecOfflineMapUI.open(); });
+    }
+
+    // زر التحديث في شريط الحالة يعيد تحميل بيانات الحساب — the status bar refresh reloads the account data
+    async function reload() {
+      header.refreshButton.classList.add('spinning');
+      try { await profile.load(); copies.render(); } finally { header.refreshButton.classList.remove('spinning'); }
+    }
+    header.refreshButton.addEventListener('click', reload);
+    // تجديد التذكرة قبل أول طلب — renew the ticket before the first request
+    SecSession.ensureFresh().then(function (ok) { if (ok) reload(); });
+  })();
+</script>
+</body>
+</html>

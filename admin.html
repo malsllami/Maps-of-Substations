@@ -1,0 +1,89 @@
+<!doctype html>
+<!-- admin.html — لوحة المدير في V2: تجمع المكوّنات فقط (لا منطق أعمال هنا)
+     الرأس وشريط الاتصال (app-header + connection-status)، لوحة العمليات (admin-dashboard)، ونافذة التفاصيل (admin-detail).
+     الدخول: بلا جلسة ← صفحة الدخول؛ جلسة بلا دور مدير ← الرئيسية (V1). الحماية الفعلية في الخادم: كل إجراء بتذكرة مدير بالبصمة.
+     The V2 admin dashboard: assembles components only. The real protection is the server's admin-fingerprint ticket. -->
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>لوحة المدير | محطات التوزيع</title>
+<script src="config/الإعدادات.js"></script>
+<script src="services/theme.js"></script>
+<!-- تطبيق قابل للتثبيت: الملف والأيقونة ولون الشريط، وتسجيل عامل الخدمة بعد التحميل — installable app: manifest, icon, bar colour, SW registered after load -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D1826">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+<script src="services/pwa.js"></script>
+<link rel="stylesheet" href="styles/update-sheet.css">
+<script src="components/update-sheet.js"></script>
+<link rel="stylesheet" href="styles/install-sheet.css">
+<script src="components/install-sheet.js"></script>
+<script>
+  // قبل الرسم: الزائر للدخول، وغير المدير للرئيسية (V1) — before drawing: a guest to login, a non-admin to home (V1)
+  (function () {
+    try {
+      const s = JSON.parse(localStorage.getItem(SEC2_CONFIG.STORAGE_KEYS.SESSION) || 'null');
+      if (!s || !s.identityToken) location.replace('auth.html');
+      else if (s.role !== 'admin') location.replace('index.html');
+    } catch (e) { location.replace('auth.html'); }
+  })();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/base.css">
+<link rel="stylesheet" href="styles/app-header.css">
+<link rel="stylesheet" href="styles/connection-status.css">
+<link rel="stylesheet" href="styles/contact-admin.css">
+<link rel="stylesheet" href="styles/tables.css">
+<link rel="stylesheet" href="styles/admin.css">
+</head>
+<body class="admin-page">
+<header id="appHeader"></header>
+<main class="content">
+  <div class="page-title">لوحة العمليات</div>
+  <div class="page-sub" id="greetLine">مرحبًا...</div>
+  <div id="dashboardSlot"></div>
+</main>
+<script src="utils/dates.js"></script>
+<script src="utils/html.js"></script>
+<script src="utils/text-input.js"></script>
+<script src="services/timing.js"></script>
+<script src="services/connection.js"></script>
+<script src="services/session.js"></script>
+<script src="services/api-client.js"></script>
+<script src="services/settings-lists.js"></script>
+<script src="components/contact-admin.js"></script>
+<script src="components/connection-status.js"></script>
+<script src="components/app-header.js"></script>
+<script src="components/admin-dashboard.js"></script>
+<script src="components/admin-detail.js"></script>
+<script>
+  (function () {
+    if (!SecSession.isAdmin()) return; // التحويل جارٍ / redirect in progress
+    SecTiming.recordPageOpen();
+    const STALE_MS = 3 * 60 * 1000; // إعادة التحميل عند الرجوع للتبويب بعد 3 دقائق (V1) / reload on return after 3 minutes (V1)
+    const header = SecAppHeader.mount(document.getElementById('appHeader'), {
+      page: 'admin', title: 'لوحة المدير', subtitle: 'الشركة السعودية للطاقة — محطات التوزيع', contact: true, refreshTitle: 'تحديث لوحة العمليات الآن'
+    });
+    let lastLoadAt = 0, lastOkAt = null;
+    const status = SecConnStatus.mount(header.status, { hasLocalData: function () { return false; }, lastUpdateAt: function () { return lastOkAt; } });
+    SecContactAdmin.loadInfo();
+    document.getElementById('greetLine').textContent = 'مرحبًا ' + (SecSession.getName() || 'المدير') + ' — ' + SecDates.dualDate(new Date());
+    const dashboard = SecAdminDashboard.mount(document.getElementById('dashboardSlot'), { onOpenDetail: function (kind) { SecAdminDetail.open(kind); } });
+
+    async function load(fresh) {
+      lastLoadAt = Date.now();
+      header.refreshButton.classList.add('spinning');
+      try {
+        // تجديد التذكرة أولًا حتى لا تُرسل تذكرة منتهية (V1) — renew the ticket first (V1)
+        if (!(await SecSession.ensureFresh())) return;
+        if ((await dashboard.load(fresh)) === 'ok') { lastOkAt = new Date(); status.refreshLastUpdate(); }
+      } finally { header.refreshButton.classList.remove('spinning'); }
+    }
+    header.refreshButton.addEventListener('click', function () { load(true); });
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible' && Date.now() - lastLoadAt > STALE_MS) load(false); });
+    load(false);
+  })();
+</script>
+</body>
+</html>

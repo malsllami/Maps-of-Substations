@@ -1,0 +1,115 @@
+/* ============================================================
+ * styles/admin.css — لوحة المدير (من V1 كما هي: admin.html الأسطر 75–207) — الرأس والجداول من ملفاتهما المشتركة
+ * The admin dashboard (from V1 as is) — the header and tables come from their shared files
+ * ============================================================ */
+[data-theme="dark"] body.admin-page{--bg:#0A1420;}
+body.admin-page{min-height:100vh;padding-bottom:48px;background:var(--bg);}
+body.admin-page header{position:sticky;top:0;z-index:20;}
+.content{max-width:1000px;margin:0 auto;padding:28px 20px;}
+.page-title{font-size:20px;font-weight:700;margin-bottom:4px;}
+.page-sub{font-size:13px;color:var(--text-secondary);margin-bottom:24px;}
+.loading-overlay{display:flex;align-items:center;justify-content:center;min-height:120px;color:var(--text-secondary);font-size:13px;gap:8px;text-align:center;}
+.spinner{width:18px;height:18px;border:2px solid var(--border-strong);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err-msg{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;color:#E0654F;font-size:13px;padding:36px 20px;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;}
+.err-hint{color:var(--text-secondary);font-size:12.5px;}
+.err-btn{flex:0 0 auto;min-width:160px;text-decoration:none;}
+
+/* غرفة العمليات — the operations room */
+.alert-strip{display:flex;gap:7px;overflow-x:auto;padding-bottom:2px;margin-bottom:16px;}
+.alert-chip{flex-shrink:0;display:flex;align-items:center;gap:6px;background:rgba(224,101,79,.12);border:1px solid rgba(224,101,79,.35);color:#E0654F;font-size:11.5px;font-weight:600;padding:7px 13px;border-radius:20px;white-space:nowrap;}
+.ops-status-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:14px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+.ops-status-ring{flex-shrink:0;}
+.ops-ring-empty{display:flex;align-items:center;justify-content:center;border-radius:50%;border:7px solid var(--border-strong);color:var(--text-secondary);font-weight:800;}
+.ops-status-info{flex:1;min-width:180px;}
+.ops-status-title{font-size:13.5px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:7px;}
+.ops-status-sub{font-size:11.5px;color:var(--text-secondary);margin-top:3px;}
+.ops-status-count-line{font-size:13px;color:var(--text-secondary);display:flex;align-items:baseline;gap:5px;flex-wrap:wrap;}
+.ops-status-count{font-size:21px;font-weight:800;color:var(--teal);font-family:'JetBrains Mono',monospace;}
+.ops-status-note{font-size:11px;color:var(--text-secondary);margin-top:4px;line-height:1.6;}
+.perf-link-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.perf-link-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:12px;background:var(--bg-card);border:1px solid var(--border);color:var(--text-primary);font-size:13px;font-weight:700;text-decoration:none;transition:border-color .2s;}
+.perf-link-btn:hover{border-color:var(--teal);}
+.perf-link-note{font-size:11.5px;color:var(--text-secondary);}
+.ops-breakdown-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:18px;margin:12px 0 14px;}
+.ops-breakdown-title{font-size:13px;font-weight:700;margin-bottom:12px;color:var(--text-secondary);}
+.ops-breakdown-row{display:flex;align-items:center;justify-content:space-between;padding:10px 4px;border-top:1px solid var(--border);font-size:13px;}
+.ops-breakdown-title + .ops-breakdown-row{border-top:none;}
+.ops-breakdown-row b{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--teal);}
+.ops-row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.ops-pill{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:14px 10px;text-align:center;}
+.ops-pill b{display:block;font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:800;margin-bottom:3px;}
+.ops-pill span{font-size:11px;color:var(--text-secondary);}
+.ops-pill .ops-pill-split{display:block;font-size:11.5px;font-weight:700;margin-top:4px;}
+
+/* الأقسام المطوية — the accordion */
+.acc-item{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden;}
+.acc-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;cursor:pointer;user-select:none;}
+.acc-head:focus-visible{outline:2px solid var(--teal);outline-offset:-2px;border-radius:12px;}
+.acc-head-title{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;}
+.acc-head-side{display:flex;align-items:center;gap:8px;}
+.acc-head-badge{font-size:11px;color:var(--text-secondary);}
+.acc-chev{transition:transform .25s;color:var(--text-secondary);flex-shrink:0;}
+.acc-item.open .acc-chev{transform:rotate(180deg);}
+.acc-body{display:none;}
+.acc-item.open .acc-body{display:block;}
+.acc-body-inner{padding:0 16px 16px;font-size:12.5px;color:var(--text-secondary);}
+.coming-soon{text-align:center;padding:24px 10px;color:var(--text-secondary);font-size:12px;}
+.link-btn{background:none;border:none;color:var(--teal-light);font:inherit;font-weight:700;cursor:pointer;text-decoration:underline;}
+.chart-box{position:relative;height:200px;}
+.quality-row{display:flex;align-items:center;gap:14px;margin-bottom:8px;color:var(--text-primary);}
+.log-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);}
+.log-row b{color:var(--text-primary);font-family:'JetBrains Mono',monospace;}
+.heatmap-grid{display:grid;grid-template-columns:34px repeat(24,1fr);gap:2px;font-size:8.5px;color:var(--text-secondary);}
+.heatmap-hour{text-align:center;}
+.heatmap-cell{aspect-ratio:1;border-radius:3px;}
+.heatmap-label{display:flex;align-items:center;justify-content:flex-end;padding-left:4px;font-size:9px;}
+.heatmap-peak-note{margin-top:10px;font-size:11.5px;color:var(--text-primary);text-align:center;}
+.region-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.region-bar-label{width:90px;flex-shrink:0;font-size:11.5px;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-primary);}
+.region-bar-track{flex:1;height:16px;background:var(--bg-elev);border-radius:6px;overflow:hidden;}
+.region-bar-fill{height:100%;background:linear-gradient(90deg,var(--blue-mid),var(--teal));border-radius:6px;}
+.region-bar-count{width:26px;flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:11px;text-align:center;color:var(--text-primary);}
+
+/* تقرير الأمس (V2) — yesterday's report (V2) */
+.rep-date{font-size:12.5px;font-weight:700;color:var(--text-primary);margin-bottom:10px;text-align:center;}
+.rep-rows{display:grid;gap:0;}
+.rep-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 2px;border-top:1px solid var(--border);color:var(--text-primary);font-size:12.5px;}
+.rep-row:first-child{border-top:none;}
+.rep-badge{display:inline-block;padding:4px 12px;border-radius:20px;border:1px solid;font-weight:700;font-size:12.5px;white-space:nowrap;font-family:'JetBrains Mono',monospace;background:var(--bg-elev);}
+.rep-cats{align-items:flex-start;}
+.rep-cat{font-size:12px;color:var(--text-secondary);margin:2px 0;text-align:left;}
+.rep-cat.real{color:#E0654F;}
+.rep-none{color:#2ECC71;font-size:12px;}
+
+/* نافذة التفاصيل — the detail window */
+.detail-modal-overlay{display:none;position:fixed;inset:0;z-index:100;background:rgba(2,5,8,.6);backdrop-filter:blur(2px);align-items:flex-end;justify-content:center;}
+.detail-modal-overlay.show{display:flex;}
+.detail-modal{width:100%;max-width:720px;max-height:92vh;background:var(--bg);border-radius:20px 20px 0 0;display:flex;flex-direction:column;overflow:hidden;animation:modalSlideUp .25s ease-out;}
+@keyframes modalSlideUp{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
+.detail-modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.detail-modal-title{font-size:15px;font-weight:700;}
+.detail-modal-close{width:32px;height:32px;border-radius:50%;background:var(--bg-card);border:1px solid var(--border-strong);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-primary);}
+.detail-modal-filters{padding:14px 18px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;gap:10px;}
+.detail-filter-row{display:flex;gap:8px;flex-wrap:wrap;}
+.detail-filter-row input{flex:1;min-width:120px;background:var(--bg-card);border:1px solid var(--border-strong);border-radius:10px;padding:9px 12px;font-size:12.5px;color:var(--text-primary);font-family:inherit;outline:none;}
+.detail-filter-row input:focus{border-color:var(--teal);}
+.detail-date{flex:1;min-width:130px;display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-secondary);}
+.detail-hijri-note{font-size:10.5px;color:var(--text-secondary);}
+.detail-filter-actions{display:flex;gap:8px;}
+.detail-btn{flex:1;padding:9px 12px;border-radius:10px;font-size:12.5px;font-weight:600;border:1px solid var(--border-strong);background:var(--bg-card);color:var(--text-primary);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;}
+.detail-btn.primary{background:rgba(31,174,140,.15);border-color:rgba(31,174,140,.4);color:var(--teal-light);}
+.detail-btn.primary:hover{background:rgba(31,174,140,.25);}
+.detail-msg{font-size:12px;color:#E0654F;min-height:0;}
+.detail-msg:empty{display:none;}
+.detail-modal-body{flex:1;overflow-y:auto;padding:14px 18px 24px;}
+.detail-table.sec-table-wrap{max-height:none;}
+.detail-count-badge{font-size:11.5px;color:var(--text-secondary);margin-bottom:10px;}
+.detail-preview-link{display:flex;width:100%;align-items:center;justify-content:center;gap:6px;margin-top:8px;padding:9px;border-radius:10px;background:var(--bg-elev);color:var(--teal-light);font-size:12px;font-weight:600;cursor:pointer;border:1px dashed var(--border-strong);font-family:inherit;}
+@media (max-width:600px){
+  .content{padding:16px 12px;}
+  .ops-row3{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+  .ops-pill{padding:12px 4px;}
+  .ops-pill b{font-size:17px;}
+  .rep-row{flex-wrap:wrap;}
+}

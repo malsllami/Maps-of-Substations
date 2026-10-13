@@ -1,0 +1,48 @@
+/* ============================================================
+ * styles/contact-admin.css — نافذة مراسلة المدير
+ * ============================================================
+ * من V1 كما هو (member.html الأسطر 108–112 و142–143 و152–183، والأنماط المضمّنة في النافذة كأصناف).
+ * ألوان الخطأ بقيمة احتياطية لأن صفحة الرئيسية في V1 لم تعرّف --danger.
+ * From V1 as is (inline styles as classes). Error colors have a fallback since V1's home page didn't define --danger.
+ * ============================================================ */
+.contact-modal-overlay{
+  display:none;position:fixed;inset:0;z-index:300;
+  background:rgba(6,10,16,0.75);align-items:center;justify-content:center;padding:20px;overflow-y:auto;
+}
+.contact-modal-overlay.show{display:flex;}
+.contact-modal-card{
+  width:min(440px, 100%);background:var(--bg-card);border:1px solid var(--border-strong);color:var(--text-primary);
+  border-radius:20px;padding:26px;box-shadow:0 20px 50px rgba(0,0,0,.4);max-height:90vh;overflow-y:auto;
+}
+.contact-modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.contact-modal-header h2{font-size:17px;font-weight:800;margin:0;}
+.contact-modal-close{
+  width:34px;height:34px;border-radius:50%;background:var(--bg);border:1px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-primary);transition:.2s;flex-shrink:0;
+}
+.contact-modal-close:hover{border-color:var(--teal);color:var(--teal);}
+.contact-modal-card .field{margin-bottom:14px;}
+.contact-modal-card .field label{display:block;font-size:12px;color:var(--text-secondary);margin-bottom:6px;}
+.contact-modal-card .input-base{width:100%;height:44px;background:var(--bg);border:1px solid var(--border-strong);border-radius:10px;color:var(--text-primary);font-family:inherit;font-size:14px;padding:0 14px;outline:none;}
+.contact-modal-card .input-base:focus{border-color:var(--teal);}
+.contact-modal-card .contact-textarea{height:90px;padding:12px 14px;resize:vertical;}
+.contact-types{display:flex;gap:8px;}
+.contact-type-btn{
+  flex:1;height:42px;border-radius:10px;border:1px solid var(--border-strong);background:var(--bg);
+  color:var(--text-primary);font-family:inherit;font-size:13px;cursor:pointer;transition:.2s;
+}
+.contact-type-btn.active{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:700;}
+.contact-modal-card .error-banner{background:var(--danger-bg, rgba(224,101,79,0.1));color:var(--danger, #E0654F);font-size:12.5px;padding:10px 12px;border-radius:8px;margin-bottom:14px;display:none;}
+.contact-modal-card .error-banner.show{display:block;}
+.contact-send-row{display:flex;gap:10px;margin-top:6px;}
+.contact-send-btn{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:8px;
+  height:48px;border-radius:12px;border:none;font-family:inherit;font-size:14px;font-weight:700;
+  cursor:pointer;transition:.2s;
+}
+.contact-send-whatsapp{background:#25D366;color:#04341c;}
+.contact-send-whatsapp:hover{background:#1ebc59;}
+.contact-send-email{background:#fff;color:#3c4043;border:1px solid #dadce0;}
+.contact-send-email:hover{background:#f8f9fa;}
+/* الجوال: حقول 16px حتى لا يكبّر آيفون الصفحة (V1) — phones: 16px fields so iPhone doesn't zoom (V1) */
+@media (max-width:767px){ .contact-modal-card .input-base{font-size:16px;} }

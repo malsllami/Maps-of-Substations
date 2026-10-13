@@ -1,0 +1,76 @@
+<!doctype html>
+<!-- shifts.html — تقويم دوام الورديات في V2: تجمع المكوّنات فقط (لا منطق أعمال هنا)
+     الرأس وشريط الاتصال (app-header + connection-status)، والتقويم (shifts-calendar فوق shift-rotation). تعمل للزائر أيضًا؛
+     للعضو تُختار ورديته تلقائيًا من الخادم (getMemberProfileLite) بلا أي مساس بالجلسة إن فشل الطلب — كما في V1.
+     The shifts calendar in V2: assembles components only. Works for guests; a member's own shift is chosen automatically. -->
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>تقويم دوام الورديات | محطات التوزيع</title>
+<script src="config/الإعدادات.js"></script>
+<script src="services/theme.js"></script>
+<!-- تطبيق قابل للتثبيت: الملف والأيقونة ولون الشريط، وتسجيل عامل الخدمة بعد التحميل — installable app: manifest, icon, bar colour, SW registered after load -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D1826">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+<script src="services/pwa.js"></script>
+<link rel="stylesheet" href="styles/update-sheet.css">
+<script src="components/update-sheet.js"></script>
+<link rel="stylesheet" href="styles/install-sheet.css">
+<script src="components/install-sheet.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/base.css">
+<link rel="stylesheet" href="styles/app-header.css">
+<link rel="stylesheet" href="styles/connection-status.css">
+<link rel="stylesheet" href="styles/contact-admin.css">
+<link rel="stylesheet" href="styles/shifts.css">
+</head>
+<body class="shifts-page">
+<header id="appHeader"></header>
+<main class="content" id="shiftsSlot"></main>
+<script src="utils/dates.js"></script>
+<script src="utils/html.js"></script>
+<script src="utils/text-input.js"></script>
+<script src="services/timing.js"></script>
+<script src="services/connection.js"></script>
+<script src="services/session.js"></script>
+<script src="services/api-client.js"></script>
+<script src="services/settings-lists.js"></script>
+<script src="services/shift-rotation.js"></script>
+<script src="components/contact-admin.js"></script>
+<script src="components/connection-status.js"></script>
+<script src="components/app-header.js"></script>
+<script src="components/shifts-calendar.js"></script>
+<script>
+  (function () {
+    SecTiming.recordPageOpen();
+    const header = SecAppHeader.mount(document.getElementById('appHeader'), {
+      page: 'shifts', title: 'تقويم دوام الورديات', subtitle: 'الشركة السعودية للطاقة — محطات التوزيع', contact: true, refreshTitle: 'تحديث الوردية'
+    });
+    SecConnStatus.mount(header.status, { hasLocalData: function () { return false; }, lastUpdateAt: function () { return null; } });
+    SecContactAdmin.loadInfo();
+    const calendar = SecShiftsCalendar.mount(document.getElementById('shiftsSlot'));
+
+    /* وردية العضو من الخادم مباشرة (لا تُخزَّن) — فشلها لا يمس الجلسة ولا يمنع الصفحة (V1)
+     * The member's shift straight from the server (not stored) — a failure never touches the session or blocks the page (V1) */
+    async function pickOwnShift() {
+      if (!SecSession.isLoggedIn()) return;
+      try {
+        const ok = await SecSession.ensureFresh({ redirectOnExpired: false });
+        if (!ok) return;
+        const res = await SecApi.call('getMemberProfileLite', {}, { token: true });
+        if (res && res.success && SecShiftRotation.isGroup(res.shift)) calendar.select(res.shift);
+      } catch (e) { /* الصفحة تعمل بوضعها الافتراضي / the page keeps its default */ }
+    }
+    if (header.refreshButton) header.refreshButton.addEventListener('click', async function () {
+      header.refreshButton.classList.add('spinning');
+      try { await pickOwnShift(); } finally { header.refreshButton.classList.remove('spinning'); }
+    });
+    pickOwnShift();
+    // بعد منتصف الليل يتغير «اليوم» — «today» changes after midnight
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') calendar.render(); });
+  })();
+</script>
+</body>
+</html>

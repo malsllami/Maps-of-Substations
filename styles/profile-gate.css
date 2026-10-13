@@ -1,0 +1,22 @@
+/* ============================================================
+ * styles/profile-gate.css — نافذة بوابة اكتمال الملف (من V1 كما هي: index.html الأسطر 690–710)
+ * The profile completeness gate (from V1 as is). Needs add-edit-station.css for .add-station-submit.
+ * ============================================================ */
+.profile-gate-overlay{
+  display:none;position:fixed;top:var(--header-h, 130px);left:0;right:0;bottom:0;z-index:150;
+  background:rgba(6,10,16,0.72);backdrop-filter:blur(3px);
+  align-items:center;justify-content:center;padding:20px;overflow-y:auto;
+}
+.profile-gate-overlay.show{display:flex;}
+.profile-gate-card{
+  width:min(440px, 100%);background:var(--bg-card);border:1px solid var(--border-strong);
+  border-radius:20px;padding:32px 28px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.4);
+}
+.profile-gate-icon{
+  width:56px;height:56px;border-radius:50%;background:rgba(31,174,140,0.14);color:var(--teal);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 18px;
+}
+.profile-gate-card h2{font-size:18px;font-weight:800;margin:0 0 8px;color:var(--text-primary);}
+.profile-gate-card p{font-size:13px;color:var(--text-secondary);line-height:1.7;margin:0 0 22px;}
+.profile-gate-btn{width:100%;background:rgba(31,174,140,0.16)!important;border-color:rgba(77,214,181,0.4)!important;color:var(--teal-light)!important;box-shadow:none!important;}
+.profile-gate-btn:hover{background:rgba(31,174,140,0.26)!important;}

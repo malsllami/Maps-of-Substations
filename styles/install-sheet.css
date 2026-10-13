@@ -1,0 +1,36 @@
+/* ============================================================
+ * styles/install-sheet.css — لوحة «حفظ الموقع كتطبيق» السفلية: الدمج «ج + د» المعتمد بلون الموقع الأخضر
+ * The bottom «save the site as an app» sheet: the approved «C + D» blend in the site's green
+ * ============================================================ */
+.ins-sheet{
+  position:fixed;left:0;right:0;bottom:0;z-index:1600;
+  max-width:560px;margin:0 auto;box-sizing:border-box;
+  padding:12px 20px calc(18px + env(safe-area-inset-bottom, 0px));
+  background:var(--bg-elev);color:var(--text-primary);text-align:center;
+  border-radius:22px 22px 0 0;border:1px solid var(--border-strong);border-bottom:0;border-top:3px solid var(--teal);
+  box-shadow:0 -10px 30px rgba(0,0,0,.35), 0 -2px 18px rgba(31,174,140,.16);
+  transform:translateY(105%);transition:transform .32s cubic-bezier(.2,.8,.2,1);
+}
+.ins-sheet.show{transform:translateY(0);}
+.ins-grab{width:40px;height:4px;border-radius:9px;background:var(--border-strong);margin:0 auto 12px;}
+.ins-x{position:absolute;top:10px;left:12px;width:32px;height:32px;border-radius:50%;border:1px solid var(--border-strong);background:transparent;color:var(--text-secondary);font-size:14px;cursor:pointer;font-family:inherit;}
+.ins-ic{width:58px;height:58px;margin:0 auto 10px;border-radius:16px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.3);}
+.ins-ic img{width:100%;height:100%;display:block;}
+.ins-title{display:block;font-size:16px;font-weight:800;color:var(--teal-light);}
+[data-theme="light"] .ins-title{color:var(--teal);}
+.ins-text{margin:6px auto 14px;max-width:360px;font-size:13px;line-height:1.7;color:var(--text-secondary);}
+.ins-steps{display:grid;gap:8px;margin:12px 0;}
+.ins-step{display:flex;align-items:center;gap:10px;text-align:right;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--border);font-size:13px;line-height:1.7;}
+[data-theme="light"] .ins-step{background:rgba(16,32,53,.03);}
+.ins-n{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;background:rgba(31,174,140,.18);color:var(--teal-light);font-weight:800;font-size:12px;}
+.ins-k{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:8px;vertical-align:middle;background:rgba(77,214,181,.14);color:var(--teal-light);font-weight:700;}
+[data-theme="light"] .ins-k, [data-theme="light"] .ins-n{color:var(--teal);}
+.ins-arrow{display:flex;flex-direction:column;align-items:center;gap:2px;margin:2px 0 10px;color:var(--teal-light);font-size:12px;font-weight:800;animation:insBounce 1.2s ease-in-out infinite;}
+.ins-note{margin:0 0 12px;font-size:12px;color:var(--text-secondary);}
+.ins-go{width:100%;border:0;border-radius:14px;padding:13px;cursor:pointer;font-family:inherit;font-size:15px;font-weight:800;
+  background:linear-gradient(135deg, var(--teal), var(--teal-light));color:#052018;box-shadow:0 6px 18px rgba(31,174,140,.3);}
+.ins-go:disabled{opacity:.7;cursor:default;}
+.ins-done{margin:4px 0 2px;padding:12px;border-radius:14px;background:rgba(31,174,140,.14);color:var(--teal-light);font-weight:800;font-size:14px;}
+.ins-later{margin-top:8px;background:none;border:0;color:var(--text-secondary);font-family:inherit;font-size:13px;cursor:pointer;padding:6px 14px;}
+@keyframes insBounce{0%,100%{transform:translateY(0);}50%{transform:translateY(5px);}}
+@media (prefers-reduced-motion:reduce){ .ins-sheet{transition:none;} .ins-arrow{animation:none;} }

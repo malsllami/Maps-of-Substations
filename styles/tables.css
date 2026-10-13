@@ -1,0 +1,16 @@
+/* ============================================================
+ * styles/tables.css — الجدول الموحّد لكل صفحات V2 (قاعدة محمد الثابتة): الصف الأول ثابت (Sticky) وملوّن، المحتوى
+ *   محاذى للمنتصف بخط 12 عريض، داخل إطار مستدير يمرّر أفقيًا وعموديًا عند الحاجة.
+ * The single V2 table style (Mohammed's fixed rule): a sticky coloured first row, centred 12px bold content, inside a
+ *   rounded frame that scrolls when needed.
+ * ============================================================ */
+.sec-table-wrap{max-height:320px;overflow:auto;border:1px solid var(--border);border-radius:12px;}
+.sec-table{width:100%;border-collapse:collapse;font-size:12px;font-weight:700;text-align:center;}
+.sec-table th{position:sticky;top:0;z-index:1;background:var(--teal);color:#fff;padding:8px 6px;white-space:nowrap;}
+.sec-table td{padding:8px 6px;border-top:1px solid var(--border);color:var(--text-primary);text-align:center;vertical-align:middle;}
+.sec-table .mono{font-family:'JetBrains Mono',monospace;}
+.sec-table .sub{display:block;color:var(--text-secondary);font-size:10.5px;}
+.sec-table .mp-empty{padding:14px;color:var(--text-secondary);}
+/* ألوان رأس الجدول حسب نوعه (V1: الإضافات أزرق، التعديلات ذهبي) — header colours by kind (V1) */
+.mp-adds .sec-table th{background:var(--blue-mid);}
+.mp-edits .sec-table th{background:#B98A2E;}

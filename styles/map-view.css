@@ -1,0 +1,135 @@
+/* ============================================================
+ * styles/map-view.css — الخريطة: المسرح، شريط الأدوات، شريح النوع وقائمته، التكبير، التلميح والتنبيه، علامات المحطات
+ * ============================================================
+ * من V1 كما هو (index.html الأسطر 228–258 و505–552 و636–668 و811–858 و1127). موضع المسرح فوق الصفحة تحدده الصفحة.
+ * الطبقة الليلية في styles/map.css (معتمدة).
+ * From V1 as is. The page decides where the stage sits. The night layer is in styles/map.css (approved).
+ * ============================================================ */
+.globe-stage.map-active{
+  width:min(1600px, 96vw);margin:0 auto;
+  min-height:280px;
+  display:flex;flex-direction:column;position:relative;
+}
+.globe-stage.map-active #map-container{
+  position:relative;inset:auto;width:100%;
+  height:min(64vh, 680px);flex-shrink:0;
+  border-radius:0 0 16px 16px;overflow:hidden;z-index:2;
+}
+.map-toolbar-bar{
+  display:flex;flex-shrink:0;width:100%;
+  position:relative;z-index:3;
+  background:rgba(13,24,38,0.82);backdrop-filter:blur(10px);
+  border:1px solid var(--border-strong);
+  border-radius:16px 16px 0 0;
+  box-shadow:0 4px 14px rgba(0,0,0,.18);
+  overflow:hidden;
+}
+[data-theme="light"] .map-toolbar-bar{background:rgba(244,248,251,0.85);}
+.toolbar-scroll{
+  display:flex;align-items:center;gap:4px;
+  padding:6px 10px;overflow-x:auto;scrollbar-width:none;white-space:nowrap;height:45px;box-sizing:border-box;
+}
+.toolbar-scroll::-webkit-scrollbar{display:none;}
+.map-tools-slot{display:contents;}
+.tb-div{width:1px;height:20px;background:var(--border-strong);flex-shrink:0;margin:0 2px;}
+.toolbar-btn{
+  pointer-events:auto;flex-shrink:0;display:flex;align-items:center;gap:5px;
+  background:transparent;border:none;border-radius:12px;
+  padding:7px 11px;cursor:pointer;font-family:inherit;
+  color:var(--text-secondary);font-size:12px;font-weight:600;transition:.2s;
+}
+.toolbar-btn:hover{background:rgba(255,255,255,0.06);}
+.toolbar-btn.active{background:var(--teal);color:#04241c;}
+.toolbar-btn .tb-icon{font-size:13px;line-height:1;}
+.map-mode-chip{
+  pointer-events:auto;flex-shrink:0;display:flex;
+  align-items:center;gap:6px;
+  background:transparent;border:none;border-radius:12px;
+  padding:7px 11px;cursor:pointer;font-size:12px;font-weight:600;color:var(--text-primary);
+  transition:.2s;
+}
+.map-mode-chip:hover{background:rgba(255,255,255,0.06);border-color:var(--border-strong);}
+.map-mode-chip .mm-icon{display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.map-mode-chip .mm-auto-badge{font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:8px;background:rgba(31,174,140,0.16);color:var(--teal);}
+.map-mode-chip .mm-auto-badge[hidden]{display:none;}
+.map-mode-chip .mm-chev{color:var(--text-secondary);transition:transform .2s;flex-shrink:0;}
+.map-mode-chip.open .mm-chev{transform:rotate(180deg);}
+.map-mode-panel{
+  display:none;flex-direction:column;gap:2px;flex-shrink:0;
+  background:var(--bg-card);border-bottom:1px solid var(--border-strong);
+  padding:6px 14px;
+}
+.map-mode-panel.show{display:flex;}
+.map-mode-opt{
+  display:flex;align-items:center;gap:9px;text-align:right;background:transparent;border:none;
+  padding:9px 10px;border-radius:8px;font-size:12.5px;color:var(--text-primary);cursor:pointer;font-family:inherit;
+}
+.map-mode-opt:hover{background:var(--bg-elev);}
+.map-mode-opt.active{background:var(--bg-elev);font-weight:700;}
+.map-mode-opt .mm-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.map-mode-opt .mm-opt-icon{display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text-secondary);}
+.map-mode-opt .mm-check{margin-right:auto;color:var(--teal);display:none;flex-shrink:0;}
+.map-mode-opt.active .mm-check{display:flex;}
+.map-panels{display:contents;}
+.zoom-controls{
+  position:absolute;bottom:14px;left:14px;z-index:6;
+  display:none;flex-direction:column;
+  border-radius:10px;overflow:hidden;
+  border:1px solid var(--border);box-shadow:0 4px 14px rgba(0,0,0,.25);
+}
+.zoom-controls.show{display:flex;}
+.zoom-btn{
+  width:36px;height:36px;background:var(--bg-card);color:var(--text-primary);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  transition:background .15s;
+}
+.zoom-btn:first-child{border-bottom:1px solid var(--border);}
+.zoom-btn:hover{background:var(--bg-elev);}
+.zoom-btn:active{background:var(--teal);color:#fff;}
+.map-toast{
+  position:absolute;bottom:16px;left:50%;transform:translateX(-50%) translateY(10px);
+  background:rgba(31,174,140,0.95);color:#04241c;
+  border-radius:20px;padding:9px 18px;font-size:12px;font-weight:700;
+  box-shadow:0 6px 18px rgba(31,174,140,.4);white-space:nowrap;
+  z-index:8;opacity:0;pointer-events:none;transition:opacity .25s ease, transform .25s ease;
+}
+.map-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.map-tool-hint{
+  width:100%;position:relative;z-index:6;
+  background:var(--bg-card);border-bottom:1px solid var(--border-strong);
+  padding:10px 16px;font-size:12px;color:var(--text-secondary);
+  display:none;text-align:center;line-height:1.6;flex-shrink:0;
+}
+.map-tool-hint a{pointer-events:auto;}
+.map-tool-hint.show{display:block;}
+
+/* علامة المحطة المختارة (V1) — the selected station marker (V1) */
+.selected-station-marker{position:relative;width:46px;height:46px;}
+.ssm-halo{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle, rgba(46,125,209,.5) 0%, rgba(46,125,209,.18) 55%, transparent 75%);}
+.ssm-pulse{position:absolute;top:50%;left:50%;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;background:rgba(46,204,113,.55);animation:ssmPulse 1.8s ease-out infinite;}
+@keyframes ssmPulse{0%{transform:scale(0.6);opacity:.9;}100%{transform:scale(2.8);opacity:0;}}
+.ssm-dot{position:absolute;top:50%;left:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:#2ECC71;border:2px solid #fff;box-shadow:0 0 10px rgba(46,204,113,.9);}
+.ssm-label{
+  position:absolute;bottom:100%;left:50%;transform:translateX(-50%);
+  margin-bottom:5px;white-space:nowrap;
+  background:rgba(8,16,26,0.92);color:#fff;
+  border:1.3px solid #2ECC71;border-radius:11px;
+  padding:2px 9px;font-size:10.5px;font-weight:700;
+  font-family:'JetBrains Mono',monospace;
+}
+/* علامات القريبة والمغذي (V1) — nearby and feeder markers (V1) */
+.nearby-pin-wrap{display:flex;flex-direction:column;align-items:center;transform-origin:bottom center;}
+.nearby-pin-card{
+  height:22px;padding:0 9px;border-radius:11px;
+  background:rgba(8,16,26,0.92);
+  border:1.3px solid;
+  color:#fff;font-size:10.5px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;gap:3px;
+  font-family:'JetBrains Mono',monospace;
+  white-space:nowrap;
+}
+.nearby-pin-tail{width:0;height:0;margin-top:-1px;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid;}
+.nearby-popup{padding:0;min-width:220px;}
+.nearby-popup .sb-data-row{margin-bottom:8px;}
+.nearby-popup .cell-value{font-size:12px;}
+@media (max-width:767px){ .globe-stage.map-active{width:calc(100% - 32px);} }

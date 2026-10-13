@@ -1,0 +1,38 @@
+/* ============================================================
+ * styles/globe.css — مسرح الكرة وحجمها (من V1 كما هو: index.html الأسطر 200–248)
+ * The globe stage and its size (from V1 as is). The map-active rules live in map-view.css.
+ * التوهج (::before) يبرز 8٪ خارج الكرة: الصفحة الحاوية تقصه أفقيًا (.hero في home.css) وإلا اتسعت الصفحة على الجوال.
+ * The glow (::before) sticks out 8%: the containing page clips it horizontally (.hero in home.css) or the page widens on phones.
+ * ============================================================ */
+:root{ --globe-size: clamp(360px, 92vw, 760px); }
+body.guest-mode{ --globe-size: clamp(400px, 100vw, 860px); }
+@media (min-width:1200px){
+  :root{ --globe-size: clamp(500px, min(88vw, 78vh), 880px); }
+  body.guest-mode{ --globe-size: clamp(560px, min(94vw, 86vh), 980px); }
+}
+@media (max-width:1199px) and (min-width:768px){
+  :root{ --globe-size: clamp(460px, min(92vw, 72vh), 680px); }
+  body.guest-mode{ --globe-size: clamp(510px, min(97vw, 80vh), 760px); }
+}
+@media (max-width:767px){
+  :root{ --globe-size: clamp(370px, min(98vw, 64vh), 520px); }
+  body.guest-mode{ --globe-size: clamp(410px, min(104vw, 72vh), 580px); }
+}
+.globe-stage{
+  position:absolute;top:calc(var(--header-h, 130px) + 78px);left:50%;transform:translateX(-50%);
+  z-index:1;
+  width:var(--globe-size);
+  aspect-ratio:1;
+  overflow:visible;
+  background:transparent;
+  transition:width .5s cubic-bezier(.4,0,.2,1), height .5s cubic-bezier(.4,0,.2,1);
+}
+@media (max-width:767px){ .globe-stage{ top:calc(var(--header-h, 130px) + 52px); } }
+[data-theme="dark"] .globe-stage::before{
+  content:'';
+  position:absolute;inset:-8%;z-index:0;pointer-events:none;
+  background:radial-gradient(circle at center, rgba(77,214,181,0.16) 0%, rgba(46,125,209,0.07) 38%, transparent 68%);
+}
+.globe-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;}
+.globe-stage.map-active .globe-canvas{display:none;}
+.globe-stage.map-active::before, .globe-stage.globe-off::before{display:none;}

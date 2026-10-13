@@ -1,0 +1,24 @@
+/* ============================================================
+ * styles/perf-viewer.css — جدول قياس زمن الطلبات
+ * ============================================================
+ * من V1 كما هو (services/timing.js — الأنماط المضمّنة في renderViewer_)، في ملف أنماط مستقل.
+ * From V1 as is (services/timing.js — renderViewer_'s inline styles), in its own stylesheet.
+ * ============================================================ */
+.perf-viewer{position:fixed;inset:12px;z-index:99999;background:#0D1826;color:#EAF1F7;border:1px solid rgba(255,255,255,.16);border-radius:14px;display:flex;flex-direction:column;font-family:inherit;direction:rtl}
+.perf-viewer .pv-bar{display:flex;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.1);flex-wrap:wrap}
+.perf-viewer .pv-bar b{flex:1;font-size:13px}
+.perf-viewer .pv-sub{font-size:11px;color:#8FA3B8;width:100%}
+.perf-viewer .pv-note{font-size:11.5px;font-weight:700;color:#4DD6B5}
+.perf-viewer .pv-note:empty{display:none}
+.perf-viewer button{background:#101D2E;color:#EAF1F7;border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:6px 12px;font-family:inherit;cursor:pointer}
+.perf-viewer button[data-confirm="1"]{border-color:#FF8A75;color:#FF8A75}
+.perf-viewer .pv-wrap{overflow:auto;flex:1}
+.perf-viewer table{width:100%;border-collapse:collapse}
+.perf-viewer th,.perf-viewer td{text-align:center;font-size:12px;font-weight:700;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.07);white-space:nowrap}
+.perf-viewer th{position:sticky;top:0;background:#1FAE8C;color:#04241c}
+.perf-viewer tr.slow td{color:#FF8A75}
+.perf-viewer tr.open td{color:#4DD6B5;background:rgba(31,174,140,.08)}
+.perf-viewer tr.has-stages{cursor:pointer}
+.perf-viewer tr.has-stages:focus-visible{outline:2px solid #4DD6B5;outline-offset:-2px}
+.perf-viewer tr.stages td{text-align:right;background:#060B14}
+.perf-viewer tr.stages pre{margin:0;font-size:11.5px;font-weight:700;white-space:pre-wrap;direction:rtl;line-height:1.7;color:#EAF1F7}

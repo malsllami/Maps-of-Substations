@@ -1,0 +1,51 @@
+/* ============================================================
+ * styles/base.css — أساس كل الصفحات: ألوان الثيمين، الخط، إعادة الضبط
+ * ============================================================
+ * من V1 (index.html الأسطر 11–47؛ و--danger من بقية الصفحات). كانت كل صفحة تكرر هذه القيم بنفسها — هنا مرة واحدة.
+ * الثيم يُطبَّق على <html data-theme> من services/theme.js قبل الرسم. صفحة بدرجات خاصة في V1 تعرّفها في أنماطها.
+ * From V1 (index.html lines 11–47; --danger from the other pages). Every page repeated these — here once.
+ * ============================================================ */
+:root{
+  --blue-deep:#1B4D8C;
+  --blue-mid:#2E7DD1;
+  --teal:#1FAE8C;
+  --teal-light:#4DD6B5;
+}
+[data-theme="dark"]{
+  --bg:#060B14;
+  --bg-elev:#101D2E;
+  --bg-card:#0D1826;
+  --text-primary:#EAF1F7;
+  --text-secondary:#8FA3B8;
+  --border:rgba(255,255,255,0.08);
+  --border-strong:rgba(255,255,255,0.16);
+  --globe-line:rgba(77,214,181,0.35);
+  --globe-point:#4DD6B5;
+  --danger:#E0654F;
+  --danger-bg:rgba(224,101,79,0.1);
+  color-scheme:dark;
+}
+[data-theme="light"]{
+  --bg:#EAF1F6;
+  --bg-elev:#F4F8FB;
+  --bg-card:#FFFFFF;
+  --text-primary:#102035;
+  --text-secondary:#52647A;
+  --border:rgba(16,32,53,0.12);
+  --border-strong:rgba(16,32,53,0.22);
+  --globe-line:rgba(27,77,140,0.45);
+  --globe-point:#1FAE8C;
+  --danger:#C8412C;
+  --danger-bg:rgba(200,65,44,0.08);
+  color-scheme:light;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{background:var(--bg);}
+body{
+  font-family:'IBM Plex Sans Arabic',sans-serif;
+  background:var(--bg);
+  color:var(--text-primary);
+  overflow-x:hidden;
+  transition:background .4s ease,color .4s ease;
+}
+[hidden]{display:none !important;}

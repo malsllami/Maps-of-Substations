@@ -1,0 +1,35 @@
+/* ============================================================
+ * styles/update-sheet.css — لوحة «نسخة جديدة متاحة» السفلية: التصميم «د» المعتمد بلون تنبيه كهرماني
+ * The bottom «new version available» sheet: approved design «D» in an amber alert colour
+ * ============================================================ */
+:root{ --upd-amber:#F0B429; --upd-amber-deep:#C98A06; --upd-on-amber:#231700; --upd-bg:#14202F; }
+[data-theme="light"]{ --upd-amber:#E09A00; --upd-amber-deep:#B57A00; --upd-on-amber:#1E1400; --upd-bg:#FFFFFF; }
+
+.upd-sheet{
+  position:fixed;left:0;right:0;bottom:0;z-index:1600;
+  max-width:560px;margin:0 auto;box-sizing:border-box;
+  padding:12px 20px calc(18px + env(safe-area-inset-bottom, 0px));
+  background:var(--upd-bg);color:var(--text-primary);text-align:center;
+  border-radius:22px 22px 0 0;border:1px solid rgba(240,180,41,.55);border-bottom:0;
+  border-top:3px solid var(--upd-amber);
+  box-shadow:0 -10px 30px rgba(0,0,0,.35), 0 -2px 18px rgba(240,180,41,.18);
+  transform:translateY(105%);transition:transform .32s cubic-bezier(.2,.8,.2,1);
+}
+.upd-sheet.show{transform:translateY(0);}
+.upd-grab{width:40px;height:4px;border-radius:9px;background:var(--border-strong);margin:0 auto 12px;}
+.upd-x{position:absolute;top:10px;left:12px;width:32px;height:32px;border-radius:50%;border:1px solid var(--border-strong);background:transparent;color:var(--text-secondary);font-size:14px;cursor:pointer;font-family:inherit;}
+
+/* الأيقونة البارزة وعلامة التنبيه — the prominent icon and alert mark */
+.upd-badge{position:relative;width:56px;height:56px;border-radius:50%;margin:0 auto 10px;display:grid;place-items:center;
+  background:rgba(240,180,41,.16);color:var(--upd-amber);border:2px solid var(--upd-amber);animation:updPulse 2.2s ease-in-out infinite;}
+.upd-alert{position:absolute;top:-4px;right:-4px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;
+  background:#E5484D;color:#fff;font-weight:800;font-size:14px;line-height:1;border:2px solid var(--upd-bg);}
+@keyframes updPulse{0%,100%{box-shadow:0 0 0 0 rgba(240,180,41,.45);}50%{box-shadow:0 0 0 9px rgba(240,180,41,0);}}
+
+.upd-title{display:block;font-size:16px;font-weight:800;color:var(--upd-amber);}
+.upd-text{margin:6px auto 14px;max-width:420px;font-size:13px;line-height:1.6;color:var(--text-secondary);}
+.upd-now{width:100%;border:0;border-radius:14px;padding:13px;cursor:pointer;font-family:inherit;font-size:15px;font-weight:800;
+  background:linear-gradient(135deg, var(--upd-amber), var(--upd-amber-deep));color:var(--upd-on-amber);box-shadow:0 6px 18px rgba(240,180,41,.3);}
+.upd-now:disabled{opacity:.7;cursor:default;}
+.upd-later{margin-top:8px;background:none;border:0;color:var(--text-secondary);font-family:inherit;font-size:13px;cursor:pointer;padding:6px 14px;}
+@media (prefers-reduced-motion:reduce){ .upd-sheet{transition:none;} .upd-badge{animation:none;} }

@@ -1,0 +1,32 @@
+<!doctype html>
+<!-- perf.html — صفحة عرض قياسات زمن الطلبات فقط (تشخيص). لا تشغّل الموقع ولا ترسل أي طلب للخادم، ولا تُسجَّل كـ«فتح صفحة»،
+     فلا تضيف طلبات مكررة تفسد القياس. تعرض سجل هذا الجهاز (sec2-perf-log) الذي تكتبه services/timing.js في صفحات الموقع.
+     Viewer-only page for request timings (diagnostics). Runs none of the site, sends no server request and isn't logged as
+     a "page open", so it adds no duplicate requests that skew measurements. Shows this device's log written by timing.js. -->
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>قياس زمن الطلبات</title>
+<link rel="stylesheet" href="styles/perf-viewer.css">
+<style>
+  :root { --bg: #0D1826; }
+  body { margin: 0; min-height: 100vh; background: var(--bg); font-family: system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif; }
+</style>
+</head>
+<body>
+<div id="perfViewer"></div>
+<script src="config/الإعدادات.js"></script>
+<script src="utils/dates.js"></script>
+<script src="services/timing.js"></script>
+<script src="components/perf-viewer.js"></script>
+<script>
+  /* رجوع للصفحة السابقة، أو للوحة المدير إن فُتحت مباشرة (V1) — Back to the previous page, or the admin panel if opened directly (V1) */
+  SecPerfViewer.mount(document.getElementById('perfViewer'), {
+    closeLabel: '↩ رجوع',
+    onClose: function () { if (history.length > 1) history.back(); else location.href = 'admin.html'; }
+  });
+</script>
+</body>
+</html>

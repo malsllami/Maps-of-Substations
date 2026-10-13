@@ -1,0 +1,161 @@
+/* ============================================================
+ * styles/auth.css — صفحة الدخول: البطاقة، التبويبان، الحقول، حقل الجوال، زر التقدّم، خطوة البصمة
+ * ============================================================
+ * من V1 كما هو (auth.html الأسطر 24–207، والأنماط المضمّنة كأصناف). نافذة مراسلة المدير في styles/contact-admin.css.
+ * حُذفت أنماط قائمة الدول لأن الحقل صار سعوديًا ثابتًا (قرار محمد).
+ * From V1 as is (inline styles as classes). The country list styles were removed: the field is Saudi only (Mohammed).
+ * ============================================================ */
+/* درجات صفحة الدخول في V1 (تختلف قليلًا عن الرئيسية) — V1's login-page shades (slightly different from home) */
+[data-theme="dark"] body.auth-page{--bg:#0A1420;--border:rgba(255,255,255,0.08);}
+[data-theme="light"] body.auth-page{--bg:#F4F8FB;--bg-elev:#FFFFFF;--border:rgba(16,32,53,0.10);--border-strong:rgba(16,32,53,0.20);}
+body.auth-page{
+  font-family:'IBM Plex Sans Arabic',sans-serif;
+  background:var(--bg); color:var(--text-primary);
+  min-height:100vh; display:flex; align-items:center; justify-content:center;
+  padding:24px; margin:0; transition:background .3s,color .3s;
+}
+.auth-card{
+  width:100%; max-width:400px;
+  background:var(--bg-card); border:1px solid var(--border);
+  border-radius:16px; padding:32px 28px;
+}
+.auth-card .brand{display:flex; align-items:center; gap:10px; margin-bottom:28px;cursor:pointer;}
+.auth-card .brand-mark{height:32px;width:auto;flex-shrink:0;display:block;object-fit:contain;transition:transform .2s;}
+.auth-card .brand-text{font-size:15px;font-weight:700;letter-spacing:.3px;white-space:nowrap;transition:color .2s;}
+.auth-card .brand:hover .brand-mark{transform:scale(1.06);}
+.auth-card .brand:hover .brand-text{color:var(--teal);}
+
+.contact-admin-row{display:flex;gap:10px;margin-bottom:24px;}
+.contact-admin-btn{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:7px;
+  height:44px;border-radius:11px;border:1.5px solid rgba(77,214,181,0.4);background:rgba(31,174,140,0.1);
+  color:var(--teal-light);font-size:12.5px;font-weight:700;font-family:inherit;
+  text-decoration:none;cursor:pointer;transition:.2s;
+}
+.contact-admin-btn:hover{border-color:var(--teal);background:rgba(31,174,140,0.18);}
+
+.tabs{position:relative;display:flex; background:var(--bg); border-radius:10px; padding:4px; margin-bottom:24px; border:1px solid var(--border);}
+.tab-indicator{
+  position:absolute;top:4px;bottom:4px;left:0;width:0;
+  background:var(--bg-card);border-radius:7px;
+  box-shadow:0 1px 3px rgba(0,0,0,.1);
+  transition:left .32s cubic-bezier(.34,1.35,.64,1), width .32s cubic-bezier(.34,1.35,.64,1);
+  z-index:0;
+}
+.tab{flex:1;position:relative;z-index:1; text-align:center; padding:9px; border-radius:7px; font-size:13px; cursor:pointer; color:var(--text-secondary); transition:color .2s;}
+.tab.active{color:var(--text-primary); font-weight:500;}
+.auth-card h2{font-size:18px; font-weight:700; margin:0 0 6px;}
+.auth-card .desc{font-size:13px; color:var(--text-secondary); margin:0 0 22px; line-height:1.6;}
+.auth-card .field{margin-bottom:16px;}
+.auth-card .field[hidden]{display:none;}
+.auth-card .field label{display:block; font-size:12.5px; color:var(--text-secondary); margin-bottom:7px;}
+.auth-card .input-base{
+  width:100%; height:46px; background:var(--bg); border:1px solid var(--border-strong);
+  border-radius:10px; color:var(--text-primary); font-family:inherit; font-size:14px;
+  padding:0 14px; outline:none; transition:border-color .2s; box-sizing:border-box;
+}
+.auth-card .input-base:focus{border-color:var(--teal);}
+.auth-card select.input-base{cursor:pointer;}
+.auth-card .input-base[hidden]{display:none;}
+
+/* ===== العنوان العائم (V1) — Floating label (V1) ===== */
+.auth-card .field.floating{position:relative;margin-bottom:18px;}
+.auth-card .field.floating label{
+  position:absolute;right:14px;top:23px;transform:translateY(-50%);
+  font-size:14px;color:var(--text-secondary);margin:0;
+  transition:top .18s ease,font-size .18s ease,color .18s ease;
+  pointer-events:none;background:var(--bg);padding:0 4px;
+  z-index:2;
+}
+.auth-card .field.floating .input-base:focus + label,
+.auth-card .field.floating .input-base:not(:placeholder-shown) + label,
+.auth-card .field.floating .phone-unified.focused label,
+.auth-card .field.floating .phone-unified.filled label{
+  top:0;font-size:11px;color:var(--teal);
+}
+
+/* ===== حقل الجوال الموحّد: 🇸🇦 +966 + خط فاصل + الرقم (V1) — The unified phone field (V1) ===== */
+.phone-unified{
+  position:relative;display:flex;align-items:center;
+  height:46px;background:var(--bg);border:1px solid var(--border-strong);
+  border-radius:10px;transition:border-color .2s;
+}
+.phone-unified:focus-within{border-color:var(--teal);}
+.phone-prefix{
+  position:relative;display:flex;align-items:center;gap:5px;
+  padding:0 12px 0 10px;height:100%;flex-shrink:0;
+}
+.phone-divider{width:1px;height:22px;background:var(--border-strong);flex-shrink:0;}
+.phone-input-unified{
+  flex:1;min-width:0;height:100%;border:none;background:transparent;outline:none;
+  color:var(--text-primary);font-family:'JetBrains Mono',monospace;font-size:14px;
+  direction:ltr;text-align:right;padding:0 12px;
+}
+.auth-card .field.floating .phone-label{right:96px;}
+.country-code{font-family:'JetBrains Mono',monospace; font-size:13px; direction:ltr;}
+
+.auth-card .error-banner{
+  background:var(--danger-bg, rgba(224,101,79,0.1)); color:var(--danger, #E0654F); font-size:12.5px;
+  padding:10px 12px; border-radius:8px; margin-bottom:16px; display:none; line-height:1.6;
+}
+.auth-card .error-banner.show{display:block;}
+.auth-card .error-banner.info{background:rgba(20,184,166,.10); color:var(--teal);}
+.member-types{display:flex;gap:8px;}
+.member-type-btn{flex:1;height:44px;border-radius:10px;border:1px solid var(--border-strong);background:var(--bg);color:var(--text-primary);font-family:inherit;font-size:13px;cursor:pointer;transition:.2s;}
+.member-type-btn.active{border-color:var(--teal);background:var(--teal);color:#fff;font-weight:500;}
+
+.btn-progress{
+  position:relative; width:100%; height:46px; border-radius:10px; border:none;
+  background:var(--teal); color:#fff; font-family:inherit; font-size:14px; font-weight:700;
+  cursor:pointer; overflow:hidden; transition:opacity .2s;
+}
+.btn-progress:disabled{cursor:not-allowed;}
+.btn-progress .label{position:relative; z-index:2; display:flex; align-items:center; justify-content:center; gap:8px; height:100%;}
+.btn-progress .label [hidden]{display:none;}
+.btn-progress .fill{
+  position:absolute; inset:0; width:0%; background:rgba(255,255,255,0.28);
+  transition:width .25s linear; z-index:1;
+}
+.btn-progress.error .fill{background:rgba(255,255,255,0.0);}
+.btn-progress.error{background:var(--danger, #E0654F);}
+.btn-progress .pct{font-family:'JetBrains Mono',monospace; font-size:13px;}
+.btn-progress .check{display:none;}
+.btn-progress.success .check{display:inline;}
+.btn-progress.success .pct, .btn-progress.success .default-label{display:none;}
+/* زر البصمة (كان نمطًا مضمّنًا في V1) — the fingerprint button (inline in V1) */
+.biometric-btn{width:100%;margin-top:10px;height:44px;border-radius:10px;border:1px solid var(--border-strong);background:var(--bg);color:var(--text-primary);font-family:inherit;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:.2s;}
+.biometric-btn[hidden]{display:none;}
+.biometric-btn:disabled, .member-type-btn:disabled{cursor:not-allowed;opacity:.6;}
+
+.fingerprint-step{display:none; text-align:center; padding:20px 0;}
+.fingerprint-step.show{display:block;}
+.fp-wrap{position:relative; width:96px; height:96px; margin:0 auto 18px;}
+.fp-icon{
+  position:relative; z-index:2;
+  width:96px; height:96px; border-radius:50%;
+  background: radial-gradient(circle at 35% 30%, var(--bg-elev), var(--bg-card) 70%);
+  box-shadow: inset 0 0 0 7px var(--teal), inset 0 -2px 6px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.2);
+  display:flex; align-items:center; justify-content:center;
+}
+.fp-icon svg{stroke:var(--text-primary); opacity:0.85;}
+.fp-spinner{
+  position:absolute; inset:-6px; border-radius:50%; z-index:1;
+  background: conic-gradient(from 0deg, transparent 0%, transparent 75%, var(--teal) 92%, transparent 100%);
+  animation: fp-spin 1.1s linear infinite;
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 4px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 4px));
+}
+.fp-spinner.verifying{
+  background: conic-gradient(from 0deg, transparent 0%, transparent 70%, var(--blue-mid) 92%, transparent 100%);
+  animation-duration:0.7s;
+}
+@keyframes fp-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.fp-progress{font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--teal); margin:-10px 0 10px; min-height:16px;}
+.fp-title{font-size:14px; font-weight:500; margin:0 0 6px;}
+.fp-sub{font-size:12.5px; color:var(--text-secondary); margin:0;}
+.fp-icon.verifying svg{opacity:1;}
+.field-disabled{opacity:.5; pointer-events:none;}
+.switch-link{text-align:center; margin-top:18px; font-size:13px; color:var(--text-secondary);}
+.switch-link a{color:var(--teal); cursor:pointer; text-decoration:none; font-weight:500;}
+/* الجوال: حقول 16px حتى لا يكبّر آيفون الصفحة — phones: 16px fields so iPhone doesn't zoom */
+@media (max-width:767px){ .auth-card .input-base, .phone-input-unified{font-size:16px;} }

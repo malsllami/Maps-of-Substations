@@ -1,0 +1,115 @@
+/* ============================================================
+ * styles/home.css — الصفحة الرئيسية: الشاشة الافتتاحية، القسم العلوي (العنوان والبحث والكرة)، منطقة البطاقة والخريطة،
+ *   أزرار الإجراءات، وزر الزائر، والتذييل — من V1 كما هي (index.html الأسطر 188–330 و476–504 و975–1146)
+ * ============================================================
+ * الكرة في styles/globe.css، والخريطة في map-view.css، والبطاقة في station-card.css، والإحصاءات في stats-cards.css —
+ * هنا ما يخص هذه الصفحة وحدها. الفرق الوحيد عن V1: الخريطة في حاوية خاصة بها تحت البطاقة (بدل مشاركة حاوية الكرة)،
+ * فلا موضع مطلق يُحسب لها؛ ارتفاعها وحده يُضبط من الصفحة كما في V1.
+ * The home page only: the intro, the hero (heading, search, globe), the card and map area, the action pills, the guest
+ * button, the footer — from V1 as is. The one difference: the map has its own container under the card.
+ * ============================================================ */
+body.home-page{min-height:100vh;}
+body.home-page > header{position:fixed;top:0;left:0;right:0;z-index:160;} /* V1 */
+
+/* الشاشة الافتتاحية — the intro */
+#introOverlay{position:fixed;inset:0;z-index:200;background:#050a10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .45s ease;}
+#introOverlay.fade-out{opacity:0;pointer-events:none;}
+#introOverlay.hidden-done{display:none;}
+.intro-logo{width:84px;height:auto;opacity:0;filter:drop-shadow(0 0 0px rgba(77,214,181,0));animation:introLogoIn .7s ease-out .15s forwards;}
+@keyframes introLogoIn{
+  0%{opacity:0;transform:scale(.85);filter:drop-shadow(0 0 0px rgba(77,214,181,0));}
+  60%{opacity:1;transform:scale(1.03);filter:drop-shadow(0 0 22px rgba(77,214,181,.65));}
+  100%{opacity:1;transform:scale(1);filter:drop-shadow(0 0 10px rgba(77,214,181,.4));}
+}
+.intro-text{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:3px;color:#4DD6B5;opacity:0;text-align:center;animation:introTextIn .5s ease-out .85s forwards;}
+@keyframes introTextIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+/* القسم العلوي — the hero */
+.hero{
+  position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:0;
+  padding:calc(var(--header-h, 130px) + 44px) 20px 4px;
+  min-height:calc(var(--globe-size) + 288px);
+}
+@media (max-width:767px){ .hero{padding:calc(var(--header-h, 130px) + 28px) 20px 3px;min-height:calc(var(--globe-size) + 240px);} }
+/* توهج الكرة (::before بهامش −8٪) كان يمدّ الصفحة أفقيًا 27 نقطة على الجوال (خطأ موروث من V1): يُقص عند حافة الشاشة ويبقى ظاهرًا
+   The globe glow (::before at −8%) widened the page by 27 px on phones (a V1 bug): clipped at the screen edge, still visible */
+.hero{overflow-x:clip;}
+@supports not (overflow-x:clip){ body.home-page{overflow-x:hidden;} }
+.hero.map-active{padding-top:calc(var(--header-h, 130px) + 14px);min-height:0;padding-bottom:20px;}
+.hero.map-active #globeStage{display:none;}
+.top-content-area{display:none;position:relative;z-index:5;width:min(1100px, 96vw);margin:0 auto;}
+body.guest-mode .top-content-area{width:min(1300px,96vw);}
+.hero.map-active .top-content-area{display:block;}
+.map-stage-slot{display:none;width:100%;margin-top:10px;}
+.hero.map-active .map-stage-slot{display:block;}
+/* حاوية الخريطة في مكانها الطبيعي تحت البطاقة (لا الموضع المطلق لمسرح الكرة)؛ وضع الملاحة الكامل (navigation.css) يبقى أعلى أولوية
+   The map container sits in normal flow under the card (not the globe stage's absolute position); full navigation mode still wins */
+body:not(.nav-full) .map-stage-slot .globe-stage.map-active{position:relative;top:auto;left:auto;transform:none;aspect-ratio:auto;margin:0 auto;}
+/* انتقال عرض الكرة لا يخص الخريطة هنا (لا تتمدد من الكرة)؛ بدونه تملأ الملاحة الشاشة فورًا
+   The globe's width transition does not apply to the map here (it never grows out of the globe); navigation fills the screen at once */
+.map-stage-slot .globe-stage.map-active{transition:none;}
+.hero-content{position:relative;z-index:5;width:100%;display:flex;flex-direction:column;align-items:center;padding:6px 30px 0;transition:opacity .4s ease;}
+.hero-content.hidden{display:none;}
+.hero-heading{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;}
+.eyebrow{
+  font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--teal-light);text-transform:uppercase;text-align:center;
+  background:rgba(5,15,25,0.45);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border-radius:20px;padding:6px 16px;white-space:nowrap;
+  text-shadow:0 1px 4px rgba(0,0,0,0.5);
+}
+[data-theme="light"] .eyebrow{color:var(--blue-deep);background:rgba(255,255,255,0.65);text-shadow:none;}
+.hero h1{
+  width:min(700px,90%);font-size:clamp(19px,3.2vw,32px);font-weight:700;text-align:center;line-height:1.3;margin:0;
+  text-shadow:0 2px 14px rgba(0,0,0,0.55);background:linear-gradient(90deg, #ffffff, var(--teal-light));
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+body.guest-mode .hero h1{font-size:clamp(24px,4vw,42px);}
+[data-theme="light"] .hero h1{background:linear-gradient(90deg, var(--text-primary), var(--teal));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:none;}
+.search-wrap{width:100%;pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:10px;}
+body.guest-mode .search-wrap{display:none;}
+
+/* زر الدخول للزائر — the guest login button */
+.guest-login-cta{
+  display:none;align-items:center;justify-content:center;gap:10px;width:min(300px,80vw);padding:17px 24px;border-radius:32px;
+  background:linear-gradient(135deg, var(--teal), var(--teal-light));color:#052018;font-weight:700;font-size:16px;text-decoration:none;
+  box-shadow:0 10px 30px rgba(31,174,140,0.5), 0 0 44px rgba(77,214,181,0.38);transition:transform .2s ease, box-shadow .2s ease;
+  animation:guestCtaGlow 2.6s ease-in-out infinite;
+}
+.guest-login-cta:hover{transform:translateY(-2px);box-shadow:0 12px 34px rgba(31,174,140,0.6), 0 0 52px rgba(77,214,181,0.48);}
+@keyframes guestCtaGlow{
+  0%, 100%{box-shadow:0 10px 30px rgba(31,174,140,0.5), 0 0 40px rgba(77,214,181,0.32);}
+  50%{box-shadow:0 10px 30px rgba(31,174,140,0.6), 0 0 58px rgba(77,214,181,0.5);}
+}
+body.guest-mode .guest-login-cta{display:flex;}
+
+/* البطاقات والإجراءات — cards and actions */
+.cards-section{position:relative;z-index:5;padding:0 32px 30px;display:flex;flex-direction:column;align-items:center;gap:14px;}
+.cards-section.hidden{display:none;}
+body.guest-mode #cardsSection{display:none;}
+.action-pills-row{display:flex;gap:10px;width:100%;max-width:520px;}
+.action-pill{display:flex;align-items:center;justify-content:center;gap:6px;border-radius:22px;font-weight:600;cursor:pointer;font-family:inherit;border:1.3px solid;transition:.2s;}
+.pill-add{flex:1.9;font-size:14px;padding:14px 16px;background:rgba(31,174,140,0.14);color:var(--teal-light);border-color:rgba(77,214,181,0.5);}
+.pill-add:hover{background:rgba(31,174,140,0.24);border-color:var(--teal);}
+.pill-refresh{flex:1;font-size:11.5px;padding:9px 10px;background:rgba(200,162,78,0.14);color:#D8B564;border-color:rgba(200,162,78,0.5);}
+.pill-refresh:hover{background:rgba(200,162,78,0.24);border-color:#C8A24E;}
+.pill-refresh svg{transition:transform .6s linear;}
+.pill-refresh.spinning svg{transform:rotate(360deg);}
+[data-theme="light"] .pill-add{color:var(--teal);}
+[data-theme="light"] .pill-refresh{color:#A9803A;}
+.home-slot{width:100%;display:flex;flex-direction:column;align-items:center;}
+footer.home-footer{text-align:center;padding:12px 20px;font-size:10px;color:var(--text-secondary);opacity:.7;border-top:1px solid var(--border);}
+
+/* الجوال — phones */
+@media (max-width:767px){
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), textarea, select{font-size:16px !important;}
+  .hero{padding-left:16px;padding-right:16px;}
+  .top-content-area{width:100%;}
+}
+@media (max-width:600px){
+  .eyebrow{font-size:10px;padding:5px 12px;}
+  .hero h1{font-size:clamp(22px,6vw,32px);}
+  .cards-section{padding:0 12px 50px;}
+}
+
+/* مكتبة الخريطة تعذّرت: رسالة واضحة مكان الخريطة والبطاقة فوقها بكل بياناتها — the map library unavailable: a clear message in its place */
+.map-unavailable{margin:10px auto 0;max-width:min(1100px, 96vw);box-sizing:border-box;padding:16px 18px;border-radius:14px;
+  border:1px dashed var(--border-strong);background:var(--bg-card);color:var(--text-secondary);font-size:13px;font-weight:700;text-align:center;line-height:1.7;}

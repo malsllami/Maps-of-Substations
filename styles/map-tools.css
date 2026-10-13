@@ -1,0 +1,78 @@
+/* ============================================================
+ * styles/map-tools.css — «المزيد» (القياس والمسار) وبحث الأعطال (على الخريطة وفي الرئيسية)
+ * ============================================================
+ * من V1 كما هو (index.html الأسطر 324–341 و669–679 و786–809، والأنماط المضمّنة في V1 كأصناف: أرقام نقاط المسار،
+ * أحرف الأعطال، رابط قوقل ماب).
+ * From V1 as is; V1's inline styles (route point numbers, outage letters, the Google Maps link) as classes.
+ * ============================================================ */
+.more-panel{
+  display:none;flex-direction:column;gap:6px;flex-shrink:0;
+  background:var(--bg-card);border-bottom:1px solid var(--border-strong);
+  padding:8px 14px;
+}
+.more-panel.show{display:flex;}
+.nearby-opt{
+  text-align:right;background:transparent;border:none;padding:9px 10px;border-radius:8px;
+  font-size:12px;color:var(--text-primary);cursor:pointer;font-family:inherit;
+}
+.nearby-opt:hover{background:var(--bg-elev);}
+.nearby-opt.active{background:var(--bg-elev);font-weight:700;color:var(--teal);}
+.route-point{
+  width:22px;height:22px;border-radius:50%;border:2px solid #fff;color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;
+  font-family:'JetBrains Mono',monospace;box-shadow:0 2px 6px rgba(0,0,0,.5);
+}
+.outage-panel{
+  display:none;flex-direction:column;gap:8px;flex-shrink:0;
+  width:100%;position:relative;z-index:6;
+  background:var(--bg-card);border-bottom:1px solid var(--border-strong);
+  padding:14px 16px;
+}
+.outage-panel.show{display:flex;}
+.outage-panel-title{font-size:11.5px;font-weight:600;color:var(--text-secondary);}
+.outage-panel textarea{
+  width:100%;min-height:70px;resize:vertical;
+  background:var(--bg);border:1px solid var(--border-strong);border-radius:8px;
+  padding:8px 10px;color:var(--text-primary);font-family:'JetBrains Mono',monospace;
+  font-size:12px;direction:ltr;text-align:right;outline:none;
+}
+.outage-panel textarea:focus{border-color:var(--teal);}
+.outage-panel textarea::placeholder, .homepage-outage-panel textarea::placeholder{font-family:'IBM Plex Sans Arabic',sans-serif;font-size:11px;color:var(--text-secondary);}
+.outage-error{font-size:11px;color:#E0654F;min-height:14px;}
+.outage-submit-btn{
+  background:rgba(31,174,140,0.14);color:var(--teal-light);
+  border:1px solid rgba(77,214,181,0.45);border-radius:8px;
+  padding:9px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;
+  transition:.2s;
+}
+.outage-submit-btn:hover{background:rgba(31,174,140,0.24);border-color:var(--teal);}
+.outage-letter{
+  width:26px;height:26px;border-radius:50%;border:2px solid #fff;color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;
+  font-family:'JetBrains Mono',monospace;box-shadow:0 2px 8px rgba(0,0,0,.5);
+}
+.outage-popup{font-family:'IBM Plex Sans Arabic',sans-serif;direction:rtl;font-size:13px;}
+.outage-gmaps-link{
+  display:inline-block;margin-top:6px;background:rgba(31,174,140,0.16);color:var(--teal-light);
+  border:1px solid rgba(77,214,181,0.5);padding:6px 14px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600;
+}
+/* بحث الأعطال في الرئيسية — outage search on the home page */
+.homepage-outage-toggle{
+  pointer-events:auto;background:transparent;border:none;color:var(--text-secondary);
+  font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;padding:6px 10px;
+  transition:color .2s;
+}
+.homepage-outage-toggle:hover{color:var(--teal-light);}
+.homepage-outage-panel{
+  display:none;flex-direction:column;gap:10px;pointer-events:auto;
+  width:min(420px, 90vw);background:var(--bg-card);border:1px solid var(--border-strong);
+  border-radius:16px;padding:16px;box-shadow:0 10px 24px rgba(0,0,0,.25);
+}
+.homepage-outage-panel.show{display:flex;}
+.homepage-outage-panel textarea{
+  width:100%;min-height:70px;background:var(--bg);border:1px solid var(--border-strong);
+  border-radius:11px;color:var(--text-primary);font-size:14px;padding:10px 14px;
+  font-family:'JetBrains Mono',monospace;direction:ltr;text-align:right;resize:vertical;
+}
+.homepage-outage-panel textarea:focus{outline:none;border-color:var(--teal);}
+@media (max-width:767px){ .outage-panel textarea, .homepage-outage-panel textarea{font-size:16px;} }

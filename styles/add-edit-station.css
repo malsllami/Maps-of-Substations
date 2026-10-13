@@ -1,0 +1,116 @@
+/* ============================================================
+ * styles/add-edit-station.css — نموذجا الإضافة والتعديل
+ * ============================================================
+ * من V1 كما هو (index.html الأسطر 681–688 و711–784 و957–974)، مع أسماء أصناف بدل المعرّفات (#addPreviewMap ←
+ * .sf-preview-map) ونقل الأنماط المضمّنة في V1 (style="…") إلى أصناف sf-*.
+ * From V1 as is, with classes instead of ids and V1's inline styles moved into sf-* classes.
+ * ============================================================ */
+.edit-input{
+  width:100%;height:54px;background:var(--bg);border:1.5px solid var(--border-strong);
+  border-radius:11px;color:var(--text-primary);font-size:16px;padding:0 16px;
+  font-family:'JetBrains Mono',monospace;direction:ltr;text-align:right;
+  transition:border-color .2s, box-shadow .2s;
+}
+.edit-input:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(31,174,140,0.18);}
+.edit-input::placeholder{color:var(--text-secondary);opacity:.75;}
+
+.fullpage-form-overlay{
+  display:none;position:fixed;inset:0;z-index:200;
+  background:var(--bg);overflow-y:auto;
+}
+.fullpage-form-overlay.show{display:block;animation:fullpageFadeIn .35s cubic-bezier(.4,0,.2,1);}
+@keyframes fullpageFadeIn{
+  from{opacity:0;transform:translateY(18px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.fullpage-form-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 32px;border-bottom:1px solid var(--border);
+  position:sticky;top:0;background:var(--bg);z-index:2;
+}
+.fullpage-form-title{font-size:20px;font-weight:800;}
+.fullpage-form-close{
+  width:42px;height:42px;border-radius:50%;background:var(--bg-card);border:1px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-primary);transition:.2s;flex-shrink:0;
+}
+.fullpage-form-close:hover{border-color:var(--teal);color:var(--teal);}
+.fullpage-form-body{padding:36px 32px 70px;max-width:1000px;margin:0 auto;}
+.form-field-label{display:block;font-size:13.5px;font-weight:700;color:var(--text-primary);margin-bottom:8px;}
+.add-station-panel{display:flex;flex-direction:column;gap:20px;width:100%;}
+.add-station-type{display:flex;gap:10px;}
+.type-btn{
+  flex:1;padding:15px;border-radius:11px;border:1.5px solid var(--border-strong);background:var(--bg);
+  color:var(--text-secondary);font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:.2s;
+}
+.type-btn.active{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:700;}
+.paste-coord-row{display:flex;flex-direction:column;gap:8px;margin-top:6px;}
+.paste-coord-label{font-size:13px;color:var(--text-secondary);font-weight:600;}
+.paste-apply-btn{
+  background:rgba(31,174,140,0.14);color:var(--teal-light);border:1.5px solid rgba(77,214,181,0.45);
+  border-radius:11px;padding:0 20px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;
+  transition:.2s;flex-shrink:0;
+}
+.paste-apply-btn:hover{background:rgba(31,174,140,0.24);border-color:var(--teal);}
+.use-gps-btn{
+  width:100%;font-size:15px;font-weight:600;padding:15px;border-radius:11px;border:1.5px solid var(--border-strong);
+  background:var(--bg);color:var(--teal);cursor:pointer;font-family:inherit;transition:.2s;
+}
+.use-gps-btn:hover{border-color:var(--teal);background:rgba(31,174,140,0.08);}
+.add-station-submit{
+  background:var(--teal);color:#fff;border:1.5px solid var(--teal);
+  border-radius:12px;padding:17px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;transition:.2s;
+  box-shadow:0 4px 14px rgba(31,174,140,0.28);
+}
+.add-station-submit:hover{background:var(--teal-light);border-color:var(--teal-light);box-shadow:0 6px 18px rgba(31,174,140,0.38);}
+.add-station-submit:disabled{opacity:.5;cursor:not-allowed;box-shadow:none;}
+.fullpage-form-body .st-actions{display:flex;gap:12px;}
+.fullpage-form-body .st-btn{
+  flex:1;text-align:center;padding:16px;border-radius:12px;font-size:15.5px;font-weight:700;
+  cursor:pointer;font-family:inherit;transition:.2s;border:1.5px solid var(--border-strong);
+  background:var(--bg);color:var(--text-primary);
+}
+.fullpage-form-body .st-btn:hover{border-color:var(--teal);}
+.fullpage-form-body .st-btn.primary{
+  background:var(--teal);border-color:var(--teal);color:#fff;
+  box-shadow:0 4px 14px rgba(31,174,140,0.28);
+}
+.fullpage-form-body .st-btn.primary:hover{background:var(--teal-light);border-color:var(--teal-light);}
+.fullpage-form-body .st-btn:disabled{opacity:.5;cursor:not-allowed;box-shadow:none;}
+.add-station-progress-track{
+  width:100%;height:8px;border-radius:5px;background:rgba(255,255,255,0.12);overflow:hidden;margin-top:10px;
+}
+[data-theme="light"] .add-station-progress-track{background:rgba(16,32,53,0.12);}
+.add-station-progress-fill{
+  height:100%;width:0%;border-radius:5px;
+  background:linear-gradient(90deg, var(--blue-mid), var(--teal-light));
+  transition:width .25s ease-out;
+}
+.edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start;}
+.edit-map-wrap{position:relative;width:100%;height:280px;border-radius:12px;overflow:hidden;border:1.5px solid var(--border-strong);}
+.sf-preview-map{width:100%;height:100%;}
+.sf-map-missing{height:100%;display:flex;align-items:center;justify-content:center;padding:14px;box-sizing:border-box;text-align:center;font-size:13px;font-weight:700;line-height:1.7;color:var(--text-secondary);border:1px dashed var(--border-strong);border-radius:12px;} /* مكتبة الخريطة تعذّرت / the map library unavailable */
+.edit-map-sat-btn{
+  position:absolute;top:8px;left:8px;z-index:650;
+  width:34px;height:34px;border-radius:50%;
+  background:var(--bg-card);border:1px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;
+  box-shadow:0 2px 8px rgba(0,0,0,.3);
+}
+.edit-map-sat-btn.active{background:var(--teal);border-color:var(--teal);}
+@media (max-width:600px){ .edit-map-wrap{height:180px;} }
+@media (max-width:700px){ .edit-grid{grid-template-columns:1fr;} }
+
+/* الأنماط المضمّنة في V1 كأصناف — V1's inline styles as classes */
+.sf-form{display:flex;flex-direction:column;gap:20px;}
+.sf-form[hidden], .sf-success[hidden], .add-station-progress-track[hidden], .sf-progress-label[hidden], .sf-dist[hidden], .sf-dist-edit[hidden]{display:none;}
+.sf-row{display:flex;gap:14px;}
+.sf-col{flex:1;min-width:0;}
+.sf-coords{margin-bottom:14px;}
+.sf-dist-edit{display:flex;flex-direction:column;gap:18px;}
+.sf-progress-label{text-align:center;font-size:11px;color:var(--text-secondary);margin-top:4px;font-family:'JetBrains Mono',monospace;}
+.sf-success{text-align:center;padding:10px 0;}
+.sf-success-text{color:var(--teal);font-weight:700;font-size:14px;margin-bottom:10px;}
+/* V1 كان يلوّن الخطأ مضمّنًا (#E0654F)؛ «جاري تحديد موقعك...» رسالة معلومة لا خطأ — V1 colored errors inline */
+.add-station-error{color:#E0654F;font-size:13px;font-weight:600;}
+.add-station-error:empty{display:none;}
+.add-station-error.sf-info{color:var(--text-secondary);}

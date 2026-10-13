@@ -1,0 +1,142 @@
+/* ============================================================
+ * styles/station-search.css — مربع البحث (العدسة وشريط صفحة المحطة)، شريط التقدّم، بطاقة «غير موجودة»
+ * ============================================================
+ * من V1 كما هو (index.html الأسطر 342–448 و859–907 و1130). رابط «تسجيل الدخول» كان نمطًا مضمّنًا ← صنف.
+ * From V1 as is. The «login» link was an inline style ← a class.
+ * ============================================================ */
+.search-lens{
+  width:72px;height:72px;border-radius:50%;
+  background:rgba(5,15,25,0.6);
+  border:1.5px solid rgba(77,214,181,0.55);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:width .45s cubic-bezier(.25,.8,.3,1),border-radius .45s,background .3s,border-color .3s,box-shadow .3s;
+  overflow:visible;
+  position:relative;
+  isolation:isolate;
+  contain:paint;
+  box-shadow:0 4px 18px rgba(0,0,0,0.35), 0 0 26px rgba(77,214,181,0.28);
+}
+[data-theme="light"] .search-lens{
+  background:rgba(255,255,255,0.6);
+  border-color:rgba(31,174,140,0.4);
+  box-shadow:0 4px 14px rgba(0,0,0,0.12), 0 0 20px rgba(31,174,140,0.18);
+}
+.search-lens svg{
+  flex-shrink:0;width:34px;height:34px;stroke:var(--teal);
+  filter:drop-shadow(0 4px 10px rgba(31,174,140,0.45)) drop-shadow(0 2px 6px rgba(0,0,0,0.25));
+  transition:width .3s,height .3s;
+}
+.search-lens.open{
+  width:340px;border-radius:27px;
+  background:rgba(255,255,255,0.12);
+  border:1px solid rgba(77,214,181,0.5);
+  justify-content:flex-start;padding:0 18px;gap:10px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.18);
+  transition:width .45s cubic-bezier(.25,.8,.3,1),border-radius .45s,background .3s,border-color .25s,box-shadow .25s;
+}
+.search-lens.open.blur-ready{
+  transition:width .45s cubic-bezier(.25,.8,.3,1),border-radius .45s,background .3s,border-color .25s,box-shadow .25s,backdrop-filter .2s;
+  -webkit-backdrop-filter:blur(14px);
+  backdrop-filter:blur(14px);
+}
+.search-lens.open:focus-within{
+  border-color:var(--teal-light);
+  box-shadow:0 0 0 3px rgba(77,214,181,0.14), 0 8px 24px rgba(0,0,0,0.18);
+}
+[data-theme="light"] .search-lens.open{background:rgba(255,255,255,0.55);border-color:rgba(31,174,140,0.4);}
+[data-theme="light"] .search-lens.open:focus-within{border-color:var(--teal);}
+@supports not (backdrop-filter: blur(1px)){
+  .search-lens.open{background:var(--bg-card);}
+}
+.search-lens.open svg{stroke:var(--text-primary);width:20px;height:20px;filter:none;}
+.search-lens input{display:none;}
+.search-lens.open input{
+  display:block;
+  flex:1;background:transparent;border:none;outline:none;min-width:0;
+  color:var(--text-primary);font-family:'JetBrains Mono',monospace;font-size:14px;
+  direction:ltr;text-align:right;
+}
+.search-lens input::placeholder{color:var(--text-secondary);font-family:'IBM Plex Sans Arabic',sans-serif;}
+.search-lens.busy svg, .station-search-bar.busy .ssb-icon{opacity:.5;}
+.search-hint{font-size:12px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,0.6);min-height:16px;text-align:center;}
+[data-theme="light"] .search-hint{color:var(--text-primary);text-shadow:none;}
+.search-hint.err{color:#FF8A75;text-shadow:0 1px 4px rgba(0,0,0,0.6);}
+[data-theme="light"] .search-hint.err{color:#C8412C;text-shadow:none;}
+.search-login-link{color:var(--teal);font-weight:500;text-decoration:underline;}
+
+.not-found-card{
+  width:min(360px, 92vw);margin:8px auto 0;
+  background:var(--bg-card);border:1px solid var(--border-strong);
+  border-radius:16px;padding:18px 20px;text-align:center;
+  box-shadow:0 10px 24px rgba(0,0,0,.22);
+  color:var(--text-primary);text-shadow:none;
+}
+.nfc-head{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  color:#C8A24E;font-weight:700;font-size:13.5px;margin-bottom:10px;
+}
+.nfc-id{font-size:12.5px;color:var(--text-secondary);margin-bottom:4px;}
+.nfc-id b{color:var(--text-primary);font-family:'JetBrains Mono',monospace;direction:ltr;display:inline-block;}
+.nfc-question{font-size:12.5px;color:var(--text-secondary);margin-bottom:14px;}
+.nfc-actions{display:flex;gap:8px;}
+.nfc-btn{
+  flex:1;font-size:12.5px;padding:10px 8px;border-radius:8px;
+  border:1px solid var(--border-strong);background:var(--bg);color:var(--text-primary);
+  cursor:pointer;font-family:inherit;transition:.2s;white-space:nowrap;
+}
+.nfc-btn:hover{border-color:var(--teal);}
+.nfc-btn.primary{background:rgba(31,174,140,0.14);color:var(--teal-light);border-color:rgba(77,214,181,0.5);}
+.nfc-btn.primary:hover{background:rgba(31,174,140,0.24);border-color:var(--teal);}
+[data-theme="light"] .nfc-btn.primary{color:var(--teal);}
+.search-progress{display:none;flex-direction:column;gap:6px;width:min(300px,88vw);}
+.search-progress.show{display:flex;}
+.search-progress-track{width:100%;height:8px;border-radius:5px;background:rgba(255,255,255,0.12);overflow:hidden;}
+[data-theme="light"] .search-progress-track{background:rgba(16,32,53,0.12);}
+.search-progress-fill{
+  height:100%;width:0%;border-radius:5px;
+  background:linear-gradient(90deg, var(--blue-mid), var(--teal-light));
+  box-shadow:0 0 10px rgba(77,214,181,0.7);
+  transition:width .25s ease-out;
+}
+.search-progress-label{
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:11.5px;color:var(--teal-light);font-weight:600;
+  font-family:'JetBrains Mono',monospace;
+}
+.search-progress-label span:first-child{font-family:'IBM Plex Sans Arabic',sans-serif;font-weight:500;}
+
+/* شريط بحث صفحة المحطة — the station page search bar */
+.search-and-back-row{display:none;align-items:center;gap:8px;width:100%;position:relative;z-index:6;}
+.search-and-back-row.show{display:flex;}
+.station-search-bar{
+  display:flex;align-items:center;gap:10px;
+  flex:1;min-width:0;height:55px;
+  position:relative;z-index:6;
+  background:var(--bg-elev);border:1.5px solid rgba(31,174,140,0.35);
+  border-radius:20px;padding:0 20px 0 9px;
+  box-shadow:0 10px 22px rgba(0,0,0,.24);
+  transition:border-color .2s, box-shadow .2s, height .2s ease;
+}
+.station-search-bar.compact{height:40px;}
+.station-search-bar:focus-within{border-color:var(--teal);box-shadow:0 6px 18px rgba(31,174,140,.24);}
+.station-search-bar .ssb-icon{
+  flex-shrink:0;width:38px;height:38px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(31,174,140,0.14);color:var(--teal);
+  box-shadow:0 2px 6px rgba(31,174,140,.2);
+  cursor:pointer;transition:.2s;
+}
+.station-search-bar .ssb-icon:hover{background:var(--teal);color:#fff;}
+.station-search-bar:focus-within .ssb-icon{background:var(--teal);color:#fff;}
+.station-search-bar input{
+  flex:1;min-width:0;background:transparent;border:none;outline:none;
+  color:var(--text-primary);font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;
+  direction:ltr;text-align:right;
+}
+.station-search-bar input::placeholder{color:var(--text-secondary);font-family:'IBM Plex Sans Arabic',sans-serif;font-weight:400;}
+.station-search-progress{display:none;flex-direction:column;gap:6px;width:100%;margin-top:8px;}
+.station-search-progress.show{display:flex;}
+.station-search-hint{width:100%;font-size:12px;color:var(--text-secondary);min-height:16px;padding:6px 4px 0;}
+.station-search-hint.err{color:#E0654F;}
+@media (max-width:600px){ .search-lens.open{width:88vw;} }
+@media (max-width:767px){ .search-lens input, .station-search-bar input{font-size:16px;} }
