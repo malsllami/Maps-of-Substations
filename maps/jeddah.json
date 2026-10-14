@@ -1,0 +1,12 @@
+{
+  "name": "خريطة محافظة جدة",
+  "version": "20260929",
+  "file": "jeddah.pmtiles",
+  "bytes": 9267495,
+  "sha256": "78d74a333fa29cf26bb0b16b8586f2cc04fc59fe644b042bc6e932ca9563cc56",
+  "bbox": [38.930, 20.893, 39.455, 22.323],
+  "maxZoom": 15,
+  "boundary": "حدود محافظة جدة الرسمية من OpenStreetMap (relation 12429519)",
+  "source": "OpenStreetMap عبر Protomaps (بناء 20260929)",
+  "attribution": "© OpenStreetMap"
+}
