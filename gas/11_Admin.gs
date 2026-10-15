@@ -182,7 +182,47 @@ function getRegionActivity() {
   });
   const ranked = Object.keys(counts).map(function (r) { return { region: r, count: counts[r] }; })
     .sort(function (a, b) { return b.count - a.count; }).slice(0, REGIONS_TOP);
-  return { success: true, regions: ranked };
+  return { success: true, regions: ranked, stations: regionStations_() };
+}
+
+/* قرار محمد (15 أكتوبر): توزيع محطات التوزيع على المناطق — المحطات التي لها تاريخ إضافة أو تعديل فقط (أُضيفت أو
+ * عُدّلت في الموقع)، لا كل الجدول — الأكثر محطات أولًا، مع إضافات وتعديلات كل منطقة آخر 30 يومًا. (التحويل بلا منطقة.)
+ * Mohammed's decision (15 Oct): distribution stations per region — only stations that carry an add/edit date (added or
+ * edited on the site), not the whole sheet — most first, with each region's adds and edits over 30 days. */
+function regionStations_() {
+  const regions = stationRegions_(), byRegion = {}, seen = {};
+  const row = function (name) { return byRegion[name] || (byRegion[name] = { region: name, stations: 0, additions: 0, edits: 0 }); };
+  stationIndex_(STATION_TYPE.DISTRIBUTION).forEach(function (e) {
+    if (!e.t || seen[e.n]) return; // بلا تاريخ إضافة/تعديل، أو رقم مكرر (أول صف يفوز) / no add/edit date, or a duplicate
+    seen[e.n] = true;
+    row(String(e.region || '').trim() || NO_REGION).stations++;
+  });
+  activityEvents_(new Date(Date.now() - ACTIVITY_DAYS * DAY_MS)).forEach(function (ev) {
+    if (!ev.ref || (ev.action !== AUDIT_TYPE.ADD && ev.action !== AUDIT_TYPE.EDIT)) return;
+    const r = row(String(regions[ev.ref] || '').trim() || NO_REGION);
+    if (ev.action === AUDIT_TYPE.ADD) r.additions++; else r.edits++;
+  });
+  return Object.keys(byRegion).map(function (k) { return byRegion[k]; })
+    .sort(function (a, b) { return b.stations - a.stations || (b.additions + b.edits) - (a.additions + a.edits); });
+}
+
+// ===== الأعضاء — Members =====
+
+/* كل الأعضاء من جدول «الأعضاء» بترتيب عكسي (آخر من سجّل أولًا — قرار محمد، 15 أكتوبر)؛ للمدير فقط
+ * Every member from the members sheet in reverse order (the latest registration first — Mohammed, 15 Oct); admin only */
+function getMembersList() {
+  const rows = cachedRows_(MEMBERS_CACHE_KEY, SHEETS.MEMBERS), c = COL.MEMBER, members = [];
+  for (let i = rows.length - 1; i >= 1; i--) {
+    const r = rows[i];
+    if (!String(r[c.PHONE] || '').trim() && !String(r[c.NAME] || '').trim()) continue; // صف فارغ / an empty row
+    const at = r[c.REGISTERED_AT];
+    members.push({
+      name: String(r[c.NAME] || ''), phone: formatPhone(r[c.PHONE]) || String(r[c.PHONE] || ''), memberType: String(r[c.MEMBER_TYPE] || ''),
+      shift: String(r[c.SHIFT] || ''), department: String(r[c.DEPARTMENT] || ''), status: String(r[c.STATUS] || '').trim(),
+      registeredAt: at instanceof Date && !isNaN(at) ? Utilities.formatDate(at, TIMEZONE, 'yyyy-MM-dd HH:mm') : String(at || '')
+    });
+  }
+  return { success: true, count: members.length, members: members };
 }
 
 // ===== جودة البيانات — Data quality =====
@@ -221,6 +261,7 @@ function buildDashboard_() {
   const result = {
     success: true,
     dailyRequests: usage.requests, dailyRequestBreakdown: usage.topActions, dailyRequestLimit: DAILY_REQUEST_LIMIT,
+    dailyRequestBreakdownAll: usage.allActions, // كل أنواع الطلبات (15 أكتوبر) / every request type (15 Oct)
     propOpsToday: usage.propOps, propOpsLimit: SCRIPT_PROPS_DAILY_LIMIT,
     totalStations: stats.totalStations, totalStationsDistribution: stats.distribution, totalStationsSubstations: stats.substations,
     additionsToday: stats.additions, editsToday: stats.edits,

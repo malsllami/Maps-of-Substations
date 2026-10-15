@@ -61,7 +61,9 @@
     pencil: SVG('<path d="M4 20l4-1 10.5-10.5a2.1 2.1 0 0 0-3-3L5 16l-1 4z"/><path d="M14 7l3 3"/>')
   };
   const CARDS = ['charts', 'peak', 'regions']; // البطاقات الظاهرة التي تُحمَّل مع اللوحة / visible cards loaded with the dashboard
-  const PEAK_TOP = 3, REGIONS_SHOWN = 3, AVATARS_MAX = 5;
+  const PEAK_TOP = 3, REGIONS_SHOWN = 3, AVATARS_MAX = 5, TOP_SHOWN = 5;
+  // سرعة الموقع: 5 طلبات فحص حقيقية، والحدود بالثواني (أخضر/أصفر/أحمر) — site speed: 5 real pings, thresholds in seconds
+  const SPEED_SAMPLES = 5, SPEED_GOOD_MS = 1500, SPEED_OK_MS = 3000, SPEED_SCALE_MS = 6000;
   const REGION_COLORS = ['#1FAE8C', '#2E7DD1', '#E5B53A', '#8FA3B8'];
   const CHEV = '<svg class="acc-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>';
 
@@ -81,6 +83,20 @@
       '<circle cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + r + '" fill="none" stroke="var(--border-strong)" stroke-width="7"/>' +
       '<circle cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + r + '" fill="none" stroke="' + color + '" stroke-width="7" stroke-dasharray="' + c + '" stroke-dashoffset="' + off + '" stroke-linecap="round" transform="rotate(-90 ' + size / 2 + ' ' + size / 2 + ')" style="transition:stroke-dashoffset .6s ease, stroke .4s ease"/>' +
       '<text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" font-size="' + Math.round(size * 0.2) + '" font-weight="800" fill="' + color + '" font-family="\'JetBrains Mono\',monospace">' + p + '%</text></svg>';
+  }
+  /* ساعة السرعة: نصف دائرة حتى 6 ث بمؤشر — the speed gauge: a half circle up to 6 s with a needle */
+  function gauge_(ms, color) {
+    const k = Math.min(1, Math.max(0, ms / SPEED_SCALE_MS)), angle = Math.PI * (1 - k);
+    const cx = 100, cy = 100, r = 80, nx = cx + 68 * Math.cos(angle), ny = cy - 68 * Math.sin(angle);
+    const arc = function (from, to, c) {
+      const a1 = Math.PI * (1 - from), a2 = Math.PI * (1 - to);
+      return '<path d="M' + (cx + r * Math.cos(a1)).toFixed(1) + ' ' + (cy - r * Math.sin(a1)).toFixed(1) + ' A' + r + ' ' + r + ' 0 0 1 ' + (cx + r * Math.cos(a2)).toFixed(1) + ' ' + (cy - r * Math.sin(a2)).toFixed(1) + '" fill="none" stroke="' + c + '" stroke-width="14" stroke-linecap="butt"/>';
+    };
+    return '<svg class="speed-gauge" viewBox="0 0 200 116" role="img" aria-label="سرعة الاستجابة ' + (ms / 1000).toFixed(2) + ' ثانية">' +
+      arc(0, SPEED_GOOD_MS / SPEED_SCALE_MS, 'rgba(46,204,113,.75)') + arc(SPEED_GOOD_MS / SPEED_SCALE_MS, SPEED_OK_MS / SPEED_SCALE_MS, 'rgba(229,181,58,.75)') + arc(SPEED_OK_MS / SPEED_SCALE_MS, 1, 'rgba(224,101,79,.75)') +
+      '<line x1="' + cx + '" y1="' + cy + '" x2="' + nx.toFixed(1) + '" y2="' + ny.toFixed(1) + '" stroke="' + color + '" stroke-width="4" stroke-linecap="round"/>' +
+      '<circle cx="' + cx + '" cy="' + cy + '" r="7" fill="' + color + '"/>' +
+      '<text x="20" y="114" font-size="10" fill="currentColor">0</text><text x="172" y="114" font-size="10" fill="currentColor">6 ث</text></svg>';
   }
   /* «yyyy-MM-dd HH:mm» بتوقيت الرياض ← Date — Riyadh "yyyy-MM-dd HH:mm" ← Date */
   function riyadhStamp(text) { const m = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})$/.exec(String(text || '')); return m ? new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4] - 3, +m[5])) : null; }
@@ -102,9 +118,16 @@
     container.innerHTML =
       '<div class="alert-strip" data-role="alerts" hidden></div>' +
       '<div data-role="main"></div>' +
+      // «الأعضاء» بجانب «قياس زمن الطلبات» (طلب محمد، 15 أكتوبر) — «members» next to «request timing» (Mohammed, 15 Oct)
       '<div class="perf-link-bar"><a href="perf.html" class="perf-link-btn">📈 قياس زمن الطلبات</a>' +
-        '<span class="perf-link-note">يعرض قياسات هذا الجهاز والمتصفح فقط — افتح الموقع بتبويب آخر واستخدمه، والجدول يتحدّث تلقائيًا</span></div>';
+        '<button type="button" class="perf-link-btn" data-act="members" aria-expanded="false">👥 الأعضاء</button>' +
+        '<span class="perf-link-note">يعرض قياسات هذا الجهاز والمتصفح فقط — افتح الموقع بتبويب آخر واستخدمه، والجدول يتحدّث تلقائيًا</span></div>' +
+      '<div class="ops-card members-card" data-role="members" hidden><div class="ops-card-title">👥 جميع الأعضاء <span class="members-count" data-role="members-count"></span></div>' +
+        '<input type="search" class="members-search" data-role="members-search" placeholder="ابحث بالاسم أو رقم الجوال" aria-label="ابحث بالاسم أو رقم الجوال">' +
+        '<div data-role="members-body"></div></div>';
     const main = container.querySelector('[data-role="main"]'), alerts = container.querySelector('[data-role="alerts"]');
+    const membersCard = container.querySelector('[data-role="members"]');
+    let members = null;
     let data = null, busy = null, alive = true, chart = null, chartData = null;
     const loaded = {};
 
@@ -158,9 +181,11 @@
     // ===== الرسم الرئيسي — The main render =====
     function render_(d) {
       const quota = pct_(d.dailyRequests, d.dailyRequestLimit), quality = num_(d.dataQualityPct);
-      const breakdown = (Array.isArray(d.dailyRequestBreakdown) ? d.dailyRequestBreakdown : []).map(function (it) {
-        return '<div class="ops-breakdown-row"><span>' + esc(ACTION_LABELS[it.action] || it.action) + '</span><b>' + show_(it.count) + '</b></div>';
-      }).join('');
+      // كل أنواع الطلبات (طلب محمد، 15 أكتوبر): أكثر 5 ظاهرة والبقية بـ«عرض الكل» — every request type: top 5 shown, the rest behind «show all»
+      const allActs = Array.isArray(d.dailyRequestBreakdownAll) && d.dailyRequestBreakdownAll.length ? d.dailyRequestBreakdownAll : (Array.isArray(d.dailyRequestBreakdown) ? d.dailyRequestBreakdown : []);
+      const breakdown = allActs.map(function (it, i) {
+        return '<div class="ops-breakdown-row"' + (i >= TOP_SHOWN ? ' data-extra hidden' : '') + '><span>' + esc(ACTION_LABELS[it.action] || it.action) + '</span><b>' + show_(it.count) + '</b></div>';
+      }).join('') + (allActs.length > TOP_SHOWN ? '<button type="button" class="detail-preview-link" data-act="all-requests">عرض كل أنواع الطلبات (' + allActs.length + ')</button>' : '');
       const propOps = num_(d.propOpsToday) !== null && num_(d.propOpsLimit) ?
         '<div class="ops-status-card" data-role="propops"><div class="ops-status-ring">' + ring_(pct_(d.propOpsToday, d.propOpsLimit), 'quota', 84) + '</div><div class="ops-status-info">' +
         '<div class="ops-status-title">🗄️ عمليات خصائص السكربت اليوم</div><div class="ops-status-count-line"><b class="ops-status-count">' + show_(d.propOpsToday) + '</b> من <b class="ops-status-count">' + show_(d.propOpsLimit) + '</b> عملية</div>' +
@@ -183,7 +208,8 @@
           '<div class="ops-status-title">⚡ طلبات اليوم على السكربت</div><div class="ops-status-count-line"><b class="ops-status-count">' + show_(d.dailyRequests) + '</b> من <b class="ops-status-count">' + show_(d.dailyRequestLimit) + '</b> طلب</div>' +
           '<div class="ops-status-sub">' + esc(d.currentShiftLabel || '') + '</div></div></div>' +
         propOps +
-        (breakdown ? '<div class="ops-breakdown-card"><div class="ops-breakdown-title">📊 أكثر ٥ أنواع طلبات اليوم (يوضّح سبب أي ارتفاع بالعدد)</div>' + breakdown + '</div>' : '') +
+        (breakdown ? '<div class="ops-breakdown-card"><div class="ops-breakdown-title">📊 أنواع طلبات اليوم — الأكثر أولًا (يوضّح سبب أي ارتفاع بالعدد)</div>' + breakdown + '</div>' : '') +
+        section_('speed', '🚀 سرعة الموقع', 'قياس حي عند الفتح') +
         section_('present', '👥 المتواجدون الآن', 'اليوم ' + show_(d.activeUsersToday) + ' — الوردية ' + show_(d.activeUsersShift)) +
         section_('additions', '➕ الإضافات اليوم', show_(d.additionsToday)) +
         section_('edits', '✏️ التعديلات اليوم', show_(d.editsToday)) +
@@ -304,11 +330,13 @@
         if (r.peak) html += '<div class="heatmap-peak-note">🔥 أكثر وقت نشاطًا: <b>' + esc(r.peak.day) + ' — الساعة ' + r.peak.hour + ':00</b> (' + show_(r.peak.count) + ' حدث)</div>';
         box.innerHTML = html;
       },
-      // دائرة: أعلى 3 مناطق + «أخرى» بالنسب، والمركز = مجموع أحداث النشاط الفعلي (لا إجمالي المحطات)
-      // A donut: the top 3 regions + «other» as percentages; the centre = the real activity total (not the station total)
+      // قرار محمد (15 أكتوبر): الدائرة = توزيع المحطات التي أُضيفت أو عُدّلت في الموقع (لها تاريخ) على المناطق — أعلى 3 +
+      // «أخرى»، والمركز عددها؛ و«عرض كل المناطق» جدول: المنطقة، المحطات، إضافات وتعديلات آخر 30 يومًا
+      // Mohammed's decision (15 Oct): the donut = stations added/edited on the site (dated) per region; «all regions» is a table
       regions: async function (box) {
-        const r = await call_('getRegionActivity'), regions = (r.regions || []).filter(function (x) { return num_(x.count) > 0; });
-        if (!regions.length) { box.innerHTML = '<div class="coming-soon">' + MSG.NO_REGIONS + '</div>'; return; }
+        const r = await call_('getRegionActivity'), all = (r.stations || []).filter(function (x) { return num_(x.stations) > 0; });
+        if (!all.length) { box.innerHTML = '<div class="coming-soon">' + MSG.NO_REGIONS + '</div>'; return; }
+        const regions = all.map(function (x) { return { region: x.region, count: x.stations }; });
         const total = regions.reduce(function (a, x) { return a + x.count; }, 0);
         const parts = regions.slice(0, REGIONS_SHOWN).map(function (x) { return { label: x.region, count: x.count }; });
         const rest = total - parts.reduce(function (a, x) { return a + x.count; }, 0);
@@ -321,10 +349,44 @@
         }).join('');
         box.innerHTML = '<div class="region-donut-wrap"><svg class="region-donut" width="' + size + '" height="' + size + '" viewBox="0 0 120 120" role="img" aria-label="نشاط المناطق">' + arcs +
           '<text x="60" y="56" text-anchor="middle" font-size="17" font-weight="800" fill="currentColor" font-family="\'JetBrains Mono\',monospace">' + total + '</text>' +
-          '<text x="60" y="74" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".7">حدث</text></svg>' +
+          '<text x="60" y="74" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".7">محطة</text></svg>' +
           '<div class="region-legend">' + parts.map(function (p, i) {
             return '<div class="region-legend-row"><span class="region-dot" style="background:' + REGION_COLORS[i] + '"></span><span class="region-legend-label">' + esc(p.label) + '</span><b>' + Math.round(p.count / total * 100) + '%</b></div>';
-          }).join('') + '</div></div>';
+          }).join('') + '</div></div>' +
+          '<details class="peak-details region-all"><summary>عرض كل المناطق (' + all.length + ')</summary>' +
+          table_(['المنطقة', 'المحطات', 'إضافات', 'تعديلات'], all.map(function (x) {
+            return '<tr><td>' + esc(x.region) + '</td><td class="mono">' + show_(x.stations) + '</td><td class="mono">' + show_(x.additions) + '</td><td class="mono">' + show_(x.edits) + '</td></tr>';
+          }).join('')) + '<div class="region-note">الإضافات والتعديلات: آخر 30 يومًا</div></details>';
+      },
+      // سرعة الموقع (طلب محمد، 15 أكتوبر): قياس حي — 5 طلبات فحص متتالية، والساعة بالوسيط، مع زمن الخادم والشبكة
+      // Site speed (Mohammed, 15 Oct): a live measurement — 5 sequential pings, the gauge at the median, server vs network
+      speed: async function (box) {
+        box.innerHTML = spinner_('جاري قياس سرعة الاستجابة…');
+        const samples = [];
+        for (let i = 0; i < SPEED_SAMPLES; i++) {
+          const t0 = global.performance.now();
+          const res = await API.call('ping', {});
+          const ms = Math.round(global.performance.now() - t0);
+          const server = res && res._timing && num_(res._timing.serverMs);
+          if (!res || !res.success) throw new Error(MSG.LOAD_FAIL);
+          samples.push({ total: ms, server: server === null ? null : server });
+        }
+        if (!alive || !box.isConnected) return;
+        const sorted = samples.map(function (x) { return x.total; }).sort(function (a, b) { return a - b; });
+        const median = sorted[Math.floor(sorted.length / 2)];
+        const servers = samples.map(function (x) { return x.server; }).filter(function (x) { return x !== null; }).sort(function (a, b) { return a - b; });
+        const serverMed = servers.length ? servers[Math.floor(servers.length / 2)] : null;
+        const color = median <= SPEED_GOOD_MS ? '#2ECC71' : median <= SPEED_OK_MS ? '#E5B53A' : '#E0654F';
+        const label = median <= SPEED_GOOD_MS ? 'سريع' : median <= SPEED_OK_MS ? 'مقبول' : 'بطيء';
+        const sec = function (ms) { return (ms / 1000).toFixed(2) + ' ث'; };
+        box.innerHTML = '<div class="speed-wrap" data-role="speed">' + gauge_(median, color) +
+          '<div class="speed-value" style="color:' + color + '">' + sec(median) + ' <span>' + label + '</span></div>' +
+          '<div class="speed-rows">' +
+            '<div class="speed-row"><span>أسرع / أبطأ استجابة</span><b>' + sec(sorted[0]) + ' / ' + sec(sorted[sorted.length - 1]) + '</b></div>' +
+            '<div class="speed-row"><span>زمن الخادم (الوسيط)</span><b>' + (serverMed === null ? '—' : sec(serverMed)) + '</b></div>' +
+            '<div class="speed-row"><span>الشبكة وجوجل (الباقي)</span><b>' + (serverMed === null ? '—' : sec(Math.max(0, median - serverMed))) + '</b></div>' +
+          '</div><div class="speed-note">' + SPEED_SAMPLES + ' طلبات فحص حقيقية من هذا الجهاز الآن — أخضر حتى 1.5 ث، أصفر حتى 3 ث، أحمر فوقها</div>' +
+          '<button type="button" class="detail-preview-link" data-act="speed-retry">↻ إعادة القياس</button></div>';
       }
     };
     async function changes_(box, type, empty, kind) {
@@ -410,10 +472,57 @@
       const more = e.target.closest('[data-detail]');
       if (more && o.onOpenDetail) { o.onOpenDetail(more.dataset.detail); return; }
       if (e.target.closest('[data-act="retry"]')) { load(true); return; }
+      const allReq = e.target.closest('[data-act="all-requests"]');
+      if (allReq) { // كل أنواع الطلبات / every request type
+        const card = allReq.closest('.ops-breakdown-card'), extra = card.querySelectorAll('[data-extra]'), open = extra.length && extra[0].hidden;
+        extra.forEach(function (el) { el.hidden = !open; });
+        allReq.textContent = open ? 'عرض أقل' : 'عرض كل أنواع الطلبات (' + card.querySelectorAll('.ops-breakdown-row').length + ')';
+        return;
+      }
+      if (e.target.closest('[data-act="speed-retry"]')) { // إعادة قياس السرعة / measure again
+        const box = main.querySelector('[data-body="speed"]');
+        if (box) LOADERS.speed(box).catch(function () { box.innerHTML = '<div class="coming-soon">' + MSG.LOAD_FAIL + '</div>'; });
+        return;
+      }
+      if (e.target.closest('[data-act="members"]')) { toggleMembers_(e.target.closest('[data-act="members"]')); return; }
       const sr = e.target.closest('[data-act="section-retry"]');
       if (sr && CARDS.indexOf(sr.dataset.name) !== -1) { loadCard_(sr.dataset.name); return; }
       if (sr) { const item = sr.closest('.acc-item'); item.classList.remove('open'); openSection(sr.dataset.name); }
     }
+    // ===== جميع الأعضاء (طلب محمد، 15 أكتوبر) — All members (Mohammed, 15 Oct) =====
+    /* فتح/طي البطاقة؛ تُحمَّل القائمة أول فتح فقط — toggle the card; the list loads on the first open only */
+    async function toggleMembers_(btn) {
+      const open = membersCard.hidden;
+      membersCard.hidden = !open; btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (!open || members) return;
+      const body = membersCard.querySelector('[data-role="members-body"]');
+      body.innerHTML = spinner_();
+      try {
+        const r = await call_('getMembersList');
+        members = Array.isArray(r.members) ? r.members : [];
+        renderMembers_();
+      } catch (err) {
+        if (err.expired) { S.handleExpired(); return; }
+        if (err.denied) { denied_(); return; }
+        body.innerHTML = '<div class="coming-soon">' + MSG.LOAD_FAIL + '</div>';
+      }
+    }
+    /* القائمة بترتيب الخادم العكسي (آخر من سجّل أولًا)، مصفّاة بالاسم أو الجوال (الأرقام العربية تُقبل)
+     * The list in the server's reverse order (latest registration first), filtered by name or phone (Arabic digits accepted) */
+    function renderMembers_() {
+      if (!members) return;
+      const raw = membersCard.querySelector('[data-role="members-search"]').value.trim();
+      const q = (global.SecTextInput ? global.SecTextInput.normalizeDigits(raw) : raw).toLowerCase();
+      const list = members.filter(function (m) { return !q || String(m.name).toLowerCase().indexOf(q) !== -1 || String(m.phone).replace(/\D/g, '').indexOf(q.replace(/\D/g, '') || '\u0000') !== -1; });
+      membersCard.querySelector('[data-role="members-count"]').textContent = '(' + (q ? list.length + ' من ' : '') + members.length + ')';
+      membersCard.querySelector('[data-role="members-body"]').innerHTML = list.length ? table_(['ترتيب التسجيل', 'الاسم', 'الجوال', 'النوع', 'الوردية', 'القسم', 'الحالة', 'تاريخ التسجيل'], list.map(function (m) {
+        const at = riyadhStamp(m.registeredAt);
+        return '<tr><td class="mono">' + (members.length - members.indexOf(m)) + '</td><td>' + esc(m.name) + '</td><td class="mono" dir="ltr">' + esc(m.phone) + '</td><td>' + esc(m.memberType || '—') + '</td><td>' + esc(m.shift || '—') + '</td><td>' + esc(m.department || '—') + '</td><td>' + esc(m.status || '—') + '</td><td>' + (at ? dateCell(at) : esc(m.registeredAt || '—')) + '</td></tr>';
+      }).join('')) : '<div class="coming-soon">لا يوجد عضو يطابق البحث</div>';
+    }
+    function onInput_(e) { if (e.target.matches('[data-role="members-search"]')) renderMembers_(); }
+    container.addEventListener('input', onInput_);
+
     function onKey_(e) { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('acc-head')) { e.preventDefault(); openSection(e.target.closest('.acc-item').dataset.section); } }
     container.addEventListener('click', onClick_);
     container.addEventListener('keydown', onKey_);
@@ -423,7 +532,7 @@
       data: function () { return data; },
       destroy: function () {
         alive = false;
-        container.removeEventListener('click', onClick_); container.removeEventListener('keydown', onKey_);
+        container.removeEventListener('click', onClick_); container.removeEventListener('keydown', onKey_); container.removeEventListener('input', onInput_);
         if (typeof unTheme === 'function') unTheme();
         if (chart) { try { chart.destroy(); } catch (e) { /* لا شيء / nothing */ } }
         container.textContent = '';

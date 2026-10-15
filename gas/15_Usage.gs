@@ -72,10 +72,12 @@ function countTriggerPropOps_() {
 /* أرقام اليوم للوحة المدير — Today's numbers for the admin dashboard */
 function usageToday_() {
   const state = usageState_(scriptProps_()), breakdown = state.breakdown || {};
+  const all = Object.keys(breakdown).map(function (k) { return { action: k, count: breakdown[k] }; })
+    .sort(function (a, b) { return b.count - a.count; });
   return {
     requests: state.count, propOps: state.propOps || 0,
-    topActions: Object.keys(breakdown).map(function (k) { return { action: k, count: breakdown[k] }; })
-      .sort(function (a, b) { return b.count - a.count; }).slice(0, TOP_ACTIONS_COUNT)
+    topActions: all.slice(0, TOP_ACTIONS_COUNT),
+    allActions: all // كل الأنواع (طلب محمد، 15 أكتوبر) — بلا قراءة إضافية / every type (Mohammed, 15 Oct) — no extra read
   };
 }
 

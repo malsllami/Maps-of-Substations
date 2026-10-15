@@ -8,7 +8,7 @@
  * - أخطاء الشبكة لا تُخرج المستخدم أبدًا؛ فقط رفض الخادم الصريح (TOKEN_INVALID).
  * - الدور (role) يأتي من الخادم: «admin» فقط للمدير الداخل بالبصمة. إظهار لوحة المدير يعتمد عليه، والخادم
  *   يتحقق من التذكرة نفسها في كل طلب إداري (الجلسة المحلية للعرض لا للصلاحية).
- * - الخروج موحّد: يحذف الجلسة والجوال. انتهاء الجلسة يحذف الجلسة ويُبقي الجوال لاقتراحه في صفحة الدخول.
+ * - الخروج موحّد: يحذف الجلسة، والجوال فقط إن ألغى المستخدم «تذكرني» (15 أكتوبر). انتهاء الجلسة يحذف الجلسة ويُبقي الجوال لاقتراحه في صفحة الدخول.
  *
  * The browser session: save, read, update, logout, and identity-ticket renewal.
  * - The only V2 session (sec2-session). Every page reads and writes through this file only (in V1 each page read
@@ -18,7 +18,7 @@
  * - Network errors never log the user out; only an explicit server refusal (TOKEN_INVALID) does.
  * - The role comes from the server: "admin" only for the admin logged in by fingerprint. Showing the admin panel
  *   depends on it, and the server checks the ticket itself on every admin request (local session = display, not rights).
- * - Logout is unified: removes the session and the phone. Expiry removes the session and keeps the phone to suggest it.
+ * - Logout is unified: removes the session, and the phone only when «remember me» is off (15 Oct). Expiry removes the session and keeps the phone to suggest it.
  * ============================================================ */
 (function (global) {
   'use strict';
@@ -85,7 +85,12 @@
 
   /* خروج يدوي موحّد لكل الصفحات: الجلسة والجوال، ثم صفحة الدخول — Unified manual logout: session and phone, then the login page */
   function logout() {
-    try { global.localStorage.removeItem(SESSION_KEY); global.localStorage.removeItem(PHONE_KEY); } catch (e) { /* تخزين محظور / storage blocked */ }
+    try {
+      global.localStorage.removeItem(SESSION_KEY);
+      // «تذكرني» مفعّل (الافتراضي) ← يبقى الجوال مقترحًا في حقل الدخول (طلب محمد، 15 أكتوبر)؛ غير مفعّل ← يُمسح
+      // «remember me» on (default) ← the phone stays suggested in the login field (Mohammed, 15 Oct); off ← removed
+      if (global.localStorage.getItem(CONFIG.STORAGE_KEYS.REMEMBER_PHONE) === '0') global.localStorage.removeItem(PHONE_KEY);
+    } catch (e) { /* تخزين محظور / storage blocked */ }
     go_(LOGIN_PAGE);
   }
 

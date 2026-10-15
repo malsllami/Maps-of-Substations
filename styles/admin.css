@@ -170,3 +170,23 @@ body.admin-page header{position:sticky;top:0;z-index:20;}
   .rep-row{flex-wrap:wrap;}
 }
 @media (max-width:360px){ .ops-grid2{grid-template-columns:1fr;} }
+
+/* ===== إضافات 15 أكتوبر: سرعة الموقع، كل المناطق، جميع الأعضاء — 15 Oct additions: site speed, all regions, all members ===== */
+.speed-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;padding-top:4px;}
+.speed-gauge{width:220px;max-width:100%;height:auto;color:var(--text-secondary);}
+.speed-value{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:800;}
+.speed-value span{font-family:'IBM Plex Sans Arabic',sans-serif;font-size:14px;}
+.speed-rows{width:100%;display:flex;flex-direction:column;}
+.speed-row{display:flex;justify-content:space-between;gap:10px;padding:8px 2px;border-top:1px solid var(--border);color:var(--text-primary);font-size:12.5px;}
+.speed-row b{font-family:'JetBrains Mono',monospace;unicode-bidi:isolate;}
+.speed-note{font-size:11.5px;color:var(--text-secondary);text-align:center;line-height:1.6;}
+.region-all{margin-top:10px;}
+.region-all .sec-table-wrap{margin-top:8px;}
+.region-note{font-size:11px;color:var(--text-secondary);margin-top:6px;text-align:center;}
+.perf-link-bar button.perf-link-btn{font-family:inherit;cursor:pointer;}
+.perf-link-bar button.perf-link-btn[aria-expanded="true"]{border-color:var(--teal);}
+.members-card[hidden]{display:none;}
+.members-count{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--text-secondary);}
+.members-search{width:100%;box-sizing:border-box;height:42px;margin-bottom:10px;padding:0 12px;border-radius:12px;border:1px solid var(--border-strong);background:var(--bg);color:var(--text-primary);font-family:inherit;font-size:16px;outline:none;}
+.members-search:focus{border-color:var(--teal);}
+.members-card .sec-table-wrap{max-height:420px;}

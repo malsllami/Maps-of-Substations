@@ -65,6 +65,7 @@ const ROUTES = {
   getVisitorsChart: { handler: function () { return getVisitorsChart(); }, access: ACCESS.ADMIN },
   getPeakHoursHeatmap: { handler: function () { return getPeakHoursHeatmap(); }, access: ACCESS.ADMIN },
   getRegionActivity: { handler: function () { return getRegionActivity(); }, access: ACCESS.ADMIN },
+  getMembersList: { handler: function () { return getMembersList(); }, access: ACCESS.ADMIN }, // كل الأعضاء للمدير (15 أكتوبر) / all members for the admin
   getDailyReport: { handler: function () { return getDailyReport(); }, access: ACCESS.ADMIN } // تقرير الأمس للعرض فقط (V2) / yesterday's report, view only (V2)
 };
 

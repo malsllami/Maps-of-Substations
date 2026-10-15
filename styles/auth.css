@@ -12,7 +12,8 @@ body.auth-page{
   --auth-field:rgba(6,18,30,0.55); --auth-glass:rgba(12,30,48,0.58);
   color-scheme:dark;
   font-family:'IBM Plex Sans Arabic',sans-serif; color:var(--auth-text);
-  min-height:100vh; margin:0; padding:clamp(150px, 26vh, 230px) 16px 28px;
+  /* موضع ثابت بالبكسل (لا vh): في سفاري الآيفون يتغير vh مع ظهور شريط المتصفح فتقفز البطاقة — fixed px, not vh (iPhone Safari) */
+  min-height:100vh; min-height:100svh; margin:0; padding:190px 16px 28px;
   display:flex; justify-content:center; align-items:flex-start;
   background:#06101C;
   box-sizing:border-box;
