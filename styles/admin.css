@@ -73,7 +73,7 @@ body.admin-page header{position:sticky;top:0;z-index:20;}
 .ops-grid2 .ops-card{margin-bottom:10px;}
 .present-avatars{display:flex;gap:10px;overflow-x:auto;padding:4px 0 12px;}
 .present-avatar{flex-shrink:0;width:64px;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;}
-.present-avatar img{width:46px;height:46px;border-radius:50%;border:2px solid var(--teal);background:var(--bg-elev);object-fit:cover;}
+.present-avatar img{width:46px;height:46px;object-fit:contain;} /* الصورة بإطارها، بلا قص — the avatar with its own frame, no crop */
 .present-avatar b{font-size:11.5px;color:var(--text-primary);max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .present-avatar span{font-size:10.5px;}
 .peak-top{display:flex;flex-direction:column;gap:9px;margin-bottom:8px;}

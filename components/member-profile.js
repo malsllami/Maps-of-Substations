@@ -61,7 +61,7 @@
    * يُرجع { load() → Promise<res|null>، save() → Promise<bool>، destroy() }
    */
   function mount(slots, opts) {
-    const o = Object.assign({ avatarSrc: 'assets/member-icon.png' }, opts || {});
+    const o = Object.assign({ avatarSrc: 'assets/member-avatar.webp' }, opts || {});
 
     // ===== بطاقة العضو — The member card =====
     // تصميم محمد (15 أكتوبر): الصورة والاسم والجوال والشارة، و«آخر تسجيل دخول» في خانة مستقلة

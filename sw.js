@@ -37,7 +37,7 @@ const PREFIX = CONFIG.STORAGE_PREFIX;
 const APP_SHELL = [
   './', 'index.html', 'auth.html', 'member.html', 'shifts.html', 'admin.html', 'perf.html', 'manifest.json',
   'config/الإعدادات.js',
-  'assets/icon-192.png', 'assets/icon-512.png', 'assets/icon-maskable-512.png', 'assets/logo-icon.png', 'assets/logo-light.png', 'assets/member-icon.png', 'assets/auth-bg.webp',
+  'assets/icon-192.png', 'assets/icon-512.png', 'assets/icon-maskable-512.png', 'assets/logo-icon.png', 'assets/logo-light.png', 'assets/member-avatar.webp', 'assets/auth-bg.webp',
   'utils/dates.js', 'utils/html.js', 'utils/station-query.js', 'utils/text-input.js',
   'services/api-client.js', 'services/connection.js', 'services/direction-tracker.js', 'services/nav-camera.js', 'services/navigation.js',
   'services/offline-map.js', 'services/osrm.js', 'services/pwa.js', 'services/session.js', 'services/settings-lists.js',

@@ -115,3 +115,5 @@ select.input-base{cursor:pointer;}
   .mp-stat-n{font-size:20px;}
   .mp-form-grid .input-base{padding:0 10px;}
 }
+/* صورة العضو بإطارها الذهبي والخوذة خارجه (15 أكتوبر): بلا قص دائري ولا إطار إضافي — the avatar has its own frame, the helmet pops out: no circular crop */
+.mp-id .avatar{border:none;background:transparent;border-radius:0;overflow:visible;}

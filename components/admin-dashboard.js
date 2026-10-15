@@ -273,7 +273,7 @@
         const r = await call_('getActiveUsersDetail', { period: 'today' }), users = (r.users || []).slice(0, PREVIEW_ROWS);
         // صفّ صور: الأيقونة العامة + الاسم الأول + الوردية (بيانات حقيقية) — an avatar row: the generic icon + first name + shift (real data)
         const avatars = users.slice(0, AVATARS_MAX).map(function (u) {
-          return '<div class="present-avatar"><img src="assets/member-icon.png" alt=""><b>' + esc(String(u.name || '—').split(' ')[0]) + '</b><span>' + (u.shift ? 'وردية ' + esc(u.shift) : '—') + '</span></div>';
+          return '<div class="present-avatar"><img src="assets/member-avatar.webp" alt=""><b>' + esc(String(u.name || '—').split(' ')[0]) + '</b><span>' + (u.shift ? 'وردية ' + esc(u.shift) : '—') + '</span></div>';
         }).join('');
         box.innerHTML = (avatars ? '<div class="present-avatars">' + avatars + '</div>' : '') + (users.length ? table_(['الاسم', 'الجوال', 'الوردية', 'آخر نشاط'], users.map(function (u) {
           return '<tr><td>' + esc(u.name) + '</td><td dir="ltr" class="mono">' + esc(u.phone) + '</td><td>' + esc(u.shift || '—') + '</td><td>' + dateCell(riyadhStamp(u.lastActivity)) + '</td></tr>';
