@@ -65,3 +65,50 @@
 .st-note-warn{background:rgba(232,163,23,.14);border-radius:10px;padding:8px 10px;font-size:11.5px;margin-bottom:10px;color:var(--text-primary);}
 .station-table .st-btn:disabled,.station-table .st-btn.st-disabled{opacity:.45;cursor:not-allowed;}
 .station-table .st-btn.primary.st-main:disabled{background:var(--teal);opacity:.45;}
+
+/* ===== تصميم محمد (15 أكتوبر): بطاقة واحدة تحيط بالخريطة — Mohammed's design (15 Oct): one card around the map =====
+   الجزء العلوي (#stationTable) ثم الخريطة (.map-stage-slot) ثم الجزء السفلي (#stationActions) بإطار واحد متصل؛ في الملاحة
+   الكاملة تُطوى البطاقة كلها والخريطة تملأ الشاشة كما كانت.
+   The top part, the map, then the bottom part share one continuous frame; full navigation folds the card as before. */
+.sb-top .sb-data-row{margin-bottom:12px;border-radius:14px;}
+.sb-top .sb-data-cell{padding:10px 6px;}
+.sb-top .sb-data-cell .cell-label{font-size:12px;margin-bottom:4px;}
+.sb-top .sb-data-cell .cell-value{font-size:17px;}
+.station-table .sb-top .st-btn.primary.st-main{padding:14px;font-size:16px;border-radius:14px;}
+.station-actions{width:min(1100px, 96vw);margin:0 auto;box-sizing:border-box;}
+body.nav-full .station-actions{display:none !important;}
+.sb-bottom .st-sub{display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:10px;}
+.station-table .sb-bottom .st-btn{justify-content:center;font-size:14px;font-weight:700;padding:11px 10px;border-radius:12px;color:var(--text-primary);background:transparent;min-width:0;}
+.station-table .sb-bottom .st-btn.st-span{grid-column:1 / -1;}
+.station-table .sb-bottom .st-google,.station-table .sb-bottom .st-share{border-color:rgba(46,125,209,0.7);}
+.station-table .sb-bottom .st-edit{border-color:rgba(229,181,58,0.75);}
+.station-table .sb-bottom .st-om{border-color:rgba(31,174,140,0.6);}
+.station-table .sb-bottom .st-om .st-om-text{text-align:center;}
+.station-table .sb-bottom .st-om .st-om-text b{font-size:13px;white-space:normal;}
+.station-table .sb-bottom .st-btn.st-danger{color:#E0654F;}
+.station-table .sb-bottom .st-btn:hover{border-color:var(--teal);}
+.sb-bottom .db-freshness-note{justify-content:flex-start;align-items:flex-start;font-size:12px;line-height:1.7;margin-top:12px;padding-top:12px;text-align:start;}
+.sb-bottom .db-freshness-note svg{margin-top:3px;}
+.hero.station-framed .top-content-area .station-table{margin-top:12px;border-radius:16px 16px 0 0;border-bottom:none;box-shadow:none;}
+.hero.station-framed .top-content-area .sb-inner{padding-bottom:4px;}
+.hero.station-framed .map-stage-slot{
+  width:min(1100px, 96vw);margin:0 auto;box-sizing:border-box;padding:8px 18px 0;
+  background:var(--bg-card);border-left:1px solid var(--border-strong);border-right:1px solid var(--border-strong);
+}
+.hero.station-framed .map-stage-slot .globe-stage.map-active{width:100%;}
+.hero.station-framed .station-actions{border-radius:0 0 16px 16px;border-top:none;box-shadow:none;}
+.hero.station-framed .station-actions .sb-inner{padding-top:12px;}
+@media (max-width:767px){
+  .station-actions,.hero.station-framed .map-stage-slot{width:100%;}
+  .hero.station-framed .map-stage-slot{padding:8px 12px 0;}
+  .hero.station-framed .station-table .sb-inner{padding-left:12px;padding-right:12px;}
+}
+@media (max-width:380px){
+  .station-table .sb-bottom .st-btn{font-size:13px;padding:10px 6px;}
+  .sb-top .sb-data-cell .cell-value{font-size:15px;}
+}
+/* شريط أدوات الخريطة داخل البطاقة بالجوال: مسافات أضيق ليتسع «الخريطة» والنوع و«قريب» و«مغذي» — the toolbar inside the card on phones */
+@media (max-width:767px){
+  .hero.station-framed .toolbar-scroll{padding:6px 6px;gap:2px;}
+  .hero.station-framed .toolbar-btn,.hero.station-framed .map-mode-chip{padding:7px 7px;gap:4px;}
+}

@@ -4,7 +4,8 @@
  * ===================================================
  * كل إجراءات هذا الملف بتذكرة مدير (جوال المدير السري + دخول بالبصمة) — يُطبَّق في الموجّه (01_Api).
  * - لوحة العمليات: عدّاد طلبات اليوم وأكثر الإجراءات، عمليات الخصائص، الإحصاءات، جودة البيانات، المتواجدون
- *   اليوم والوردية، وملخص سجل الأخطاء بالتصنيفات. محفوظة 55 ث (fresh يتجاوزها بزر «تحديث اللوحة»).
+ *   اليوم والوردية، وملخص سجل الأخطاء بالتصنيفات، والمشاكل المحددة فيه (شريط 72 ساعة من أول ظهور + أحدث المشاكل
+ *   لسجل النظام — 15 أكتوبر). محفوظة 55 ث (fresh يتجاوزها بزر «تحديث اللوحة»).
  * - السجلات الزمنية (الزوار، التعديلات) تُقرأ من ذيلها حتى بداية الفترة المطلوبة فقط.
  * - جودة البيانات: المحطات بلا إحداثيات صالحة، محفوظة 10 دقائق بمفتاح رقم الإصدار.
  * - كل الأوقات بتوقيت الرياض (+03:00 ثابت).
@@ -217,26 +218,62 @@ function getOperationsDashboard(data) {
 function buildDashboard_() {
   const stats = getStats(), quality = dataQualityReport_(), usage = usageToday_();
   const today = getActiveUsersDetail({ period: 'today' }), shift = getActiveUsersDetail({ period: 'shift' });
-  return {
+  const result = {
     success: true,
     dailyRequests: usage.requests, dailyRequestBreakdown: usage.topActions, dailyRequestLimit: DAILY_REQUEST_LIMIT,
     propOpsToday: usage.propOps, propOpsLimit: SCRIPT_PROPS_DAILY_LIMIT,
     totalStations: stats.totalStations, totalStationsDistribution: stats.distribution, totalStationsSubstations: stats.substations,
     additionsToday: stats.additions, editsToday: stats.edits,
     dataQualityPct: quality.qualityPct, stationsNeedingReview: quality.needsReviewCount,
-    activeUsersToday: today.count, activeUsersShift: shift.count, currentShiftLabel: shiftRange_(new Date()).label,
-    alertsSummary: errorCategoryCounts_()
+    activeUsersToday: today.count, activeUsersShift: shift.count, currentShiftLabel: shiftRange_(new Date()).label
   };
+  const rows = perfMeasure_('سجل الأخطاء', function () { return readAllRows_(SHEETS.ERRORS); }, function (r) { return r.length + ' صف'; });
+  result.alertsSummary = errorCategoryCounts_(rows);
+  // قرار محمد (15 أكتوبر): شريط الأخطاء = المشاكل التي أول ظهور لها خلال 72 ساعة؛ وكل المشاكل تبقى في «سجل النظام»
+  // Mohammed's decision (15 Oct): the alert strip = problems first seen within 72 hours; all problems stay in «system log»
+  const problems = recentProblems_(rows, Date.now());
+  result.alertsRecent = problems.recent;
+  result.problems = problems.latest;
+  return result;
 }
 
 /* عدد صفوف سجل الأخطاء لكل تصنيف (بالقواعد الحالية؛ التحذير غير الضار لا يُعدّ) — Error-log rows per category (current rules; the harmless warning isn't counted) */
-function errorCategoryCounts_() {
+function errorCategoryCounts_(rows) {
   const counts = {};
   ERROR_CATEGORIES.forEach(function (c) { counts[c] = 0; });
-  const rows = perfMeasure_('سجل الأخطاء', function () { return readAllRows_(SHEETS.ERRORS); }, function (r) { return r.length + ' صف'; });
   for (let i = 1; i < rows.length; i++) {
     const category = classifyError_(rows[i][1], rows[i][2]);
     if (category !== HARMLESS_CATEGORY) counts[category] = (counts[category] || 0) + 1;
   }
   return counts;
+}
+
+/* المشاكل المحددة في سجل الأخطاء: المشكلة الواحدة = نفس المصدر + نفس الرسالة (بلا التحذير غير الضار).
+ * recent: أول ظهور لها خلال آخر 72 ساعة (للشريط)، الأحدث ظهورًا أولًا؛ latest: أحدث المشاكل بآخر ظهور (لسجل النظام).
+ * Distinct problems in the error log: one problem = same source + same message (harmless warning excluded).
+ * recent: first seen within the last 72 hours (the strip), newest first; latest: the most recently seen (system log). */
+const ALERT_WINDOW_HOURS = 72;
+const PROBLEMS_LIST_MAX = 20;
+const PROBLEM_MESSAGE_MAX = 160;
+function recentProblems_(rows, nowMs) {
+  const byKey = {};
+  for (let i = 1; i < rows.length; i++) {
+    const t = logCellTime_(rows[i][0]);
+    if (!t) continue;
+    const source = String(rows[i][1] || '').trim(), message = String(rows[i][2] || '').trim();
+    const category = classifyError_(source, message);
+    if (category === HARMLESS_CATEGORY) continue;
+    const key = source + '\u0000' + message, ms = t.getTime();
+    const p = byKey[key] || (byKey[key] = { category: category, source: source, message: message.slice(0, PROBLEM_MESSAGE_MAX), count: 0, first: ms, last: ms });
+    p.count++;
+    if (ms < p.first) p.first = ms;
+    if (ms > p.last) p.last = ms;
+  }
+  const all = Object.keys(byKey).map(function (k) { return byKey[k]; });
+  const out = function (p) { return { category: p.category, source: p.source, message: p.message, count: p.count, firstSeen: new Date(p.first).toISOString(), lastSeen: new Date(p.last).toISOString() }; };
+  const since = nowMs - ALERT_WINDOW_HOURS * 3600 * 1000;
+  return {
+    recent: all.filter(function (p) { return p.first >= since; }).sort(function (a, b) { return b.first - a.first; }).slice(0, PROBLEMS_LIST_MAX).map(out),
+    latest: all.slice().sort(function (a, b) { return b.last - a.last; }).slice(0, PROBLEMS_LIST_MAX).map(out)
+  };
 }

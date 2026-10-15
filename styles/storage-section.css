@@ -1,29 +1,60 @@
 /* ============================================================
- * styles/storage-section.css — قسم الذاكرة (من V1 كما هو: index.html الأسطر 1014–1042)
- * The storage section (from V1 as is)
+ * styles/storage-section.css — قسم «البيانات المؤقتة» (تصميم محمد — 15 أكتوبر)
+ * رأس بالعنوان وزر المسح، شريط الذاكرة بالنسبة، أربع خانات بأيقونات، سطر حالة عند الحاجة، وسطر «آخر مزامنة».
+ * The «cached data» section: header with the clear button, usage bar with a percentage, four icon cells, a status line
+ * when needed, and the «last sync» line.
  * ============================================================ */
 .storage-row{
-  display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
-  width:100%;max-width:760px;padding:10px 16px;
-  background:var(--bg-card);border:1px solid var(--border);border-radius:12px;
+  width:100%;max-width:760px;box-sizing:border-box;padding:14px 14px 12px;
+  display:flex;flex-direction:column;gap:12px;
+  background:var(--bg-card);border:1px solid var(--border-strong);border-radius:16px;
 }
+.storage-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.storage-title{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:700;color:var(--text-primary);}
+.storage-title-icon{display:flex;color:var(--blue-mid);}
 .storage-clear-btn{
-  background:transparent;border:none;color:var(--text-secondary);font-size:11.5px;
-  cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;
+  display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:10px;
+  background:transparent;border:1px solid var(--border);color:var(--text-secondary);
+  font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:color .2s, border-color .2s;
 }
-.storage-clear-btn:hover{color:#E0654F;}
-.storage-bar-wrap{display:flex;align-items:center;gap:8px;font-size:10.5px;color:var(--text-secondary);flex:1;min-width:160px;}
-.storage-bar-track{flex:1;height:8px;border-radius:4px;background:var(--bg-elev);border:1px solid var(--border-strong);overflow:hidden;}
-.storage-bar-fill{height:100%;min-width:2px;border-radius:4px;background:linear-gradient(90deg, var(--blue-mid), var(--teal-light));transition:width .4s ease;}
+.storage-clear-icon{display:flex;color:var(--danger);}
+.storage-clear-icon svg{width:17px;height:17px;}
+.storage-clear-btn:hover{color:var(--danger);border-color:var(--danger);}
+
+.storage-usage{display:flex;flex-direction:column;gap:6px;}
+.storage-usage-top{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:var(--text-secondary);}
+.storage-usage-val{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--text-primary);direction:ltr;}
+.storage-bar-wrap{display:flex;align-items:center;gap:10px;}
+.storage-bar-track{flex:1;height:10px;border-radius:6px;background:var(--bg-elev);border:1px solid var(--border-strong);overflow:hidden;}
+.storage-bar-fill{height:100%;min-width:6px;border-radius:6px;background:linear-gradient(90deg, var(--blue-mid), var(--teal-light));transition:width .4s ease;}
+.storage-percent{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--teal);direction:ltr;min-width:48px;text-align:left;}
+
+.storage-cells{display:grid;grid-template-columns:repeat(4, minmax(0,1fr));border-top:1px solid var(--border);padding-top:12px;}
+.storage-cell{min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:0 4px;text-align:center;}
+.storage-cell + .storage-cell{border-right:1px solid var(--border);}
+.storage-cell-icon{display:flex;color:var(--blue-mid);}
+.storage-cell-label{font-size:11px;color:var(--text-secondary);line-height:1.4;}
+.storage-cell-val{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:13px;font-weight:700;color:var(--text-primary);line-height:1.4;}
+.storage-cell-val small{font-size:10.5px;font-weight:700;color:var(--text-secondary);}
+
 .stations-cache-info{
-  width:100%;display:flex;align-items:center;justify-content:center;gap:6px;
-  font-size:10.5px;color:var(--text-secondary);
-  padding-top:8px;margin-top:2px;border-top:1px solid var(--border);
-  font-family:'JetBrains Mono',monospace;
+  font-size:11.5px;color:var(--text-secondary);text-align:center;line-height:1.8;
+  padding-top:10px;border-top:1px solid var(--border);
 }
-.stations-cache-info b{color:var(--teal);font-weight:700;}
 .stations-cache-info[hidden]{display:none;}
-/* سطر نصي عادي لا عناصر مرنة — كل جزء في <bdi> فلا يتبادل التاريخ والأرقام مواقعها بالاتجاه من اليمين
-   A plain text line, not flex items — each part in <bdi> so dates and numbers never swap places in RTL */
-.stations-latest-info{display:block;text-align:center;line-height:1.8;font-family:'IBM Plex Sans Arabic',sans-serif;}
+.stations-cache-info b{color:var(--teal);font-weight:700;}
+/* سطر نصي عادي — كل جزء في <bdi> فلا يتبادل التاريخ والأرقام مواقعها بالاتجاه من اليمين
+   A plain text line — each part in <bdi> so dates and numbers never swap places in RTL */
 .stations-latest-info bdi{white-space:nowrap;}
+
+@media (max-width:420px){
+  .storage-row{padding:12px 8px 10px;}
+  .storage-cell{padding:0 2px;}
+  .storage-cell-label{font-size:10px;}
+  .storage-cell-val{font-size:12px;}
+  .storage-cell-val small{font-size:9.5px;}
+}
+@media (max-width:340px){
+  .storage-cells{grid-template-columns:repeat(2, minmax(0,1fr));row-gap:12px;}
+  .storage-cell:nth-child(3){border-right:none;}
+}

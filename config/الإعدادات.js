@@ -27,6 +27,7 @@
     STORAGE_KEYS: {
       SESSION: PREFIX + 'session',                       // الجلسة (التذكرة والدور والاسم) / the session
       PHONE: PREFIX + 'phone',                           // آخر جوال أُدخل في الدخول / the last phone entered at login
+      REMEMBER_PHONE: PREFIX + 'remember-phone',         // «تذكرني»: حفظ الجوال في حقل الدخول ('0' = لا) / «remember me»: keep the phone in the login field
       THEME: PREFIX + 'theme',                           // الوضع الداكن/الفاتح / dark or light theme
       MAP_MODE: PREFIX + 'map-mode',                     // نمط الخريطة (تلقائي/نهاري/ليلي/أقمار) / map style
       NAV_GLASS: PREFIX + 'nav-glass',                   // مظهر لوحة الملاحة / navigation sheet look

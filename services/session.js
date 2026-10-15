@@ -74,6 +74,8 @@
   function getPhone() { const s = read(); return (s && s.phone) || ''; }
   function getName() { const s = read(); return (s && s.name) || ''; }
   function getSavedPhone() { try { return global.localStorage.getItem(PHONE_KEY) || ''; } catch (e) { return ''; } }
+  /* «تذكرني» غير مفعّل: مسح الجوال المقترح فقط — الجلسة كما هي — «remember me» off: forget the suggested phone only, the session stays */
+  function forgetSavedPhone() { try { global.localStorage.removeItem(PHONE_KEY); } catch (e) { /* تخزين محظور / storage blocked */ } }
 
   // ===== الخروج والانتهاء — Logout and expiry =====
 
@@ -150,7 +152,7 @@
 
   global.SecSession = {
     read: read, save: save, update: update, touch: touch, isLoggedIn: isLoggedIn, isAdmin: isAdmin,
-    getToken: getToken, getPhone: getPhone, getName: getName, getSavedPhone: getSavedPhone,
+    getToken: getToken, getPhone: getPhone, getName: getName, getSavedPhone: getSavedPhone, forgetSavedPhone: forgetSavedPhone,
     logout: logout, handleExpired: handleExpired, isTokenInvalid: isTokenInvalid, ensureFresh: ensureFresh
   };
 })(typeof window !== 'undefined' ? window : globalThis);

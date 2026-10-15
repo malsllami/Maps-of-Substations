@@ -13,6 +13,11 @@
  * - الحالات الخاصة: صلاحية غير كافية (NOT_ADMIN) برسالة ورابط الدخول بالبصمة، انتهاء الجلسة ← handleExpired، فشل الخادم
  *   بزر «إعادة المحاولة»، تحميل بطيء بملاحظة بعد 8 ث، بيانات جزئية ← «—» بدل NaN، أقسام فارغة برسائل V1.
  * - التواريخ ميلادي + هجري؛ الجداول بالقاعدة الموحّدة؛ كل نص من البيانات يُكتب نصًا؛ فشل مكتبة الرسم ← الأرقام جدولًا.
+ * تصميم محمد (15 أكتوبر) — الترتيب: شريط الأخطاء (مشاكل أول ظهور لها خلال 72 ساعة، شريط واحد لا بطاقات) ← «لوحة
+ *   العمليات» بثلاث بطاقات (إجمالي المحطات توزيع/تحويل، إضافات اليوم، تعديلات اليوم) ← طلبات اليوم وعمليات الخصائص وأكثر 5
+ *   كما هي ← الأقسام المطوية (المتواجدون بصفّ صور، الإضافات، التعديلات، تقرير الأمس) ← بطاقات ظاهرة تُحمَّل مع اللوحة
+ *   (زوار 7 أيام بأعمدة وقيمها، أوقات الذروة بأعلى 3 ساعات، نشاط المناطق بدائرة) ← جودة البيانات ← سجل النظام (التصنيفات
+ *   + أحدث المشاكل). كل الأرقام من ردود الخادم الحقيقية؛ ما لا مصدر له في النموذج لا يُعرض.
  *
  * The admin operations dashboard. V1's behavior, design and texts. V2: every request carries the admin ticket, a new
  * «yesterday's report» section, explicit special states, dual dates, the unified tables, text-only data, a chart fallback.
@@ -47,6 +52,17 @@
     'فشل أثناء الخلفية أو النوم': '🌙', 'نتيجة كتابة غير مؤكدة': '❔', 'تأخر وعالجه الاحتياطي': '🟡', 'خطأ برمجي': '🐞', 'رفض دخول لوحة المدير': '⛔'
   };
   const REPORT_COLOR = { green: '#2ECC71', yellow: '#C8A24E', orange: '#E08A3C', blue: 'var(--blue-mid)', teal: 'var(--teal)', red: '#E0654F' };
+  // أيقونات خطية للوحة العمليات (تصميم محمد، 15 أكتوبر) — line icons for the operations board
+  const SVG = function (body) { return '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + body + '</svg>'; };
+  const ICONS = {
+    bars: SVG('<path d="M6 20V12M12 20V5M18 20v-9"/>'),
+    db: SVG('<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/>'),
+    plus: SVG('<path d="M12 5v14M5 12h14"/>'),
+    pencil: SVG('<path d="M4 20l4-1 10.5-10.5a2.1 2.1 0 0 0-3-3L5 16l-1 4z"/><path d="M14 7l3 3"/>')
+  };
+  const CARDS = ['charts', 'peak', 'regions']; // البطاقات الظاهرة التي تُحمَّل مع اللوحة / visible cards loaded with the dashboard
+  const PEAK_TOP = 3, REGIONS_SHOWN = 3, AVATARS_MAX = 5;
+  const REGION_COLORS = ['#1FAE8C', '#2E7DD1', '#E5B53A', '#8FA3B8'];
   const CHEV = '<svg class="acc-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>';
 
   // ===== أدوات العرض — Display helpers =====
@@ -85,9 +101,9 @@
     const o = opts || {}, doc = global.document;
     container.innerHTML =
       '<div class="alert-strip" data-role="alerts" hidden></div>' +
+      '<div data-role="main"></div>' +
       '<div class="perf-link-bar"><a href="perf.html" class="perf-link-btn">📈 قياس زمن الطلبات</a>' +
-        '<span class="perf-link-note">يعرض قياسات هذا الجهاز والمتصفح فقط — افتح الموقع بتبويب آخر واستخدمه، والجدول يتحدّث تلقائيًا</span></div>' +
-      '<div data-role="main"></div>';
+        '<span class="perf-link-note">يعرض قياسات هذا الجهاز والمتصفح فقط — افتح الموقع بتبويب آخر واستخدمه، والجدول يتحدّث تلقائيًا</span></div>';
     const main = container.querySelector('[data-role="main"]'), alerts = container.querySelector('[data-role="alerts"]');
     let data = null, busy = null, alive = true, chart = null, chartData = null;
     const loaded = {};
@@ -150,46 +166,90 @@
         '<div class="ops-status-title">🗄️ عمليات خصائص السكربت اليوم</div><div class="ops-status-count-line"><b class="ops-status-count">' + show_(d.propOpsToday) + '</b> من <b class="ops-status-count">' + show_(d.propOpsLimit) + '</b> عملية</div>' +
         '<div class="ops-status-note">عدّاد داخلي لعمليات خصائص السكربت التي رصدها النظام — وليس قراءة من جوجل للحصة المتبقية. الحد المعروض (' + show_(d.propOpsLimit) + ') هو الحد المنشور للحسابات المجانية، للمقارنة فقط.</div></div></div>' : '';
       const summary = d.alertsSummary && typeof d.alertsSummary === 'object' ? d.alertsSummary : {};
+      const problems = Array.isArray(d.problems) ? d.problems : [];
+      const logTotal = Object.keys(summary).reduce(function (a, c) { return a + (num_(summary[c]) || 0); }, 0);
       main.innerHTML =
+        // لوحة العمليات: ثلاث بطاقات (تصميم محمد، 15 أكتوبر) — the operations board: three tiles (Mohammed's design)
+        '<div class="ops-board" data-role="board"><div class="ops-board-head"><span class="ops-board-icon">' + ICONS.bars + '</span><div><div class="ops-board-title">لوحة العمليات</div>' +
+          '<div class="ops-board-sub">مراجعة سريعة لحالة النظام وقاعدة البيانات</div></div></div>' +
+          '<div class="ops-row3">' +
+            '<div class="ops-pill ops-pill-total"><span class="ops-pill-icon">' + ICONS.db + '</span><b>' + show_(d.totalStations) + '</b><span>إجمالي المحطات</span>' +
+              '<span class="ops-pill-split"><span class="ops-split-dist">● توزيع ' + show_(d.totalStationsDistribution) + '</span><span class="ops-split-sub">● تحويل ' + show_(d.totalStationsSubstations) + '</span></span></div>' +
+            '<div class="ops-pill ops-pill-adds"><span class="ops-pill-icon">' + ICONS.plus + '</span><b>' + show_(d.additionsToday) + '</b><span>إضافات اليوم</span></div>' +
+            '<div class="ops-pill ops-pill-edits"><span class="ops-pill-icon">' + ICONS.pencil + '</span><b>' + show_(d.editsToday) + '</b><span>تعديلات اليوم</span></div>' +
+          '</div></div>' +
+        // طلبات اليوم وعمليات الخصائص وأكثر 5 كما هي (قرار محمد) — today's requests, property operations and top 5 as they were
         '<div class="ops-status-card" data-role="quota"><div class="ops-status-ring">' + ring_(quota, 'quota', 84) + '</div><div class="ops-status-info">' +
           '<div class="ops-status-title">⚡ طلبات اليوم على السكربت</div><div class="ops-status-count-line"><b class="ops-status-count">' + show_(d.dailyRequests) + '</b> من <b class="ops-status-count">' + show_(d.dailyRequestLimit) + '</b> طلب</div>' +
           '<div class="ops-status-sub">' + esc(d.currentShiftLabel || '') + '</div></div></div>' +
         propOps +
         (breakdown ? '<div class="ops-breakdown-card"><div class="ops-breakdown-title">📊 أكثر ٥ أنواع طلبات اليوم (يوضّح سبب أي ارتفاع بالعدد)</div>' + breakdown + '</div>' : '') +
-        '<div class="ops-row3">' +
-          '<div class="ops-pill"><b style="color:var(--teal)">' + show_(d.additionsToday) + '</b><span>إضافات اليوم</span></div>' +
-          '<div class="ops-pill"><b style="color:var(--blue-mid)">' + show_(d.editsToday) + '</b><span>تعديلات اليوم</span></div>' +
-          '<div class="ops-pill"><b>' + show_(d.totalStations) + '</b><span>إجمالي المحطات</span><span class="ops-pill-split"><span style="color:var(--teal)">توزيع ' + show_(d.totalStationsDistribution) + '</span> · <span style="color:var(--blue-mid)">تحويل ' + show_(d.totalStationsSubstations) + '</span></span></div>' +
-        '</div>' +
-        section_('present', '👥 المتواجدون', 'اليوم ' + show_(d.activeUsersToday) + ' — الوردية ' + show_(d.activeUsersShift)) +
-        section_('additions', '+ الإضافات', show_(d.additionsToday) + ' اليوم') +
-        section_('edits', '✎ التعديلات', show_(d.editsToday) + ' اليوم') +
+        section_('present', '👥 المتواجدون الآن', 'اليوم ' + show_(d.activeUsersToday) + ' — الوردية ' + show_(d.activeUsersShift)) +
+        section_('additions', '➕ الإضافات اليوم', show_(d.additionsToday)) +
+        section_('edits', '✏️ التعديلات اليوم', show_(d.editsToday)) +
         section_('report', '📋 تقرير الأمس', 'نفس التقرير اليومي بالبريد') +
-        section_('charts', '📈 زوار آخر 7 أيام', '') +
-        section_('peak', '🔥 أوقات الذروة', '') +
-        section_('regions', '🗺️ نشاط المناطق', '') +
-        '<div class="acc-item" data-section="quality"><div class="acc-head" role="button" tabindex="0" aria-expanded="false"><div class="acc-head-title">⭐ جودة البيانات</div>' +
-          '<div class="acc-head-side"><span class="acc-head-badge"' + (quality === null ? '' : ' style="color:' + gaugeColor(quality, 'quality') + '"') + '>' + (quality === null ? '—' : quality + '%') + '</span>' + CHEV + '</div></div>' +
-          '<div class="acc-body"><div class="acc-body-inner"><div class="quality-row">' + ring_(quality, 'quality', 60) + '<div>' + show_(d.stationsNeedingReview) + ' محطة تحتاج مراجعة (إحداثية ناقصة) من أصل ' + show_(d.totalStations) + '</div></div></div></div></div>' +
-        '<div class="acc-item" data-section="log"><div class="acc-head" role="button" tabindex="0" aria-expanded="false"><div class="acc-head-title">⚠️ سجل النظام</div><div class="acc-head-side">' + CHEV + '</div></div>' +
+        // بطاقات ظاهرة تُحمَّل مع اللوحة — visible cards loaded with the dashboard
+        card_('charts', '📈 زوار آخر 7 أيام', '') +
+        '<div class="ops-grid2">' + card_('peak', '🔥 أوقات الذروة', '') + card_('regions', '🗺️ نشاط المناطق', '') + '</div>' +
+        '<div class="ops-card" data-role="quality"><div class="ops-card-title">⭐ جودة البيانات</div>' +
+          '<div class="quality-row">' + ring_(quality, 'quality', 72) + '<div><b class="quality-pct"' + (quality === null ? '' : ' style="color:' + gaugeColor(quality, 'quality') + '"') + '>' + (quality === null ? '—' : quality + '%') + '</b>' +
+          '<div>' + show_(d.stationsNeedingReview) + ' محطة تحتاج مراجعة (إحداثية ناقصة) من أصل ' + show_(d.totalStations) + '</div></div></div></div>' +
+        // سجل النظام (بطاقة الأخطاء): التصنيفات + أحدث المشاكل — the system log: categories + latest problems
+        '<div class="acc-item" data-section="log"><div class="acc-head" role="button" tabindex="0" aria-expanded="false"><div class="acc-head-title">⚠️ سجل النظام</div><div class="acc-head-side"><span class="acc-head-badge">' + logTotal + '</span>' + CHEV + '</div></div>' +
           '<div class="acc-body"><div class="acc-body-inner">' + (Object.keys(summary).map(function (c) {
             return '<div class="log-row"><span>' + (ALERT_ICON[c] || '') + ' ' + esc(c) + '</span><b>' + show_(summary[c]) + '</b></div>';
-          }).join('') || '<div class="coming-soon">' + MSG.NONE + '</div>') + '</div></div></div>';
-      const chips = Object.keys(summary).filter(function (c) { return num_(summary[c]) > 0; })
-        .map(function (c) { return '<div class="alert-chip">' + (ALERT_ICON[c] || '⚠️') + ' ' + summary[c] + ' ' + esc(c) + '</div>'; }).join('');
-      alerts.innerHTML = chips; alerts.hidden = !chips;
+          }).join('') || '<div class="coming-soon">' + MSG.NONE + '</div>') +
+          (problems.length ? '<div class="log-problems-title">أحدث المشاكل</div>' + table_(['المشكلة', 'التصنيف', 'العدد', 'آخر ظهور'], problems.map(function (p) {
+            const last = new Date(p && p.lastSeen);
+            return '<tr><td class="log-msg">' + esc(p.message) + '<span class="sub">' + esc(p.source) + '</span></td><td>' + (ALERT_ICON[p.category] || '') + ' ' + esc(p.category) + '</td><td class="mono">' + show_(p.count) + '</td><td>' + (isNaN(last.getTime()) ? '—' : dateCell(last) + '<span class="sub">' + esc(D.time(last)) + '</span>') + '</td></tr>';
+          }).join('')) : '') + '</div></div></div>';
+      renderAlerts_(d.alertsRecent);
+      CARDS.forEach(function (name) { loadCard_(name); });
+    }
+    /* شريط الأخطاء: مشاكل أول ظهور لها خلال 72 ساعة، شريطًا واحدًا لا بطاقات (قرار محمد، 15 أكتوبر)
+     * The alert strip: problems first seen within 72 hours, one strip not cards (Mohammed's decision, 15 Oct) */
+    function renderAlerts_(list) {
+      const items = (Array.isArray(list) ? list : []).filter(function (p) { return p && p.message; });
+      alerts.hidden = !items.length;
+      if (!items.length) { alerts.innerHTML = ''; return; }
+      alerts.innerHTML = '<span class="alert-strip-title">⚠️ مشاكل جديدة (آخر 72 ساعة): ' + items.length + '</span><div class="alert-strip-items">' + items.map(function (p) {
+        const first = new Date(p.firstSeen);
+        return '<span class="alert-item" title="' + esc(p.category) + ' — ' + esc(p.source) + '">' + (ALERT_ICON[p.category] || '⚠️') + ' <span class="alert-item-msg">' + esc(p.message) + '</span>' +
+          '<b class="alert-item-count">×' + show_(p.count) + '</b>' + (isNaN(first.getTime()) ? '' : '<span class="alert-item-age">' + esc(D.relativeTime(first).replace(/^قبل /, 'منذ ')) + '</span>') + '</span>';
+      }).join('') + '</div>';
     }
     function section_(name, title, badge) {
       return '<div class="acc-item" data-section="' + name + '"><div class="acc-head" role="button" tabindex="0" aria-expanded="false"><div class="acc-head-title">' + title + '</div>' +
         '<div class="acc-head-side">' + (badge ? '<span class="acc-head-badge">' + esc(badge) + '</span>' : '') + CHEV + '</div></div>' +
         '<div class="acc-body"><div class="acc-body-inner" data-body="' + name + '"><div class="coming-soon">' + MSG.LAZY + '</div></div></div></div>';
     }
+    function card_(name, title) {
+      return '<div class="ops-card" data-card="' + name + '"><div class="ops-card-title">' + title + '</div><div class="ops-card-body" data-body="' + name + '">' + spinner_() + '</div></div>';
+    }
+    /* بطاقة ظاهرة: تحميلها مع اللوحة، وفشلها داخلها فقط بزر إعادة — A visible card: loaded with the dashboard, its failure stays inside it */
+    async function loadCard_(name) {
+      const box = main.querySelector('[data-card="' + name + '"] [data-body]');
+      if (!box || loaded[name]) return;
+      loaded[name] = true;
+      box.innerHTML = spinner_();
+      try { await LOADERS[name](box); }
+      catch (err) {
+        delete loaded[name];
+        if (err.expired) { S.handleExpired(); return; }
+        if (err.denied) { denied_(); return; }
+        if (box.isConnected) box.innerHTML = '<div class="coming-soon">' + MSG.LOAD_FAIL + ' <button type="button" class="link-btn" data-act="section-retry" data-name="' + name + '">' + MSG.RETRY + '</button></div>';
+      }
+    }
 
     // ===== الأقسام (تحميل كسول) — Sections (lazy) =====
     const LOADERS = {
       present: async function (box) {
         const r = await call_('getActiveUsersDetail', { period: 'today' }), users = (r.users || []).slice(0, PREVIEW_ROWS);
-        box.innerHTML = (users.length ? table_(['الاسم', 'الجوال', 'الوردية', 'آخر نشاط'], users.map(function (u) {
+        // صفّ صور: الأيقونة العامة + الاسم الأول + الوردية (بيانات حقيقية) — an avatar row: the generic icon + first name + shift (real data)
+        const avatars = users.slice(0, AVATARS_MAX).map(function (u) {
+          return '<div class="present-avatar"><img src="assets/member-icon.png" alt=""><b>' + esc(String(u.name || '—').split(' ')[0]) + '</b><span>' + (u.shift ? 'وردية ' + esc(u.shift) : '—') + '</span></div>';
+        }).join('');
+        box.innerHTML = (avatars ? '<div class="present-avatars">' + avatars + '</div>' : '') + (users.length ? table_(['الاسم', 'الجوال', 'الوردية', 'آخر نشاط'], users.map(function (u) {
           return '<tr><td>' + esc(u.name) + '</td><td dir="ltr" class="mono">' + esc(u.phone) + '</td><td>' + esc(u.shift || '—') + '</td><td>' + dateCell(riyadhStamp(u.lastActivity)) + '</td></tr>';
         }).join('')) : '<div class="coming-soon">' + MSG.NO_PRESENT + '</div>') + more_('present');
       },
@@ -222,7 +282,16 @@
       peak: async function (box) {
         const r = await call_('getPeakHoursHeatmap'), matrix = Array.isArray(r.matrix) ? r.matrix : [];
         const max = Math.max.apply(null, [1].concat(matrix.reduce(function (a, row) { return a.concat(row); }, [])));
-        let html = '<div class="heatmap-grid"><div></div>';
+        // أعلى 3 ساعات: مجموع الأيام لكل ساعة (من نفس المصفوفة) — the top 3 hours: each hour summed over the days
+        const byHour = [];
+        for (let h = 0; h < 24; h++) byHour.push({ hour: h, count: matrix.reduce(function (a, row) { return a + (num_(row[h]) || 0); }, 0) });
+        const top = byHour.filter(function (x) { return x.count > 0; }).sort(function (a, b) { return b.count - a.count; }).slice(0, PEAK_TOP);
+        const topMax = top.length ? top[0].count : 1;
+        const hourLabel = function (h) { return (h % 12 || 12) + ':00 ' + (h < 12 ? 'ص' : 'م'); };
+        let html = top.length ? '<div class="peak-top">' + top.map(function (x) {
+          return '<div class="peak-row"><span class="peak-hour">' + hourLabel(x.hour) + '</span><div class="peak-track"><div class="peak-fill" style="width:' + Math.round(x.count / topMax * 100) + '%"></div></div><b class="peak-count">' + x.count + '</b></div>';
+        }).join('') + '</div>' : '<div class="coming-soon">' + MSG.NO_REGIONS + '</div>';
+        html += '<details class="peak-details"><summary>الخريطة الحرارية الكاملة</summary><div class="heatmap-grid"><div></div>';
         for (let h = 0; h < 24; h++) html += '<div class="heatmap-hour">' + (h % 3 === 0 ? h : '') + '</div>';
         matrix.forEach(function (row, d) {
           html += '<div class="heatmap-label">' + esc((r.weekdayLabels || [])[d] || '') + '</div>';
@@ -231,17 +300,31 @@
             html += '<div class="heatmap-cell" style="background:' + (count ? 'rgba(31,174,140,' + (0.15 + k * 0.85).toFixed(3) + ')' : 'var(--bg-elev)') + '" title="' + count + ' — ' + h + ':00"></div>';
           });
         });
-        html += '</div>';
+        html += '</div></details>';
         if (r.peak) html += '<div class="heatmap-peak-note">🔥 أكثر وقت نشاطًا: <b>' + esc(r.peak.day) + ' — الساعة ' + r.peak.hour + ':00</b> (' + show_(r.peak.count) + ' حدث)</div>';
         box.innerHTML = html;
       },
+      // دائرة: أعلى 3 مناطق + «أخرى» بالنسب، والمركز = مجموع أحداث النشاط الفعلي (لا إجمالي المحطات)
+      // A donut: the top 3 regions + «other» as percentages; the centre = the real activity total (not the station total)
       regions: async function (box) {
-        const r = await call_('getRegionActivity'), regions = r.regions || [];
+        const r = await call_('getRegionActivity'), regions = (r.regions || []).filter(function (x) { return num_(x.count) > 0; });
         if (!regions.length) { box.innerHTML = '<div class="coming-soon">' + MSG.NO_REGIONS + '</div>'; return; }
-        const max = Math.max.apply(null, regions.map(function (x) { return x.count; }));
-        box.innerHTML = regions.map(function (x) {
-          return '<div class="region-bar-row"><div class="region-bar-label">' + esc(x.region) + '</div><div class="region-bar-track"><div class="region-bar-fill" style="width:' + Math.round(x.count / max * 100) + '%"></div></div><div class="region-bar-count">' + show_(x.count) + '</div></div>';
+        const total = regions.reduce(function (a, x) { return a + x.count; }, 0);
+        const parts = regions.slice(0, REGIONS_SHOWN).map(function (x) { return { label: x.region, count: x.count }; });
+        const rest = total - parts.reduce(function (a, x) { return a + x.count; }, 0);
+        if (rest > 0) parts.push({ label: 'أخرى', count: rest });
+        const size = 120, rad = 46, circ = 2 * Math.PI * rad;
+        let offset = 0;
+        const arcs = parts.map(function (p, i) {
+          const len = p.count / total * circ, arc = '<circle cx="60" cy="60" r="' + rad + '" fill="none" stroke="' + REGION_COLORS[i] + '" stroke-width="16" stroke-dasharray="' + len + ' ' + (circ - len) + '" stroke-dashoffset="' + (-offset) + '" transform="rotate(-90 60 60)"/>';
+          offset += len; return arc;
         }).join('');
+        box.innerHTML = '<div class="region-donut-wrap"><svg class="region-donut" width="' + size + '" height="' + size + '" viewBox="0 0 120 120" role="img" aria-label="نشاط المناطق">' + arcs +
+          '<text x="60" y="56" text-anchor="middle" font-size="17" font-weight="800" fill="currentColor" font-family="\'JetBrains Mono\',monospace">' + total + '</text>' +
+          '<text x="60" y="74" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".7">حدث</text></svg>' +
+          '<div class="region-legend">' + parts.map(function (p, i) {
+            return '<div class="region-legend-row"><span class="region-dot" style="background:' + REGION_COLORS[i] + '"></span><span class="region-legend-label">' + esc(p.label) + '</span><b>' + Math.round(p.count / total * 100) + '%</b></div>';
+          }).join('') + '</div></div>';
       }
     };
     async function changes_(box, type, empty, kind) {
@@ -255,7 +338,7 @@
     // ===== الرسم البياني — The chart =====
     function chartColors_() {
       const dark = (global.SecTheme ? global.SecTheme.get() : 'dark') === 'dark';
-      return { grid: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.07)', text: dark ? '#8FA3B8' : '#52647A' };
+      return { grid: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.07)', text: dark ? '#C9D7E4' : '#2C3D50', value: dark ? '#EAF1F7' : '#102035' };
     }
     function loadChartLib_() {
       if (o.loadChart) return o.loadChart();
@@ -278,12 +361,20 @@
       }
       const colors = chartColors_();
       if (chart) { try { chart.destroy(); } catch (e) { /* لا شيء / nothing */ } }
+      // أعمدة بقيمها فوقها (تصميم محمد) — bars with their values on top (Mohammed's design)
+      const valuesOnTop = { id: 'valuesOnTop', afterDatasetsDraw: function (c) {
+        const ctx = c.ctx, meta = c.getDatasetMeta(0);
+        ctx.save(); ctx.fillStyle = colors.value; ctx.font = '700 12px "JetBrains Mono", monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+        meta.data.forEach(function (bar, i) { ctx.fillText(String(c.data.datasets[0].data[i]), bar.x, bar.y - 4); });
+        ctx.restore();
+      } };
       chart = new Chart(canvas.getContext('2d'), {
-        type: 'line',
-        data: { labels: chartData.labels, datasets: [{ label: 'أحداث النشاط', data: chartData.values, borderColor: '#1FAE8C', backgroundColor: 'rgba(31,174,140,.15)', fill: true, tension: 0.35, pointRadius: 3, pointBackgroundColor: '#1FAE8C' }] },
-        options: { responsive: true, maintainAspectRatio: false, animation: false,
+        type: 'bar',
+        data: { labels: chartData.labels, datasets: [{ label: 'أحداث النشاط', data: chartData.values, backgroundColor: '#2E7DD1', borderRadius: 4, maxBarThickness: 34 }] },
+        options: { responsive: true, maintainAspectRatio: false, animation: false, layout: { padding: { top: 20 } },
           plugins: { legend: { display: false }, tooltip: { rtl: true } },
-          scales: { x: { ticks: { color: colors.text, font: { size: 10 } }, grid: { color: colors.grid } }, y: { ticks: { color: colors.text, precision: 0 }, grid: { color: colors.grid }, beginAtZero: true } } }
+          scales: { x: { ticks: { color: colors.text, font: { size: 10 } }, grid: { display: false } }, y: { display: false, beginAtZero: true } } },
+        plugins: [valuesOnTop]
       });
     }
     // تغيير الثيم يعيد ألوان الرسم (V2) — a theme change recolours the chart (V2)
@@ -320,6 +411,7 @@
       if (more && o.onOpenDetail) { o.onOpenDetail(more.dataset.detail); return; }
       if (e.target.closest('[data-act="retry"]')) { load(true); return; }
       const sr = e.target.closest('[data-act="section-retry"]');
+      if (sr && CARDS.indexOf(sr.dataset.name) !== -1) { loadCard_(sr.dataset.name); return; }
       if (sr) { const item = sr.closest('.acc-item'); item.classList.remove('open'); openSection(sr.dataset.name); }
     }
     function onKey_(e) { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('acc-head')) { e.preventDefault(); openSection(e.target.closest('.acc-item').dataset.section); } }

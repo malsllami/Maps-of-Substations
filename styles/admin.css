@@ -16,8 +16,17 @@ body.admin-page header{position:sticky;top:0;z-index:20;}
 .err-btn{flex:0 0 auto;min-width:160px;text-decoration:none;}
 
 /* غرفة العمليات — the operations room */
-.alert-strip{display:flex;gap:7px;overflow-x:auto;padding-bottom:2px;margin-bottom:16px;}
-.alert-chip{flex-shrink:0;display:flex;align-items:center;gap:6px;background:rgba(224,101,79,.12);border:1px solid rgba(224,101,79,.35);color:#E0654F;font-size:11.5px;font-weight:600;padding:7px 13px;border-radius:20px;white-space:nowrap;}
+/* شريط الأخطاء: شريط واحد لا بطاقات (15 أكتوبر) — the alert strip: one strip, not cards */
+.alert-strip{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;padding:10px 12px;border-radius:14px;background:rgba(224,101,79,.08);border:1px solid rgba(224,101,79,.45);}
+.alert-strip[hidden]{display:none;}
+.alert-strip-title{font-size:12.5px;font-weight:700;color:#E0654F;}
+.alert-strip-items{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;white-space:nowrap;padding-bottom:2px;}
+.alert-strip-items::-webkit-scrollbar{display:none;}
+.alert-item{flex-shrink:0;display:inline-flex;align-items:center;gap:6px;padding:2px 12px;font-size:12px;color:var(--text-primary);}
+.alert-item + .alert-item{border-right:1px solid rgba(224,101,79,.35);}
+.alert-item-msg{max-width:260px;overflow:hidden;text-overflow:ellipsis;}
+.alert-item-count{color:#E0654F;font-family:'JetBrains Mono',monospace;}
+.alert-item-age{font-size:11px;color:var(--text-secondary);}
 .ops-status-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:14px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
 .ops-status-ring{flex-shrink:0;}
 .ops-ring-empty{display:flex;align-items:center;justify-content:center;border-radius:50%;border:7px solid var(--border-strong);color:var(--text-secondary);font-weight:800;}
@@ -36,11 +45,55 @@ body.admin-page header{position:sticky;top:0;z-index:20;}
 .ops-breakdown-row{display:flex;align-items:center;justify-content:space-between;padding:10px 4px;border-top:1px solid var(--border);font-size:13px;}
 .ops-breakdown-title + .ops-breakdown-row{border-top:none;}
 .ops-breakdown-row b{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--teal);}
-.ops-row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
-.ops-pill{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:14px 10px;text-align:center;}
-.ops-pill b{display:block;font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:800;margin-bottom:3px;}
-.ops-pill span{font-size:11px;color:var(--text-secondary);}
-.ops-pill .ops-pill-split{display:block;font-size:11.5px;font-weight:700;margin-top:4px;}
+/* لوحة العمليات بثلاث بطاقات (15 أكتوبر) — the operations board with three tiles */
+.ops-board{background:var(--bg-card);border:1px solid var(--border-strong);border-radius:16px;padding:16px 14px 14px;margin-bottom:14px;}
+.ops-board-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.ops-board-icon{display:flex;color:var(--blue-mid);}
+.ops-board-title{font-size:17px;font-weight:700;}
+.ops-board-sub{font-size:12px;color:var(--text-secondary);margin-top:2px;}
+.ops-row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
+.ops-pill{border:1.5px solid var(--border-strong);border-radius:14px;padding:12px 8px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;}
+.ops-pill-icon{display:flex;}
+.ops-pill b{display:block;font-family:'JetBrains Mono',monospace;font-size:21px;font-weight:800;color:var(--text-primary);}
+.ops-pill span{font-size:11.5px;color:var(--text-secondary);}
+.ops-pill .ops-pill-split{display:flex;flex-direction:column;gap:1px;font-size:11px;font-weight:700;margin-top:4px;}
+.ops-pill-total{border-color:rgba(31,174,140,.7);}
+.ops-pill-total .ops-pill-icon,.ops-split-dist{color:var(--teal) !important;}
+.ops-split-sub{color:var(--blue-mid) !important;}
+.ops-pill-adds{border-color:rgba(46,125,209,.7);}
+.ops-pill-adds .ops-pill-icon,.ops-pill-adds b{color:var(--blue-mid);}
+.ops-pill-edits{border-color:rgba(229,181,58,.75);}
+.ops-pill-edits .ops-pill-icon,.ops-pill-edits b{color:#E5B53A;}
+[data-theme="light"] .ops-pill-edits .ops-pill-icon,[data-theme="light"] .ops-pill-edits b{color:#A57C12;}
+/* البطاقات الظاهرة — the visible cards */
+.ops-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px;min-width:0;}
+.ops-card-title{font-size:13.5px;font-weight:700;margin-bottom:10px;}
+.ops-card-body{font-size:12.5px;color:var(--text-secondary);}
+.ops-grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+.ops-grid2 .ops-card{margin-bottom:10px;}
+.present-avatars{display:flex;gap:10px;overflow-x:auto;padding:4px 0 12px;}
+.present-avatar{flex-shrink:0;width:64px;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;}
+.present-avatar img{width:46px;height:46px;border-radius:50%;border:2px solid var(--teal);background:var(--bg-elev);object-fit:cover;}
+.present-avatar b{font-size:11.5px;color:var(--text-primary);max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.present-avatar span{font-size:10.5px;}
+.peak-top{display:flex;flex-direction:column;gap:9px;margin-bottom:8px;}
+.peak-row{display:grid;grid-template-columns:62px 1fr 34px;align-items:center;gap:8px;}
+.peak-hour{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-primary);direction:rtl;unicode-bidi:isolate;text-align:right;white-space:nowrap;}
+.peak-track{height:8px;border-radius:5px;background:var(--bg-elev);overflow:hidden;}
+.peak-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,#E5B53A,#E0654F);}
+.peak-count{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-primary);text-align:center;}
+.peak-details summary{cursor:pointer;font-size:11.5px;color:var(--teal-light);margin:6px 0;}
+.peak-details .heatmap-grid{margin-top:8px;}
+.region-donut-wrap{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;}
+.region-donut{flex-shrink:0;color:var(--text-primary);}
+.region-legend{display:flex;flex-direction:column;gap:6px;min-width:110px;flex:1;}
+.region-legend-row{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-primary);}
+.region-legend-row b{margin-right:auto;font-family:'JetBrains Mono',monospace;}
+.region-legend-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.region-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.quality-pct{display:block;font-family:'JetBrains Mono',monospace;font-size:20px;margin-bottom:2px;}
+.log-problems-title{font-size:12.5px;font-weight:700;color:var(--text-primary);margin:12px 0 6px;}
+.log-msg{max-width:220px;word-break:break-word;}
 
 /* الأقسام المطوية — the accordion */
 .acc-item{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden;}
@@ -108,8 +161,12 @@ body.admin-page header{position:sticky;top:0;z-index:20;}
 .detail-preview-link{display:flex;width:100%;align-items:center;justify-content:center;gap:6px;margin-top:8px;padding:9px;border-radius:10px;background:var(--bg-elev);color:var(--teal-light);font-size:12px;font-weight:600;cursor:pointer;border:1px dashed var(--border-strong);font-family:inherit;}
 @media (max-width:600px){
   .content{padding:16px 12px;}
-  .ops-row3{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
-  .ops-pill{padding:12px 4px;}
-  .ops-pill b{font-size:17px;}
+  .ops-row3{gap:6px;}
+  .ops-pill{padding:10px 4px;}
+  .ops-pill b{font-size:18px;}
+  .ops-grid2 .ops-card{padding:10px;}
+  .region-donut{width:100px;height:100px;}
+  .ops-card{padding:12px;}
   .rep-row{flex-wrap:wrap;}
 }
+@media (max-width:360px){ .ops-grid2{grid-template-columns:1fr;} }

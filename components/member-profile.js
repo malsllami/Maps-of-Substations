@@ -7,6 +7,8 @@
  *   كما رتبها الخادم، 50 لكل منهما) و«ما فيه إضافات/تعديلات بعد».
  * - النموذج: الاسم، الجوال (للعرض)، الإيميل، الوردية، القسم («أخرى» ← اذكر القسم)؛ نفس ترتيب التحقق ورسائله؛ زر الحفظ
  *   بشريط تقدّم، و«تم حفظ التعديلات بنجاح»؛ الاسم الجديد يُحفظ في الجلسة.
+ * تصميم محمد (15 أكتوبر): بطاقة العضو (الصورة والاسم والجوال والشارة و«آخر تسجيل دخول» في خانة مستقلة)، ثلاث خانات مساهمات
+ *   متساوية بأيقونات وألوان ثابتة، والنموذج بعمودين تحت «بيانات الحساب» — نفس المنطق والرسائل.
  * V2: الطلبات من api-client بتذكرة الجلسة (session.js)؛ القوائم من شيت «الإعدادات» (settings-lists) لا من الكود؛
  *   «آخر دخول» ميلادي + هجري ويشمل الدخول بالجوال (إصلاح بند V1 رقم 6 في الخادم)؛ تاريخ كل مساهمة ميلادي + هجري؛
  *   الجداول بالقاعدة الموحّدة (صف أول ثابت ملوّن، توسيط، 12 عريض)؛ كل نص من البيانات يُكتب نصًا؛ بلا إنترنت لا حفظ.
@@ -38,6 +40,19 @@
     return isNaN(out) ? null : out;
   }
 
+  // أيقونات خطية (تصميم محمد، 15 أكتوبر) — line icons (Mohammed's design)
+  const SVG = function (body) { return '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + body + '</svg>'; };
+  const ICONS = {
+    phone: SVG('<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/>'),
+    badge: SVG('<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/>'),
+    clock: SVG('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),
+    bars: SVG('<path d="M6 20V12M12 20V5M18 20v-9"/>'),
+    sigma: SVG('<path d="M18 5H7l6 7-6 7h11"/>'),
+    plus: SVG('<path d="M12 5v14M5 12h14"/>'),
+    pencil: SVG('<path d="M4 20l4-1 10.5-10.5a2.1 2.1 0 0 0-3-3L5 16l-1 4z"/><path d="M14 7l3 3"/>'),
+    user: SVG('<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>')
+  };
+
   function el_(tag, cls, text) { const e = global.document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
 
   /**
@@ -49,18 +64,21 @@
     const o = Object.assign({ avatarSrc: 'assets/member-icon.png' }, opts || {});
 
     // ===== بطاقة العضو — The member card =====
+    // تصميم محمد (15 أكتوبر): الصورة والاسم والجوال والشارة، و«آخر تسجيل دخول» في خانة مستقلة
+    // Mohammed's design (15 Oct): avatar, name, phone and badge, with «last login» in its own box
     slots.profile.innerHTML =
-      '<div class="avatar"><img src="' + o.avatarSrc + '" alt="أيقونة العضو"></div>' +
-      '<h2 data-role="name">...</h2><div class="mp-phone" data-role="phone">-</div><span class="role-badge" data-role="type"></span>' +
-      '<div class="meta-row"><span>آخر دخول ناجح</span><span data-role="last-login">—</span></div>';
+      '<div class="mp-id"><div class="avatar"><img src="' + o.avatarSrc + '" alt="أيقونة العضو"></div>' +
+        '<div class="mp-id-text"><h2 data-role="name">...</h2><div class="mp-phone"><span class="mp-ic">' + ICONS.phone + '</span><span data-role="phone">-</span></div>' +
+        '<span class="role-badge"><span class="mp-ic">' + ICONS.badge + '</span><span data-role="type"></span></span></div></div>' +
+      '<div class="mp-login"><span class="mp-ic">' + ICONS.clock + '</span><div><div class="mp-login-label">آخر تسجيل دخول</div><div class="mp-login-value" data-role="last-login">—</div></div></div>';
     const q = function (root, r) { return root.querySelector('[data-role="' + r + '"]'); };
 
     // ===== المساهمات — Contributions =====
     slots.contributions.innerHTML =
-      '<div class="card" data-role="stats-card" hidden><div class="card-title">مساهماتك في قاعدة البيانات</div><div class="mp-stats">' +
-        '<div class="mp-stat"><div class="mp-stat-n" data-role="total" style="color:var(--teal)">0</div><div class="mp-stat-l">إجمالي</div></div>' +
-        '<div class="mp-stat"><div class="mp-stat-n" data-role="adds" style="color:var(--blue-mid)">0</div><div class="mp-stat-l">إضافات</div></div>' +
-        '<div class="mp-stat"><div class="mp-stat-n" data-role="edits" style="color:#C8A24E">0</div><div class="mp-stat-l">تعديلات</div></div></div></div>' +
+      '<div class="card" data-role="stats-card" hidden><div class="card-title mp-section-title"><span class="mp-ic">' + ICONS.bars + '</span>مساهماتك في قاعدة البيانات</div><div class="mp-stats">' +
+        '<div class="mp-stat mp-stat-total"><span class="mp-stat-ic">' + ICONS.sigma + '</span><div><div class="mp-stat-n" data-role="total">0</div><div class="mp-stat-l">إجمالي</div></div></div>' +
+        '<div class="mp-stat mp-stat-adds"><span class="mp-stat-ic">' + ICONS.plus + '</span><div><div class="mp-stat-n" data-role="adds">0</div><div class="mp-stat-l">إضافات</div></div></div>' +
+        '<div class="mp-stat mp-stat-edits"><span class="mp-stat-ic">' + ICONS.pencil + '</span><div><div class="mp-stat-n" data-role="edits">0</div><div class="mp-stat-l">تعديلات</div></div></div></div></div>' +
       table_('adds-card', '📥 تفاصيل الإضافات', 'mp-adds') + table_('edits-card', '✏️ تفاصيل التعديلات', 'mp-edits');
     function table_(role, title, cls) {
       return '<div class="card ' + cls + '" data-role="' + role + '" hidden><div class="card-title">' + title + '</div><div class="sec-table-wrap"><table class="sec-table">' +
@@ -86,14 +104,18 @@
     }
 
     // ===== النموذج — The form =====
+    // نموذج بعمودين: الاسم | الجوال، الوردية | الإيميل، ثم القسم (تصميم محمد) — a two-column form (Mohammed's design)
     slots.form.innerHTML =
+      '<div class="card-title mp-section-title"><span class="mp-ic">' + ICONS.user + '</span>بيانات الحساب</div>' +
       '<div class="error-banner" data-role="error"></div><div class="success-banner" data-role="success">' + MSG.SAVED + '</div>' +
-      '<div class="field"><label for="mpName">الاسم الكامل</label><input type="text" class="input-base" id="mpName" data-f="name" autocomplete="name"></div>' +
+      '<div class="mp-form-grid">' +
+      '<div class="field"><label for="mpName">الاسم الكامل</label><input type="text" class="input-base" id="mpName" data-f="name" dir="auto" autocomplete="name"></div>' +
       '<div class="field"><label for="mpPhone">رقم الجوال</label><input type="text" class="input-base" id="mpPhone" data-f="phone" disabled dir="ltr"></div>' +
-      '<div class="field"><label for="mpEmail">الإيميل</label><input type="email" class="input-base" id="mpEmail" data-f="email" dir="ltr" autocomplete="email"></div>' +
       '<div class="field"><label for="mpShift">الوردية</label><select class="input-base" id="mpShift" data-f="shift"><option value="">اختر الوردية</option></select></div>' +
-      '<div class="field"><label for="mpDept">القسم</label><select class="input-base" id="mpDept" data-f="department"><option value="">اختر القسم</option></select>' +
+      '<div class="field"><label for="mpEmail">الإيميل</label><input type="email" class="input-base" id="mpEmail" data-f="email" dir="ltr" autocomplete="email"></div>' +
+      '<div class="field mp-span"><label for="mpDept">القسم</label><select class="input-base" id="mpDept" data-f="department"><option value="">اختر القسم</option></select>' +
         '<input type="text" class="input-base" data-f="departmentOther" placeholder="اذكر القسم" hidden style="margin-top:8px"></div>' +
+      '</div>' +
       '<button type="button" class="btn-progress" data-act="save"><span class="label"><span data-role="save-label">حفظ التعديلات</span><span class="pct" data-role="pct"></span></span><span class="fill" data-role="fill"></span></button>';
     const f = function (n) { return slots.form.querySelector('[data-f="' + n + '"]'); };
     const errEl = q(slots.form, 'error'), okEl = q(slots.form, 'success'), saveBtn = slots.form.querySelector('[data-act="save"]');

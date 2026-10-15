@@ -1,161 +1,171 @@
 /* ============================================================
- * styles/auth.css — صفحة الدخول: البطاقة، التبويبان، الحقول، حقل الجوال، زر التقدّم، خطوة البصمة
+ * styles/auth.css — صفحة الدخول والتسجيل (تصميم محمد — 15 أكتوبر)
  * ============================================================
- * من V1 كما هو (auth.html الأسطر 24–207، والأنماط المضمّنة كأصناف). نافذة مراسلة المدير في styles/contact-admin.css.
- * حُذفت أنماط قائمة الدول لأن الحقل صار سعوديًا ثابتًا (قرار محمد).
- * From V1 as is (inline styles as classes). The country list styles were removed: the field is Saudi only (Mohammed).
+ * شاشتان منفصلتان فوق صورة الخلفية (assets/auth-bg.webp): بطاقة زجاجية في أعلاها الشعار، حقول بحدود واضحة وأيقونات،
+ * زر «دخول» متدرّج، دائرة البصمة، أزرار العضوية والوردية، و«اتصال/مراسلة المدير» في شاشة التسجيل فقط.
+ * مظهر واحد مقصود للثيمين (الخلفية صورة ليلية). نافذة مراسلة المدير في styles/contact-admin.css.
+ * The login/registration page (Mohammed's design — 15 Oct): two separate screens over the photo, a glass card with the
+ * logo on top, clearly bordered fields with icons. One deliberate look for both themes (a night photo).
  * ============================================================ */
-/* درجات صفحة الدخول في V1 (تختلف قليلًا عن الرئيسية) — V1's login-page shades (slightly different from home) */
-[data-theme="dark"] body.auth-page{--bg:#0A1420;--border:rgba(255,255,255,0.08);}
-[data-theme="light"] body.auth-page{--bg:#F4F8FB;--bg-elev:#FFFFFF;--border:rgba(16,32,53,0.10);--border-strong:rgba(16,32,53,0.20);}
 body.auth-page{
-  font-family:'IBM Plex Sans Arabic',sans-serif;
-  background:var(--bg); color:var(--text-primary);
-  min-height:100vh; display:flex; align-items:center; justify-content:center;
-  padding:24px; margin:0; transition:background .3s,color .3s;
+  --auth-teal:#25D7B0; --auth-teal-2:#4FE8C8; --auth-line:rgba(160,220,235,0.42); --auth-text:#EAF4F8; --auth-muted:#D3E0EA;
+  --auth-field:rgba(6,18,30,0.55); --auth-glass:rgba(12,30,48,0.58);
+  color-scheme:dark;
+  font-family:'IBM Plex Sans Arabic',sans-serif; color:var(--auth-text);
+  min-height:100vh; margin:0; padding:clamp(150px, 26vh, 230px) 16px 28px;
+  display:flex; justify-content:center; align-items:flex-start;
+  background:#06101C;
+  box-sizing:border-box;
 }
+/* الصورة في طبقة ثابتة (لا background-attachment:fixed — لا يعمل في سفاري الآيفون) + تدرّج خفيف حتى تبقى البطاقة واضحة
+   The photo in a fixed layer (not background-attachment:fixed — broken on iPhone Safari) + a soft gradient for legibility */
+body.auth-page::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:linear-gradient(180deg, rgba(4,10,18,0) 0%, rgba(4,10,18,0.2) 35%, rgba(4,10,18,0.55) 100%), url('../assets/auth-bg.webp') center top / cover no-repeat;}
+#authCard{position:relative;z-index:1;}
 .auth-card{
-  width:100%; max-width:400px;
-  background:var(--bg-card); border:1px solid var(--border);
-  border-radius:16px; padding:32px 28px;
+  width:100%; max-width:420px; box-sizing:border-box; position:relative;
+  background:var(--auth-glass); -webkit-backdrop-filter:blur(14px) saturate(1.2); backdrop-filter:blur(14px) saturate(1.2);
+  border:1.5px solid rgba(170,225,240,0.35); border-radius:26px; padding:14px 22px 22px;
+  box-shadow:0 18px 40px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.12);
 }
-.auth-card .brand{display:flex; align-items:center; gap:10px; margin-bottom:28px;cursor:pointer;}
-.auth-card .brand-mark{height:32px;width:auto;flex-shrink:0;display:block;object-fit:contain;transition:transform .2s;}
-.auth-card .brand-text{font-size:15px;font-weight:700;letter-spacing:.3px;white-space:nowrap;transition:color .2s;}
-.auth-card .brand:hover .brand-mark{transform:scale(1.06);}
-.auth-card .brand:hover .brand-text{color:var(--teal);}
+/* سهم الرجوع (شاشة التسجيل) أعلى يسار الشاشة فوق البطاقة — the back arrow (registration) top left, above the card */
+/* البطاقة بتأثير زجاجي تصير مرجع position:fixed، فالسهم يُوضع فوقها مباشرة — the glass card becomes the fixed containing block, so the arrow sits right above it */
+.auth-back{position:absolute;top:-72px;left:0;z-index:5;width:52px;height:52px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;background:rgba(6,18,30,0.6);border:1.5px solid rgba(37,215,176,0.6);color:var(--auth-text);cursor:pointer;
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);}
+.auth-back[hidden]{display:none;}
+.auth-card .brand{display:flex;justify-content:center;margin:-2px 0 6px;cursor:pointer;}
+.auth-card .brand-mark{width:170px;max-width:60%;height:auto;display:block;filter:drop-shadow(0 4px 10px rgba(0,0,0,0.45));}
+.auth-title{font-size:26px;font-weight:700;text-align:center;margin:0 0 4px;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,0.4);}
+.auth-card .desc{font-size:14px;color:var(--auth-text);opacity:.88;text-align:center;margin:0 0 16px;line-height:1.6;}
 
-.contact-admin-row{display:flex;gap:10px;margin-bottom:24px;}
-.contact-admin-btn{
-  flex:1;display:flex;align-items:center;justify-content:center;gap:7px;
-  height:44px;border-radius:11px;border:1.5px solid rgba(77,214,181,0.4);background:rgba(31,174,140,0.1);
-  color:var(--teal-light);font-size:12.5px;font-weight:700;font-family:inherit;
-  text-decoration:none;cursor:pointer;transition:.2s;
-}
-.contact-admin-btn:hover{border-color:var(--teal);background:rgba(31,174,140,0.18);}
-
-.tabs{position:relative;display:flex; background:var(--bg); border-radius:10px; padding:4px; margin-bottom:24px; border:1px solid var(--border);}
-.tab-indicator{
-  position:absolute;top:4px;bottom:4px;left:0;width:0;
-  background:var(--bg-card);border-radius:7px;
-  box-shadow:0 1px 3px rgba(0,0,0,.1);
-  transition:left .32s cubic-bezier(.34,1.35,.64,1), width .32s cubic-bezier(.34,1.35,.64,1);
-  z-index:0;
-}
-.tab{flex:1;position:relative;z-index:1; text-align:center; padding:9px; border-radius:7px; font-size:13px; cursor:pointer; color:var(--text-secondary); transition:color .2s;}
-.tab.active{color:var(--text-primary); font-weight:500;}
-.auth-card h2{font-size:18px; font-weight:700; margin:0 0 6px;}
-.auth-card .desc{font-size:13px; color:var(--text-secondary); margin:0 0 22px; line-height:1.6;}
-.auth-card .field{margin-bottom:16px;}
+/* ===== الحقول بحدود واضحة — fields with clear borders ===== */
+.auth-input{display:flex;align-items:center;gap:10px;height:52px;padding:0 14px;margin-bottom:10px;border-radius:14px;
+  background:var(--auth-field);border:1.5px solid var(--auth-line);box-sizing:border-box;transition:border-color .2s, box-shadow .2s;}
+.auth-input[hidden]{display:none;}
+.auth-input:focus-within{border-color:var(--auth-teal);box-shadow:0 0 0 3px rgba(37,215,176,0.18);}
+.auth-input input,.auth-input select{flex:1;min-width:0;height:100%;border:none;background:transparent;outline:none;color:var(--auth-text);font-family:inherit;font-size:15px;}
+.auth-input input::placeholder{color:var(--auth-muted);opacity:1;}
+.auth-input input[type="email"]{direction:ltr;text-align:right;}
+.auth-input input[type="email"]::placeholder{direction:rtl;}
+.auth-input select{appearance:none;-webkit-appearance:none;cursor:pointer;}
+.auth-input select option{color:#102035;background:#fff;}
+.auth-input-ic{display:flex;flex-shrink:0;color:var(--auth-text);opacity:.9;}
+.auth-select .auth-select-ic{padding-left:10px;border-left:1.5px solid var(--auth-line);}
+.auth-card .field{margin-bottom:8px;}
 .auth-card .field[hidden]{display:none;}
-.auth-card .field label{display:block; font-size:12.5px; color:var(--text-secondary); margin-bottom:7px;}
-.auth-card .input-base{
-  width:100%; height:46px; background:var(--bg); border:1px solid var(--border-strong);
-  border-radius:10px; color:var(--text-primary); font-family:inherit; font-size:14px;
-  padding:0 14px; outline:none; transition:border-color .2s; box-sizing:border-box;
-}
-.auth-card .input-base:focus{border-color:var(--teal);}
-.auth-card select.input-base{cursor:pointer;}
-.auth-card .input-base[hidden]{display:none;}
+.auth-label{font-size:14px;font-weight:700;color:var(--auth-text);margin:4px 2px 6px;}
 
-/* ===== العنوان العائم (V1) — Floating label (V1) ===== */
-.auth-card .field.floating{position:relative;margin-bottom:18px;}
-.auth-card .field.floating label{
-  position:absolute;right:14px;top:23px;transform:translateY(-50%);
-  font-size:14px;color:var(--text-secondary);margin:0;
-  transition:top .18s ease,font-size .18s ease,color .18s ease;
-  pointer-events:none;background:var(--bg);padding:0 4px;
-  z-index:2;
-}
-.auth-card .field.floating .input-base:focus + label,
-.auth-card .field.floating .input-base:not(:placeholder-shown) + label,
-.auth-card .field.floating .phone-unified.focused label,
-.auth-card .field.floating .phone-unified.filled label{
-  top:0;font-size:11px;color:var(--teal);
-}
+/* ===== حقل الجوال: «رقم الجوال» يمينًا، ثم العلم و+966، ثم الأيقونة يسارًا — the phone field ===== */
+.auth-card .field.floating{position:relative;margin-bottom:10px;}
+.phone-unified{position:relative;display:flex;align-items:center;height:52px;padding:0 14px;border-radius:14px;box-sizing:border-box;
+  background:var(--auth-field);border:1.5px solid var(--auth-line);transition:border-color .2s, box-shadow .2s;}
+.phone-unified:focus-within{border-color:var(--auth-teal);box-shadow:0 0 0 3px rgba(37,215,176,0.18);}
+.phone-unified .phone-input-unified{order:1;}
+.phone-unified .phone-prefix{order:2;display:flex;align-items:center;gap:8px;padding:0 10px;font-size:17px;}
+.phone-unified .phone-divider{order:3;width:1.5px;height:24px;background:var(--auth-line);flex-shrink:0;}
+.phone-unified .phone-ic{order:4;padding-right:10px;}
+.phone-input-unified{flex:1;min-width:0;height:100%;border:none;background:transparent;outline:none;color:var(--auth-text);
+  font-family:'JetBrains Mono',monospace;font-size:16px;direction:ltr;text-align:right;padding:0;}
+.country-code{font-family:'JetBrains Mono',monospace;font-size:16px;direction:ltr;color:var(--auth-text);}
+/* العنوان داخل الحقل كـ«عنصر نائب» ويختفي عند الكتابة — the label inside the field as a placeholder, hidden while typing */
+.auth-card .field.floating .phone-label{position:absolute;right:14px;top:50%;transform:translateY(-50%);margin:0;font-size:15px;color:var(--auth-muted);pointer-events:none;transition:opacity .15s;}
+.auth-card .field.floating .phone-unified.focused .phone-label,.auth-card .field.floating .phone-unified.filled .phone-label{opacity:0;}
+.field-disabled{opacity:.5;pointer-events:none;}
 
-/* ===== حقل الجوال الموحّد: 🇸🇦 +966 + خط فاصل + الرقم (V1) — The unified phone field (V1) ===== */
-.phone-unified{
-  position:relative;display:flex;align-items:center;
-  height:46px;background:var(--bg);border:1px solid var(--border-strong);
-  border-radius:10px;transition:border-color .2s;
-}
-.phone-unified:focus-within{border-color:var(--teal);}
-.phone-prefix{
-  position:relative;display:flex;align-items:center;gap:5px;
-  padding:0 12px 0 10px;height:100%;flex-shrink:0;
-}
-.phone-divider{width:1px;height:22px;background:var(--border-strong);flex-shrink:0;}
-.phone-input-unified{
-  flex:1;min-width:0;height:100%;border:none;background:transparent;outline:none;
-  color:var(--text-primary);font-family:'JetBrains Mono',monospace;font-size:14px;
-  direction:ltr;text-align:right;padding:0 12px;
-}
-.auth-card .field.floating .phone-label{right:96px;}
-.country-code{font-family:'JetBrains Mono',monospace; font-size:13px; direction:ltr;}
+/* ===== «تذكرني» — remember me ===== */
+.auth-remember{display:flex;align-items:center;gap:10px;margin:4px 2px 14px;font-size:15px;color:var(--auth-text);cursor:pointer;width:max-content;}
+.auth-remember[hidden]{display:none;}
+.auth-remember input{width:22px;height:22px;margin:0;accent-color:var(--auth-teal);cursor:pointer;}
 
-.auth-card .error-banner{
-  background:var(--danger-bg, rgba(224,101,79,0.1)); color:var(--danger, #E0654F); font-size:12.5px;
-  padding:10px 12px; border-radius:8px; margin-bottom:16px; display:none; line-height:1.6;
-}
+/* ===== الرسائل — messages ===== */
+.auth-card .error-banner{background:rgba(224,101,79,0.16);border:1px solid rgba(224,101,79,0.5);color:#FFB4A5;font-size:13px;padding:10px 12px;border-radius:12px;margin-bottom:12px;display:none;line-height:1.6;}
 .auth-card .error-banner.show{display:block;}
-.auth-card .error-banner.info{background:rgba(20,184,166,.10); color:var(--teal);}
-.member-types{display:flex;gap:8px;}
-.member-type-btn{flex:1;height:44px;border-radius:10px;border:1px solid var(--border-strong);background:var(--bg);color:var(--text-primary);font-family:inherit;font-size:13px;cursor:pointer;transition:.2s;}
-.member-type-btn.active{border-color:var(--teal);background:var(--teal);color:#fff;font-weight:500;}
+.auth-card .error-banner.info{background:rgba(37,215,176,0.12);border-color:rgba(37,215,176,0.45);color:var(--auth-teal-2);}
 
-.btn-progress{
-  position:relative; width:100%; height:46px; border-radius:10px; border:none;
-  background:var(--teal); color:#fff; font-family:inherit; font-size:14px; font-weight:700;
-  cursor:pointer; overflow:hidden; transition:opacity .2s;
-}
+/* ===== نوع العضوية والوردية — member type and shift buttons ===== */
+.member-types{display:flex;gap:10px;}
+.member-type-btn{flex:1;height:50px;border-radius:14px;border:1.5px solid var(--auth-line);background:var(--auth-field);color:var(--auth-text);
+  font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:.2s;}
+.member-type-btn.active{border-color:var(--auth-teal);background:linear-gradient(90deg, #22D3A6, #4FE8C8);color:#05241C;}
+.member-type-ic{display:flex;}
+.shift-chips{display:flex;flex-wrap:wrap;gap:8px;}
+.shift-btn{flex:1 1 auto;min-width:52px;white-space:nowrap;height:44px;border-radius:12px;border:1.5px solid var(--auth-line);background:var(--auth-field);color:var(--auth-text);
+  font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;transition:.2s;padding:0 8px;}
+.shift-btn.active{border-color:var(--auth-teal);background:rgba(37,215,176,0.18);color:#fff;box-shadow:inset 0 0 0 1px rgba(37,215,176,0.6);}
+.member-type-btn:disabled,.shift-btn:disabled{cursor:not-allowed;opacity:.6;}
+
+/* ===== الزر الرئيسي المتدرّج (بشريط التقدّم — V1) — the main gradient button (with V1's progress bar) ===== */
+.btn-progress{position:relative;width:100%;height:56px;border-radius:16px;border:none;margin-top:4px;
+  background:linear-gradient(90deg, #4FE8C8 0%, #25D7B0 55%, #1FB8C9 100%);color:#04261D;font-family:inherit;font-size:20px;font-weight:700;
+  cursor:pointer;overflow:hidden;box-shadow:0 8px 22px rgba(37,215,176,0.28);transition:opacity .2s;}
+.mode-register .btn-progress{background:linear-gradient(90deg, #4FE8C8 0%, #29C9D8 60%, #2EA8E0 100%);}
 .btn-progress:disabled{cursor:not-allowed;}
-.btn-progress .label{position:relative; z-index:2; display:flex; align-items:center; justify-content:center; gap:8px; height:100%;}
+.btn-progress .label{position:relative;z-index:2;display:flex;align-items:center;justify-content:center;gap:10px;height:100%;}
 .btn-progress .label [hidden]{display:none;}
-.btn-progress .fill{
-  position:absolute; inset:0; width:0%; background:rgba(255,255,255,0.28);
-  transition:width .25s linear; z-index:1;
-}
-.btn-progress.error .fill{background:rgba(255,255,255,0.0);}
-.btn-progress.error{background:var(--danger, #E0654F);}
-.btn-progress .pct{font-family:'JetBrains Mono',monospace; font-size:13px;}
+.btn-progress::after{content:'';position:absolute;left:16px;top:50%;width:11px;height:11px;margin-top:-6px;border:solid #04261D;border-width:0 0 2.6px 2.6px;transform:rotate(45deg);z-index:2;}
+.mode-register .btn-progress::after{display:none;}
+.btn-ic{display:flex;}
+.btn-ic:empty{display:none;}
+.btn-progress .fill{position:absolute;inset:0;width:0%;background:rgba(255,255,255,0.3);transition:width .25s linear;z-index:1;}
+.btn-progress.error{background:#E0654F;color:#fff;}
+.btn-progress .pct{font-family:'JetBrains Mono',monospace;font-size:15px;}
 .btn-progress .check{display:none;}
 .btn-progress.success .check{display:inline;}
-.btn-progress.success .pct, .btn-progress.success .default-label{display:none;}
-/* زر البصمة (كان نمطًا مضمّنًا في V1) — the fingerprint button (inline in V1) */
-.biometric-btn{width:100%;margin-top:10px;height:44px;border-radius:10px;border:1px solid var(--border-strong);background:var(--bg);color:var(--text-primary);font-family:inherit;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:.2s;}
-.biometric-btn[hidden]{display:none;}
-.biometric-btn:disabled, .member-type-btn:disabled{cursor:not-allowed;opacity:.6;}
+.btn-progress.success .pct,.btn-progress.success .default-label{display:none;}
 
-.fingerprint-step{display:none; text-align:center; padding:20px 0;}
+/* ===== الفاصل «أو» و«ليس لديك حساب؟» — dividers ===== */
+.auth-divider{display:flex;align-items:center;gap:12px;margin:16px 0 10px;font-size:14px;color:var(--auth-text);}
+.auth-divider[hidden]{display:none;}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--auth-line);}
+
+/* ===== دائرة البصمة — the fingerprint circle ===== */
+.biometric-btn{display:flex;flex-direction:column;align-items:center;gap:4px;width:100%;padding:4px 0;border:none;background:transparent;color:var(--auth-text);font-family:inherit;cursor:pointer;}
+.biometric-btn[hidden]{display:none;}
+.biometric-btn:disabled{cursor:not-allowed;opacity:.6;}
+.bio-ring{width:112px;height:112px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:6px;
+  border:2.5px solid var(--auth-teal);background:radial-gradient(circle, rgba(37,215,176,0.12), rgba(6,18,30,0.5) 70%);
+  box-shadow:0 0 22px rgba(37,215,176,0.45), inset 0 0 18px rgba(37,215,176,0.18);}
+.bio-ring svg{width:62px;height:62px;stroke:#fff;}
+.biometric-btn b{font-size:19px;font-weight:700;}
+.biometric-btn small{font-size:14px;color:var(--auth-muted);}
+
+/* ===== زر التبديل بين الشاشتين — the screen switch button ===== */
+.auth-switch{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;height:52px;border-radius:16px;
+  border:1.5px solid var(--auth-teal);background:rgba(6,18,30,0.45);color:var(--auth-teal-2);font-family:inherit;font-size:18px;font-weight:700;cursor:pointer;}
+.auth-switch span{display:flex;}
+.auth-switch:disabled{opacity:.6;cursor:not-allowed;}
+
+/* ===== «اتصال بالمدير» و«مراسلة المدير» (شاشة التسجيل فقط) — contact the admin (registration only) ===== */
+.contact-admin-row{display:flex;gap:10px;margin-top:14px;}
+.contact-admin-row[hidden]{display:none;}
+.contact-admin-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;height:56px;border-radius:16px;border:none;
+  color:#fff;font-size:16px;font-weight:700;font-family:inherit;text-decoration:none;cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,0.3);}
+.contact-call{background:linear-gradient(180deg, #2F8CFF, #1458D6);}
+.contact-message{background:linear-gradient(180deg, #2BD45F, #12962F);}
+
+/* ===== خطوة البصمة (V1) — the fingerprint step (V1) ===== */
+.fingerprint-step{display:none;text-align:center;padding:20px 0;}
 .fingerprint-step.show{display:block;}
-.fp-wrap{position:relative; width:96px; height:96px; margin:0 auto 18px;}
-.fp-icon{
-  position:relative; z-index:2;
-  width:96px; height:96px; border-radius:50%;
-  background: radial-gradient(circle at 35% 30%, var(--bg-elev), var(--bg-card) 70%);
-  box-shadow: inset 0 0 0 7px var(--teal), inset 0 -2px 6px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.2);
-  display:flex; align-items:center; justify-content:center;
-}
-.fp-icon svg{stroke:var(--text-primary); opacity:0.85;}
-.fp-spinner{
-  position:absolute; inset:-6px; border-radius:50%; z-index:1;
-  background: conic-gradient(from 0deg, transparent 0%, transparent 75%, var(--teal) 92%, transparent 100%);
-  animation: fp-spin 1.1s linear infinite;
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 4px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 4px));
-}
-.fp-spinner.verifying{
-  background: conic-gradient(from 0deg, transparent 0%, transparent 70%, var(--blue-mid) 92%, transparent 100%);
-  animation-duration:0.7s;
-}
+.fp-wrap{position:relative;width:96px;height:96px;margin:0 auto 18px;}
+.fp-icon{position:relative;z-index:2;width:96px;height:96px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, rgba(30,60,80,0.9), rgba(6,18,30,0.9) 70%);
+  box-shadow:inset 0 0 0 7px var(--auth-teal), 0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;}
+.fp-icon svg{stroke:#fff;opacity:0.85;}
+.fp-spinner{position:absolute;inset:-6px;border-radius:50%;z-index:1;
+  background:conic-gradient(from 0deg, transparent 0%, transparent 75%, var(--auth-teal) 92%, transparent 100%);animation:fp-spin 1.1s linear infinite;
+  -webkit-mask:radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 4px));mask:radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 4px));}
+.fp-spinner.verifying{background:conic-gradient(from 0deg, transparent 0%, transparent 70%, #2E7DD1 92%, transparent 100%);animation-duration:0.7s;}
 @keyframes fp-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-.fp-progress{font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--teal); margin:-10px 0 10px; min-height:16px;}
-.fp-title{font-size:14px; font-weight:500; margin:0 0 6px;}
-.fp-sub{font-size:12.5px; color:var(--text-secondary); margin:0;}
+.fp-progress{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--auth-teal);margin:-10px 0 10px;min-height:16px;}
+.fp-title{font-size:15px;font-weight:700;margin:0 0 6px;}
+.fp-sub{font-size:13px;color:var(--auth-muted);margin:0;}
 .fp-icon.verifying svg{opacity:1;}
-.field-disabled{opacity:.5; pointer-events:none;}
-.switch-link{text-align:center; margin-top:18px; font-size:13px; color:var(--text-secondary);}
-.switch-link a{color:var(--teal); cursor:pointer; text-decoration:none; font-weight:500;}
+
 /* الجوال: حقول 16px حتى لا يكبّر آيفون الصفحة — phones: 16px fields so iPhone doesn't zoom */
-@media (max-width:767px){ .auth-card .input-base, .phone-input-unified{font-size:16px;} }
+@media (max-width:767px){ .auth-input input,.auth-input select,.phone-input-unified{font-size:16px;} }
+@media (max-width:380px){
+  .auth-card{padding:12px 16px 18px;}
+  .auth-title{font-size:23px;}
+  .contact-admin-btn{font-size:14px;}
+}

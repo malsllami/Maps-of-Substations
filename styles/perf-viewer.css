@@ -7,7 +7,7 @@
 .perf-viewer{position:fixed;inset:12px;z-index:99999;background:#0D1826;color:#EAF1F7;border:1px solid rgba(255,255,255,.16);border-radius:14px;display:flex;flex-direction:column;font-family:inherit;direction:rtl}
 .perf-viewer .pv-bar{display:flex;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.1);flex-wrap:wrap}
 .perf-viewer .pv-bar b{flex:1;font-size:13px}
-.perf-viewer .pv-sub{font-size:11px;color:#8FA3B8;width:100%}
+.perf-viewer .pv-sub{font-size:11px;color:var(--text-secondary);width:100%}
 .perf-viewer .pv-note{font-size:11.5px;font-weight:700;color:#4DD6B5}
 .perf-viewer .pv-note:empty{display:none}
 .perf-viewer button{background:#101D2E;color:#EAF1F7;border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:6px 12px;font-family:inherit;cursor:pointer}

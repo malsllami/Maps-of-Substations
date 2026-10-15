@@ -1,6 +1,8 @@
 /* ============================================================
- * styles/member.css — صفحة «حسابي» (من V1 كما هي: member.html الأسطر 96–151) — الرأس والجداول من ملفاتهما المشتركة
- * The «My account» page (from V1 as is) — the header and tables come from their shared files
+ * styles/member.css — صفحة «حسابي» — الرأس والجداول من ملفاتهما المشتركة
+ * أساسها V1 (member.html الأسطر 96–151)، وتصميم محمد (15 أكتوبر) في القسم الأخير: بطاقة العضو، خريطة جدة، سجل النسخ
+ * بطاقات صفّية، خانات المساهمات، والنموذج بعمودين.
+ * The «My account» page — based on V1, with Mohammed's design (15 Oct) in the last section.
  * ============================================================ */
 body.member-page{min-height:100vh;padding-bottom:24px;}
 body.member-page header{position:sticky;top:0;z-index:20;}
@@ -17,9 +19,6 @@ body.member-page header{position:sticky;top:0;z-index:20;}
 .member-page h2{font-size:17px;font-weight:700;margin-bottom:4px;}
 .mp-phone{font-size:12.5px;color:var(--text-secondary);font-family:'JetBrains Mono',monospace;direction:ltr;text-align:right;}
 .role-badge{display:inline-block;font-size:11px;color:var(--teal);background:rgba(31,174,140,0.1);padding:3px 10px;border-radius:10px;margin-top:6px;}
-.meta-row{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;padding:8px 0;border-top:1px solid var(--border);color:var(--text-secondary);}
-.meta-row > span:last-child{color:var(--text-primary);text-align:left;}
-.meta-col{flex-direction:column;gap:6px;}
 .field{margin-bottom:14px;}
 .field label{display:block;font-size:12px;color:var(--text-secondary);margin-bottom:6px;}
 .input-base{width:100%;height:44px;background:var(--bg);border:1px solid var(--border-strong);border-radius:10px;color:var(--text-primary);font-family:inherit;font-size:14px;padding:0 14px;outline:none;}
@@ -27,23 +26,6 @@ select.input-base{cursor:pointer;}
 .input-base:disabled{opacity:.55;}
 .input-base:focus{border-color:var(--teal);}
 @media (max-width:767px){ .input-base{font-size:16px;} }
-.mp-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
-.mp-stat{text-align:center;padding:10px 6px;background:var(--bg);border-radius:8px;border:1px solid var(--border);}
-.mp-stat-n{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;}
-.mp-stat-l{font-size:10px;color:var(--text-secondary);margin-top:3px;}
-/* آخر نسخة وسجل الجهاز — the last copy and the device log */
-.cache-copy{background:var(--bg-elev);border:1px solid var(--border);border-radius:12px;padding:10px 12px;display:grid;gap:3px;font-size:12px;color:var(--text-secondary);}
-.cache-copy .v{font-weight:700;color:var(--text-primary);font-size:13px;}
-.cache-copy .n{font-weight:700;color:var(--text-primary);font-family:'JetBrains Mono',monospace;}
-.cache-copy .warn{color:#C8A24E;font-weight:700;}
-.cache-type{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;}
-.cache-type.full{background:rgba(46,125,209,.15);color:var(--blue-mid);}
-.cache-type.sync{background:rgba(31,174,140,.15);color:var(--teal);}
-.cache-type.migrate{background:rgba(200,162,78,.18);color:#B98A2E;}
-.cache-ops{display:grid;gap:8px;}
-.cache-op{display:grid;grid-template-columns:auto 1fr;gap:8px;background:var(--bg-elev);border-radius:12px;padding:9px 12px;font-size:12px;}
-.cache-op .t{font-weight:700;color:var(--text-primary);}
-.cache-op .s{color:var(--text-secondary);font-size:11px;}
 /* بطاقة خريطة جدة — the Jeddah map card */
 .om-account{display:grid;gap:12px;}
 .om-account-head{display:flex;align-items:center;gap:12px;}
@@ -64,3 +46,72 @@ select.input-base{cursor:pointer;}
 .btn-progress.error{background:var(--danger);}
 .btn-progress .pct{font-family:'JetBrains Mono',monospace;font-size:13px;display:none;}
 @media (max-width:600px){ .wrap{padding:16px 16px 0;} .card{padding:18px;} }
+
+/* ===== تصميم محمد (15 أكتوبر) — Mohammed's design (15 Oct) ===== */
+.mp-ic{display:inline-flex;flex-shrink:0;}
+.mp-section-title{display:flex;align-items:center;gap:8px;font-size:15px;color:var(--text-primary);}
+.mp-section-title .mp-ic{color:var(--blue-mid);}
+/* بطاقة العضو — the member card */
+.mp-id{display:flex;align-items:center;gap:14px;}
+.mp-id .avatar{width:84px;height:84px;margin:0;flex-shrink:0;border:3px solid var(--blue-mid);}
+.mp-id-text{min-width:0;display:flex;flex-direction:column;gap:5px;}
+.member-page .mp-id h2{margin:0;font-size:17px;word-break:break-word;}
+.mp-phone{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--text-primary);}
+.mp-phone .mp-ic{color:var(--teal);}
+.role-badge{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;font-size:12.5px;font-weight:700;padding:4px 12px;border:1px solid rgba(31,174,140,.45);margin-top:0;}
+.mp-login{display:flex;align-items:flex-start;gap:10px;margin-top:14px;padding:10px 12px;border:1px solid var(--border-strong);border-radius:12px;background:var(--bg-elev);}
+.mp-login .mp-ic{color:var(--blue-mid);margin-top:2px;}
+.mp-login-label{font-size:12px;color:var(--text-secondary);}
+.mp-login-value{font-size:13px;font-weight:700;color:var(--text-primary);line-height:1.6;}
+/* خريطة جدة: زر بعرض البطاقة — the Jeddah map: a full-width button */
+.om-account-btn{background:var(--teal);border-color:var(--teal);color:#fff;font-size:15px;padding:12px;}
+.om-account-btn:hover{background:var(--teal-light);}
+/* سجل نسخ الذاكرة المؤقتة — the cached copies log */
+.copies-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.copies-icon{display:flex;color:var(--blue-mid);}
+.copies-title{font-size:15px;font-weight:700;}
+.copy-status{font-size:12.5px;color:var(--text-secondary);padding:8px 10px;border-radius:10px;background:var(--bg-elev);margin-bottom:8px;}
+.copy-status[hidden]{display:none;}
+.copy-status.warn{color:#C8A24E;font-weight:700;}
+.copy-list{display:flex;flex-direction:column;gap:8px;}
+.copy-row{border:1px solid var(--border-strong);border-radius:12px;padding:9px 12px;display:flex;flex-direction:column;gap:4px;}
+.copy-row.failed{border-color:rgba(224,101,79,.45);}
+.copy-top{display:flex;align-items:center;gap:8px;min-width:0;}
+.copy-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.copy-dot.ok{background:#2ECC71;box-shadow:0 0 6px rgba(46,204,113,.6);}
+.copy-dot.fail{background:#E0654F;}
+.copy-ver{font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:700;color:var(--text-primary);}
+.copy-type{font-size:12px;color:var(--text-secondary);margin-right:auto;}
+.copy-row.failed .copy-type{color:#E0654F;font-weight:700;margin-right:0;}
+.copy-sub{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--text-secondary);}
+.copy-n{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--text-primary);}
+.copy-reason{flex-basis:100%;}
+.copy-when{margin-right:auto;display:flex;flex-direction:column;align-items:flex-end;line-height:1.4;}
+.copy-when small{font-size:10.5px;}
+.copy-empty{font-size:12.5px;color:var(--text-secondary);text-align:center;padding:8px;}
+.copies-more{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:10px;padding:9px;border-radius:12px;border:1px solid var(--border-strong);background:transparent;color:var(--text-primary);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;}
+.copies-more[hidden]{display:none;}
+.copies-more svg{color:var(--blue-mid);}
+/* خانات المساهمات — the contribution tiles */
+.mp-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
+.mp-stat{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 6px;border-radius:12px;border:1.5px solid var(--border-strong);text-align:center;min-width:0;}
+.mp-stat-ic{display:flex;flex-shrink:0;}
+.mp-stat-ic svg{width:24px;height:24px;}
+.mp-stat-n{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;}
+.mp-stat-l{font-size:12px;color:var(--text-primary);margin-top:1px;}
+.mp-stat-total{border-color:rgba(31,174,140,.7);}
+.mp-stat-total .mp-stat-ic,.mp-stat-total .mp-stat-n{color:var(--teal);}
+.mp-stat-adds{border-color:rgba(46,125,209,.7);}
+.mp-stat-adds .mp-stat-ic,.mp-stat-adds .mp-stat-n{color:var(--blue-mid);}
+.mp-stat-edits{border-color:rgba(229,181,58,.75);}
+.mp-stat-edits .mp-stat-ic,.mp-stat-edits .mp-stat-n{color:#E5B53A;}
+[data-theme="light"] .mp-stat-edits .mp-stat-ic,[data-theme="light"] .mp-stat-edits .mp-stat-n{color:#A57C12;}
+/* النموذج بعمودين — the two-column form */
+.mp-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 10px;}
+.mp-form-grid .mp-span{grid-column:1 / -1;}
+@media (max-width:420px){
+  .mp-id .avatar{width:72px;height:72px;}
+  .mp-stat{flex-direction:column;gap:2px;padding:8px 4px;}
+  .mp-stat-n{font-size:20px;}
+  .mp-form-grid .input-base{padding:0 10px;}
+}

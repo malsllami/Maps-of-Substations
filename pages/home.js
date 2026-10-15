@@ -90,7 +90,9 @@
     if (!view || !$('heroSection').classList.contains('map-active') || doc.body.classList.contains('nav-full')) return;
     const box = $('mapStage').querySelector('#map-container');
     const top = box.getBoundingClientRect().top + global.scrollY;
-    box.style.height = Math.max(320, global.innerHeight - top - 16) + 'px'; // كل ما تبقى من الشاشة (V1) / the rest of the screen (V1)
+    // كل ما تبقى من الشاشة (V1) بعد الجزء السفلي من البطاقة / the rest of the screen (V1) after the card's bottom part
+    const below = $('stationActions').classList.contains('show') ? $('stationActions').offsetHeight : 0;
+    box.style.height = Math.max(320, global.innerHeight - top - below - 16) + 'px';
     global.requestAnimationFrame(function () { view.map.invalidateSize(); });
   }
   function ensureMap_() {
@@ -131,12 +133,14 @@
       offlineMapUI: global.SecOfflineMapUI || null,
       toast: notify_,
       dataFreshness: function () { return SYNC.state().syncedAt; },
-      localStations: function () { return SYNC.stations(); }
+      localStations: function () { return SYNC.stations(); },
+      actionsContainer: $('stationActions') // الجزء السفلي تحت الخريطة / the bottom part under the map
     };
   }
   function showCard_(s) {
     if (card) card.update(s);
     else card = SecStationCard.render($('stationTable'), s, cardDeps_());
+    $('heroSection').classList.toggle('station-framed', !!view); // البطاقة تحيط بالخريطة / the card frames the map
   }
 
   // ===== الانتقال لمحطة والرجوع — Going to a station and back =====
@@ -177,6 +181,7 @@
     current = null;
     if (view) { tools.stop(); outageMap.clear(); nearby.reset(); view.hideHint(); view.clearStation(); }
     if (card) { card.destroy(); card = null; }
+    hero.classList.remove('station-framed');
     bar.clear();
     hero.classList.remove('map-active');
     $('heroContent').classList.remove('hidden');

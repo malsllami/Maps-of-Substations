@@ -1,8 +1,11 @@
 /* ============================================================
- * components/auth-form.js — بطاقة الدخول والتسجيل: التبويبان، الدخول بالجوال، عضو جديد، الدخول بالبصمة
+ * components/auth-form.js — بطاقة الدخول والتسجيل: شاشتا الدخول وإنشاء الحساب، الدخول بالجوال، الدخول بالبصمة
  * ============================================================
- * تصميم V1 وسلوكه ورسائله كما هي:
- * - تبويبا «تسجيل الدخول» و«عضو جديد» بمؤشر متحرك، ورابط التبديل أسفل البطاقة.
+ * تصميم محمد (15 أكتوبر): شاشتان منفصلتان على صورة الخلفية ببطاقة زجاجية — «تسجيل الدخول» (الجوال، «تذكرني»، «دخول»،
+ *   «أو» ثم دائرة البصمة، «إنشاء حساب جديد») و«إنشاء حساب جديد» (سهم رجوع، الحقول بأيقونات، نوع العضوية والوردية أزرارًا
+ *   من الإعدادات، القسم، «إنشاء الحساب»، «تسجيل دخول»، و«اتصال بالمدير» + «مراسلة المدير» في هذه الشاشة فقط).
+ *   «تذكرني» = حفظ الجوال في الحقل للمرة القادمة فقط (الجلسة كما هي)؛ مفعّل افتراضيًا. لا كلمة مرور (الدخول بالجوال).
+ * سلوك V1 ورسائله كما هي:
  * - الدخول برقم الجوال هو الطريقة الرسمية لكل الأعضاء (صلاحية عضو دائمًا، حتى لرقم المدير) — قرار محمد.
  * - «الدخول بالبصمة» خيار مساعد (نصه وأيقونته حسب الجهاز)؛ يمنح صلاحية المدير فقط لرقم المدير. عضو بلا بصمة ← تُفعَّل
  *   له الآن (V1). يظهر في تبويب الدخول فقط.
@@ -34,40 +37,63 @@
     LOGIN_FAIL: 'تعذّر تسجيل الدخول', REG_FAIL: 'تعذّر إنشاء الحساب', FP_FAIL: 'تعذّر الدخول بالبصمة', GENERIC: 'حدث خطأ، حاول مرة أخرى'
   };
   const TEXT = {
-    login: { title: 'تسجيل الدخول', desc: 'أدخل رقم جوالك المسجل للدخول، أو استخدم البصمة إن كانت مفعّلة', btn: 'دخول برقم الجوال', hint: 'ما عندك حساب؟ ', link: 'سجّل كعضو جديد' },
-    register: { title: 'إنشاء حساب جديد', desc: 'سجّل بياناتك — تفعيل البصمة اختياري ومتاح لك لاحقًا', btn: 'إنشاء حساب', hint: 'عندك حساب؟ ', link: 'سجّل الدخول' }
+    login: { title: 'إحداثيات المحطات', desc: 'نظام إدارة واستعراض مواقع محطات الكهرباء', btn: 'دخول', hint: 'ليس لديك حساب؟', link: 'إنشاء حساب جديد' },
+    register: { title: 'إنشاء حساب جديد', desc: 'سجّل بياناتك لتفعيل البصمة اختياريًا لاحقًا', btn: 'إنشاء الحساب', hint: 'يوجد لديك حساب؟', link: 'تسجيل دخول' }
   };
+  const REMEMBER_KEY = global.SEC2_CONFIG.STORAGE_KEYS.REMEMBER_PHONE;
+  /* «تذكرني»: مفعّل افتراضيًا (سلوك V1)؛ '0' = لا يُحفظ الجوال — «remember me»: on by default (V1); '0' = the phone isn't kept */
+  function rememberOn_() { try { return global.localStorage.getItem(REMEMBER_KEY) !== '0'; } catch (e) { return true; } }
+  function setRemember_(on) { try { global.localStorage.setItem(REMEMBER_KEY, on ? '1' : '0'); } catch (e) { /* تخزين محظور / storage blocked */ } }
   const S = function (inner) { return '<svg width="46" height="46" viewBox="0 0 100 100" fill="none" stroke-linecap="round">' + inner + '</svg>'; };
   const AUTH_ICONS = { // V1
     fingerprint: S('<path d="M50 28c-13 0-22 9-22 22v8" stroke-width="3.2"/><path d="M50 22c-17 0-29 12-29 28v9" stroke-width="3.2"/><path d="M50 35c-9 0-15 6-15 15v10c0 4 1 7 3 10" stroke-width="3.2"/><path d="M50 42c-5 0-8 3-8 8v9c0 6 2 11 6 15" stroke-width="3.2"/><path d="M50 49c-1.5 0-2 1-2 2v8c0 9 4 16 11 21" stroke-width="3.2"/><path d="M65 47v10c0 12-6 21-16 27" stroke-width="3.2"/><path d="M71 44v12c0 16-9 28-23 35" stroke-width="3.2"/>'),
     face: S('<path d="M20 30V22a6 6 0 016-6h8" stroke-width="3.2"/><path d="M80 30V22a6 6 0 00-6-6h-8" stroke-width="3.2"/><path d="M20 70v8a6 6 0 006 6h8" stroke-width="3.2"/><path d="M80 70v8a6 6 0 01-6 6h-8" stroke-width="3.2"/><circle cx="38" cy="46" r="3" fill="currentColor" stroke="none"/><circle cx="62" cy="46" r="3" fill="currentColor" stroke="none"/><path d="M40 62c4 3 16 3 20 0" stroke-width="3.2"/>'),
     windows: S('<rect x="18" y="18" width="28" height="28" rx="3" stroke-width="3.2"/><rect x="54" y="18" width="28" height="28" rx="3" stroke-width="3.2"/><rect x="18" y="54" width="28" height="28" rx="3" stroke-width="3.2"/><rect x="54" y="54" width="28" height="28" rx="3" stroke-width="3.2"/>')
   };
-  const PHONE_SVG = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>';
-  const CHAT_SVG = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>';
 
+  // أيقونات خطية للحقول والأزرار (تصميم محمد، 15 أكتوبر) — line icons for the fields and buttons (Mohammed's design)
+  const I = function (body, size) { return '<svg width="' + (size || 22) + '" height="' + (size || 22) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + body + '</svg>'; };
+  const ICON = {
+    user: I('<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>'),
+    mail: I('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>'),
+    phone: I('<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/>'),
+    building: I('<rect x="5" y="3" width="14" height="18" rx="1"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2M10 21v-3h4v3"/>'),
+    chevDown: I('<path d="M6 9l6 6 6-6"/>', 20),
+    chevLeft: I('<path d="M15 6l-6 6 6 6"/>', 24),
+    userPlus: I('<circle cx="10" cy="8" r="4"/><path d="M3 21a7 7 0 0 1 14 0M19 8v6M16 11h6"/>', 24),
+    login: I('<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l-5-5 5-5M5 12h11"/>', 20),
+    employee: '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="7" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8z"/></svg>',
+    helmet: I('<path d="M4 15a8 8 0 0 1 16 0"/><path d="M2 15h20v3H2zM12 7v4M9 8v3M15 8v3"/><path d="M8 18v2h8v-2"/>')
+  };
+  const WA_ICON = '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.2-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6l.4-.5c.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.3z"/><path d="M12 2a10 10 0 0 0-8.6 15.2L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.1c-1.5 0-2.9-.4-4.1-1.1l-.3-.2-3 .8.8-3-.2-.3A8.1 8.1 0 1 1 12 20.1z"/></svg>';
+  const LOGIN_SUB = { fingerprint: 'ضع إصبعك على المستشعر', face: 'انظر إلى الكاميرا أو ضع إصبعك على المستشعر', windows: 'استخدم Windows Hello في جهازك' };
+
+  // تصميم محمد (15 أكتوبر): شاشتان منفصلتان على خلفية الصورة — [data-login] للدخول فقط، و[data-reg] للتسجيل فقط
+  // Mohammed's design (15 Oct): two separate screens over the photo — [data-login] login only, [data-reg] registration only
   function html_(logoSrc) {
-    return '<div class="brand" data-act="home" role="button" tabindex="0" aria-label="الرجوع للصفحة الرئيسية"><img class="brand-mark" src="' + logoSrc + '" alt="شعار الشركة السعودية للطاقة"><div class="brand-text">محطات التوزيع — SEC</div></div>' +
-      '<div class="contact-admin-row"><a href="#" class="contact-admin-btn" data-act="call" title="اتصال بالمدير">' + PHONE_SVG + ' اتصال بالمدير</a>' +
-        '<button type="button" class="contact-admin-btn" data-act="message">' + CHAT_SVG + ' مراسلة المدير</button></div>' +
-      '<div class="tabs" role="tablist"><div class="tab-indicator" data-role="indicator"></div>' +
-        '<div class="tab active" data-tab="login" role="tab" tabindex="0" aria-selected="true">تسجيل الدخول</div>' +
-        '<div class="tab" data-tab="register" role="tab" tabindex="0" aria-selected="false">عضو جديد</div></div>' +
-      '<div class="error-banner" data-role="banner" role="alert"></div>' +
-      '<div data-role="phone-step"><h2 data-role="title"></h2><p class="desc" data-role="desc"></p>' +
-        '<div class="field floating" data-reg hidden><input type="text" class="input-base" data-f="name" placeholder=" " autocomplete="name"><label>الاسم الكامل</label></div>' +
-        '<div class="field floating" data-reg hidden><input type="email" class="input-base" data-f="email" placeholder=" " dir="ltr" style="text-align:left" autocomplete="email"><label>الإيميل</label></div>' +
-        '<div class="field" data-reg hidden><label>نوع العضوية</label><div class="member-types" data-role="types"></div></div>' +
-        '<div class="field" data-reg hidden><label>الوردية</label><select class="input-base" data-f="shift"><option value="">اختر الوردية</option></select></div>' +
-        '<div class="field" data-reg hidden><label>القسم</label><select class="input-base" data-f="department"><option value="">اختر القسم</option></select>' +
-          '<input type="text" class="input-base" data-f="departmentOther" placeholder="اذكر القسم" hidden style="margin-top:8px"></div>' +
+    return '<button type="button" class="auth-back" data-act="back" data-reg hidden aria-label="الرجوع لتسجيل الدخول">' + ICON.chevLeft + '</button>' +
+      '<div class="brand" data-act="home" role="button" tabindex="0" aria-label="الرجوع للصفحة الرئيسية"><img class="brand-mark" src="' + logoSrc + '" alt="شعار الشركة السعودية للطاقة — استعراض محطات الكهرباء"></div>' +
+      '<div data-role="phone-step"><h1 class="auth-title" data-role="title"></h1><p class="desc" data-role="desc"></p>' +
+        '<div class="error-banner" data-role="banner" role="alert"></div>' +
+        '<label class="auth-input" data-reg hidden><input type="text" data-f="name" placeholder="الاسم الكامل" aria-label="الاسم الكامل" autocomplete="name"><span class="auth-input-ic">' + ICON.user + '</span></label>' +
+        '<label class="auth-input" data-reg hidden><input type="email" data-f="email" placeholder="الإيميل" aria-label="الإيميل" autocomplete="email"><span class="auth-input-ic">' + ICON.mail + '</span></label>' +
         '<div data-role="phone"></div>' +
-        '<button type="button" class="btn-progress" data-act="main"><span class="label"><span class="default-label" data-role="btn-label"></span><span class="pct" data-role="pct" hidden></span><span class="check">✓</span></span><span class="fill" data-role="fill"></span></button>' +
-        '<button type="button" class="biometric-btn" data-act="biometric"><span data-role="bio-icon"></span><span data-role="bio-label"></span></button>' +
+        '<div class="field" data-reg hidden><div class="auth-label">نوع العضوية</div><div class="member-types" data-role="types"></div></div>' +
+        '<div class="field" data-reg hidden><div class="auth-label">الوردية</div><div class="shift-chips" data-role="shifts"></div><input type="hidden" data-f="shift" value=""></div>' +
+        '<div class="field" data-reg hidden><div class="auth-label">القسم</div><label class="auth-input auth-select"><span class="auth-input-ic auth-select-ic">' + ICON.building + '</span>' +
+          '<select data-f="department" aria-label="القسم"><option value="">اختر القسم</option></select><span class="auth-input-ic">' + ICON.chevDown + '</span></label>' +
+          '<label class="auth-input" data-role="dept-other" hidden><input type="text" data-f="departmentOther" placeholder="اذكر القسم" aria-label="اذكر القسم"></label></div>' +
+        '<label class="auth-remember" data-login><input type="checkbox" data-f="remember"><span>تذكرني</span></label>' +
+        '<button type="button" class="btn-progress" data-act="main"><span class="label"><span class="btn-ic" data-role="btn-ic"></span><span class="default-label" data-role="btn-label"></span><span class="pct" data-role="pct" hidden></span><span class="check">✓</span></span><span class="fill" data-role="fill"></span></button>' +
+        '<div class="auth-divider" data-login><span>أو</span></div>' +
+        '<button type="button" class="biometric-btn" data-act="biometric" data-login><span class="bio-ring" data-role="bio-icon"></span><b data-role="bio-label"></b><small data-role="bio-sub"></small></button>' +
+        '<div class="auth-divider"><span data-role="hint"></span></div>' +
+        '<button type="button" class="auth-switch" data-act="switch"><span data-role="switch-ic"></span><span data-role="switch-label"></span></button>' +
+        '<div class="contact-admin-row" data-reg hidden><a href="#" class="contact-admin-btn contact-call" data-act="call" title="اتصال بالمدير">' + ICON.phone + ' اتصال بالمدير</a>' +
+          '<button type="button" class="contact-admin-btn contact-message" data-act="message">' + WA_ICON + ' مراسلة المدير</button></div>' +
       '</div>' +
       '<div class="fingerprint-step" data-role="fp-step"><div class="fp-wrap"><div class="fp-spinner" data-role="fp-spinner"></div><div class="fp-icon" data-role="fp-icon"></div></div>' +
-        '<p class="fp-progress" data-role="fp-progress"></p><p class="fp-title" data-role="fp-title">تحقق من هويتك</p><p class="fp-sub" data-role="fp-sub">سيستخدم جهازك أفضل وسيلة تحقق متوفرة</p></div>' +
-      '<div class="switch-link"><span data-role="hint"></span><a href="#" data-act="switch"></a></div>';
+        '<p class="fp-progress" data-role="fp-progress"></p><p class="fp-title" data-role="fp-title">تحقق من هويتك</p><p class="fp-sub" data-role="fp-sub">سيستخدم جهازك أفضل وسيلة تحقق متوفرة</p></div>';
   }
 
   /**
@@ -75,37 +101,42 @@
    * يُرجع { mode()، setMode(m)، phone، destroy() }
    */
   function mount(card, opts) {
-    const o = Object.assign({ logoSrc: 'assets/logo-icon.png' }, opts || {});
+    const o = Object.assign({ logoSrc: 'assets/logo-light.png' }, opts || {});
     let mode = 'login', busy = false, memberType = '', lists = null;
     card.classList.add('auth-card');
     card.innerHTML = html_(o.logoSrc);
     const r = function (n) { return card.querySelector('[data-role="' + n + '"]'); };
     const f = function (n) { return card.querySelector('[data-f="' + n + '"]'); };
-    const phone = PHONE.mount(r('phone'));
+    // «تذكرني» غير مفعّل ← لا يُقترح الجوال المحفوظ — «remember me» off ← no suggested phone
+    const remember = rememberOn_();
+    f('remember').checked = remember;
+    const phone = PHONE.mount(r('phone'), remember ? {} : { prefill: '' });
+    r('phone').querySelector('.phone-unified').insertAdjacentHTML('beforeend', '<span class="auth-input-ic phone-ic">' + ICON.phone + '</span>');
     ['name', 'email', 'departmentOther'].forEach(function (n) { TI.digits(f(n)); });
     const label = WA.deviceLabel();
-    r('bio-icon').textContent = label.icon; r('bio-label').textContent = label.label;
+    r('bio-icon').innerHTML = AUTH_ICONS[label.iconType] || AUTH_ICONS.fingerprint;
+    r('bio-label').textContent = label.label;
+    r('bio-sub').textContent = LOGIN_SUB[label.iconType] || LOGIN_SUB.fingerprint;
     if (global.SecContactAdmin) global.SecContactAdmin.bindCallLink(card.querySelector('[data-act="call"]'));
 
     // ===== الرسائل — Messages =====
     function banner_(text, info) { const b = r('banner'); b.textContent = text || ''; b.classList.toggle('show', !!text); b.classList.toggle('info', !!info && !!text); }
 
-    // ===== التبويبات — Tabs =====
-    function moveIndicator_() {
-      const t = card.querySelector('.tab[data-tab="' + mode + '"]'), ind = r('indicator');
-      ind.style.width = t.offsetWidth + 'px'; ind.style.left = t.offsetLeft + 'px';
-    }
+    // ===== الشاشتان: الدخول والتسجيل — The two screens: login and registration =====
     function setMode(m) {
       if (busy || (m !== 'login' && m !== 'register')) return;
       mode = m;
-      card.querySelectorAll('.tab').forEach(function (t) { const on = t.dataset.tab === m; t.classList.toggle('active', on); t.setAttribute('aria-selected', on ? 'true' : 'false'); });
+      card.classList.toggle('mode-register', m === 'register');
       card.querySelectorAll('[data-reg]').forEach(function (el) { el.hidden = m !== 'register'; });
+      // البصمة و«تذكرني» لحساب موجود فقط (V1) — fingerprint and «remember me» for an existing account only (V1)
+      card.querySelectorAll('[data-login]').forEach(function (el) { el.hidden = m !== 'login'; });
       const t = TEXT[m];
       r('title').textContent = t.title; r('desc').textContent = t.desc; r('btn-label').textContent = t.btn;
-      r('hint').textContent = t.hint; card.querySelector('[data-act="switch"]').textContent = t.link;
-      card.querySelector('[data-act="biometric"]').hidden = m !== 'login'; // البصمة لحساب موجود فقط (V1) / fingerprint for an existing account only
+      r('btn-ic').innerHTML = m === 'login' ? '' : ICON.userPlus;
+      r('hint').textContent = t.hint; r('switch-label').textContent = t.link;
+      r('switch-ic').innerHTML = m === 'login' ? ICON.userPlus : ICON.login;
+      if (m === 'register') r('dept-other').hidden = f('department').value !== OTHER_DEPT;
       banner_('');
-      moveIndicator_();
       if (m === 'register') loadLists_();
     }
 
@@ -118,14 +149,29 @@
       if (!types.childElementCount || types.dataset.sig !== got.memberTypes.join('|')) {
         types.textContent = ''; types.dataset.sig = got.memberTypes.join('|');
         if (got.memberTypes.indexOf(memberType) === -1) memberType = got.memberTypes[0] || '';
-        got.memberTypes.forEach(function (t) {
+        got.memberTypes.forEach(function (t, i) {
           const b = doc.createElement('button');
-          b.type = 'button'; b.className = 'member-type-btn' + (t === memberType ? ' active' : ''); b.dataset.type = t; b.textContent = t;
+          b.type = 'button'; b.className = 'member-type-btn' + (t === memberType ? ' active' : ''); b.dataset.type = t;
+          b.appendChild(doc.createTextNode(t));
+          // أيقونة: الأول (موظف) شخص، وغيره خوذة — أيقونة عرض فقط، والقيمة من الإعدادات / an icon for display only
+          b.insertAdjacentHTML('beforeend', '<span class="member-type-ic">' + (i === 0 ? ICON.employee : ICON.helmet) + '</span>');
           types.appendChild(b);
         });
       }
-      fill_(f('shift'), got.shifts); fill_(f('department'), got.departments);
+      chips_(got.shifts); fill_(f('department'), got.departments);
       return true;
+    }
+    /* أزرار الوردية من الإعدادات؛ القيمة في الحقل المخفي data-f="shift" — shift buttons from the settings */
+    function chips_(items) {
+      const box = r('shifts'), keep = f('shift').value;
+      if (box.dataset.sig === items.join('|')) return;
+      box.dataset.sig = items.join('|'); box.textContent = '';
+      if (items.indexOf(keep) === -1) f('shift').value = '';
+      items.forEach(function (s) {
+        const b = doc.createElement('button');
+        b.type = 'button'; b.className = 'shift-btn' + (s === f('shift').value ? ' active' : ''); b.dataset.shift = s; b.textContent = s;
+        box.appendChild(b);
+      });
     }
     function fill_(select, items) {
       const keep = select.value;
@@ -140,7 +186,7 @@
       card.querySelector('[data-act="main"]').disabled = on;
       card.querySelector('[data-act="biometric"]').disabled = on;
       phone.setDisabled(on);
-      card.querySelectorAll('[data-reg] input, [data-reg] select, .member-type-btn').forEach(function (el) { el.disabled = on; });
+      card.querySelectorAll('[data-reg] input, [data-reg] select, .member-type-btn, .shift-btn, [data-act="switch"], [data-f="remember"]').forEach(function (el) { el.disabled = on; });
     }
     async function runProgress_(task) {
       const btn = card.querySelector('[data-act="main"]'), pct = r('pct'), fill = r('fill'), lbl = r('btn-label');
@@ -178,7 +224,11 @@
       return '';
     }
 
-    function done_(result) { if (o.onSuccess) o.onSuccess(result); else delay_(700).then(function () { global.location.href = 'index.html'; }); }
+    function done_(result) {
+      // «تذكرني» غير مفعّل ← لا يبقى الجوال للمرة القادمة (الجلسة كما هي) — «remember me» off ← the phone isn't kept (the session stays)
+      if (!f('remember').checked && SESSION.forgetSavedPhone) SESSION.forgetSavedPhone();
+      if (o.onSuccess) o.onSuccess(result); else delay_(700).then(function () { global.location.href = 'index.html'; });
+    }
 
     async function main_() {
       if (busy) return;
@@ -254,34 +304,39 @@
 
     // ===== الأحداث — Events =====
     function onClick_(e) {
-      const t = e.target.closest('[data-act], .tab, .member-type-btn');
+      const t = e.target.closest('[data-act], .member-type-btn, .shift-btn');
       if (!t || !card.contains(t)) return;
-      if (t.classList.contains('tab')) { setMode(t.dataset.tab); return; }
       if (t.classList.contains('member-type-btn')) {
         if (busy) return;
         card.querySelectorAll('.member-type-btn').forEach(function (b) { b.classList.toggle('active', b === t); });
         memberType = t.dataset.type; return;
       }
+      if (t.classList.contains('shift-btn')) {
+        if (busy) return;
+        card.querySelectorAll('.shift-btn').forEach(function (b) { b.classList.toggle('active', b === t); });
+        f('shift').value = t.dataset.shift; return;
+      }
       const act = t.dataset.act;
       if (act === 'main') main_();
       else if (act === 'biometric') biometric_();
       else if (act === 'switch') { e.preventDefault(); setMode(mode === 'login' ? 'register' : 'login'); }
+      else if (act === 'back') setMode('login');
       else if (act === 'message' && global.SecContactAdmin) global.SecContactAdmin.open();
       else if (act === 'home') global.location.href = 'index.html';
     }
     function onKey_(e) {
       if (e.key !== 'Enter' && e.key !== ' ') return;
       const t = e.target;
-      if (t.classList.contains('tab')) { e.preventDefault(); setMode(t.dataset.tab); }
-      else if (t.dataset && t.dataset.act === 'home') { e.preventDefault(); global.location.href = 'index.html'; }
+      if (t.dataset && t.dataset.act === 'home') { e.preventDefault(); global.location.href = 'index.html'; }
     }
-    function onChange_(e) { if (e.target === f('department')) f('departmentOther').hidden = f('department').value !== OTHER_DEPT; }
-    function onResize_() { moveIndicator_(); }
+    function onChange_(e) {
+      if (e.target === f('department')) { r('dept-other').hidden = f('department').value !== OTHER_DEPT; f('departmentOther').hidden = false; }
+      else if (e.target === f('remember')) setRemember_(e.target.checked);
+    }
 
     card.addEventListener('click', onClick_);
     card.addEventListener('keydown', onKey_);
     card.addEventListener('change', onChange_);
-    global.addEventListener('resize', onResize_);
     setMode('login');
     if (new URLSearchParams(global.location.search).get('expired') === '1') banner_(MSG.EXPIRED, true);
 
@@ -290,7 +345,6 @@
       destroy: function () {
         WA.abort();
         card.removeEventListener('click', onClick_); card.removeEventListener('keydown', onKey_); card.removeEventListener('change', onChange_);
-        global.removeEventListener('resize', onResize_);
         card.innerHTML = '';
       }
     };

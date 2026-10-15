@@ -32,6 +32,10 @@
 .toolbar-scroll::-webkit-scrollbar{display:none;}
 .map-tools-slot{display:contents;}
 .tb-div{width:1px;height:20px;background:var(--border-strong);flex-shrink:0;margin:0 2px;}
+/* عنوان الشريط (تصميم محمد، 15 أكتوبر) — the toolbar title */
+.tb-title{flex-shrink:0;display:flex;align-items:center;gap:4px;padding:0 2px;font-size:13px;font-weight:700;color:var(--text-primary);}
+.tb-title svg{width:16px;height:16px;}
+.tb-title svg{color:var(--teal);}
 .toolbar-btn{
   pointer-events:auto;flex-shrink:0;display:flex;align-items:center;gap:5px;
   background:transparent;border:none;border-radius:12px;

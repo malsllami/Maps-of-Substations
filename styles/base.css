@@ -16,7 +16,7 @@
   --bg-elev:#101D2E;
   --bg-card:#0D1826;
   --text-primary:#EAF1F7;
-  --text-secondary:#8FA3B8;
+  --text-secondary:#C9D7E4; /* أوضح (طلب محمد، 15 أكتوبر): كان #8FA3B8 رماديًا ضعيف الوضوح — clearer (Mohammed, 15 Oct) */
   --border:rgba(255,255,255,0.08);
   --border-strong:rgba(255,255,255,0.16);
   --globe-line:rgba(77,214,181,0.35);
@@ -30,7 +30,7 @@
   --bg-elev:#F4F8FB;
   --bg-card:#FFFFFF;
   --text-primary:#102035;
-  --text-secondary:#52647A;
+  --text-secondary:#2C3D50; /* أوضح (طلب محمد، 15 أكتوبر): كان #52647A — clearer (Mohammed, 15 Oct) */
   --border:rgba(16,32,53,0.12);
   --border-strong:rgba(16,32,53,0.22);
   --globe-line:rgba(27,77,140,0.45);
