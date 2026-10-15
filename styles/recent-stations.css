@@ -2,12 +2,7 @@
  * styles/recent-stations.css — لوحة «آخر المحطات» وزرها (من V1 كما هو: index.html الأسطر 449–474 و994–1005)
  * The «recent stations» panel and its pill (from V1 as is)
  * ============================================================ */
-.pill-recent{
-  flex:1;font-size:11.5px;padding:9px 10px;border-radius:22px;font-weight:600;cursor:pointer;font-family:inherit;border:1.3px solid;transition:.2s;
-  background:rgba(46,125,209,0.14);color:#6FA8E8;border-color:rgba(46,125,209,0.5);
-}
-.pill-recent:hover{background:rgba(46,125,209,0.24);border-color:var(--blue-mid);}
-[data-theme="light"] .pill-recent{color:var(--blue-mid);}
+/* زر فتح اللوحة صار بطاقة «آخر المحطات» في صف الإجراءات (styles/home.css، 15 أكتوبر) — the opening button is now the recent tile in home.css */
 .recent-panel{
   display:none;flex-direction:column;gap:10px;
   width:100%;max-width:760px;
@@ -35,4 +30,6 @@
 }
 .recent-chip:hover{border-color:var(--teal);color:var(--teal);}
 .recent-empty{font-size:11.5px;color:var(--text-secondary);}
+/* «المحطة … لم تعد موجودة» (V2، 15 أكتوبر) — «the station no longer exists» */
+.recent-note{font-size:11.5px;font-weight:600;color:#E0654F;background:rgba(224,101,79,0.10);border:1px solid rgba(224,101,79,0.35);border-radius:10px;padding:6px 10px;}
 @media (max-width:767px){ .recent-panel{gap:6px;} }

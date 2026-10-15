@@ -191,14 +191,14 @@
   }
 
   /**
-   * mountHome(container, opts) — في الرئيسية. opts: { isLoggedIn()، onResult(found, notFound) }
-   * يُرجع { search(raw)، destroy() }
+   * mountHome(container, opts) — في الرئيسية. opts: { toggle: زر الفتح (بطاقة «بحث عن حالة عطل» في صف الإجراءات)، isLoggedIn()، onResult(found, notFound) }
+   * يُرجع { search(raw)، toggle(open?)، isOpen()، destroy() }
+   * On the home page. opts.toggle is the opening button (the outage tile in the actions row, Mohammed's design 15 Oct).
    */
   function mountHome(container, opts) {
     const o = opts || {};
     let busy = false;
-    container.innerHTML = '<button type="button" class="homepage-outage-toggle" data-act="toggle">⚠️ بحث عن حالة عطل (أكثر من محطة)</button>' +
-      '<div class="homepage-outage-panel" data-role="panel">' + panelHtml_('') + '</div>';
+    container.innerHTML = '<div class="homepage-outage-panel" data-role="panel">' + panelHtml_('') + '</div>';
     const panel = container.querySelector('[data-role="panel"]'), input = container.querySelector('[data-role="input"]'), err = container.querySelector('[data-role="error"]');
     TI.digits(input);
 
@@ -221,12 +221,21 @@
         return r;
       } finally { busy = false; }
     }
-    function onClick_(e) {
-      if (e.target.closest('[data-act="toggle"]')) panel.classList.toggle('show');
-      else if (e.target.closest('[data-act="submit"]')) search();
+    function toggle(open) {
+      const willOpen = open === undefined ? !panel.classList.contains('show') : !!open;
+      panel.classList.toggle('show', willOpen);
+      if (o.toggle) o.toggle.setAttribute('aria-expanded', String(willOpen));
+      if (willOpen) global.setTimeout(function () { if (panel.scrollIntoView) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 50);
+      return willOpen;
     }
+    function onClick_(e) { if (e.target.closest('[data-act="submit"]')) search(); }
+    function onToggle_() { toggle(); }
     container.addEventListener('click', onClick_);
-    return { search: search, destroy: function () { container.removeEventListener('click', onClick_); container.innerHTML = ''; } };
+    if (o.toggle) o.toggle.addEventListener('click', onToggle_);
+    return {
+      search: search, toggle: toggle, isOpen: function () { return panel.classList.contains('show'); },
+      destroy: function () { container.removeEventListener('click', onClick_); if (o.toggle) o.toggle.removeEventListener('click', onToggle_); container.innerHTML = ''; }
+    };
   }
 
   global.SecOutageSearch = { mountMap: mountMap, mountHome: mountHome, parseIds: parseIds, letter: letter, googleUrl: googleUrl, resolve: resolve, MSG: MSG };

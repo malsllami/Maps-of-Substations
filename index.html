@@ -35,6 +35,7 @@
 <link rel="stylesheet" href="styles/add-edit-station.css">
 <link rel="stylesheet" href="styles/delete-station.css">
 <link rel="stylesheet" href="styles/recent-stations.css">
+<link rel="stylesheet" href="styles/tables.css">
 <link rel="stylesheet" href="styles/stats-cards.css">
 <link rel="stylesheet" href="styles/storage-section.css">
 <link rel="stylesheet" href="styles/profile-gate.css">
@@ -68,7 +69,6 @@
     </div>
     <div class="search-wrap globe-bottom-anchor">
       <div id="lensBox"></div>
-      <div id="homeOutage"></div>
     </div>
     <a href="auth.html" class="guest-login-cta globe-bottom-anchor">
       <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -78,14 +78,32 @@
 </section>
 
 <section class="cards-section" id="cardsSection">
-  <div class="action-pills-row">
-    <button type="button" class="action-pill pill-add" id="addStationToggle">+ إضافة محطة</button>
-    <button type="button" class="action-pill pill-recent" id="recentToggleBtn">🕐 آخر المحطات</button>
-    <button type="button" class="action-pill pill-refresh" id="refreshStatsBtn" aria-label="تحديث الإحصائيات">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"></path></svg>
-      تحديث
+  <!-- أزرار الإجراءات (تصميم محمد، 15 أكتوبر): «إضافة محطة» بعرض الشاشة، ثم ثلاث بطاقات بأيقونات — الأعطال أصفر، آخر المحطات أزرق، التحديث محايد
+       Action buttons (Mohammed's design, 15 Oct): a full-width «add station», then three icon tiles -->
+  <button type="button" class="action-add" id="addStationToggle">
+    <span class="action-add-plus" aria-hidden="true">+</span>
+    <span class="action-add-label">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>
+      إضافة محطة
+    </span>
+  </button>
+  <div class="action-tiles">
+    <button type="button" class="action-tile tile-outage" id="outageTileBtn" aria-controls="homeOutage">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span class="tile-label">الأعطال</span><span class="tile-sub">بحث (أكثر من محطة)</span>
+    </button>
+    <button type="button" class="action-tile tile-recent" id="recentToggleBtn">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span class="tile-label">آخر المحطات</span>
+    </button>
+    <button type="button" class="action-tile tile-refresh" id="refreshStatsBtn" aria-label="تحديث أرقام لوحة المعلومات" aria-describedby="refreshNote" title="يحدّث أرقام لوحة المعلومات فقط — لبيانات المحطات استخدم زر التحديث في الشريط العلوي">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      <span class="tile-label">تحديث</span>
     </button>
   </div>
+  <!-- رسالة زر «تحديث»: ماذا يحدّث، ونتيجته (طلب محمد، 15 أكتوبر) — the refresh tile's note: what it refreshes, and the result -->
+  <div class="action-note" id="refreshNote" role="status" hidden></div>
+  <div class="home-slot" id="homeOutage"></div>
   <div class="home-slot" id="recentSlot"></div>
   <div class="home-slot" id="statsSlot"></div>
   <div class="home-slot" id="storageSlot"></div>

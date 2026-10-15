@@ -131,7 +131,7 @@ function addNewStation(data, auth) {
     const newRow = sheet.getLastRow(), entry = entryFromSheetRow_(type, newRow);
     if (entry && entry.n === normalizeStationId_(stationId)) patchIndex_(type, 'add', entry);
     else dropIndex_(INDEX_KEYS[type]); // الصف الأخير ليس محطتنا ← يُبنى الفهرس من الشيت / the last row isn't ours ← rebuild from the sheet
-    logAudit_(auth.phone, AUDIT_TYPE.ADD, stationId, location);
+    logAudit_(auth.phone, AUDIT_TYPE.ADD, stationId, auditDetailsWithTable_(location, type));
     bumpDataVersion_();
     return { success: true };
   });
@@ -170,7 +170,7 @@ function updateCoordinates(data, auth) {
 
     const entry = entryFromSheetRow_(type, row);
     patchIndex_(type, 'replace', entry, entry ? entry.n : normalizeStationId_(data.stationId));
-    logAudit_(auth.phone, AUDIT_TYPE.EDIT, String(data.stationId).trim(), fields[c.LOCATION] + ' (' + String(data.method || 'يدوي') + ')');
+    logAudit_(auth.phone, AUDIT_TYPE.EDIT, String(data.stationId).trim(), auditDetailsWithTable_(fields[c.LOCATION] + ' (' + String(data.method || 'يدوي') + ')', type));
     bumpDataVersion_();
     return { success: true };
   });

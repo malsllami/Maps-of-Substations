@@ -1,59 +1,65 @@
 /* ============================================================
- * styles/stats-cards.css — بطاقات الإحصاءات و«📊 لوحة المعلومات»
+ * styles/stats-cards.css — «📊 لوحة المعلومات»: بطاقة الإحصاءات الواحدة (تصميم محمد — 15 أكتوبر)
  * ============================================================
- * من V1 كما هو (index.html الأسطر 1008–1012 و1067–1108 و1137–1140).
- * From V1 as is.
+ * الإجمالي أعلى البطاقة، ثم ثلاثة أعمدة ظاهرة دائمًا (عدد المحطات ثم إضافة/تعديل اليوم): توزيع (أخضر)، تحويل
+ * (أزرق)، الإجمالي (ذهبي)، ثم جدول الفرق
+ * عند وجوده (بنمط الجدول الموحّد styles/tables.css).
+ * The single stats card: the total on top, three always-visible columns (distribution green, substation blue,
+ * totals gold), then the difference table when present (unified table style).
  * ============================================================ */
 .dashboard-label{
   width:100%;max-width:760px;display:flex;align-items:center;gap:10px;margin-top:6px;
   font-size:12.5px;font-weight:700;color:var(--text-secondary);
 }
 .dashboard-label::before,.dashboard-label::after{content:'';flex:1;height:1px;background:var(--border-strong);}
-.cards-row{
-  display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;max-width:760px;width:100%;
-  align-items:start;
+
+.stats-board{
+  --sb-dist:var(--teal-light);--sb-sub:#5AA2EE;--sb-all:#E5B53A;
+  width:100%;max-width:760px;box-sizing:border-box;
+  background:var(--bg-card);border:1.5px solid rgba(31,174,140,0.75);border-radius:16px;
+  padding:16px 14px 12px;display:flex;flex-direction:column;align-items:center;gap:6px;
 }
-.stat-card{
-  min-width:0;
-  background:var(--bg-card);
-  border:1px solid var(--border);
-  border-radius:10px;
-  border-right:3px solid var(--teal);
-  padding:14px;
-  cursor:pointer;
-  transition:border-color .2s, transform .2s;
+[data-theme="light"] .stats-board{--sb-dist:var(--teal);--sb-sub:var(--blue-mid);--sb-all:#A57C12;}
+.sb-head{display:flex;align-items:center;gap:10px;}
+.sb-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(31,174,140,0.14);}
+.sb-title{font-size:17px;font-weight:700;color:var(--text-primary);}
+.sb-total{font-family:'JetBrains Mono',monospace;font-size:34px;font-weight:700;direction:ltr;color:var(--text-primary);line-height:1.2;}
+
+.sb-cols{
+  width:100%;display:grid;grid-template-columns:repeat(3, minmax(0,1fr));
+  border-top:1px solid var(--border-strong);margin-top:6px;padding-top:12px;
 }
-.stat-card.sc-orange{border-right-color:#C8A24E;}
-.stat-card.sc-blue{border-right-color:var(--blue-mid);}
-.stat-card.sc-green{border-right-color:var(--teal);}
-.stat-card:hover{transform:translateY(-2px);}
-.stat-card .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
-.stat-card .sc-icon{
-  width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;
-  font-size:16px;background:rgba(255,255,255,0.06);
-}
-.stat-card.sc-orange .sc-icon{background:rgba(200,162,78,0.14);}
-.stat-card.sc-blue .sc-icon{background:rgba(46,125,209,0.14);}
-.stat-card.sc-green .sc-icon{background:rgba(31,174,140,0.14);}
-.stat-card .num{
-  font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;
-  direction:ltr;display:block;text-align:right;margin-bottom:2px;
-}
-.stat-card .label{font-size:12px;color:var(--text-secondary);}
-.stat-card .chev{color:var(--text-secondary);transition:transform .3s;font-size:14px;}
-.stat-card.expanded .chev{transform:rotate(180deg);}
-.stat-panel{
-  max-height:0;overflow:hidden;
-  transition:max-height .45s cubic-bezier(.25,.8,.3,1), margin-top .45s;
-}
-.stat-card.expanded .stat-panel{max-height:160px;margin-top:14px;}
-.stat-panel-inner{border-top:1px solid var(--border);padding-top:12px;display:flex;flex-direction:column;gap:8px;}
-.stat-panel-row{display:flex;justify-content:space-between;font-size:12.5px;}
-.stat-panel-row .v{font-family:'JetBrains Mono',monospace;color:var(--teal);direction:ltr;}
-.legend-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-left:6px;}
+.sb-col{min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px;padding:0 4px;}
+.sb-col + .sb-col{border-right:1px solid var(--border-strong);}
+.sb-col-icon{display:flex;}
+.sb-col-title{font-size:15px;font-weight:700;}
+.sb-col-num{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;direction:ltr;color:var(--text-primary);margin:2px 0 8px;}
+.sb-dist{--sb-c:var(--sb-dist);}
+.sb-sub{--sb-c:var(--sb-sub);}
+.sb-all{--sb-c:var(--sb-all);}
+.sb-col-icon,.sb-col-title,.sb-op{color:var(--sb-c);}
+.sb-pair{width:100%;display:grid;grid-template-columns:1fr 1fr;}
+.sb-cell{min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px;padding:0 2px;}
+.sb-cell + .sb-cell{border-right:1px solid var(--border);}
+.sb-op{display:flex;}
+.sb-op svg{width:18px;height:18px;}
+.sb-k{font-size:11.5px;color:var(--text-secondary);white-space:nowrap;}
+.sb-v{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;direction:ltr;color:var(--text-primary);}
+.sb-foot{width:100%;text-align:center;font-size:11.5px;color:var(--text-secondary);margin-top:8px;}
+
+/* جدول الفرق — the difference table */
+.sb-removed{width:100%;margin-top:6px;border:1px solid rgba(229,181,58,0.55);border-radius:12px;padding:8px 10px;background:rgba(229,181,58,0.06);}
+.sb-removed summary{cursor:pointer;font-size:12.5px;font-weight:700;color:var(--sb-all);}
+.sb-removed-note{font-size:11.5px;color:var(--text-secondary);margin:8px 0;line-height:1.6;}
+.sb-removed .sec-table th{background:#B98A2E;}
+.sb-removed .sb-ltr{direction:ltr;unicode-bidi:isolate;}
+
 @media (max-width:600px){
-  .cards-row{gap:6px;}
-  .stat-card{padding:10px 8px;border-right-width:2px;}
-  .stat-card .label{font-size:10.5px;line-height:1.3;}
-  .stat-card .num{font-size:20px;}
+  .stats-board{padding:14px 8px 10px;}
+  .sb-total{font-size:30px;}
+  .sb-col{padding:0 2px;}
+  .sb-col-title{font-size:13.5px;}
+  .sb-col-num{font-size:18px;}
+  .sb-k{font-size:10.5px;}
+  .sb-v{font-size:15px;}
 }

@@ -4,7 +4,8 @@
  * ===================================================
  * - الإجمالي = أرقام المحطات الفريدة (بعد توحيد الأرقام العربية والأحرف) من فهرس المحطات، فالمكرر لا يُحسب مرتين.
  * - إضافات وتعديلات اليوم من «سجل التعديلات» بحدود يوم الرياض (+03:00 ثابت)، وتقسيمها توزيع/تحويل حسب
- *   وجود الرقم في كل فهرس (التوزيع أولًا — قاعدة V1).
+ *   وجود الرقم في كل فهرس (التوزيع أولًا — قاعدة V1). تُعدّ الموجودة فعلًا فقط (15 أكتوبر)، والعمليات على محطات
+ *   حُذفت تُعاد جدولًا للمراجعة (removedToday).
  * - نسبة التغير: أمس صفر ← null إن كان اليوم أكثر من صفر، و0 إن كانا صفرًا؛ وإلا النسبة مقرّبة.
  * - الإحصاءات واحدة لكل المستخدمين، فتُحسب مرة وتُحفظ بمفتاح «رقم الإصدار + تاريخ اليوم»:
  *   أي إضافة/تعديل/حذف يغيّر الإصدار ← مفتاح جديد فورًا؛ ويوم جديد ← مفتاح جديد؛ والتعديل اليدوي بالشيت
@@ -79,18 +80,33 @@ function stationIdSets_() {
 
 /* إضافات وتعديلات المحطات في [start, end) من صفوف «سجل التعديلات»، وتقسيمها توزيع/تحويل حسب وجود الرقم
  * (التوزيع أولًا — قاعدة V1). تستخدمها الإحصاءات (اليوم وأمس) والتقرير اليومي (أمس) بنفس القواعد.
+ * قرار محمد (15 أكتوبر): تُعدّ المحطات الموجودة فعلًا فقط، فيتطابق الإجمالي مع التقسيم دائمًا. عملية على محطة لم تعد
+ * موجودة (أُضيفت أو عُدّلت ثم حُذفت، أو رقم في السجل لا يقابله صف) لا تُعدّ، وتُعاد في «removed» جدولًا للمراجعة —
+ * فيُحكم عليها: حذف طبيعي أم مشكلة فعلية.
  * Station adds and edits within [start, end) from the audit rows, split by which index holds the number
- * (distribution first — V1 rule). Used by the stats (today and yesterday) and the daily report (yesterday) alike. */
+ * (distribution first — V1 rule). Used by the stats (today and yesterday) and the daily report (yesterday) alike.
+ * Mohammed's decision (15 Oct): only stations that exist now are counted, so the total always matches the split. An
+ * operation on a station that no longer exists is not counted and is returned in «removed» as a table to review. */
+const REMOVED_LIST_MAX = 50;
 function stationChanges_(rows, start, end, ids) {
-  const c = { additions: 0, edits: 0, additionsDistribution: 0, additionsSubstations: 0, editsDistribution: 0, editsSubstations: 0 };
+  const c = { additions: 0, edits: 0, additionsDistribution: 0, additionsSubstations: 0, editsDistribution: 0, editsSubstations: 0, removed: [], removedCount: 0 };
   for (let i = 1; i < rows.length; i++) {
     const t = (rows[i][0] instanceof Date ? rows[i][0] : new Date(rows[i][0])).getTime();
     if (isNaN(t) || t < start || t >= end) continue;
     const type = String(rows[i][2] || ''), ref = normalizeStationId_(rows[i][3]);
     const kind = type === AUDIT_TYPE.ADD ? 'additions' : type === AUDIT_TYPE.EDIT ? 'edits' : null;
     if (!kind) continue;
+    const part = ids.dist[ref] ? 'Distribution' : ids.sub[ref] ? 'Substations' : null;
+    if (!part) { // لم تعد موجودة ← للمراجعة لا للعدّ / no longer exists ← for review, not counted
+      c.removedCount++;
+      if (c.removed.length < REMOVED_LIST_MAX) {
+        const phone = String(rows[i][1] || '');
+        c.removed.push({ id: String(rows[i][3] || '').trim(), table: auditTableOf_(rows[i][4]) || 'غير معروف', op: kind === 'additions' ? 'إضافة' : 'تعديل', at: new Date(t).toISOString(), by: phone ? '***' + phone.slice(-4) : '—' });
+      }
+      continue;
+    }
     c[kind]++;
-    if (ids.dist[ref]) c[kind + 'Distribution']++; else if (ids.sub[ref]) c[kind + 'Substations']++;
+    c[kind + part]++;
   }
   return c;
 }
@@ -109,6 +125,8 @@ function computeStats_() {
     additionsChangePct: changePct_(today.additions, yesterday.additions), editsChangePct: changePct_(today.edits, yesterday.edits),
     additionsDistribution: today.additionsDistribution, additionsSubstations: today.additionsSubstations,
     editsDistribution: today.editsDistribution, editsSubstations: today.editsSubstations,
+    // عمليات اليوم على محطات لم تعد موجودة — للمراجعة لا للعدّ (15 أكتوبر) / today's operations on stations that no longer exist
+    removedToday: today.removed, removedTodayCount: today.removedCount,
     version: getDataVersion().version
   };
 }

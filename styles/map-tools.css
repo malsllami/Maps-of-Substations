@@ -56,16 +56,11 @@
   display:inline-block;margin-top:6px;background:rgba(31,174,140,0.16);color:var(--teal-light);
   border:1px solid rgba(77,214,181,0.5);padding:6px 14px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600;
 }
-/* بحث الأعطال في الرئيسية — outage search on the home page */
-.homepage-outage-toggle{
-  pointer-events:auto;background:transparent;border:none;color:var(--text-secondary);
-  font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;padding:6px 10px;
-  transition:color .2s;
-}
-.homepage-outage-toggle:hover{color:var(--teal-light);}
+/* بحث الأعطال في الرئيسية: اللوحة تحت صف الإجراءات، وزر فتحها بطاقة «بحث عن حالة عطل» (home.css، 15 أكتوبر)
+   Outage search on the home page: the panel below the actions row, opened by the outage tile */
 .homepage-outage-panel{
   display:none;flex-direction:column;gap:10px;pointer-events:auto;
-  width:min(420px, 90vw);background:var(--bg-card);border:1px solid var(--border-strong);
+  width:100%;max-width:560px;background:var(--bg-card);border:1px solid var(--border-strong);
   border-radius:16px;padding:16px;box-shadow:0 10px 24px rgba(0,0,0,.25);
 }
 .homepage-outage-panel.show{display:flex;}

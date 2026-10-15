@@ -85,16 +85,50 @@ body.guest-mode .guest-login-cta{display:flex;}
 .cards-section{position:relative;z-index:5;padding:0 32px 30px;display:flex;flex-direction:column;align-items:center;gap:14px;}
 .cards-section.hidden{display:none;}
 body.guest-mode #cardsSection{display:none;}
-.action-pills-row{display:flex;gap:10px;width:100%;max-width:520px;}
-.action-pill{display:flex;align-items:center;justify-content:center;gap:6px;border-radius:22px;font-weight:600;cursor:pointer;font-family:inherit;border:1.3px solid;transition:.2s;}
-.pill-add{flex:1.9;font-size:14px;padding:14px 16px;background:rgba(31,174,140,0.14);color:var(--teal-light);border-color:rgba(77,214,181,0.5);}
-.pill-add:hover{background:rgba(31,174,140,0.24);border-color:var(--teal);}
-.pill-refresh{flex:1;font-size:11.5px;padding:9px 10px;background:rgba(200,162,78,0.14);color:#D8B564;border-color:rgba(200,162,78,0.5);}
-.pill-refresh:hover{background:rgba(200,162,78,0.24);border-color:#C8A24E;}
-.pill-refresh svg{transition:transform .6s linear;}
-.pill-refresh.spinning svg{transform:rotate(360deg);}
-[data-theme="light"] .pill-add{color:var(--teal);}
-[data-theme="light"] .pill-refresh{color:#A9803A;}
+/* أزرار الإجراءات (تصميم محمد، 15 أكتوبر): «إضافة محطة» بعرض الصف، ثم ثلاث بطاقات بأيقونات بنفس الحجم
+   Action buttons (Mohammed's design, 15 Oct): a full-row «add station», then three equal icon tiles */
+.action-add{
+  width:100%;max-width:560px;display:flex;align-items:center;justify-content:center;position:relative;
+  padding:16px 52px;border-radius:22px;border:1.6px solid rgba(77,214,181,0.75);background:rgba(31,174,140,0.08);
+  color:var(--teal-light);font-family:inherit;font-size:18px;font-weight:700;cursor:pointer;transition:.2s;
+}
+.action-add:hover{background:rgba(31,174,140,0.18);border-color:var(--teal);}
+.action-add-label{display:inline-flex;align-items:center;gap:8px;}
+.action-add-plus{position:absolute;inset-inline-end:20px;top:50%;transform:translateY(-50%);font-size:28px;font-weight:400;line-height:1;}
+.action-tiles{width:100%;max-width:560px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.action-tile{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:118px;
+  padding:14px 8px;border-radius:18px;border:1.6px solid;font-family:inherit;cursor:pointer;transition:.2s;text-align:center;
+}
+.tile-label{font-size:14.5px;font-weight:700;line-height:1.35;}
+.tile-sub{font-size:11px;font-weight:600;opacity:.85;margin-top:-4px;}
+/* الأعطال أصفر — outage yellow */
+.tile-outage{background:rgba(229,181,58,0.08);color:#E8C155;border-color:rgba(229,181,58,0.7);}
+.tile-outage:hover,.tile-outage[aria-expanded="true"]{background:rgba(229,181,58,0.18);border-color:#E5B53A;}
+/* آخر المحطات أزرق — recent blue */
+.tile-recent{background:rgba(46,125,209,0.08);color:#6FA8E8;border-color:rgba(46,125,209,0.7);}
+.tile-recent:hover{background:rgba(46,125,209,0.18);border-color:var(--blue-mid);}
+/* التحديث محايد — refresh neutral */
+.tile-refresh{background:var(--bg-elev);color:var(--text-secondary);border-color:var(--border-strong);}
+.tile-refresh:hover{color:var(--text-primary);border-color:var(--text-secondary);}
+.tile-refresh svg{transition:transform .6s linear;}
+.tile-refresh.spinning svg{transform:rotate(360deg);}
+.action-tile:disabled{cursor:default;}
+/* رسالة زر «تحديث» — the refresh tile's note */
+.action-note{width:100%;max-width:560px;font-size:12px;font-weight:600;line-height:1.6;text-align:center;padding:10px 14px;border-radius:14px;
+  background:var(--bg-elev);color:var(--text-secondary);border:1px solid var(--border-strong);}
+.action-note[data-kind="ok"]{color:var(--teal-light);border-color:rgba(77,214,181,0.5);}
+.action-note[data-kind="fail"]{color:#E0654F;border-color:rgba(224,101,79,0.45);}
+[data-theme="light"] .action-note[data-kind="ok"]{color:var(--teal);}
+[data-theme="light"] .action-add{color:var(--teal);}
+[data-theme="light"] .tile-outage{color:#A57C12;}
+[data-theme="light"] .tile-recent{color:var(--blue-mid);}
+@media (max-width:767px){
+  .action-add{font-size:17px;padding:15px 48px;}
+  .action-tiles{gap:8px;}
+  .action-tile{min-height:108px;padding:12px 6px;}
+  .tile-label{font-size:13.5px;}
+}
 .home-slot{width:100%;display:flex;flex-direction:column;align-items:center;}
 footer.home-footer{text-align:center;padding:12px 20px;font-size:10px;color:var(--text-secondary);opacity:.7;border-top:1px solid var(--border);}
 

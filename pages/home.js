@@ -201,7 +201,9 @@
   }
   const lens = SecStationSearchBox.mount($('lensBox'), { variant: 'lens', isLoggedIn: loggedIn, onFound: goToStation, onAdd: function (q) { SecStationForm.openAdd(q); }, onUpdated: onUpdated_ });
   const bar = SecStationSearchBox.mount($('barBox'), { variant: 'bar', isLoggedIn: loggedIn, onFound: goToStation, onAdd: function (q) { SecStationForm.openAdd(q); }, onUpdated: onUpdated_ });
-  SecOutageSearch.mountHome($('homeOutage'), {
+  // بطاقة «بحث عن حالة عطل» في صف الإجراءات تفتح لوحة الأرقام تحته (تصميم محمد، 15 أكتوبر) / the outage tile opens the panel below it
+  const outage = SecOutageSearch.mountHome($('homeOutage'), {
+    toggle: $('outageTileBtn'),
     isLoggedIn: loggedIn,
     onResult: function (found, notFound) {
       // بعد ظهور الخريطة على أول محطة تُرسم كلها بالأحرف (V1) / once the map shows the first station, all are drawn with letters (V1)
@@ -230,13 +232,34 @@
   const stats = loggedIn() ? SecStatsCards.mount($('statsSlot')) : { refresh: function () { return Promise.resolve(false); }, refreshIfStale: function () {} };
   const recent = SecRecentStations.mount($('recentSlot'), { onSelect: goToStation });
   SecStorageSection.mount($('storageSlot'), { onCleared: function () { status.refreshOffline(); } });
-  $('addStationToggle').addEventListener('click', function () { recent.toggle(false); SecStationForm.openAdd(); });
-  $('recentToggleBtn').addEventListener('click', function () { recent.toggle(); });
+  // لوحة واحدة مفتوحة في كل مرة: الأعطال أو آخر المحطات / one panel open at a time: outage or recent
+  $('addStationToggle').addEventListener('click', function () { recent.toggle(false); outage.toggle(false); SecStationForm.openAdd(); });
+  $('recentToggleBtn').addEventListener('click', function () { outage.toggle(false); recent.toggle(); });
+  $('outageTileBtn').addEventListener('click', function () { recent.toggle(false); });
+  // زر «تحديث» في البطاقات يحدّث أرقام لوحة المعلومات فقط، ويشرح ذلك برسالة (طلب محمد، 15 أكتوبر) — بخلاف زر الشريط العلوي الذي يزامن بيانات المحطات
+  // The tiles' «refresh» updates the dashboard numbers only, and says so (Mohammed, 15 Oct) — unlike the header button, which syncs the stations
+  const REFRESH_NOTE = {
+    BUSY: 'جارٍ تحديث أرقام لوحة المعلومات…',
+    OK: '✓ تم تحديث أرقام لوحة المعلومات: إجمالي المحطات، وإضافات اليوم وتعديلاته. هذا الزر لا يحدّث بيانات المحطات — لها زر التحديث في الشريط العلوي.',
+    FAIL: 'تعذّر تحديث أرقام لوحة المعلومات الآن — تبقى الأرقام السابقة، حاول بعد قليل. (بيانات المحطات تُحدَّث من زر الشريط العلوي)'
+  };
+  const REFRESH_NOTE_MS = 7000;
+  let refreshNoteTimer = 0;
+  function refreshNote_(text, kind) {
+    const n = $('refreshNote');
+    global.clearTimeout(refreshNoteTimer);
+    n.textContent = text; n.dataset.kind = kind; n.hidden = false;
+    if (kind !== 'busy') refreshNoteTimer = global.setTimeout(function () { n.hidden = true; }, REFRESH_NOTE_MS);
+  }
   $('refreshStatsBtn').addEventListener('click', async function () {
     const b = this;
     if (b.disabled) return;
     b.disabled = true; b.classList.add('spinning');
-    try { await stats.refresh(true); } finally { global.setTimeout(function () { b.classList.remove('spinning'); b.disabled = false; }, 600); }
+    refreshNote_(REFRESH_NOTE.BUSY, 'busy');
+    let ok = false;
+    try { ok = await stats.refresh(true); } catch (e) { ok = false; }
+    finally { global.setTimeout(function () { b.classList.remove('spinning'); b.disabled = false; }, 600); }
+    refreshNote_(ok ? REFRESH_NOTE.OK : REFRESH_NOTE.FAIL, ok ? 'ok' : 'fail');
   });
   global.addEventListener('focus', function () { if (loggedIn()) stats.refreshIfStale(); });
   doc.addEventListener('visibilitychange', function () { if (doc.visibilityState === 'visible' && loggedIn()) stats.refreshIfStale(); });

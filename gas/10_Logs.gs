@@ -41,6 +41,17 @@ function logAudit_(phone, type, ref, details) {
   }
 }
 
+/* جدول المحطة داخل «التفاصيل» (15 أكتوبر — إضافة نص فقط بلا عمود جديد): حتى تُنسب المحطة لجدولها بعد حذفها.
+ * الصفوف الأقدم بلا هذا الجزء ← «غير معروف».
+ * The station's table inside «details» (15 Oct — text only, no new column), so a deleted station keeps its table.
+ * Older rows lack it ← unknown. */
+const AUDIT_TABLE_TAG = ' | الجدول: ';
+function auditDetailsWithTable_(details, type) { return String(details) + AUDIT_TABLE_TAG + type; }
+function auditTableOf_(details) {
+  const m = /\| الجدول: (\S+)\s*$/.exec(String(details || ''));
+  return m && (m[1] === STATION_TYPE.DISTRIBUTION || m[1] === STATION_TYPE.SUBSTATION) ? m[1] : '';
+}
+
 /* آخر زيارة ناجحة لجوال بأحد الإجراءات المعطاة — يُقرأ السجل من الأسفل بدفعات حتى أول تطابق
  * The phone's last successful visit with one of the given actions — the log is read from the bottom in blocks until the first match */
 const LOG_TAIL_BLOCK = 500;
