@@ -48,7 +48,7 @@
     /* «البداية النظيفة» يوم الانتقال من V1 (خطة محمد): مرة واحدة لكل جهاز — تُفعَّل يوم الانتقال فقط (ENABLED: true)
        The migration-day «fresh start» (Mohammed's plan): once per device — enabled on migration day only */
     FRESH_START: {
-      ENABLED: false,
+      ENABLED: true,                                     // فُعِّلت يوم الانتقال (16 أكتوبر) / enabled on migration day
       ID: 'v2-launch',                                   // تغييره يعيد التنفيذ على كل الأجهزة / changing it reruns on every device
       V1_PREFIX: 'sec-',                                 // مفاتيح V1 وذاكراته (لا يمس sec2- ولا مشاريع النطاق الأخرى) / V1 keys and caches only
       V1_DATABASES: ['sec-stations', 'sec-offline-map'], // قواعد V1 بالاسم فقط / V1 databases by name only
