@@ -293,10 +293,11 @@
      An automatic update that brought colleagues' additions or edits ← a short note in the status bar */
   let syncNoteTimer = 0;
   SYNC.onChange(function (event, st, detail) {
-    if (event !== 'synced' || !detail || !(detail.added + detail.modified)) return;
+    if (event !== 'synced' || !detail || !(detail.added + detail.modified + (detail.removed || 0))) return;
     const parts = [];
     if (detail.added) parts.push('إضافة ' + detail.added);
     if (detail.modified) parts.push('تعديل ' + detail.modified);
+    if (detail.removed) parts.push('حذف ' + detail.removed);
     status.setNote('🔄 تم تحديث بيانات المحطات: ' + parts.join(' و') + ' من الزملاء');
     global.clearTimeout(syncNoteTimer);
     syncNoteTimer = global.setTimeout(function () { if (!SYNC.state().loading) status.clearNote(); }, SYNC_NOTE_MS);

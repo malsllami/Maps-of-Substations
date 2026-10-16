@@ -17,7 +17,9 @@
 
 const MEMBERS_CACHE_KEY = 'members_rows';
 const PROFILE_LIST_MAX = 50;
-const AUDIT_TYPE = { ADD: 'إضافة_محطة_جديدة', EDIT: 'تعديل_إحداثية', PROFILE: 'تعديل_بيانات_شخصية' };
+// الحذف يُسجَّل ليعرف الجهاز ما حُذف دون تحميل كامل (اقتراح محمد 16 أكتوبر)؛ «حذف_يدوي» = حذف صف من الشيت اكتشفه المشغّل
+// Deletions are logged so devices learn what was removed without a full load; «manual» = a sheet row removal found by the trigger
+const AUDIT_TYPE = { ADD: 'إضافة_محطة_جديدة', EDIT: 'تعديل_إحداثية', PROFILE: 'تعديل_بيانات_شخصية', DELETE: 'حذف_محطة', MANUAL_DELETE: 'حذف_يدوي' };
 const LOGIN_ACTIONS = ['دخول', 'دخول برقم الجوال'];
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

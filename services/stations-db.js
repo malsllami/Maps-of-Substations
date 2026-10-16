@@ -199,21 +199,32 @@
     return { stations: next, added: added, replaced: replaced, modified: modified };
   }
 
+  /* حذف المحطات التي أعلن الخادم حذفها (من سجل التعديلات) — بالرقم والجدول، فمحطة توزيع لا تحذف تحويلًا بنفس الرقم
+     Drop the stations the server announced as deleted (from the audit log) — by number and table */
+  function removeStations_(base, removed) {
+    if (!removed || !removed.length) return { stations: base, removed: 0 };
+    const drop = new Set(removed.map(function (r) { return keyOf_({ id: r.id, type: r.type }); }));
+    const next = base.filter(function (s) { return !drop.has(keyOf_(s)); });
+    return { stations: next, removed: base.length - next.length };
+  }
+
   /**
-   * يبني نسخة المزامنة من النسخة المحفوظة ورد getUpdatedStationsSince. لا يعتمدها.
-   * يُرجع { ok:true, stations, version, lastSync, changes } أو { ok:false, needsFullLoad, reason }.
-   * Builds the sync copy from the stored copy and the getUpdatedStationsSince reply. Doesn't commit it.
+   * يبني نسخة المزامنة من النسخة المحفوظة ورد getUpdatedStationsSince (المتغيّر والمحذوف). لا يعتمدها.
+   * يُرجع { ok:true, stations, version, lastSync, changes, added, modified, removed } أو { ok:false, needsFullLoad, reason }.
+   * Builds the sync copy from the stored copy and the getUpdatedStationsSince reply (changed and removed). Doesn't commit it.
    */
   function buildSync(stored, reply) {
     if (!stored || !Array.isArray(stored.stations)) return { ok: false, needsFullLoad: true, reason: 'لا توجد نسخة محفوظة' };
     if (!reply || !reply.success || !Array.isArray(reply.updated) || reply.version == null) return { ok: false, needsFullLoad: false, reason: 'رد غير صالح من الخادم' };
     if (isOlder_(reply.version, stored.version)) return { ok: false, needsFullLoad: false, reason: 'رد أقدم من النسخة المحفوظة' };
-    const built = applyUpdates(stored.stations, reply.updated);
-    if (built.stations.length !== stored.stations.length + built.added) return { ok: false, needsFullLoad: false, reason: 'عدد المحطات لم يطابق المتوقع' };
+    const cut = removeStations_(stored.stations, reply.removed); // المحذوف أولًا، ثم المتغيّر (محطة أُعيدت إضافتها تعود) / removed first, then changed
+    const built = applyUpdates(cut.stations, reply.updated);
+    if (built.stations.length !== cut.stations.length + built.added) return { ok: false, needsFullLoad: false, reason: 'عدد المحطات لم يطابق المتوقع' };
     if (typeof reply.totalCount === 'number' && built.stations.length !== reply.totalCount) {
       return { ok: false, needsFullLoad: true, reason: 'عدد النسخة (' + built.stations.length + ') لا يطابق الخادم (' + reply.totalCount + ') — محطة حُذفت أو تغيّر رقمها' };
     }
-    return { ok: true, stations: built.stations, version: String(reply.version), lastSync: reply.serverTime || null, changes: reply.updated.length, added: built.added, modified: built.modified };
+    return { ok: true, stations: built.stations, version: String(reply.version), lastSync: reply.serverTime || null,
+      changes: reply.updated.length + cut.removed, added: built.added, modified: built.modified, removed: cut.removed };
   }
 
   /* هل النسخة المحفوظة مطابقة لإصدار الخادم؟ — Does the stored copy match the server version? */

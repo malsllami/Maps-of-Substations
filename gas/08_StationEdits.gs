@@ -184,7 +184,7 @@ function updateCoordinates(data, auth) {
  * Permanently deletes the first row with the id — no audit row (explicit V1 request; security review later).
  * The operation key (optional for compatibility; the browser always sends it): a resend after a lost reply returns «done»
  * with no second delete — otherwise the next duplicate row with the same id would be deleted. */
-function deleteStation(data) {
+function deleteStation(data, auth) {
   if (!data.stationId || !data.type) return { error: EDIT_MSG.MISSING_DATA };
   const type = data.type;
   if (type !== STATION_TYPE.DISTRIBUTION && type !== STATION_TYPE.SUBSTATION) return { error: EDIT_MSG.BAD_TYPE };
@@ -198,6 +198,8 @@ function deleteStation(data) {
     withSheetRetry_(function () { sheet_(stationSheetName_(type)).deleteRow(row); });
     if (data.opKey) appendFormattedRow_(sheet_(SHEETS.IDEMPOTENCY), [data.opKey, new Date()], true);
     patchIndex_(type, 'remove', null, normalizeStationId_(stationId));
+    // سطر في «سجل التعديلات»: المزامنة تُرسله للأجهزة فتحذفها من نسخها بلا تحميل كامل — the sync sends it so devices drop it, no full load
+    logAudit_(auth && auth.phone ? auth.phone : '', AUDIT_TYPE.DELETE, stationId, auditDetailsWithTable_('حذف من لوحة المدير', type));
     bumpDataVersion_();
     return { success: true };
   });

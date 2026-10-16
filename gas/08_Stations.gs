@@ -310,8 +310,30 @@ function getUpdatedStationsSince(data) {
   const updated = [];
   dist.forEach(function (e) { if (changed(STATION_TYPE.DISTRIBUTION, e)) updated.push({ id: e.id, type: STATION_TYPE.DISTRIBUTION, feeder: e.feeder, region: e.region, lat: e.lat, lng: e.lng }); });
   sub.forEach(function (e) { if (changed(STATION_TYPE.SUBSTATION, e)) updated.push({ id: e.id, type: STATION_TYPE.SUBSTATION, feeder: '', region: '', lat: e.lat, lng: e.lng }); });
-  perfNote_('المتغيّرة', updated.length);
-  return { success: true, updated: updated, serverTime: new Date().toISOString(), version: getDataVersion().version, totalCount: dist.length + sub.length };
+  const removed = isNaN(sinceMs) ? [] : removedSince_(sinceMs, dist, sub);
+  perfNote_('المتغيّرة', updated.length + (removed.length ? ' | محذوفة: ' + removed.length : ''));
+  return { success: true, updated: updated, removed: removed, serverTime: new Date().toISOString(), version: getDataVersion().version, totalCount: dist.length + sub.length };
+}
+
+/* المحطات المحذوفة منذ وقت: من «سجل التعديلات» (آخره فقط، لا الجدول الرئيسي) — ما أُعيدت إضافته بعدها لا يُرسل محذوفًا
+ * Stations deleted since a time: from the audit log's tail (not the main table) — one re-added afterwards isn't sent as removed
+ * (اقتراح محمد 16 أكتوبر: الجهاز يحذفها من نسخته بلا تحميل كامل / the device drops them from its copy, no full load) */
+function removedSince_(sinceMs, dist, sub) {
+  const present = {}, out = [], seen = {};
+  dist.forEach(function (e) { present[STATION_TYPE.DISTRIBUTION + '|' + e.n] = true; });
+  sub.forEach(function (e) { present[STATION_TYPE.SUBSTATION + '|' + e.n] = true; });
+  const rows = perfMeasure_('سجل التعديلات (المحذوف)', function () { return readLogRowsSince_(SHEETS.AUDIT, new Date(sinceMs)); }, function (r) { return r.length + ' صف'; });
+  rows.forEach(function (row) {
+    const kind = String(row[2] || '');
+    if (kind !== AUDIT_TYPE.DELETE && kind !== AUDIT_TYPE.MANUAL_DELETE) return;
+    const t = logCellTime_(row[0]), type = auditTableOf_(row[4]), id = String(row[3] == null ? '' : row[3]).trim();
+    if (!t || t.getTime() <= sinceMs || !type || !id) return;
+    const key = type + '|' + normalizeStationId_(id);
+    if (present[key] || seen[key]) return;
+    seen[key] = true;
+    out.push({ id: id, type: type });
+  });
+  return out;
 }
 
 /* البحث برقم المحطة (أرقام عربية/إنجليزية، أحرف كبيرة/صغيرة): التوزيع أولًا ثم التحويل
@@ -398,21 +420,27 @@ function refreshIndexInPlace_(type) {
  * A build already running elsewhere ← this index is skipped. */
 function refreshStationIndexesInBackground() {
   const manualKeys = [];
+  let manualDeletes = 0;
   [STATION_TYPE.DISTRIBUTION, STATION_TYPE.SUBSTATION].forEach(function (type) {
     const start = Date.now();
     try {
       if (CacheService.getScriptCache().get(INDEX_KEYS[type] + '_building')) { console.log('فهرس ' + type + ': تخطٍّ (بناء جارٍ)'); return; }
       const before = getChunked_(INDEX_KEYS[type]); // الفهرس الحالي (يشمل كتابات الموقع) قبل إعادة البناء / the current index, before the rebuild
       const index = buildAndSaveIndex_(type);
-      const diff = before ? indexDiff_(before, index) : [];
-      diff.forEach(function (n) { manualKeys.push(type + '|' + n); });
-      console.log('فهرس ' + type + ' بالخلفية: ' + index.length + ' محطة | ' + (Date.now() - start) + ' ms' + (diff.length ? ' | تعديل يدوي: ' + diff.length : ''));
+      const diff = before ? indexDiff_(before, index) : { changed: [], removed: [] };
+      diff.changed.forEach(function (n) { manualKeys.push(type + '|' + n); });
+      // صف حُذف يدويًا من الشيت ← سطر «حذف_يدوي» في سجل التعديلات (إضافة فقط) فتحذفه الأجهزة من نسخها
+      // A row deleted by hand in the sheet ← a «manual delete» audit line (append only) so devices drop it from their copies
+      diff.removed.forEach(function (id) { logAudit_('', AUDIT_TYPE.MANUAL_DELETE, id, auditDetailsWithTable_('حذف يدوي من الشيت (اكتشفه الخادم)', type)); manualDeletes++; });
+      console.log('فهرس ' + type + ' بالخلفية: ' + index.length + ' محطة | ' + (Date.now() - start) + ' ms' +
+        (diff.changed.length ? ' | تعديل يدوي: ' + diff.changed.length : '') + (diff.removed.length ? ' | حذف يدوي: ' + diff.removed.length : ''));
     } catch (err) {
       logError_('refreshStationIndexesInBackground', String(err), type);
     }
   });
-  // تعديل يدوي في الشيت ← يُسجَّل ويُرفع الإصدار فتجلبه الأجهزة (اعتماد محمد 16 أكتوبر) — manual edit ← recorded and the version bumped
-  if (manualKeys.length) { recordManualChanges_(manualKeys); bumpDataVersion_(); }
+  // تعديل أو حذف يدوي في الشيت ← يُسجَّل ويُرفع الإصدار فتجلبه الأجهزة (اعتماد محمد 16 أكتوبر) — manual edit/delete ← recorded, version bumped
+  if (manualKeys.length) recordManualChanges_(manualKeys);
+  if (manualKeys.length || manualDeletes) bumpDataVersion_();
   countTriggerPropOps_(); // عمليات الخصائص لهذا التشغيل ضمن عدّاد اليوم / this run's property operations into today's counter
 }
 
@@ -423,14 +451,17 @@ const MANUAL_CHANGES_KEY = 'manual_station_changes';
 const MANUAL_CHANGES_MAX = 300;                       // حد حماية لحجم الخاصية / a cap protecting the property size
 const MANUAL_CHANGES_KEEP_MS = 2 * 24 * 3600 * 1000;  // يومان: جهاز غاب أكثر يحمّل كاملًا عند اختلاف العدد أو يتلقاها من الإصدار / two days
 
-/* المحطات الجديدة أو التي تغيّرت إحداثياتها/مغذيها/منطقتها بين فهرسين — stations new or changed between two indexes */
+/* بين فهرسين: changed = الجديدة أو التي تغيّرت إحداثياتها/مغذيها/منطقتها (بالمفتاح n)، removed = أرقام ما اختفى (بالرقم الأصلي)
+ * Between two indexes: changed = new or changed stations (by key n), removed = the original numbers of those that disappeared */
 function indexDiff_(before, after) {
   const sig = function (e) { return [e.lat, e.lng, e.feeder || '', e.region || ''].join('|'); };
-  const old = {};
+  const old = {}, now = {};
   before.forEach(function (e) { old[e.n] = sig(e); });
-  const out = [];
-  after.forEach(function (e) { if (old[e.n] !== sig(e)) out.push(e.n); });
-  return out;
+  after.forEach(function (e) { now[e.n] = true; });
+  const changed = [], removed = [];
+  after.forEach(function (e) { if (old[e.n] !== sig(e)) changed.push(e.n); });
+  before.forEach(function (e) { if (!now[e.n]) removed.push(e.id); });
+  return { changed: changed, removed: removed };
 }
 function readManualChanges_() {
   try { return JSON.parse(scriptProps_().getProperty(MANUAL_CHANGES_KEY) || '{}') || {}; } catch (e) { return {}; }

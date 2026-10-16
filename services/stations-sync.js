@@ -247,7 +247,7 @@
       logLoad_('sync', built.changes);
       markSynced_();
       // المضاف والمعدّل فعلًا — لرسالة «تم تحديث … من تعديلات الزملاء» / really added and modified — for the update message
-      emit_('synced', { added: built.added || 0, modified: built.modified || 0 });
+      emit_('synced', { added: built.added || 0, modified: built.modified || 0, removed: built.removed || 0 });
       return { ok: true, persisted: c.saved, changes: built.changes };
     });
     if (outcome.needsFullLoad) {

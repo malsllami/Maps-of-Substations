@@ -53,7 +53,7 @@ const ROUTES = {
   // المحطات: الكتابة (مفتاح العملية يُحفظ في «عمليات الحفظ») — stations: writes (operation key kept in «عمليات الحفظ»)
   addNewStation: { handler: function (d, a) { return addNewStation(d, a); }, access: ACCESS.MEMBER, deniedMessage: 'الرجاء تسجيل الدخول أولًا' },
   updateCoordinates: { handler: function (d, a) { return updateCoordinates(d, a); }, access: ACCESS.MEMBER, deniedMessage: 'الرجاء تسجيل الدخول أولًا' },
-  deleteStation: { handler: function (d) { return deleteStation(d); }, access: ACCESS.ADMIN, deniedMessage: 'حذف المحطات متاح للمدير فقط' },
+  deleteStation: { handler: function (d, a) { return deleteStation(d, a); }, access: ACCESS.ADMIN, deniedMessage: 'حذف المحطات متاح للمدير فقط' },
   // الإحصاءات — stats
   getStats: { handler: function () { return getStats(); }, access: ACCESS.MEMBER },
   // السجلات (عام كما في V1: يصل الخطأ حتى قبل الدخول) — logs (public as in V1: errors arrive even before login)
