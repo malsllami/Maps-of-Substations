@@ -48,6 +48,19 @@
     try { return D.dualDateTime(date); } catch (e) { return '—'; }
   }
 
+  /* مدة البحث ومصدره (طلب محمد، 16 أكتوبر): يظهر فقط حين تأتي المحطة من البحث (searchMs)، فيرى العضو فائدة نسخة الجهاز
+   * The search time and its source (Mohammed, 16 Oct): only when the station came from a search, showing the device copy's value */
+  function searchTime_(s) {
+    const ms = Number(s && s.searchMs);
+    if (!isFinite(ms) || ms < 0 || !s.source) return '';
+    // أقل من 1 ملي ثانية يُكتب «أقل من 0.001 ث» بدل «0.000 ث» — under 1 ms reads «under 0.001 s», not «0.000 s»
+    // الرقم وحده باتجاه اليسار، والوحدة «ث» بعده بالعربي فيُقرأ «2.56 ث» لا «ث 2.56» — the number alone is LTR, the unit follows in RTL
+    const sec = (ms < 1 ? 'أقل من <b dir="ltr">0.001</b>' : '<b dir="ltr">' + (ms / 1000).toFixed(ms < 100 ? 3 : 2) + '</b>') + ' ث';
+    return s.source === 'local'
+      ? '<div class="st-search-time local" data-role="search-time">⚡ وُجدت في ' + sec + ' — من نسخة جهازك</div>'
+      : '<div class="st-search-time server" data-role="search-time">⏱ وُجدت في ' + sec + ' — من الخادم · حمّل البيانات المؤقتة لبحث فوري</div>';
+  }
+
   /* الجزء العلوي (فوق الخريطة): البيانات في ثلاثة أقسام ثم «المسار من موقعي» بعرض البطاقة
    * The top part (above the map): the data in three sections, then a full-width «route from my location» */
   function topHtml_(s) {
@@ -58,6 +71,7 @@
         (s.feeder ? '<div class="sb-data-cell"><div class="cell-label">🔌 المغذي</div><div class="cell-value">' + esc(s.feeder) + '</div></div>' : '') +
         (s.region ? '<div class="sb-data-cell"><div class="cell-label">📍 المنطقة</div><div class="cell-value ar">' + esc(s.region) + '</div></div>' : '') +
       '</div>' +
+      searchTime_(s) +
       (coords ? '' : '<div class="st-note-warn" data-role="no-coords">' + NO_COORDS_MSG + '</div>') +
       '<div class="st-actions st-actions-v2">' +
         '<button class="st-btn primary st-main" type="button" data-act="navigate"' + (coords ? '' : ' disabled') + '>🧭 المسار من موقعي</button>' +

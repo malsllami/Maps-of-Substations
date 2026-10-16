@@ -41,7 +41,18 @@
       STATIONS_LOAD_LOG: PREFIX + 'stations-load-log',   // سجل التحميل والمزامنة / load and sync log
       STATIONS_ISSUES_LOG: PREFIX + 'stations-issues-log', // سجل الإخفاقات / failures log
       RECENT_STATIONS: PREFIX + 'recent-stations',       // «آخر المحطات» (ساعتان) / «recent stations» (two hours)
-      SW_RELOAD: PREFIX + 'sw-reload'                    // وقت آخر إعادة تحميل بعد تحديث عامل الخدمة (sessionStorage) — منع الحلقة / last reload after a SW update — loop guard
+      SW_RELOAD: PREFIX + 'sw-reload',                   // وقت آخر إعادة تحميل بعد تحديث عامل الخدمة (sessionStorage) — منع الحلقة / last reload after a SW update — loop guard
+      FRESH_START: PREFIX + 'fresh-start'                // رقم «البداية النظيفة» المنفّذة على هذا الجهاز / the fresh start id already run on this device
+    },
+
+    /* «البداية النظيفة» يوم الانتقال من V1 (خطة محمد): مرة واحدة لكل جهاز — تُفعَّل يوم الانتقال فقط (ENABLED: true)
+       The migration-day «fresh start» (Mohammed's plan): once per device — enabled on migration day only */
+    FRESH_START: {
+      ENABLED: false,
+      ID: 'v2-launch',                                   // تغييره يعيد التنفيذ على كل الأجهزة / changing it reruns on every device
+      V1_PREFIX: 'sec-',                                 // مفاتيح V1 وذاكراته (لا يمس sec2- ولا مشاريع النطاق الأخرى) / V1 keys and caches only
+      V1_DATABASES: ['sec-stations', 'sec-offline-map'], // قواعد V1 بالاسم فقط / V1 databases by name only
+      V1_PHONE_KEY: 'sec-phone', V1_SESSION_KEY: 'sec-session'
     },
 
     /* قواعد IndexedDB وذاكرة ملفات الموقع — IndexedDB databases and the site file cache */

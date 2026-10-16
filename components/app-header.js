@@ -33,6 +33,7 @@
     phone: S('<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>'),
     chat: S('<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>'),
     install: S('<rect x="3" y="3" width="18" height="18" rx="4"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>'),
+    tour: S('<circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>'),
     out: S('<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>'),
     chev: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>',
     toggle: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"></circle><line x1="12" y1="2" x2="12" y2="4"></line><line x1="12" y1="20" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="6.34" y2="6.34"></line><line x1="17.66" y1="17.66" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="4" y2="12"></line><line x1="20" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="6.34" y2="17.66"></line><line x1="17.66" y1="6.34" x2="19.07" y2="4.93"></line></svg>',
@@ -80,6 +81,7 @@
           }).join('') +
           (o.contact ? '<a href="#" class="mobile-menu-link" data-act="call"><span class="menu-icon" style="color:var(--teal)">' + ICON.phone + '</span>اتصال بالمدير</a>' +
             '<button type="button" class="mobile-menu-link mobile-menu-btn" data-act="message"><span class="menu-icon" style="color:#6C5CE7">' + ICON.chat + '</span>مراسلة المدير</button>' : '') +
+          tour_() +
           '<button type="button" class="mobile-menu-logout" data-act="logout"><span class="menu-icon" style="color:#E0654F">' + ICON.out + '</span><span data-role="logout-label">' + LOGOUT + '</span></button>' +
         '</div></div>';
     }
@@ -89,6 +91,12 @@
       const P = global.SecPWA;
       if (!global.SecInstallSheet || !P || P.installMode() === 'installed') return '';
       return '<button type="button" class="mobile-menu-link mobile-menu-btn" data-act="install"><span class="menu-icon" style="color:var(--teal-light)">' + ICON.install + '</span>حفظ الموقع كتطبيق</button>';
+    }
+    /* «الجولة التعريفية» في أسفل القائمة قبل الخروج (اعتماد محمد 16 أكتوبر) — تظهر فقط إن حُمّلت الجولة في الصفحة
+       «Feature tour» at the bottom of the menu, before logout — only when the page loaded the tour */
+    function tour_() {
+      if (!global.SecFeatureTour) return '';
+      return '<button type="button" class="mobile-menu-link mobile-menu-btn" data-act="tour"><span class="menu-icon" style="color:#1FB8C9">' + ICON.tour + '</span>الجولة التعريفية</button>';
     }
     function guest_() {
       return '<a href="auth.html" class="login-btn" data-role="login">تسجيل الدخول</a>' +
@@ -151,6 +159,7 @@
       else if (act === 'home') global.location.href = 'index.html';
       else if (act === 'message') { e.preventDefault(); setMenu_(false); if (global.SecContactAdmin) global.SecContactAdmin.open(); }
       else if (act === 'install') { setMenu_(false); if (global.SecInstallSheet) global.SecInstallSheet.open(); }
+      else if (act === 'tour') { setMenu_(false); if (global.SecFeatureTour) global.SecFeatureTour.open(); }
       else if (act === 'logout') {
         if (t.dataset.confirm === '1') { resetLogout_(); (o.onLogout || SESSION.logout)(); return; }
         t.dataset.confirm = '1';

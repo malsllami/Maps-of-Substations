@@ -38,8 +38,9 @@ const APP_SHELL = [
   './', 'index.html', 'auth.html', 'member.html', 'shifts.html', 'admin.html', 'perf.html', 'manifest.json',
   'config/الإعدادات.js',
   'assets/icon-192.png', 'assets/icon-512.png', 'assets/icon-maskable-512.png', 'assets/logo-icon.png', 'assets/logo-light.png', 'assets/member-avatar.webp', 'assets/auth-bg.webp',
+  'assets/tour/01-offline.webp', 'assets/tour/02-search-server.webp', 'assets/tour/03-search-local.webp', 'assets/tour/04-outages-input.webp', 'assets/tour/05-outages-map.webp', 'assets/tour/06-ruler.webp', 'assets/tour/07-nav-online.webp', 'assets/tour/08-nav-offline.webp', 'assets/tour/09-shifts.webp', 'assets/tour/10-dashboard.webp',
   'utils/dates.js', 'utils/html.js', 'utils/station-query.js', 'utils/text-input.js',
-  'services/api-client.js', 'services/connection.js', 'services/direction-tracker.js', 'services/nav-camera.js', 'services/navigation.js',
+  'services/api-client.js', 'services/connection.js', 'services/direction-tracker.js', 'services/fresh-start.js', 'services/nav-camera.js', 'services/navigation.js',
   'services/offline-map.js', 'services/osrm.js', 'services/pwa.js', 'services/session.js', 'services/settings-lists.js',
   'services/shift-rotation.js', 'services/station-search.js', 'services/stations-db.js', 'services/stations-sync.js', 'services/theme.js',
   'services/timing.js', 'services/webauthn-client.js',
@@ -49,13 +50,13 @@ const APP_SHELL = [
   'components/navigation-view.js', 'components/nearby-layer.js', 'components/offline-map-ui.js', 'components/outage-search.js',
   'components/perf-viewer.js', 'components/phone-input.js', 'components/profile-gate.js', 'components/recent-stations.js',
   'components/shifts-calendar.js', 'components/station-card.js', 'components/station-search-box.js', 'components/stats-cards.js',
-  'components/install-sheet.js', 'components/storage-section.js', 'components/update-sheet.js',
+  'components/install-sheet.js', 'components/storage-section.js', 'components/update-sheet.js', 'components/feature-tour.js', 'config/جولة_تعريفية.js',
   'pages/home.js',
   'styles/add-edit-station.css', 'styles/admin.css', 'styles/app-header.css', 'styles/auth.css', 'styles/base.css',
   'styles/connection-status.css', 'styles/contact-admin.css', 'styles/delete-station.css', 'styles/globe.css', 'styles/home.css',
   'styles/map-tools.css', 'styles/map-view.css', 'styles/map.css', 'styles/member.css', 'styles/navigation.css', 'styles/offline-map.css',
   'styles/perf-viewer.css', 'styles/profile-gate.css', 'styles/recent-stations.css', 'styles/shifts.css', 'styles/station-card.css',
-  'styles/station-search.css', 'styles/stats-cards.css', 'styles/storage-section.css', 'styles/tables.css', 'styles/update-sheet.css', 'styles/install-sheet.css'
+  'styles/station-search.css', 'styles/stats-cards.css', 'styles/storage-section.css', 'styles/tables.css', 'styles/update-sheet.css', 'styles/install-sheet.css', 'styles/feature-tour.css'
 ];
 const CDN_ASSETS = Object.keys(CONFIG.LIBRARIES).map((k) => CONFIG.LIBRARIES[k]);
 const CACHE_FIRST_HOSTS = ['cdnjs.cloudflare.com', 'cdn.jsdelivr.net', 'fonts.googleapis.com', 'fonts.gstatic.com'];

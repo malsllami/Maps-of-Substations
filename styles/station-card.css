@@ -112,3 +112,8 @@ body.nav-full .station-actions{display:none !important;}
   .hero.station-framed .toolbar-scroll{padding:6px 6px;gap:2px;}
   .hero.station-framed .toolbar-btn,.hero.station-framed .map-mode-chip{padding:7px 7px;gap:4px;}
 }
+/* مدة البحث ومصدره (16 أكتوبر) — the search time and its source */
+.st-search-time{font-size:13px;text-align:center;margin:-4px 0 10px;color:var(--text-secondary);}
+.st-search-time b{font-family:'JetBrains Mono',monospace;color:var(--text-primary);unicode-bidi:isolate;}
+.st-search-time.local b{color:var(--teal);}
+.st-search-time.server b{color:#E5B53A;}

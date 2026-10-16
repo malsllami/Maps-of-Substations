@@ -87,11 +87,13 @@
       }
       busy = true; box.classList.add('busy'); setHint_('');
       const bar = progress_(true);
+      const t0 = global.performance.now(); // مدة البحث تُعرض في بطاقة المحطة (طلب محمد، 16 أكتوبر) / the search time, shown on the station card
       try {
         const res = await SEARCH.find(raw, {
           onChecking: function () { setHint_(SEARCH.MSG.CHECKING); },
           onUpdated: function (st) { if (o.onUpdated) o.onUpdated(st); }
         });
+        if (res.found) res.searchMs = Math.max(0, Math.round((global.performance.now() - t0) * 10) / 10);
         if (res.found) {
           bar.finish(); setHint_('');
           if (!lens) input.value = '';

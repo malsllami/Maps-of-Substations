@@ -9,6 +9,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>لوحة المدير | محطات التوزيع</title>
 <script src="config/الإعدادات.js"></script>
+<script src="services/fresh-start.js"></script>
 <script src="services/theme.js"></script>
 <!-- تطبيق قابل للتثبيت: الملف والأيقونة ولون الشريط، وتسجيل عامل الخدمة بعد التحميل — installable app: manifest, icon, bar colour, SW registered after load -->
 <link rel="manifest" href="manifest.json">
@@ -19,6 +20,9 @@
 <script src="components/update-sheet.js"></script>
 <link rel="stylesheet" href="styles/install-sheet.css">
 <script src="components/install-sheet.js"></script>
+<link rel="stylesheet" href="styles/feature-tour.css">
+<script src="config/جولة_تعريفية.js"></script>
+<script src="components/feature-tour.js"></script>
 <script>
   // قبل الرسم: الزائر للدخول، وغير المدير للرئيسية (V1) — before drawing: a guest to login, a non-admin to home (V1)
   (function () {
