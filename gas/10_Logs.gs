@@ -58,16 +58,31 @@ function errorRow_(source, message, details, meta) {
   const phone = formatPhone(m.phone) || '';
   let name = '';
   if (phone) { try { const member = findMember_(phone); name = member ? member.name : '(غير مسجّل)'; } catch (err) { name = ''; } }
-  const page = m.page || fromDetails('الصفحة'), action = m.action || '';
-  const failKind = m.failKind || '', deviceText = fromDetails('الجهاز');
+  const page = m.page || fromDetails('الصفحة'), deviceText = fromDetails('الجهاز');
+  const old = legacyFields_(source, message, d); // متصفح لم يتحدّث (أو طابور قديم): من الرسالة والتفاصيل / an old browser or queue
+  const action = m.action || old.action, failKind = m.failKind || old.failKind, outcome = m.outcome || old.outcome;
   const fromDevice = function (re) { const x = re.exec(deviceText); return x ? x[1].trim() : ''; };
   return [
     new Date(), cellText_(source, 200), cellText_(message, CLIENT_TEXT_MAX), cellText_(d, CLIENT_TEXT_MAX), category,
     cellText_(m.deviceType || deviceText.split(' ')[0]), cellText_(m.os || fromDevice(/((?:iOS|Android) [0-9.]+)/)), cellText_(m.browser || fromDevice(/— ([^(]+)/)),
     cellText_(m.openMode || fromDevice(/(تطبيق مثبّت|متصفح)/)), phone, cellText_(name),
-    cellText_(page), cellText_(action), cellText_(m.file, 300), cellText_(failKind), cellText_(m.outcome),
+    cellText_(page), cellText_(action), cellText_(m.file || old.file, 300), cellText_(failKind), cellText_(outcome),
     severityOf_(category), cellText_(problemCode_(action, failKind, page, source + ' — ' + message), 200)
   ];
+}
+
+/* الحقول من رسالة الخطأ وتفاصيله بالشكل القديم (قبل 16 أكتوبر): الإجراء، نوع الفشل، النتيجة، والملف للخطأ البرمجي
+ * The fields from an old-format error's message and details: the action, failure kind, outcome, and the file for a JS error */
+function legacyFields_(source, message, details) {
+  const s = String(source || ''), msg = String(message || '');
+  const act = /(?:فشل طلب|نتيجة كتابة غير مؤكدة:|كتابة تأكدت بإعادة الإرسال:|تأخر وعالجه الاحتياطي:)\s*([A-Za-z]\w*)/.exec(msg);
+  const failKind = /HTTP (\d{3})/.test(msg) ? 'صفحة HTTP ' + /HTTP (\d{3})/.exec(msg)[1] : /انتهت المهلة/.test(msg) ? 'انتهاء المهلة'
+    : /رد ليس من خادمنا/.test(msg) ? 'رد ليس من خادمنا' : /لم يرد خلال 8 ث/.test(msg) ? 'تأخر أكثر من 8 ث'
+    : /انقطاع الاتصال/.test(msg) ? 'انقطاع' : s === 'client/js' ? 'خطأ برمجي' : '';
+  const outcome = s === 'client/recovered' ? 'نجاح بعد الطلب الاحتياطي' : s === 'client/write-recovered' ? 'نجاح بعد إعادة الإرسال'
+    : s === 'client/write-unconfirmed' ? 'غير مؤكدة' : s === 'client/background' ? 'فشل أثناء الخلفية' : s === 'client/connection' ? 'فشل نهائي' : '';
+  const where = s === 'client/js' ? ((/المكان: ([^|]+)/.exec(String(details || '')) || [])[1] || '').trim() : '';
+  return { action: act ? act[1] : where, failKind: failKind, outcome: outcome, file: where };
 }
 
 /* سطر في «سجل الزوار» — A row in the visits log */
