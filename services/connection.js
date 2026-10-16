@@ -65,6 +65,34 @@
     return device + ' — ' + browser + (installed ? ' (تطبيق مثبّت)' : ' (متصفح)') + net;
   }
 
+  /* بيانات الجهاز منفصلة لأعمدة «سجل الأخطاء» الجديدة (16 أكتوبر) — device data split for the new error-log columns */
+  function deviceMeta_() {
+    const ua = navigator.userAgent || '';
+    const type = /iPhone/.test(ua) ? 'iPhone' : /iPad/.test(ua) ? 'iPad' : /Android/.test(ua) ? 'Android' : /Windows/.test(ua) ? 'Windows' : /Macintosh/.test(ua) ? 'Mac' : 'غير معروف';
+    const ios = ua.match(/OS (\d+)_(\d+)/), android = ua.match(/Android (\d+(?:\.\d+)?)/), mac = ua.match(/Mac OS X (\d+)[_.](\d+)/), win = ua.match(/Windows NT (\d+\.\d+)/);
+    const os = (type === 'iPhone' || type === 'iPad') && ios ? 'iOS ' + ios[1] + '.' + ios[2] : android ? 'Android ' + android[1]
+      : mac ? 'macOS ' + mac[1] + '.' + mac[2] : win ? 'Windows ' + win[1] : type;
+    const v = function (re) { const m = ua.match(re); return m ? ' ' + m[1] : ''; };
+    const browser = /EdgA?\//.test(ua) ? 'Edge' + v(/EdgA?\/(\d+)/) : /CriOS|Chrome\//.test(ua) ? 'Chrome' + v(/(?:CriOS|Chrome)\/(\d+)/)
+      : /FxiOS|Firefox\//.test(ua) ? 'Firefox' + v(/(?:FxiOS|Firefox)\/(\d+)/) : /SamsungBrowser/.test(ua) ? 'Samsung' + v(/SamsungBrowser\/(\d+)/)
+      : /Safari\//.test(ua) ? 'Safari' + v(/Version\/(\d+(?:\.\d+)?)/) : 'غير معروف';
+    let installed = false;
+    try { installed = navigator.standalone === true || global.matchMedia('(display-mode: standalone)').matches; } catch (e) {}
+    const net = navigator.connection && navigator.connection.effectiveType ? ' · ' + navigator.connection.effectiveType : '';
+    return { deviceType: type, os: os, browser: browser, openMode: (installed ? 'تطبيق مثبّت' : 'متصفح') + net };
+  }
+  /* جوال العضو من الجلسة (بلا اعتماد على session.js)، ومعرّف جهاز ثابت لمن لم يسجّل دخوله — لعدّ «الأعضاء المتأثرين»
+     The member's phone from the session (no dependency on session.js), and a stable device id for the logged-out */
+  function personMeta_() {
+    let phone = '', deviceId = '';
+    try { phone = (JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.SESSION) || 'null') || {}).phone || ''; } catch (e) { phone = ''; }
+    try {
+      deviceId = localStorage.getItem(CONFIG.STORAGE_KEYS.DEVICE_ID) || '';
+      if (!deviceId) { deviceId = Date.now().toString(36) + Math.random().toString(36).slice(2, 10); localStorage.setItem(CONFIG.STORAGE_KEYS.DEVICE_ID, deviceId); }
+    } catch (e) { deviceId = ''; }
+    return { phone: phone, deviceId: deviceId };
+  }
+
   function pageName_() {
     return location.pathname.split('/').pop() || 'index.html';
   }
@@ -79,13 +107,17 @@
   function writeQueue_(queue) {
     try { localStorage.setItem(PENDING_ERRORS_KEY, JSON.stringify(queue.slice(-MAX_PENDING))); } catch (e) {}
   }
-  function queueError_(source, message, details) {
-    const queue = readQueue_();
+  /* meta (اختياري): { action, failKind, outcome, file } — تُكمَّل ببيانات الجهاز والصفحة والعضو لأعمدة السجل المنفصلة
+     meta (optional): completed with device, page and member data for the separate log columns */
+  function queueError_(source, message, details, meta) {
+    const queue = readQueue_(), person = personMeta_();
     queue.push({
       id: newErrorId_(),
       source: source,
       message: String(message).slice(0, 180),
-      details: ('وقت الحدوث: ' + clock_() + ' | الصفحة: ' + pageName_() + ' | ' + details + ' | الجهاز: ' + deviceSummary_()).slice(0, 1500)
+      details: ('وقت الحدوث: ' + clock_() + ' | الصفحة: ' + pageName_() + ' | ' + details + ' | الجهاز: ' + deviceSummary_() +
+        (person.deviceId ? ' | معرّف الجهاز: ' + person.deviceId : '')).slice(0, 1500),
+      meta: Object.assign(deviceMeta_(), { page: pageName_(), phone: person.phone, deviceId: person.deviceId }, meta || {})
     });
     writeQueue_(queue);
   }
@@ -162,6 +194,11 @@
     try { const x = new URL(u); return x.host + x.pathname; } catch (e) { return String(u || '').split('?')[0].slice(0, 120); }
   }
   function sec_(ms) { return (ms / 1000).toFixed(1) + ' ث'; }
+  /* نوع الفشل مختصرًا لعمود «نوع الفشل» ولرمز المشكلة — the failure kind, short, for the column and the problem code */
+  function failKind_(a) {
+    return !a ? '' : a.kind === 'http' ? 'صفحة HTTP ' + a.status : a.kind === 'timeout' ? 'انتهاء المهلة'
+      : a.kind === 'invalid-reply' ? 'رد ليس من خادمنا' : a.kind === 'cancelled' ? 'تأخر أكثر من 8 ث' : 'انقطاع';
+  }
   function whatFailed_(a) {
     return a.kind === 'http' ? 'رد غير سليم HTTP ' + a.status
       : a.kind === 'timeout' ? 'انتهت المهلة'
@@ -203,15 +240,18 @@
     if (leavingPage || !attempts.length || attempts.every(function (a) { return a.offline; })) return;
     const labels = attempts.length > 1 ? ['الطلب الأصلي', 'الطلب الاحتياطي'] : [''];
     const body = attempts.map(function (a, i) { return (labels[i] ? labels[i] + ': ' : '') + describeAttempt_(a); }).join(' || ');
-    queueError_(failureSource_(action, attempts), failureMessage_(action, attempts) + (attempts.length > 1 ? ' (الأصلي والاحتياطي)' : ''),
-      body + (note ? ' || ' + note : ''));
+    const source = failureSource_(action, attempts), main = attempts.filter(function (a) { return a.kind === 'http'; })[0] || attempts[attempts.length - 1];
+    queueError_(source, failureMessage_(action, attempts) + (attempts.length > 1 ? ' (الأصلي والاحتياطي)' : ''),
+      body + (note ? ' || ' + note : ''),
+      { action: action, failKind: failKind_(main), outcome: source === 'client/write-unconfirmed' ? 'غير مؤكدة' : source === 'client/background' ? 'فشل أثناء الخلفية' : 'فشل نهائي' });
   }
   /* فشل الأصلي ونجح الاحتياطي: ليس خطأً ولا يُحذف — «تأخر وعالجه الاحتياطي»
    * The original failed and the backup succeeded: not an error, not dropped — "delayed, recovered by the backup" */
   function reportRecovered(action, original, backup) {
     queueError_('client/recovered', 'تأخر وعالجه الاحتياطي: ' + action + ' — ' + whatFailed_(original),
       'الطلب الأصلي: ' + describeAttempt_(original) + ' || الطلب الاحتياطي: requestId: ' + (backup.requestId || '—') +
-      ' | الزمن: ' + sec_(backup.ms || 0) + ' | النتيجة النهائية: نجاح');
+      ' | الزمن: ' + sec_(backup.ms || 0) + ' | النتيجة النهائية: نجاح',
+      { action: action, failKind: failKind_(original), outcome: 'نجاح بعد الطلب الاحتياطي' });
   }
   /* كتابة انتهت إحدى محاولاتها بلا رد سليم، ثم ما انتهت إليه إعادة الإرسال بنفس opKey.
    * تأكد الحفظ بالإعادة (confirmed) ← «كتابة تأكدت بإعادة الإرسال» (ليست خطأً، مثل «تأخر وعالجه الاحتياطي»)؛ وإلا «نتيجة كتابة غير مؤكدة».
@@ -223,7 +263,8 @@
     queueError_(confirmed ? 'client/write-recovered' : 'client/write-unconfirmed',
       (confirmed ? 'كتابة تأكدت بإعادة الإرسال: ' : 'نتيجة كتابة غير مؤكدة: ') + action + ': ' + whatFailed_(failed[0]),
       attempts.map(function (a, i) { return 'المحاولة ' + (i + 1) + ': ' + (a.kind === 'ok' ? 'رد سليم | ' : '') + describeAttempt_(a); }).join(' || ') +
-      ' || النتيجة النهائية: ' + outcome);
+      ' || النتيجة النهائية: ' + outcome,
+      { action: action, failKind: failKind_(failed[0]), outcome: confirmed ? 'نجاح بعد إعادة الإرسال' : 'غير مؤكدة' });
   }
 
   /* يراقب طلبات الخادم فقط دون تعديل الطلب أو الرد (سوى إضافة requestId الذي يضيفه قياس الأزمنة أصلًا): الرد السليم يثبت
@@ -282,21 +323,24 @@
     // side effects of a connection failure already logged above — not duplicated (including «invalid-reply», logged by the backup request with its outcome)
     return /Load failed|Failed to fetch|NetworkError|did not match the expected pattern|Unexpected token|JSON|invalid-reply/i.test(msg);
   }
-  function queueJsError_(msg, where) {
+  /* where: الملف:السطر:العمود؛ stack: أول أسطر تسلسل الاستدعاءات (إن توفر) — where: file:line:column; stack: the first call-stack lines */
+  function queueJsError_(msg, where, stack) {
     if (!msg || msg === 'Script error.' || isConnectionSideEffect_(msg)) return; // "Script error." = سكربت خارجي بلا تفاصيل / cross-origin script with no details
     if (/ResizeObserver loop/i.test(msg)) return; // تحذير متصفح معروف غير ضار، لا خلل ظاهر / a known harmless browser warning, no visible fault
     const key = msg + '|' + where;
     if (seenJsErrors[key]) return;
     seenJsErrors[key] = true;
-    queueError_('client/js', 'خطأ برمجي: ' + msg, 'المكان: ' + where);
+    const trace = String(stack || '').split('\n').slice(0, 4).map(function (l) { return l.trim().replace(/https?:\/\/[^/]+\/[^/]*\//g, ''); }).join(' ← ');
+    queueError_('client/js', 'خطأ برمجي: ' + msg, 'المكان: ' + where + (trace ? ' | تسلسل الاستدعاءات: ' + trace.slice(0, 400) : ''),
+      { action: where, failKind: 'خطأ برمجي', file: where, outcome: '—' }); // الملف والسطر في رمز المشكلة: كل خطأ مشكلة مستقلة / file:line in the code
   }
   global.addEventListener('error', function (ev) {
     if (!ev || !ev.message) return; // فشل تحميل صورة/ملف وليس خطأ برمجيًا / a resource load failure, not a script error
-    queueJsError_(ev.message, (ev.filename || '').split('/').pop() + ':' + ev.lineno);
+    queueJsError_(ev.message, (ev.filename || '').split('/').pop() + ':' + ev.lineno + (ev.colno ? ':' + ev.colno : ''), ev.error && ev.error.stack);
   });
   global.addEventListener('unhandledrejection', function (ev) {
     const reason = ev && ev.reason;
-    queueJsError_(reason && reason.message ? reason.message : String(reason || ''), 'وعد غير معالج (Promise)');
+    queueJsError_(reason && reason.message ? reason.message : String(reason || ''), 'وعد غير معالج (Promise)', reason && reason.stack);
   });
 
   function lastOkAt() {
@@ -318,9 +362,9 @@
 
   /* حدث تشخيصي تعرفه الصفحة وحدها (مثل نوع خطأ البصمة) — بنفس الطابور والتفاصيل الموحدة
    * A diagnostic event only the page knows about (e.g. the fingerprint error type) — through the same queue and standard details */
-  function reportEvent(source, message, details) {
+  function reportEvent(source, message, details, meta) {
     if (leavingPage) return;
-    queueError_(String(source), String(message), String(details || ''));
+    queueError_(String(source), String(message), String(details || ''), meta);
   }
 
   global.SecConnection = { lastOkAt: lastOkAt, pingUnlessRecent: pingUnlessRecent,

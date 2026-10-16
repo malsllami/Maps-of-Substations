@@ -18,7 +18,7 @@
  * ===================================================
  */
 
-const SCHEMA_VERSION = 'v2-1';
+const SCHEMA_VERSION = 'v2-2'; // v2-2 (16 أكتوبر): أعمدة سجل الأخطاء الجديدة تُضاف تلقائيًا مع أول طلب / the new error-log columns are added with the first request
 const SCHEMA_FLAG_KEY = 'schema_version';
 const SCHEMA_CACHE_SECONDS = 21600;
 
@@ -49,6 +49,16 @@ function تهيئة_المخطط() {
   scriptProps_().setProperty(SCHEMA_FLAG_KEY, SCHEMA_VERSION);
   CacheService.getScriptCache().put(SCHEMA_FLAG_KEY, SCHEMA_VERSION, SCHEMA_CACHE_SECONDS);
   console.log(report.length ? report.join('\n') : 'المخطط مطابق — لا تغيير');
+}
+
+/* إضافة أعمدة «سجل الأخطاء» الجديدة (16 أكتوبر) يدويًا من المحرر — إضافة فقط في آخر الجدول، لا تمس أي عمود أو صف قائم.
+ * (تُضاف أيضًا تلقائيًا مع أول طلب بعد النشر؛ هذه الدالة للتشغيل والتحقق اليدوي.)
+ * Adds the new error-log columns manually from the editor — appended only, never touching an existing column or row. */
+function إضافة_أعمدة_سجل_الأخطاء() {
+  const report = applySchema_().filter(function (line) { return line.indexOf(SHEETS.ERRORS) === 0; });
+  scriptProps_().setProperty(SCHEMA_FLAG_KEY, SCHEMA_VERSION);
+  CacheService.getScriptCache().put(SCHEMA_FLAG_KEY, SCHEMA_VERSION, SCHEMA_CACHE_SECONDS);
+  console.log(report.length ? report.join('\n') : 'أعمدة «سجل الأخطاء» موجودة كلها — لا تغيير');
 }
 
 /* التهيئة الفعلية — يُرجع قائمة بما تغيّر — The actual setup — returns a list of what changed */

@@ -113,7 +113,8 @@
       C.reportEvent('client/session-expired', 'خروج قسري: رفض الخادم التذكرة' + (r.action ? ' في ' + r.action : ''),
         'الإجراء: ' + (r.action || 'غير معروف') + ' | رسالة الخادم: ' + String(r.message || '—').slice(0, 120) +
         ' | عمر التذكرة: ' + (ageMin === null ? 'غير معروف' : ageMin + ' دقيقة') + ' | طريقة الدخول: ' + (p.via || 'غير معروفة') +
-        ' | الجوال: ' + (s && s.phone ? s.phone : '—'));
+        ' | الجوال: ' + (s && s.phone ? s.phone : '—'),
+        { action: r.action || 'غير معروف', failKind: 'رفض التذكرة', outcome: 'خروج من الجلسة' });
     } catch (e) { /* التسجيل لا يمنع الخروج أبدًا / logging never blocks the logout */ }
   }
 

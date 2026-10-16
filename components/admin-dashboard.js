@@ -225,24 +225,36 @@
           '<div class="acc-body"><div class="acc-body-inner">' + (Object.keys(summary).map(function (c) {
             return '<div class="log-row"><span>' + (ALERT_ICON[c] || '') + ' ' + esc(c) + '</span><b>' + show_(summary[c]) + '</b></div>';
           }).join('') || '<div class="coming-soon">' + MSG.NONE + '</div>') +
-          (problems.length ? '<div class="log-problems-title">أحدث المشاكل</div>' + table_(['المشكلة', 'التصنيف', 'العدد', 'آخر ظهور'], problems.map(function (p) {
+          // كل المشاكل بكل درجاتها: الدرجة الحالية والحالة والأعضاء المختلفون والمرات منفصلة (مواصفات محمد 16 أكتوبر)
+          // Every problem at every level: current level, status, distinct members and occurrences kept separate
+          (problems.length ? '<div class="log-problems-title">أحدث المشاكل</div>' + table_(['المشكلة', 'الدرجة', 'الحالة', 'الأعضاء', 'المرات', 'آخر ظهور'], problems.map(function (p) {
             const last = new Date(p && p.lastSeen);
-            return '<tr><td class="log-msg">' + esc(p.message) + '<span class="sub">' + esc(p.source) + '</span></td><td>' + (ALERT_ICON[p.category] || '') + ' ' + esc(p.category) + '</td><td class="mono">' + show_(p.count) + '</td><td>' + (isNaN(last.getTime()) ? '—' : dateCell(last) + '<span class="sub">' + esc(D.time(last)) + '</span>') + '</td></tr>';
+            return '<tr><td class="log-msg">' + (ALERT_ICON[p.category] || '') + ' ' + esc(p.message) + '<span class="sub">' + esc(p.code || p.source) + (p.devices && p.devices.length ? ' · ' + esc(p.devices.join('، ')) : '') + '</span></td>' +
+              '<td>' + levelBadge_(p.level || p.base) + '</td><td>' + esc(p.status || '—') + '</td><td class="mono">' + show_(p.members) + '</td><td class="mono">' + show_(p.count) + '</td>' +
+              '<td>' + (isNaN(last.getTime()) ? '—' : dateCell(last) + '<span class="sub">' + esc(D.time(last)) + '</span>') + '</td></tr>';
           }).join('')) : '') + '</div></div></div>';
       renderAlerts_(d.alertsRecent);
       CARDS.forEach(function (name) { loadCard_(name); });
     }
     /* شريط الأخطاء: مشاكل أول ظهور لها خلال 72 ساعة، شريطًا واحدًا لا بطاقات (قرار محمد، 15 أكتوبر)
      * The alert strip: problems first seen within 72 hours, one strip not cards (Mohammed's decision, 15 Oct) */
+    /* الشريط يعرض «حرج جدًا» و«مهم جدًا» فقط (الخادم يصفّيها)، مع عدد الأعضاء المختلفين وعدد المرات منفصلين (16 أكتوبر)
+     * The strip shows only «حرج جدًا» and «مهم جدًا» (filtered by the server), with distinct members and occurrences apart */
     function renderAlerts_(list) {
       const items = (Array.isArray(list) ? list : []).filter(function (p) { return p && p.message; });
       alerts.hidden = !items.length;
       if (!items.length) { alerts.innerHTML = ''; return; }
-      alerts.innerHTML = '<span class="alert-strip-title">⚠️ مشاكل جديدة (آخر 72 ساعة): ' + items.length + '</span><div class="alert-strip-items">' + items.map(function (p) {
+      alerts.innerHTML = '<span class="alert-strip-title">⚠️ مشاكل تحتاج انتباهك (حرج جدًا / مهم جدًا — آخر 72 ساعة): ' + items.length + '</span><div class="alert-strip-items">' + items.map(function (p) {
         const first = new Date(p.firstSeen);
-        return '<span class="alert-item" title="' + esc(p.category) + ' — ' + esc(p.source) + '">' + (ALERT_ICON[p.category] || '⚠️') + ' <span class="alert-item-msg">' + esc(p.message) + '</span>' +
-          '<b class="alert-item-count">×' + show_(p.count) + '</b>' + (isNaN(first.getTime()) ? '' : '<span class="alert-item-age">' + esc(D.relativeTime(first).replace(/^قبل /, 'منذ ')) + '</span>') + '</span>';
+        return '<span class="alert-item" title="' + esc(p.category) + ' — ' + esc(p.code || p.source) + ' — ' + esc(p.status || '') + '">' + levelBadge_(p.level) + ' ' + (ALERT_ICON[p.category] || '⚠️') +
+          ' <span class="alert-item-msg">' + esc(p.message) + '</span>' +
+          '<b class="alert-item-count">' + show_(p.members) + ' عضو · ×' + show_(p.count) + '</b>' + (isNaN(first.getTime()) ? '' : '<span class="alert-item-age">' + esc(D.relativeTime(first).replace(/^قبل /, 'منذ ')) + '</span>') + '</span>';
       }).join('') + '</div>';
+    }
+    /* شارة الدرجة — the severity badge */
+    function levelBadge_(level) {
+      const cls = { 'حرج جدًا': 'lv-critical', 'مهم جدًا': 'lv-high', 'مهم': 'lv-mid', 'منخفض': 'lv-low' }[level] || 'lv-mid';
+      return '<span class="lv-badge ' + cls + '">' + esc(level || '—') + '</span>';
     }
     function section_(name, title, badge) {
       return '<div class="acc-item" data-section="' + name + '"><div class="acc-head" role="button" tabindex="0" aria-expanded="false"><div class="acc-head-title">' + title + '</div>' +

@@ -25,6 +25,12 @@ body.admin-page header{position:sticky;top:0;z-index:20;}
 .alert-item{flex-shrink:0;display:inline-flex;align-items:center;gap:6px;padding:2px 12px;font-size:12px;color:var(--text-primary);}
 .alert-item + .alert-item{border-right:1px solid rgba(224,101,79,.35);}
 .alert-item-msg{max-width:260px;overflow:hidden;text-overflow:ellipsis;}
+/* شارات الدرجة (16 أكتوبر) — severity badges */
+.lv-badge{display:inline-block;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:700;white-space:nowrap;}
+.lv-critical{background:#C62828;color:#fff;}
+.lv-high{background:#E0654F;color:#fff;}
+.lv-mid{background:rgba(240,180,41,.2);color:#B7860B;border:1px solid rgba(240,180,41,.55);}
+.lv-low{background:rgba(127,140,155,.18);color:var(--text-secondary);}
 .alert-item-count{color:#E0654F;font-family:'JetBrains Mono',monospace;}
 .alert-item-age{font-size:11px;color:var(--text-secondary);}
 .ops-status-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:14px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;}

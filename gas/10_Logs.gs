@@ -14,13 +14,60 @@
  * ===================================================
  */
 
-/* سطر في «سجل الأخطاء» مع تصنيفه — A row in the error log with its category */
+/* سطر في «سجل الأخطاء» مع تصنيفه — أخطاء الخادم نفسه (الجهاز «الخادم») — A row in the error log: the server's own errors */
 function logError_(source, message, details) {
   try {
-    appendFormattedRow_(sheet_(SHEETS.ERRORS), [new Date(), sanitizeSheetText_(source), sanitizeSheetText_(message), sanitizeSheetText_(details || ''), classifyError_(source, message)]);
+    appendFormattedRow_(sheet_(SHEETS.ERRORS), errorRow_(source, message, details || '', { deviceType: 'الخادم', action: String(source || '') }));
   } catch (err) {
     console.error('logError_: ' + err);
   }
+}
+
+// ===== صف «سجل الأخطاء» بأعمدته الثمانية عشر (16 أكتوبر) — An error-log row with its 18 columns =====
+
+/* درجات الخطورة من الأدنى للأعلى (مواصفات محمد) — Severity levels, lowest first (Mohammed's spec) */
+const SEVERITY = ['منخفض', 'مهم', 'مهم جدًا', 'حرج جدًا'];
+/* الدرجة الابتدائية لكل تصنيف: فشل نهائي ← مهم جدًا، نجح في النهاية ← مهم، الخلفية/النوم ← منخفض
+ * Each category's initial severity: a final failure ← very important, succeeded in the end ← important, background ← low */
+const CATEGORY_SEVERITY = {
+  'خطأ برمجي': 'مهم جدًا', 'نتيجة كتابة غير مؤكدة': 'مهم جدًا', 'خروج قسري': 'مهم جدًا', 'صفحة 404 بدل الرد': 'مهم جدًا',
+  'مشاكل اتصال': 'مهم جدًا', 'فشل تحديث بيانات': 'مهم جدًا',
+  'تأخر وعالجه الاحتياطي': 'مهم', 'كتابة تأكدت بإعادة الإرسال': 'مهم', 'محاولة دخول خاطئة': 'مهم', 'رفض دخول لوحة المدير': 'مهم', 'تنبيهات': 'مهم',
+  'فشل أثناء الخلفية أو النوم': 'منخفض', 'تحذير متصفح غير ضار': 'منخفض'
+};
+function severityOf_(category) { return CATEGORY_SEVERITY[category] || 'مهم'; }
+
+/* رمز المشكلة: الإجراء + نوع الفشل + الصفحة — كل صفوف المشكلة نفسها تحمل الرمز نفسه (سهل التصفية بالشيت)
+ * The problem code: action + failure kind + page — every row of the same problem carries the same code */
+function problemCode_(action, failKind, page, fallback) {
+  const parts = [action, failKind, page].map(function (x) { return String(x || '').trim(); });
+  return parts[0] || parts[1] ? parts.join(' | ') : String(fallback || '').slice(0, 120);
+}
+
+/* قيمة نصية آمنة للخانة بحد طول — a safe, length-capped cell text */
+function cellText_(v, max) { return sanitizeSheetText_(String(v == null ? '' : v).slice(0, max || 200)); }
+
+/* يبني الصف: الأعمدة الخمسة الأصلية ثم الجديدة بترتيب HEADERS. meta من المتصفح (أو فارغ للخادم)، وما نقص يُستخرج من «تفاصيل»
+ * (متصفح لم يتحدّث بعد). الاسم من جدول «الأعضاء» لحظة التسجيل.
+ * Builds the row: the 5 original columns then the new ones in HEADERS order. meta from the browser (empty for the server);
+ * anything missing is read from the details (a not-yet-updated browser). The name comes from the members sheet. */
+function errorRow_(source, message, details, meta) {
+  const m = meta && typeof meta === 'object' ? meta : {}, d = String(details || '');
+  const fromDetails = function (label) { const x = new RegExp(label + ': ([^|]+)').exec(d); return x ? x[1].trim() : ''; };
+  const category = classifyError_(source, message);
+  const phone = formatPhone(m.phone) || '';
+  let name = '';
+  if (phone) { try { const member = findMember_(phone); name = member ? member.name : '(غير مسجّل)'; } catch (err) { name = ''; } }
+  const page = m.page || fromDetails('الصفحة'), action = m.action || '';
+  const failKind = m.failKind || '', deviceText = fromDetails('الجهاز');
+  const fromDevice = function (re) { const x = re.exec(deviceText); return x ? x[1].trim() : ''; };
+  return [
+    new Date(), cellText_(source, 200), cellText_(message, CLIENT_TEXT_MAX), cellText_(d, CLIENT_TEXT_MAX), category,
+    cellText_(m.deviceType || deviceText.split(' ')[0]), cellText_(m.os || fromDevice(/((?:iOS|Android) [0-9.]+)/)), cellText_(m.browser || fromDevice(/— ([^(]+)/)),
+    cellText_(m.openMode || fromDevice(/(تطبيق مثبّت|متصفح)/)), phone, cellText_(name),
+    cellText_(page), cellText_(action), cellText_(m.file, 300), cellText_(failKind), cellText_(m.outcome),
+    severityOf_(category), cellText_(problemCode_(action, failKind, page, source + ' — ' + message), 200)
+  ];
 }
 
 /* سطر في «سجل الزوار» — A row in the visits log */
@@ -99,21 +146,25 @@ const CLIENT_TEXT_MAX = 5000;            // حد طول الخلية حماية 
 /* مفاتيح منع التكرار لخطأ واحد — The de-duplication keys of one error:
  * 1) id: رقم فريد يولّده المتصفح ← إعادة إرسال نفس الدفعة (ضاع الرد) لا تكرر الصف / a resent batch never duplicates the row
  * 2) exact: المصدر + الرسالة + وقت الحدوث + الجهاز ← نفس الحدث أُرسل برقم آخر / the same event sent under another id
- * 3) window: المصدر + الرسالة + عائلة الجهاز بلا أرقام الإصدار، 5 دقائق ← نفس العطل يتكرر بسرعة / the same fault repeating fast
- *    («تأخر وعالجه الاحتياطي» خارج الطبقة 3: كل حالة منه طلب مستقل نحتاج عدّه / outside layer 3: each case is a request we count) */
+ * 3) window: المصدر + الرسالة + **الشخص** (الجوال، أو معرّف الجهاز لمن لم يسجّل دخوله، أو عائلة الجهاز لمتصفح قديم)، 5 دقائق
+ *    ← نفس العطل يتكرر بسرعة عند نفس الشخص؛ وأشخاص مختلفون يُسجَّلون كلهم فيُعدّ «الأعضاء المتأثرون» (مواصفات محمد 16 أكتوبر)
+ *    («تأخر وعالجه الاحتياطي» خارج الطبقة 3: كل حالة منه طلب مستقل نحتاج عدّه / outside layer 3: each case is a request we count)
+ * Layer 3 is per PERSON (phone, else device id, else device family for an old browser), so different members are all
+ * logged and «affected members» can be counted. */
 function clientErrorKeys_(e) {
-  const details = String(e.details || '');
+  const details = String(e.details || ''), meta = e.meta && typeof e.meta === 'object' ? e.meta : {};
   const hash = function (text) {
     return Utilities.base64EncodeWebSafe(Utilities.computeDigest(Utilities.DigestAlgorithm.MD5, text, Utilities.Charset.UTF_8));
   };
   const at = (/وقت الحدوث: ([0-9:]+)/.exec(details) || [])[1] || '';
   const device = ((/الجهاز: ([^|]+)/.exec(details) || [])[1] || '').trim();
   const family = device.replace(/[0-9.]+/g, '').replace(/\s+/g, ' ').trim();
+  const person = formatPhone(meta.phone) || String(meta.deviceId || '').slice(0, 40) || family;
   const base = String(e.source || '') + '|' + String(e.message || '');
   return {
     id: e.id ? 'clienterr_id_' + String(e.id).slice(0, 40) : null,
-    exact: 'clienterr_x_' + hash(base + '|' + at + '|' + device),
-    window: String(e.source || '') === 'client/recovered' ? null : 'clienterr_w_' + hash(base + '|' + family)
+    exact: 'clienterr_x_' + hash(base + '|' + at + '|' + device + '|' + person),
+    window: String(e.source || '') === 'client/recovered' ? null : 'clienterr_w_' + hash(base + '|' + person)
   };
 }
 
@@ -147,7 +198,8 @@ function logNewClientErrors_(errors) {
     const k = keys[i];
     if (isSeen(k.id) || isSeen(k.exact) || isSeen(k.window)) return; // مكرر / duplicate
     const source = String(e.source || 'client').slice(0, 200), message = String(e.message || '').slice(0, CLIENT_TEXT_MAX);
-    rows.push([new Date(), sanitizeSheetText_(source), sanitizeSheetText_(message), sanitizeSheetText_(String(e.details || '').slice(0, CLIENT_TEXT_MAX)), classifyError_(source, message)]);
+    const meta = e.meta && typeof e.meta === 'object' && !Array.isArray(e.meta) ? e.meta : {};
+    rows.push(errorRow_(source, message, String(e.details || '').slice(0, CLIENT_TEXT_MAX), meta));
     if (k.id) fresh[k.id] = '1';
     fresh[k.exact] = '1';
     if (k.window) freshWindow[k.window] = '1';

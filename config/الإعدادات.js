@@ -42,7 +42,8 @@
       STATIONS_ISSUES_LOG: PREFIX + 'stations-issues-log', // سجل الإخفاقات / failures log
       RECENT_STATIONS: PREFIX + 'recent-stations',       // «آخر المحطات» (ساعتان) / «recent stations» (two hours)
       SW_RELOAD: PREFIX + 'sw-reload',                   // وقت آخر إعادة تحميل بعد تحديث عامل الخدمة (sessionStorage) — منع الحلقة / last reload after a SW update — loop guard
-      FRESH_START: PREFIX + 'fresh-start'                // رقم «البداية النظيفة» المنفّذة على هذا الجهاز / the fresh start id already run on this device
+      FRESH_START: PREFIX + 'fresh-start',               // رقم «البداية النظيفة» المنفّذة على هذا الجهاز / the fresh start id already run on this device
+      DEVICE_ID: PREFIX + 'device-id'                    // معرّف جهاز مجهول لعدّ المتأثرين بالأخطاء (16 أكتوبر) / an anonymous device id for counting affected people
     },
 
     /* «البداية النظيفة» يوم الانتقال من V1 (خطة محمد): مرة واحدة لكل جهاز — تُفعَّل يوم الانتقال فقط (ENABLED: true)
