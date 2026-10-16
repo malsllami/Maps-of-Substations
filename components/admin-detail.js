@@ -94,7 +94,7 @@
         : await API.call('getChangesLog', Object.assign({ type: cfg.type, limit: MAX_ROWS }, payload), { token: true });
     } catch (err) { if (my === seq) { rows = []; wrap.innerHTML = '<div class="coming-soon">' + MSG.FAIL + '</div>'; ui.q('count').textContent = ''; } return false; }
     if (my !== seq) return false; // طلب أحدث بدأ / a newer request started
-    if (S.isTokenInvalid(res)) { close(); S.handleExpired(); return false; }
+    if (S.isTokenInvalid(res)) { close(); S.handleExpired({ action: 'admin-detail', message: res.error }); return false; }
     if (!res || !res.success) { rows = []; wrap.innerHTML = '<div class="coming-soon">' + esc((res && res.error) || MSG.FAIL) + '</div>'; ui.q('count').textContent = ''; return false; }
     rows = kind === 'present'
       ? (res.users || []).map(function (u) { return { csv: [u.name, u.phone, u.shift || '—', u.lastActivity], when: DASH.riyadhStamp(u.lastActivity) }; })

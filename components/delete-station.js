@@ -107,7 +107,7 @@
       if (mine()) say_(err && err.kind === 'offline' ? MSG.OFFLINE : err && err.kind === 'unconfirmed' ? MSG.UNCONFIRMED : MSG.FAILED, 'error');
       return;
     }
-    if (S.isTokenInvalid(res)) { busy_(false, c); close(); S.handleExpired(); return; }
+    if (S.isTokenInvalid(res)) { busy_(false, c); close(); S.handleExpired({ action: 'deleteStation', message: res.error }); return; }
     if (!res || !res.success) { busy_(false, c); if (mine()) say_(res && res.code === 'NOT_ADMIN' ? MSG.NOT_ADMIN : (res && res.error) || MSG.FAILED, 'error'); return; }
     // النسخة المحلية تتحدث في الذاكرة فورًا، وحفظها بالجهاز يكمل بالخلفية — لا تنتظر النافذة القرص
     // The local copy updates in memory at once; its device save finishes in the background — the window never waits on disk

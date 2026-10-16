@@ -94,10 +94,27 @@
     go_(LOGIN_PAGE);
   }
 
-  /* انتهت الجلسة (رفض الخادم): الجلسة فقط، ويبقى الجوال لاقتراحه — Session expired (server refusal): session only, the phone stays */
-  function handleExpired() {
+  /* انتهت الجلسة (رفض الخادم): الجلسة فقط، ويبقى الجوال لاقتراحه — Session expired (server refusal): session only, the phone stays.
+     يُسجَّل السبب في «سجل الأخطاء» (يُرسل بعد الدخول التالي) لمعرفة سبب أي خروج قسري — 16 أكتوبر
+     The reason is logged (sent after the next login) so any forced logout can be traced */
+  function handleExpired(reason) {
+    reportExpired_(reason);
     try { global.localStorage.removeItem(SESSION_KEY); } catch (e) { /* تخزين محظور / storage blocked */ }
     go_(LOGIN_PAGE + '?expired=1');
+  }
+  function reportExpired_(reason) {
+    try {
+      const C = global.SecConnection, s = read();
+      if (!C || !C.reportEvent) return;
+      let p = {};
+      try { let b64 = String(s && s.identityToken || '').split('.')[0].replace(/-/g, '+').replace(/_/g, '/'); while (b64.length % 4) b64 += '='; p = JSON.parse(global.atob(b64)) || {}; } catch (e) { p = {}; }
+      const r = reason && typeof reason === 'object' ? reason : { action: reason };
+      const ageMin = p.iat ? Math.round((Date.now() - p.iat) / 60000) : null;
+      C.reportEvent('client/session-expired', 'خروج قسري: رفض الخادم التذكرة' + (r.action ? ' في ' + r.action : ''),
+        'الإجراء: ' + (r.action || 'غير معروف') + ' | رسالة الخادم: ' + String(r.message || '—').slice(0, 120) +
+        ' | عمر التذكرة: ' + (ageMin === null ? 'غير معروف' : ageMin + ' دقيقة') + ' | طريقة الدخول: ' + (p.via || 'غير معروفة') +
+        ' | الجوال: ' + (s && s.phone ? s.phone : '—'));
+    } catch (e) { /* التسجيل لا يمنع الخروج أبدًا / logging never blocks the logout */ }
   }
 
   function isTokenInvalid(res) {
@@ -123,7 +140,7 @@
    */
   async function ensureFresh(options) {
     const redirect = !(options && options.redirectOnExpired === false);
-    const expire = function () { if (redirect) handleExpired(); return false; }; // بلا توجيه تبقى الجلسة كما في V1 / without redirect the session stays, as in V1
+    const expire = function (message) { if (redirect) handleExpired({ action: 'refreshIdentityToken', message: message }); return false; }; // بلا توجيه تبقى الجلسة كما في V1 / without redirect the session stays, as in V1
     const session = read();
     if (!session) return false;
     if (!session.identityToken) return expire();
@@ -144,7 +161,7 @@
         write_(latest);
         return true;
       }
-      if (isTokenInvalid(json)) return expire();
+      if (isTokenInvalid(json)) return expire(json.error);
       return !expired;
     } catch (e) {
       // خطأ شبكة أو رد غير صالح: لا خروج أبدًا. صالحة ← تابع؛ منتهية ← لا طلبات تحتاجها، وتُعاد المحاولة بالفتح القادم

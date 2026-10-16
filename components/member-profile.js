@@ -153,7 +153,7 @@
       try { res = await API.call('getMemberProfile', {}, { token: true }); }
       catch (e) { if (alive) showError_(e && e.message ? e.message : MSG.LOAD_FAIL); return null; }
       if (!alive) return null;
-      if (S.isTokenInvalid(res)) { S.handleExpired(); return null; }
+      if (S.isTokenInvalid(res)) { S.handleExpired({ action: 'getMemberProfile', message: res.error }); return null; }
       if (!res || !res.success) { showError_((res && res.error) || MSG.LOAD_FAIL); return null; }
       profile = res;
       q(slots.profile, 'name').textContent = res.name || '';
@@ -197,7 +197,7 @@
       let ok = false;
       try {
         const res = await API.call('updateMemberProfile', { name: v.name, email: v.email, shift: v.shift, department: v.department }, { token: true });
-        if (S.isTokenInvalid(res)) { global.clearInterval(tick); S.handleExpired(); return false; }
+        if (S.isTokenInvalid(res)) { global.clearInterval(tick); S.handleExpired({ action: 'updateMemberProfile', message: res.error }); return false; }
         global.clearInterval(tick);
         fill.style.width = '100%'; pct.textContent = '100%';
         if (!res || !res.success) throw new Error((res && res.error) || MSG.SAVE_FAIL);

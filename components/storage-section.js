@@ -30,8 +30,10 @@
   const ASSUMED_CAP_MB = 50; // سقف V1 المفترض — للاحتياط فقط / V1's assumed cap — fallback only
   const AGE_REFRESH_MS = 30 * 1000;
   const GREGORY_NUMERIC = 'ar-SA-u-ca-gregory-nu-latn';
-  /* ما يبقى بعد المسح — What survives a clear */
-  const KEEP = [K.SESSION, K.PHONE, K.REMEMBER_PHONE, K.THEME, K.MAP_MODE, K.NAV_GLASS, K.NAV_ROTATE, K.PENDING_ERRORS];
+  /* ما يبقى بعد المسح — What survives a clear.
+     علامة «البداية النظيفة» تبقى: بدونها تُعاد البداية النظيفة فتمسح الجلسة وتُخرج المستخدم (خلل اكتُشف 16 أكتوبر)
+     The fresh-start marker stays: without it the fresh start reruns, clearing the session and logging the user out */
+  const KEEP = [K.SESSION, K.PHONE, K.REMEMBER_PHONE, K.THEME, K.MAP_MODE, K.NAV_GLASS, K.NAV_ROTATE, K.PENDING_ERRORS, K.FRESH_START];
   const MSG = {
     TITLE: 'البيانات المؤقتة',
     CLEAR: 'مسح التخزين المؤقت',

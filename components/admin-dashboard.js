@@ -49,7 +49,7 @@
   };
   const ALERT_ICON = {
     'فشل تحديث بيانات': '⚠️', 'محاولة دخول خاطئة': '🔒', 'مشاكل اتصال': '📡', 'تنبيهات': 'ℹ️', 'صفحة 404 بدل الرد': '🚫',
-    'فشل أثناء الخلفية أو النوم': '🌙', 'نتيجة كتابة غير مؤكدة': '❔', 'تأخر وعالجه الاحتياطي': '🟡', 'كتابة تأكدت بإعادة الإرسال': '✅', 'خطأ برمجي': '🐞', 'رفض دخول لوحة المدير': '⛔'
+    'فشل أثناء الخلفية أو النوم': '🌙', 'نتيجة كتابة غير مؤكدة': '❔', 'تأخر وعالجه الاحتياطي': '🟡', 'كتابة تأكدت بإعادة الإرسال': '✅', 'خروج قسري': '🚪', 'خطأ برمجي': '🐞', 'رفض دخول لوحة المدير': '⛔'
   };
   const REPORT_COLOR = { green: '#2ECC71', yellow: '#C8A24E', orange: '#E08A3C', blue: 'var(--blue-mid)', teal: 'var(--teal)', red: '#E0654F' };
   // أيقونات خطية للوحة العمليات (تصميم محمد، 15 أكتوبر) — line icons for the operations board
@@ -169,7 +169,7 @@
           return 'ok';
         } catch (err) {
           if (!alive) return 'failed';
-          if (err.expired) { S.handleExpired(); return 'expired'; }
+          if (err.expired) { S.handleExpired({ action: 'admin-dashboard', message: err.message }); return 'expired'; }
           if (err.denied) { denied_(); return 'denied'; }
           failed_(err && err.message ? err.message : MSG.LOAD_FAIL);
           return 'failed';
@@ -261,7 +261,7 @@
       try { await LOADERS[name](box); }
       catch (err) {
         delete loaded[name];
-        if (err.expired) { S.handleExpired(); return; }
+        if (err.expired) { S.handleExpired({ action: 'admin-dashboard', message: err.message }); return; }
         if (err.denied) { denied_(); return; }
         if (box.isConnected) box.innerHTML = '<div class="coming-soon">' + MSG.LOAD_FAIL + ' <button type="button" class="link-btn" data-act="section-retry" data-name="' + name + '">' + MSG.RETRY + '</button></div>';
       }
@@ -459,7 +459,7 @@
         try { await LOADERS[name](box); }
         catch (err) {
           delete loaded[name];
-          if (err.expired) { S.handleExpired(); return true; }
+          if (err.expired) { S.handleExpired({ action: 'admin-dashboard', message: err.message }); return true; }
           if (err.denied) { denied_(); return true; }
           box.innerHTML = '<div class="coming-soon">' + MSG.LOAD_FAIL + ' <button type="button" class="link-btn" data-act="section-retry" data-name="' + name + '">' + MSG.RETRY + '</button></div>';
         }
@@ -502,7 +502,7 @@
         members = Array.isArray(r.members) ? r.members : [];
         renderMembers_();
       } catch (err) {
-        if (err.expired) { S.handleExpired(); return; }
+        if (err.expired) { S.handleExpired({ action: 'admin-dashboard', message: err.message }); return; }
         if (err.denied) { denied_(); return; }
         body.innerHTML = '<div class="coming-soon">' + MSG.LOAD_FAIL + '</div>';
       }

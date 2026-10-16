@@ -43,7 +43,7 @@
       let res;
       try { res = await API.call('getMemberProfileLite', {}, { token: true }); } catch (e) { return 'unknown'; }
       if (my !== seq) return 'unknown'; // فحص أحدث بدأ / a newer check started
-      if (S.isTokenInvalid(res)) { S.handleExpired(); return 'expired'; }
+      if (S.isTokenInvalid(res)) { S.handleExpired({ action: 'getMemberProfileLite', message: res.error }); return 'expired'; }
       if (!res || !res.success) return 'unknown';
       const incomplete = !String(res.shift || '').trim() || !String(res.department || '').trim();
       overlay.classList.toggle('show', incomplete);

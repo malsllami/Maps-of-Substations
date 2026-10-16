@@ -69,14 +69,28 @@ function normalizeDigits_(s) {
 
 // ===== التذكرة — Ticket =====
 
+/* مفتاح توقيع التذاكر. حارس (16 أكتوبر): قراءة فارغة عابرة لا تستبدل المفتاح — يُعاد القراءة تحت قفل السكربت قبل أي إنشاء،
+ * وأي إنشاء لمفتاح جديد يُسجَّل في «سجل الأخطاء» (لأنه يُخرج كل المستخدمين) فلا يمر بصمت.
+ * The ticket signing key. Guard: a transient empty read never replaces the key — re-read under the script lock before
+ * creating one, and any new key is logged (it logs every user out) so it never passes silently. */
 function identitySecret_() {
   const props = scriptProps_();
   let secret = props.getProperty(SECRET_KEY);
-  if (!secret) {
+  if (secret) return secret;
+  const lock = LockService.getScriptLock();
+  const locked = lock.tryLock(10000);
+  try {
+    Utilities.sleep(200);
+    secret = props.getProperty(SECRET_KEY); // إعادة القراءة: قراءة فارغة عابرة / re-read: a transient empty read
+    if (secret) return secret;
+    if (!locked) throw new Error('تعذّر قفل إنشاء مفتاح التوقيع — لم يُنشأ مفتاح جديد'); // لا إنشاء بلا قفل / never create without the lock
     secret = Utilities.getUuid() + Utilities.getUuid() + Utilities.getUuid();
     props.setProperty(SECRET_KEY, secret);
+    logError_('identitySecret_', 'أُنشئ مفتاح توقيع جديد للتذاكر — كل الجلسات السابقة صارت غير صالحة', 'إن لم يكن هذا أول تشغيل للخادم فهذا يُخرج كل المستخدمين');
+    return secret;
+  } finally {
+    if (locked) lock.releaseLock();
   }
-  return secret;
 }
 
 function sign_(payloadB64) {
