@@ -6,8 +6,9 @@
  * - النسخة مؤكدة خلال 5 دقائق ← النتيجة المحلية نهائية بلا أي طلب.
  * - وُجدت محليًا ← تُعرض فورًا، ويُتحقق بالخلفية؛ إن تحدّثت النسخة وتغيّرت إحداثيات المحطة ← onUpdated(المحطة الجديدة)
  *   فتنقل الصفحة العلامة (أو وجهة الملاحة) مع «تم تحديث إحداثيات المحطة».
- * - غير موجودة محليًا ← onChecking() «جارٍ التأكد من الخادم…» ثم الحكم بعد التأكد (حد 10 ث)؛ تعذّر التأكد (بلا إنترنت
- *   أو بلا رد) ← { found:false, unverified:true } بصياغة غير قاطعة.
+ * - غير موجودة محليًا ← onChecking() «جارٍ التأكد من الخادم…» ثم **بحث مباشر في الخادم** (searchStation — فهرسه يتحدّث
+ *   لحظة الإضافة، فالمحطة التي أضافها زميل تظهر فورًا، طلب محمد 16 أكتوبر)، ونسخة الجهاز تُزامَن بالخلفية؛ تعذّر الوصول
+ *   (بلا إنترنت أو بلا رد) ← { found:false, unverified:true } بصياغة غير قاطعة.
  *
  * Search by station number: from the device copy with server confirmation (decision H2) — logic only, no UI.
  * V1's approved policy on top of stations-sync, with no loading or syncing here (it only calls ensureFresh): no copy ←
@@ -56,10 +57,17 @@
     }
     if (global.navigator.onLine === false) return Object.assign(local, { unverified: true });
     if (o.onChecking) { try { o.onChecking(); } catch (e) { /* لا شيء / nothing */ } }
-    const state = await SYNC.ensureFreshBounded(undefined, { force: true });
-    const again = Object.assign({ source: 'local' }, SYNC.search(query));
-    if (!again.found && state === 'unverified') again.unverified = true;
-    return again;
+    // غير موجودة في نسخة الجهاز ← بحث مباشر في الخادم (فهرسه يشمل ما أُضيف للتو)؛ وجدها ← النسخة ناقصة فتُزامَن بالخلفية
+    // Missing from the device copy ← a direct server search (its index has what was just added); found ← the copy syncs in the background
+    try {
+      const res = await global.SecApi.call('searchStation', { query: query }, { phone: true });
+      if (res && res.found) {
+        SYNC.ensureFresh({ force: true }).catch(function () { /* لا شيء / nothing */ });
+        return Object.assign({ source: 'server', newOnServer: true }, res);
+      }
+      if (res && !res.error) return { found: false, source: 'server' };
+    } catch (e) { /* تعذّر الوصول ← النتيجة المحلية بصياغة غير قاطعة / unreachable ← the local result, worded as unconfirmed */ }
+    return Object.assign(local, { unverified: true });
   }
 
   /* «غير موجودة» غير المؤكدة مع وقت آخر تأكيد للنسخة — The unconfirmed «not found» note with the copy's last confirmation */

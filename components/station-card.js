@@ -56,9 +56,10 @@
     // أقل من 1 ملي ثانية يُكتب «أقل من 0.001 ث» بدل «0.000 ث» — under 1 ms reads «under 0.001 s», not «0.000 s»
     // الرقم وحده باتجاه اليسار، والوحدة «ث» بعده بالعربي فيُقرأ «2.56 ث» لا «ث 2.56» — the number alone is LTR, the unit follows in RTL
     const sec = (ms < 1 ? 'أقل من <b dir="ltr">0.001</b>' : '<b dir="ltr">' + (ms / 1000).toFixed(ms < 100 ? 3 : 2) + '</b>') + ' ث';
-    return s.source === 'local'
-      ? '<div class="st-search-time local" data-role="search-time">⚡ وُجدت في ' + sec + ' — من نسخة جهازك</div>'
-      : '<div class="st-search-time server" data-role="search-time">⏱ وُجدت في ' + sec + ' — من الخادم · حمّل البيانات المؤقتة لبحث فوري</div>';
+    if (s.source === 'local') return '<div class="st-search-time local" data-role="search-time">⚡ وُجدت في ' + sec + ' — من نسخة جهازك</div>';
+    // محطة مضافة حديثًا لم تصل لنسخة الجهاز بعد ← من الخادم مباشرة (النسخة تتحدّث بالخلفية) — newly added, not yet in the copy
+    if (s.newOnServer) return '<div class="st-search-time server" data-role="search-time">⏱ وُجدت في ' + sec + ' — من الخادم (محطة مضافة حديثًا، تُضاف لنسخة جهازك تلقائيًا)</div>';
+    return '<div class="st-search-time server" data-role="search-time">⏱ وُجدت في ' + sec + ' — من الخادم · حمّل البيانات المؤقتة لبحث فوري</div>';
   }
 
   /* الجزء العلوي (فوق الخريطة): البيانات في ثلاثة أقسام ثم «المسار من موقعي» بعرض البطاقة
