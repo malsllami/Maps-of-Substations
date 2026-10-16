@@ -76,9 +76,9 @@
       loading: loading ? Object.assign({}, loading) : null, resumable: loader ? loader.progress() : null, firstLoadFailed: firstLoadFailed
     };
   }
-  function emit_(event) {
+  function emit_(event, detail) {
     const s = state();
-    listeners.slice().forEach(function (fn) { try { fn(event, s); } catch (e) { /* مستمع فاشل لا يوقف الباقي / a failing listener never stops the rest */ } });
+    listeners.slice().forEach(function (fn) { try { fn(event, s, detail || null); } catch (e) { /* مستمع فاشل لا يوقف الباقي / a failing listener never stops the rest */ } });
   }
   function onChange(fn) { listeners.push(fn); return function () { const i = listeners.indexOf(fn); if (i !== -1) listeners.splice(i, 1); }; }
 
@@ -246,7 +246,8 @@
       if (!c.saved) logIssue_('sync', MSG.NOT_SAVED + ' (' + c.reason + ')');
       logLoad_('sync', built.changes);
       markSynced_();
-      emit_('synced');
+      // المضاف والمعدّل فعلًا — لرسالة «تم تحديث … من تعديلات الزملاء» / really added and modified — for the update message
+      emit_('synced', { added: built.added || 0, modified: built.modified || 0 });
       return { ok: true, persisted: c.saved, changes: built.changes };
     });
     if (outcome.needsFullLoad) {
@@ -260,10 +261,12 @@
   // ===== التأكد قبل الوثوق بالبحث — Confirming before trusting search =====
   function isConfirmed() { return !!copy && now_() - syncedAt < T.STATIONS_CONFIRM_MAX_AGE_MS; }
 
-  /* ← 'fresh' | 'updated' | 'unverified' — طلب واحد مشترك لكل البحوث المتزامنة */
-  function ensureFresh() {
+  /* ← 'fresh' | 'updated' | 'unverified' — طلب واحد مشترك لكل البحوث المتزامنة.
+     opts.force: يتحقق من الخادم حتى داخل مدة الثقة (لمحطة غير موجودة محليًا — قد يكون غيرك أضافها للتو)
+     opts.force: checks the server even within the trust window (for a station missing locally — someone may have just added it) */
+  function ensureFresh(opts) {
     if (!copy) return Promise.resolve('unverified');
-    if (isConfirmed()) return Promise.resolve('fresh');
+    if (!(opts && opts.force) && isConfirmed()) return Promise.resolve('fresh');
     if (offline_()) return Promise.resolve('unverified');
     if (freshCheck && now_() - freshCheckAt > FRESH_STALE_MS) freshCheck = null;
     if (!freshCheck) {
@@ -281,8 +284,8 @@
     return freshCheck;
   }
   /* نفس التأكد بحد انتظار (10 ث افتراضيًا) ويكمل بالخلفية — The same check with a wait cap, carrying on in the background */
-  function ensureFreshBounded(ms) {
-    return Promise.race([ensureFresh(), delay_(ms || T.NOT_FOUND_VERIFY_WAIT_MS).then(function () { return 'unverified'; })]);
+  function ensureFreshBounded(ms, opts) {
+    return Promise.race([ensureFresh(opts), delay_(ms || T.NOT_FOUND_VERIFY_WAIT_MS).then(function () { return 'unverified'; })]);
   }
 
   // ===== البحث المحلي — Local search =====

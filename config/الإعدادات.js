@@ -68,7 +68,7 @@
       CONN_CHECK_INTERVAL_MS: 3 * 60 * 1000,   // فحص الاتصال كل 3 دقائق / connection check every 3 minutes
       CONN_CHECK_TIMEOUT_MS: 15 * 1000,
       SW_FETCH_TIMEOUT_MS: 15 * 1000,          // مهلة كل ملف أثناء تثبيت عامل الخدمة؛ الملف المعلق لا يوقف التثبيت / per-file timeout while installing the SW; a stalled file never blocks the install
-      STATIONS_CONFIRM_MAX_AGE_MS: 5 * 60 * 1000, // الثقة بالبحث المحلي 5 دقائق بعد آخر تأكيد للإصدار / trust local search 5 min after the last version check
+      STATIONS_CONFIRM_MAX_AGE_MS: 2 * 60 * 1000, // الثقة بالبحث المحلي دقيقتين بعد آخر تأكيد للإصدار (اختيار محمد 16 أكتوبر) / trust local search 2 min after the last version check
       NOT_FOUND_VERIFY_WAIT_MS: 10000,         // انتظار التأكد من الخادم لمحطة غير موجودة محليًا / wait for server confirmation of a station missing locally
       STATS_STALE_MS: 3 * 60 * 1000,
       RECENT_STATIONS_MS: 2 * 60 * 60 * 1000,  // «آخر المحطات»: ساعتان / «recent stations»: two hours

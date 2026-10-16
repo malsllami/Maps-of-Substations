@@ -67,6 +67,28 @@
     deps = pageDeps;
     if (!engine) { engine = NAV.create(); engine.subscribe(onState_); }
   }
+
+  // ===== إبقاء الشاشة مضاءة أثناء الملاحة (طلب محمد 16 أكتوبر) — Keep the screen on during navigation =====
+  /* Screen Wake Lock: يُطلب عند بدء الملاحة، والمتصفح يحرّره تلقائيًا إذا ذهبت الصفحة للخلفية فيُطلب من جديد عند العودة،
+   * ويُحرَّر عند الإيقاف. غير مدعوم أو مرفوض ← لا شيء يتغير (بلا حيل).
+   * Requested when navigation starts; the browser drops it when the page goes to the background, so it is requested again on
+   * return; released on stop. Unsupported or refused ← nothing changes (no tricks). */
+  let wakeLock = null;
+  async function keepAwake_() {
+    if (!ui || wakeLock || !global.navigator.wakeLock || global.document.visibilityState !== 'visible') return;
+    try {
+      const lock = await global.navigator.wakeLock.request('screen');
+      if (!ui) { lock.release().catch(function () { /* لا شيء / nothing */ }); return; } // انتهت الملاحة أثناء الطلب / nav ended meanwhile
+      wakeLock = lock;
+      lock.addEventListener('release', function () { if (wakeLock === lock) wakeLock = null; });
+    } catch (e) { /* رفض المتصفح (بطارية منخفضة/سياسة) — الملاحة تعمل كالمعتاد / refused — navigation works as usual */ }
+  }
+  function releaseAwake_() {
+    const lock = wakeLock;
+    wakeLock = null;
+    if (lock) lock.release().catch(function () { /* لا شيء / nothing */ });
+  }
+  function onVisibility_() { if (global.document.visibilityState === 'visible') keepAwake_(); }
   function isActive() { return !!ui; }
 
   // ===== البدء والإيقاف — Start and stop =====
@@ -145,12 +167,16 @@
     bindInput_();
     bindRotDrag_();
     setRotateMode_(ui.rotation.mode());
+    global.document.addEventListener('visibilitychange', onVisibility_);
+    keepAwake_();
   }
 
   function teardown_() {
     if (!ui) return;
     const u = ui;
     ui = null;
+    global.document.removeEventListener('visibilitychange', onVisibility_);
+    releaseAwake_();
     const map = u.map, mc = map.getContainer();
     map.off('dragstart', u.onDrag); map.off('zoomstart', u.onZoom);
     ['pointerdown', 'touchstart', 'wheel'].forEach(function (t) { deps.stage.removeEventListener(t, u.onUserInput, { capture: true }); });

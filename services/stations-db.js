@@ -188,13 +188,15 @@
   function applyUpdates(base, updates) {
     const next = base.slice(), index = new Map();
     for (let i = 0; i < next.length; i++) { const k = keyOf_(next[i]); if (!index.has(k)) index.set(k, i); } // أول تطابق / the first match
-    let added = 0, replaced = 0;
+    let added = 0, replaced = 0, modified = 0;
+    // «modified»: ما تغيّر فعلًا (لا ما أُعيد إرساله كما هو ضمن نافذة الرجوع) — what really changed, not what was resent unchanged
+    const sig = function (s) { return [s.lat, s.lng, s.feeder || '', s.region || ''].join('|'); };
     (updates || []).forEach(function (raw) {
       const st = toStation_(raw), k = keyOf_(st);
-      if (index.has(k)) { next[index.get(k)] = st; replaced++; }
+      if (index.has(k)) { const i = index.get(k); if (sig(next[i]) !== sig(st)) modified++; next[i] = st; replaced++; }
       else { index.set(k, next.length); next.push(st); added++; }
     });
-    return { stations: next, added: added, replaced: replaced };
+    return { stations: next, added: added, replaced: replaced, modified: modified };
   }
 
   /**
@@ -211,7 +213,7 @@
     if (typeof reply.totalCount === 'number' && built.stations.length !== reply.totalCount) {
       return { ok: false, needsFullLoad: true, reason: 'عدد النسخة (' + built.stations.length + ') لا يطابق الخادم (' + reply.totalCount + ') — محطة حُذفت أو تغيّر رقمها' };
     }
-    return { ok: true, stations: built.stations, version: String(reply.version), lastSync: reply.serverTime || null, changes: reply.updated.length };
+    return { ok: true, stations: built.stations, version: String(reply.version), lastSync: reply.serverTime || null, changes: reply.updated.length, added: built.added, modified: built.modified };
   }
 
   /* هل النسخة المحفوظة مطابقة لإصدار الخادم؟ — Does the stored copy match the server version? */

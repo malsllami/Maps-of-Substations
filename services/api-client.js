@@ -139,7 +139,7 @@
   /* الكتابة بنفس مفتاح العملية: إعادة فقط عند غياب رد سليم — A write with the same operation key: resent only without a valid reply */
   async function write_(action, body, onRetry) {
     const attempts = [];
-    const record = function (outcome) { const c = global.SecConnection; if (c && c.reportWrite) c.reportWrite(action, attempts, outcome); };
+    const record = function (outcome, confirmed) { const c = global.SecConnection; if (c && c.reportWrite) c.reportWrite(action, attempts, outcome, !!confirmed); };
     const delays = T.SAVE_RETRY_DELAYS_MS;
     for (let i = 0; ; i++) {
       const controller = new global.AbortController();
@@ -147,7 +147,7 @@
       try {
         const json = await once_(body, controller);
         if (controller.signal.__secAttempt) attempts.push(controller.signal.__secAttempt);
-        if (i > 0) record(json.success ? 'تأكد الحفظ بإعادة الإرسال بنفس opKey (بلا تكرار)' : 'رد الخادم بعد إعادة الإرسال: ' + String(json.error || 'فشل').slice(0, 80));
+        if (i > 0) record(json.success ? 'تأكد الحفظ بإعادة الإرسال بنفس opKey (بلا تكرار)' : 'رد الخادم بعد إعادة الإرسال: ' + String(json.error || 'فشل').slice(0, 80), json.success === true);
         return json;
       } catch (err) {
         if (controller.signal.__secAttempt) attempts.push(controller.signal.__secAttempt);

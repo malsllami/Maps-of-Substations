@@ -43,6 +43,9 @@
     FAILED: 'فشل الحفظ',
     ADDED: '✓ تمت إضافة المحطة بنجاح — يمكنك البحث عنها مباشرة',
     EDITED: '✓ تم حفظ التعديل بنجاح',
+    // متى يراها الآخرون (اختيار محمد 16 أكتوبر: الثقة بالنسخة المحلية دقيقتان) — when others see it (local trust window: 2 minutes)
+    SHARED_ADD: 'تظهر الإضافة عند جميع المستخدمين خلال دقيقتين كحد أقصى',
+    SHARED_EDIT: 'يظهر التعديل عند جميع المستخدمين خلال دقيقتين كحد أقصى',
     LEAVE: 'عملية الحفظ لسه ما خلصت'
   };
   const NOFILL = ' autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false"';
@@ -91,7 +94,7 @@
         '<div class="add-station-error" data-role="error" role="alert"></div>' +
         '<button class="add-station-submit" type="button" data-act="save">حفظ المحطة</button>' +
       '</div>' + progressBlock_() +
-      '<div class="sf-success" data-role="success" hidden><div class="sf-success-text">' + MSG.ADDED + '</div><button class="add-station-submit" type="button" data-act="done">حسنًا</button></div>' +
+      '<div class="sf-success" data-role="success" hidden><div class="sf-success-text">' + MSG.ADDED + '</div><div class="sf-success-note">⏱ ' + MSG.SHARED_ADD + '</div><button class="add-station-submit" type="button" data-act="done">حسنًا</button></div>' +
     '</div>';
   }
   function editHtml_() {
@@ -105,7 +108,7 @@
         progressBlock_() +
         '<div class="st-actions"><button class="st-btn primary" type="button" data-act="save">حفظ التعديل</button><button class="st-btn" type="button" data-act="close">إلغاء</button></div>' +
       '</div>' +
-      '<div class="sf-success" data-role="success" hidden><div class="sf-success-text">' + MSG.EDITED + '</div><button class="add-station-submit" type="button" data-act="done">حسنًا</button></div>' +
+      '<div class="sf-success" data-role="success" hidden><div class="sf-success-text">' + MSG.EDITED + '</div><div class="sf-success-note">⏱ ' + MSG.SHARED_EDIT + '</div><button class="add-station-submit" type="button" data-act="done">حسنًا</button></div>' +
     '</div>';
   }
 

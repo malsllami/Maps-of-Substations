@@ -300,11 +300,16 @@ function getAllStations(data) {
  * Incremental sync: what changed since the last sync (with a 20-minute lookback) + the total count to compare */
 function getUpdatedStationsSince(data) {
   const sinceMs = data.since ? new Date(data.since).getTime() - SYNC_LOOKBACK_MS : NaN;
-  const changed = function (e) { return e.t !== null && e.t !== undefined && (isNaN(sinceMs) || e.t > sinceMs); };
+  const manual = readManualChanges_(); // تعديلات يدوية في الشيت اكتشفها المشغّل (بلا تاريخ تعديل) / manual sheet edits found by the trigger
+  const changed = function (type, e) {
+    if (e.t !== null && e.t !== undefined && (isNaN(sinceMs) || e.t > sinceMs)) return true;
+    const at = manual[type + '|' + e.n];
+    return !!at && (isNaN(sinceMs) || at > sinceMs);
+  };
   const dist = stationIndex_(STATION_TYPE.DISTRIBUTION), sub = stationIndex_(STATION_TYPE.SUBSTATION);
   const updated = [];
-  dist.forEach(function (e) { if (changed(e)) updated.push({ id: e.id, type: STATION_TYPE.DISTRIBUTION, feeder: e.feeder, region: e.region, lat: e.lat, lng: e.lng }); });
-  sub.forEach(function (e) { if (changed(e)) updated.push({ id: e.id, type: STATION_TYPE.SUBSTATION, feeder: '', region: '', lat: e.lat, lng: e.lng }); });
+  dist.forEach(function (e) { if (changed(STATION_TYPE.DISTRIBUTION, e)) updated.push({ id: e.id, type: STATION_TYPE.DISTRIBUTION, feeder: e.feeder, region: e.region, lat: e.lat, lng: e.lng }); });
+  sub.forEach(function (e) { if (changed(STATION_TYPE.SUBSTATION, e)) updated.push({ id: e.id, type: STATION_TYPE.SUBSTATION, feeder: '', region: '', lat: e.lat, lng: e.lng }); });
   perfNote_('المتغيّرة', updated.length);
   return { success: true, updated: updated, serverTime: new Date().toISOString(), version: getDataVersion().version, totalCount: dist.length + sub.length };
 }
@@ -392,17 +397,52 @@ function refreshIndexInPlace_(type) {
  * Rebuilds both indexes every 10 minutes in a separate execution (no user waits); manual sheet edits show within 10 minutes.
  * A build already running elsewhere ← this index is skipped. */
 function refreshStationIndexesInBackground() {
+  const manualKeys = [];
   [STATION_TYPE.DISTRIBUTION, STATION_TYPE.SUBSTATION].forEach(function (type) {
     const start = Date.now();
     try {
       if (CacheService.getScriptCache().get(INDEX_KEYS[type] + '_building')) { console.log('فهرس ' + type + ': تخطٍّ (بناء جارٍ)'); return; }
+      const before = getChunked_(INDEX_KEYS[type]); // الفهرس الحالي (يشمل كتابات الموقع) قبل إعادة البناء / the current index, before the rebuild
       const index = buildAndSaveIndex_(type);
-      console.log('فهرس ' + type + ' بالخلفية: ' + index.length + ' محطة | ' + (Date.now() - start) + ' ms');
+      const diff = before ? indexDiff_(before, index) : [];
+      diff.forEach(function (n) { manualKeys.push(type + '|' + n); });
+      console.log('فهرس ' + type + ' بالخلفية: ' + index.length + ' محطة | ' + (Date.now() - start) + ' ms' + (diff.length ? ' | تعديل يدوي: ' + diff.length : ''));
     } catch (err) {
       logError_('refreshStationIndexesInBackground', String(err), type);
     }
   });
+  // تعديل يدوي في الشيت ← يُسجَّل ويُرفع الإصدار فتجلبه الأجهزة (اعتماد محمد 16 أكتوبر) — manual edit ← recorded and the version bumped
+  if (manualKeys.length) { recordManualChanges_(manualKeys); bumpDataVersion_(); }
   countTriggerPropOps_(); // عمليات الخصائص لهذا التشغيل ضمن عدّاد اليوم / this run's property operations into today's counter
+}
+
+// ===== التعديل اليدوي في الشيت — Manual sheet edits =====
+/* لا يغيّر أي خلية في الشيت: يحفظ أرقام المحطات المعدّلة يدويًا ووقت اكتشافها في خاصية للسكربت، فتدخل «المتغيّر» في المزامنة
+ * Never changes a sheet cell: keeps the manually edited station numbers and when they were found in a script property */
+const MANUAL_CHANGES_KEY = 'manual_station_changes';
+const MANUAL_CHANGES_MAX = 300;                       // حد حماية لحجم الخاصية / a cap protecting the property size
+const MANUAL_CHANGES_KEEP_MS = 2 * 24 * 3600 * 1000;  // يومان: جهاز غاب أكثر يحمّل كاملًا عند اختلاف العدد أو يتلقاها من الإصدار / two days
+
+/* المحطات الجديدة أو التي تغيّرت إحداثياتها/مغذيها/منطقتها بين فهرسين — stations new or changed between two indexes */
+function indexDiff_(before, after) {
+  const sig = function (e) { return [e.lat, e.lng, e.feeder || '', e.region || ''].join('|'); };
+  const old = {};
+  before.forEach(function (e) { old[e.n] = sig(e); });
+  const out = [];
+  after.forEach(function (e) { if (old[e.n] !== sig(e)) out.push(e.n); });
+  return out;
+}
+function readManualChanges_() {
+  try { return JSON.parse(scriptProps_().getProperty(MANUAL_CHANGES_KEY) || '{}') || {}; } catch (e) { return {}; }
+}
+function recordManualChanges_(keys) {
+  const map = readManualChanges_(), now = Date.now();
+  keys.forEach(function (k) { map[k] = now; });
+  const kept = Object.keys(map).filter(function (k) { return now - map[k] < MANUAL_CHANGES_KEEP_MS; })
+    .sort(function (a, b) { return map[b] - map[a]; }).slice(0, MANUAL_CHANGES_MAX);
+  const out = {};
+  kept.forEach(function (k) { out[k] = map[k]; });
+  scriptProps_().setProperty(MANUAL_CHANGES_KEY, JSON.stringify(out));
 }
 
 /* تثبيت المشغّل يدويًا من المحرر (مرة واحدة): يحذف أي نسخة سابقة فلا يتكرر، ثم يبني الفهرس فورًا

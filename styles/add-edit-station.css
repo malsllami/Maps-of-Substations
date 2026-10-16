@@ -110,6 +110,7 @@
 .sf-progress-label{text-align:center;font-size:11px;color:var(--text-secondary);margin-top:4px;font-family:'JetBrains Mono',monospace;}
 .sf-success{text-align:center;padding:10px 0;}
 .sf-success-text{color:var(--teal);font-weight:700;font-size:14px;margin-bottom:10px;}
+.sf-success-note{color:var(--text-secondary);font-size:13px;margin:-4px 0 12px;line-height:1.6;}
 /* V1 كان يلوّن الخطأ مضمّنًا (#E0654F)؛ «جاري تحديد موقعك...» رسالة معلومة لا خطأ — V1 colored errors inline */
 .add-station-error{color:#E0654F;font-size:13px;font-weight:600;}
 .add-station-error:empty{display:none;}

@@ -75,6 +75,7 @@ function classifyError_(source, message) {
   const has = function (text, parts) { return parts.some(function (p) { return text.indexOf(p) !== -1; }); };
   if (has(m, ['resizeobserver loop'])) return 'تحذير متصفح غير ضار';
   if (has(s, ['client/recovered'])) return 'تأخر وعالجه الاحتياطي';
+  if (has(s, ['client/write-recovered'])) return 'كتابة تأكدت بإعادة الإرسال'; // حُفظت مرة واحدة بنفس opKey — ليست خطأً / saved once — not an error
   if (has(s, ['client/write-unconfirmed'])) return 'نتيجة كتابة غير مؤكدة';
   if (has(s, ['client/background'])) return 'فشل أثناء الخلفية أو النوم';
   if (has(m, ['referenceerror', 'typeerror', 'syntaxerror', 'is not defined', 'is not a function', 'cannot read'])) return 'خطأ برمجي';

@@ -213,12 +213,15 @@
       'الطلب الأصلي: ' + describeAttempt_(original) + ' || الطلب الاحتياطي: requestId: ' + (backup.requestId || '—') +
       ' | الزمن: ' + sec_(backup.ms || 0) + ' | النتيجة النهائية: نجاح');
   }
-  /* كتابة انتهت إحدى محاولاتها بلا رد سليم: النتيجة غير مؤكدة، ثم ما انتهت إليه إعادة الإرسال بنفس opKey
-   * A write where an attempt ended without a valid reply: result unconfirmed, then what the same-opKey resend concluded */
-  function reportWrite(action, attempts, outcome) {
+  /* كتابة انتهت إحدى محاولاتها بلا رد سليم، ثم ما انتهت إليه إعادة الإرسال بنفس opKey.
+   * تأكد الحفظ بالإعادة (confirmed) ← «كتابة تأكدت بإعادة الإرسال» (ليست خطأً، مثل «تأخر وعالجه الاحتياطي»)؛ وإلا «نتيجة كتابة غير مؤكدة».
+   * A write where an attempt had no valid reply, then what the same-opKey resend concluded. Confirmed by the resend ←
+   * "write confirmed by resend" (not an error, like a recovered read); otherwise "unconfirmed write result". */
+  function reportWrite(action, attempts, outcome, confirmed) {
     const failed = attempts.filter(function (a) { return a.kind !== 'ok'; });
     if (!failed.length) return;
-    queueError_('client/write-unconfirmed', 'نتيجة كتابة غير مؤكدة: ' + action + ': ' + whatFailed_(failed[0]),
+    queueError_(confirmed ? 'client/write-recovered' : 'client/write-unconfirmed',
+      (confirmed ? 'كتابة تأكدت بإعادة الإرسال: ' : 'نتيجة كتابة غير مؤكدة: ') + action + ': ' + whatFailed_(failed[0]),
       attempts.map(function (a, i) { return 'المحاولة ' + (i + 1) + ': ' + (a.kind === 'ok' ? 'رد سليم | ' : '') + describeAttempt_(a); }).join(' || ') +
       ' || النتيجة النهائية: ' + outcome);
   }

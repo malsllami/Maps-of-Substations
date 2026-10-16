@@ -32,8 +32,11 @@ const REGIONS_TOP = 10;
 const NO_REGION = 'غير محدّدة';
 const WEEKDAYS = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 const ERROR_CATEGORIES = ['خطأ برمجي', 'فشل تحديث بيانات', 'محاولة دخول خاطئة', 'مشاكل اتصال', 'تنبيهات',
-  'صفحة 404 بدل الرد', 'فشل أثناء الخلفية أو النوم', 'نتيجة كتابة غير مؤكدة', 'تأخر وعالجه الاحتياطي'];
+  'صفحة 404 بدل الرد', 'فشل أثناء الخلفية أو النوم', 'نتيجة كتابة غير مؤكدة', 'تأخر وعالجه الاحتياطي', 'كتابة تأكدت بإعادة الإرسال'];
 const HARMLESS_CATEGORY = 'تحذير متصفح غير ضار';
+// تصنيفات تُعدّ وتبقى في جدول السجل لكنها لا تظهر في شريط التنبيهات (نجحت في النهاية — 16 أكتوبر)
+// Categories counted and kept in the log table but never shown in the alert strip (they succeeded in the end)
+const NON_ALERT_CATEGORIES = ['كتابة تأكدت بإعادة الإرسال'];
 
 // ===== الوقت — Time =====
 
@@ -314,7 +317,7 @@ function recentProblems_(rows, nowMs) {
   const out = function (p) { return { category: p.category, source: p.source, message: p.message, count: p.count, firstSeen: new Date(p.first).toISOString(), lastSeen: new Date(p.last).toISOString() }; };
   const since = nowMs - ALERT_WINDOW_HOURS * 3600 * 1000;
   return {
-    recent: all.filter(function (p) { return p.first >= since; }).sort(function (a, b) { return b.first - a.first; }).slice(0, PROBLEMS_LIST_MAX).map(out),
+    recent: all.filter(function (p) { return p.first >= since && NON_ALERT_CATEGORIES.indexOf(p.category) === -1; }).sort(function (a, b) { return b.first - a.first; }).slice(0, PROBLEMS_LIST_MAX).map(out),
     latest: all.slice().sort(function (a, b) { return b.last - a.last; }).slice(0, PROBLEMS_LIST_MAX).map(out)
   };
 }

@@ -41,7 +41,9 @@
       return Object.assign({ source: 'server' }, res.found ? res : { found: false });
     }
     const local = Object.assign({ source: 'local' }, SYNC.search(query));
-    if (SYNC.isConfirmed()) return local;
+    // موجودة والنسخة مؤكدة ← فورًا؛ «غير موجودة» تُتحقق من الخادم دائمًا (طلب واحد) — قد تكون أُضيفت للتو (16 أكتوبر)
+    // Found with a confirmed copy ← instant; «not found» is always checked with the server — it may have just been added
+    if (local.found && SYNC.isConfirmed()) return local;
     if (local.found) {
       SYNC.ensureFresh().then(function (state) {
         if (state !== 'updated' || !o.onUpdated) return;
@@ -54,7 +56,7 @@
     }
     if (global.navigator.onLine === false) return Object.assign(local, { unverified: true });
     if (o.onChecking) { try { o.onChecking(); } catch (e) { /* لا شيء / nothing */ } }
-    const state = await SYNC.ensureFreshBounded();
+    const state = await SYNC.ensureFreshBounded(undefined, { force: true });
     const again = Object.assign({ source: 'local' }, SYNC.search(query));
     if (!again.found && state === 'unverified') again.unverified = true;
     return again;

@@ -21,6 +21,7 @@
   const doc = global.document, S = global.SecSession, SYNC = global.SecStationsSync;
   const $ = function (id) { return doc.getElementById(id); };
   const INTRO_FADE_MS = 480, MORPH_SETTLE_MS = 200, OUTAGE_AFTER_MS = 650;
+  const SYNC_NOTE_MS = 6000; // مدة رسالة «تم تحديث بيانات المحطات» / how long the «stations updated» note stays
   const loggedIn = function () { return S.isLoggedIn(); };
 
   SecTiming.recordPageOpen();
@@ -267,7 +268,12 @@
     refreshNote_(ok ? REFRESH_NOTE.OK : REFRESH_NOTE.FAIL, ok ? 'ok' : 'fail');
   });
   global.addEventListener('focus', function () { if (loggedIn()) stats.refreshIfStale(); });
-  doc.addEventListener('visibilitychange', function () { if (doc.visibilityState === 'visible' && loggedIn()) stats.refreshIfStale(); });
+  doc.addEventListener('visibilitychange', function () {
+    if (doc.visibilityState !== 'visible' || !loggedIn()) return;
+    stats.refreshIfStale();
+    // العودة للتطبيق ← تحقق بالخلفية من تعديلات الآخرين (لا طلب إن كانت النسخة مؤكدة خلال دقيقتين) — returning ← a background check for others' edits
+    if (SYNC.state().loaded) SYNC.ensureFresh().catch(function () { /* لا شيء / nothing */ });
+  });
 
   // ===== بوابة اكتمال الملف — The profile gate =====
   const gate = SecProfileGate.mount(doc.body, { onOpenMenu: function () { header.openMenu(); } });
@@ -283,6 +289,19 @@
       status.refreshOffline();
     }
   }
+  /* تحديث تلقائي جلب إضافات أو تعديلات من الزملاء ← رسالة قصيرة في شريط الحالة (طلب محمد 16 أكتوبر)
+     An automatic update that brought colleagues' additions or edits ← a short note in the status bar */
+  let syncNoteTimer = 0;
+  SYNC.onChange(function (event, st, detail) {
+    if (event !== 'synced' || !detail || !(detail.added + detail.modified)) return;
+    const parts = [];
+    if (detail.added) parts.push('إضافة ' + detail.added);
+    if (detail.modified) parts.push('تعديل ' + detail.modified);
+    status.setNote('🔄 تم تحديث بيانات المحطات: ' + parts.join(' و') + ' من الزملاء');
+    global.clearTimeout(syncNoteTimer);
+    syncNoteTimer = global.setTimeout(function () { if (!SYNC.state().loading) status.clearNote(); }, SYNC_NOTE_MS);
+  });
+
   header.refreshButton.addEventListener('click', async function () {
     if (!loggedIn()) { status.setNote('سجّل دخول أولًا لاستخدام تحديث البيانات'); global.setTimeout(function () { status.clearNote(); }, 4000); return; }
     if (SYNC.state().loading || header.refreshButton.disabled) return; // تحميل جارٍ ← لا شيء (V1) / a load is running ← nothing (V1)
