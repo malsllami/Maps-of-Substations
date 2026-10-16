@@ -142,11 +142,11 @@ function roleFor_(phone, via) {
 /* الدخول برقم الجوال — صلاحية عضو دائمًا — Phone login — always member rights */
 function loginByPhone(data) {
   const phone = formatPhone(data.phone);
-  if (!phone) return { error: MSG.PHONE_INVALID };
+  if (!phone) { logLoginFailure_(data.phone, LOGIN_LOG.PHONE, MSG.PHONE_INVALID); return { error: MSG.PHONE_INVALID }; }
   const member = findMember_(phone);
-  if (!member) return { error: MSG.PHONE_NOT_REGISTERED };
-  if (member.status !== MEMBER_STATUS.ACTIVE) return { error: MSG.MEMBERSHIP_SUSPENDED };
-  logVisit_(phone, 'دخول برقم الجوال', 'نجاح');
+  if (!member) { logLoginFailure_(phone, LOGIN_LOG.PHONE, MSG.PHONE_NOT_REGISTERED); return { error: MSG.PHONE_NOT_REGISTERED }; }
+  if (member.status !== MEMBER_STATUS.ACTIVE) { logLoginFailure_(phone, LOGIN_LOG.PHONE, MSG.MEMBERSHIP_SUSPENDED); return { error: MSG.MEMBERSHIP_SUSPENDED }; }
+  logVisit_(phone, LOGIN_LOG.PHONE, 'نجاح');
   return { success: true, role: 'member', name: member.name, identityToken: issueToken_(phone, LOGIN_VIA.PHONE) };
 }
 

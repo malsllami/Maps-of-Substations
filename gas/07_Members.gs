@@ -20,7 +20,10 @@ const PROFILE_LIST_MAX = 50;
 // الحذف يُسجَّل ليعرف الجهاز ما حُذف دون تحميل كامل (اقتراح محمد 16 أكتوبر)؛ «حذف_يدوي» = حذف صف من الشيت اكتشفه المشغّل
 // Deletions are logged so devices learn what was removed without a full load; «manual» = a sheet row removal found by the trigger
 const AUDIT_TYPE = { ADD: 'إضافة_محطة_جديدة', EDIT: 'تعديل_إحداثية', PROFILE: 'تعديل_بيانات_شخصية', DELETE: 'حذف_محطة', MANUAL_DELETE: 'حذف_يدوي' };
-const LOGIN_ACTIONS = ['دخول', 'دخول برقم الجوال'];
+// أسماء الدخول في «سجل الزوار»: «دخول بالبصمة» منذ 16 أكتوبر (كان «دخول» قبلها ويبقى مقروءًا للصفوف القديمة)
+// Login names in the visits log: «دخول بالبصمة» since 16 Oct (formerly «دخول», still read for old rows)
+const LOGIN_LOG = { FINGERPRINT: 'دخول بالبصمة', PHONE: 'دخول برقم الجوال', LEGACY_FINGERPRINT: 'دخول' };
+const LOGIN_ACTIONS = [LOGIN_LOG.FINGERPRINT, LOGIN_LOG.LEGACY_FINGERPRINT, LOGIN_LOG.PHONE];
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const MEMBER_MSG = {

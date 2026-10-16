@@ -73,6 +73,8 @@ function activityEvents_(since) {
     rows.forEach(function (row) {
       const t = logCellTime_(row[0]);
       if (!t || t < since) return;
+      // محاولات الدخول الفاشلة (16 أكتوبر) لا تُحسب نشاطًا: المتواجدون والزوار والذروة من الناجح فقط — failed logins aren't activity
+      if (name === SHEETS.VISITS && String(row[3] || '').indexOf('فشل') === 0) return;
       events.push({ time: t, phone: String(row[1] || '').trim(), action: String(row[2] || ''), ref: name === SHEETS.AUDIT ? normalizeStationId_(row[3]) : '' });
     });
   });

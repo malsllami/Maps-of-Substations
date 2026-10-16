@@ -79,6 +79,15 @@ function logVisit_(phone, action, result) {
   }
 }
 
+/* محاولة دخول فاشلة في «سجل الزوار»: النتيجة «فشل — السبب» (16 أكتوبر). الجوال موحّدًا إن صح، وإلا كما كُتب (مقصوصًا ومعقّمًا).
+ * لا يُحسب في المتواجدين ولا الزوار ولا «آخر دخول» (كلها تقرأ «نجاح» فقط).
+ * A failed login in the visits log: result «فشل — reason». The phone normalized if valid, else as typed (trimmed, sanitized).
+ * Never counted as active, a visitor or a last login (they all read «نجاح» only). */
+function logLoginFailure_(rawPhone, action, reason) {
+  const phone = formatPhone(rawPhone) || sanitizeSheetText_(String(rawPhone == null ? '' : rawPhone).slice(0, 20));
+  logVisit_(phone, action, 'فشل — ' + String(reason || 'غير معروف').slice(0, 120));
+}
+
 /* سطر في «سجل التعديلات» — A row in the audit log */
 function logAudit_(phone, type, ref, details) {
   try {

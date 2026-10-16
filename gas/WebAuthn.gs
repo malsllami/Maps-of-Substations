@@ -209,7 +209,7 @@ function verifyAssertion(data) {
     sheet.getRange(cred.index, c.SIGN_COUNT + 1).setValue(auth.signCount);
     sheet.getRange(cred.index, c.LAST_USED + 1).setValue(nowStamp_());
     const member = findMember_(phone);
-    logVisit_(phone, 'دخول', 'نجاح');
+    logVisit_(phone, LOGIN_LOG.FINGERPRINT, 'نجاح'); // كان «دخول» (V1)؛ الصفوف القديمة تبقى وتُقرأ / was «دخول»; old rows stay readable
     return { success: true, role: roleFor_(phone, LOGIN_VIA.FINGERPRINT), name: member ? member.name : '', identityToken: issueToken_(phone, LOGIN_VIA.FINGERPRINT) };
   } catch (err) {
     logError_('verifyAssertion exception', String(err), phone);

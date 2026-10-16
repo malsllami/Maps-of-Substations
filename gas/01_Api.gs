@@ -36,7 +36,8 @@ const ROUTES = {
   generateRegisterChallenge: { handler: function (d) { return generateRegisterChallenge(d); }, access: ACCESS.PUBLIC },
   registerCredential: { handler: function (d) { return registerCredential(d); }, access: ACCESS.PUBLIC, opResult: true },
   generateLoginChallenge: { handler: function (d) { return generateLoginChallenge(d); }, access: ACCESS.PUBLIC },
-  verifyAssertion: { handler: function (d) { return verifyAssertion(d); }, access: ACCESS.PUBLIC },
+  // فشل الدخول بالبصمة يُسجَّل في «سجل الزوار» بسببه (16 أكتوبر) دون المساس بمنطق التحقق نفسه — a failed fingerprint login is logged with its reason
+  verifyAssertion: { handler: function (d) { const r = verifyAssertion(d); if (r && r.error) logLoginFailure_(d.phone, LOGIN_LOG.FINGERPRINT, r.error); return r; }, access: ACCESS.PUBLIC },
   // الأعضاء — members
   getSettingsLists: { handler: function () { return getSettingsLists(); }, access: ACCESS.PUBLIC },
   registerUser: { handler: function (d) { return registerUser(d); }, access: ACCESS.PUBLIC, opResult: true },
