@@ -40,7 +40,12 @@
       (g.SecDeleteStation && g.SecDeleteStation.isOpen()) || (doc.body && doc.body.classList.contains('nav-full')));
   }
   /* لوحة التحديث تنتظر أيضًا لوحة التثبيت المفتوحة (لا لوحتان معًا) — the update sheet also waits for an open install sheet */
-  function updateBusy_() { return defaultBusy() || !!(global.SecInstallSheet && global.SecInstallSheet.isOpen()); }
+  // وتنتظر الجولة/بطاقة الترحيب، ولا تظهر في جلسة «البداية النظيفة» (التحديث يُطبَّق هناك بصمت) — لا طبقتان معًا (16 أكتوبر)
+  // It also waits for the tour/welcome card, and never shows in a fresh-start session (the update is applied quietly there)
+  function updateBusy_() {
+    return defaultBusy() || !!(global.SecInstallSheet && global.SecInstallSheet.isOpen()) ||
+      !!(global.SecFeatureTour && global.SecFeatureTour.isOpen()) || !!(global.SecFreshStart && global.SecFreshStart.quietUpdates());
+  }
 
   /**
    * mount(opts) — opts: { pwa (الافتراضي window.SecPWA)، isBusy() (الافتراضي: ملاحة/حفظ/حذف) }

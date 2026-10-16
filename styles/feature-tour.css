@@ -8,15 +8,9 @@ html.tour-open,html.tour-open body{overflow:hidden !important;}
 .tour-card-mode{background:rgba(3,8,14,.72);}
 .tour-slides-mode{background:#03080E;display:flex;align-items:center;justify-content:center;}
 
-/* ===== البطاقة: لوحة سفلية — the card: a bottom sheet ===== */
-.tour-sheet{position:absolute;left:0;right:0;bottom:0;max-width:560px;margin:0 auto;box-sizing:border-box;
-  background:#0F1D2E;border-radius:26px 26px 0 0;border-top:2px solid #1FAE8C;
-  padding:22px 22px calc(env(safe-area-inset-bottom, 0px) + 28px);display:flex;flex-direction:column;gap:12px;text-align:center;
-  animation:tourUp .28s ease-out;}
-@keyframes tourUp{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}
-.tour-sheet-ic{font-size:42px;line-height:1;}
-.tour-sheet h2{margin:0;font-size:22px;font-weight:700;}
-.tour-sheet p{margin:0;font-size:15px;color:#C9D7E4;}
+/* ===== البطاقة: نفس لوحة «نسخة جديدة متاحة» الكهرمانية (styles/update-sheet.css) — the card reuses the amber update sheet ===== */
+.tour-card{animation:tourUp .3s ease-out;}
+@keyframes tourUp{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
 
 /* ===== الشرائح — the slides ===== */
 .tour-stage{position:relative;overflow:hidden;border-radius:0;}
@@ -45,6 +39,5 @@ html.tour-open,html.tour-open body{overflow:hidden !important;}
 /* ===== الأزرار — buttons ===== */
 .tour-btn{border:none;border-radius:14px;font-family:inherit;font-weight:700;font-size:16px;padding:11px 20px;cursor:pointer;}
 .tour-btn.primary{background:linear-gradient(90deg,#4FE8C8,#25D7B0,#1FB8C9);color:#04261D;}
-.tour-sheet .tour-btn.primary{font-size:18px;padding:14px;}
 .tour-btn.ghost{background:rgba(255,255,255,.1);color:#EAF1F7;}
 .tour-btn:focus-visible,.tour-skip:focus-visible{outline:2px solid #4FE8C8;outline-offset:2px;}

@@ -78,17 +78,40 @@
     return { ran: true, v1Keys: v1Keys };
   }
 
+  /* جلسة «البداية النظيفة» (هذا التبويب): بطاقة الترحيب هي إعلان النسخة الجديدة، فلا تظهر لوحة «نسخة جديدة متاحة» فوقها
+     أو بعدها، ويُطبَّق تحديث عامل الخدمة بصمت بلا إعادة تحميل تقطع الجولة أو الدخول (اختيار محمد 16 أكتوبر)
+     A fresh-start session (this tab): the welcome card is the new-version notice, so the update sheet never shows on top of it
+     or after it, and the service worker update is applied quietly, with no reload interrupting the tour or login */
+  const SESSION_FLAG = K.FRESH_START + '-session';
+  function quietUpdates() { try { return global.sessionStorage.getItem(SESSION_FLAG) === '1'; } catch (e) { return ran; } }
+  function applyQuietly_() {
+    const P = global.SecPWA;
+    if (!quietUpdates() || !P || P.state().status !== 'update-ready') return;
+    // حارس إعادة التحميل في pwa.js: لا إعادة تحميل عند تبدّل عامل الخدمة الآن — pwa.js's reload guard: no reload on this switch
+    try { global.sessionStorage.setItem(K.SW_RELOAD, String(Date.now())); } catch (e) { /* لا شيء / nothing */ }
+    P.applyUpdate();
+  }
+
   /* بعد تحميل الصفحة: البطاقة ثم الجولة ثم صفحة الدخول — after load: the card, the tour, then login */
   function showWelcome_() {
-    const done = function () { if (global.location.pathname.indexOf('auth.html') === -1) global.location.href = 'auth.html'; };
+    const done = function () {
+      applyQuietly_();
+      if (global.location.pathname.indexOf('auth.html') === -1) global.location.href = 'auth.html';
+    };
     if (global.SecFeatureTour) global.SecFeatureTour.showCard({ onDone: done }); else done();
   }
 
   run();
   if (ran) {
+    try { global.sessionStorage.setItem(SESSION_FLAG, '1'); } catch (e) { /* لا شيء / nothing */ }
     if (global.document.readyState === 'loading') global.document.addEventListener('DOMContentLoaded', showWelcome_);
     else showWelcome_();
   }
+  // نسخة تجهز لاحقًا في نفس الجلسة (مثلًا في صفحة الدخول) ← تُطبَّق بصمت أيضًا — a version ready later in the session ← applied quietly too
+  if (quietUpdates()) {
+    const sub_ = function () { if (global.SecPWA) global.SecPWA.onChange(function () { if (!global.SecFeatureTour || !global.SecFeatureTour.isOpen()) applyQuietly_(); }); applyQuietly_(); };
+    if (global.document.readyState === 'loading') global.document.addEventListener('DOMContentLoaded', sub_); else sub_();
+  }
 
-  global.SecFreshStart = { run: run, justRan: function () { return ran; }, whenDone: function () { return pending; } };
+  global.SecFreshStart = { run: run, justRan: function () { return ran; }, whenDone: function () { return pending; }, quietUpdates: quietUpdates };
 })(typeof window !== 'undefined' ? window : globalThis);

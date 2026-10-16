@@ -18,7 +18,9 @@
 
   const doc = global.document;
   const SHOT_W = 390, SHOT_H = 844; // مقاس اللقطات بوحدات CSS — the screenshots' size in CSS units
-  const MSG = { SKIP: 'تخطي', NEXT: 'التالي', BACK: 'السابق', START: 'ابدأ', CARD_TITLE: 'نسخة جديدة محسّنة من الموقع', CARD_TEXT: 'تعرّف على المميزات الجديدة في دقيقة', UPDATE: 'تحديث' };
+  // نصوص البطاقة نفس لوحة «نسخة جديدة متاحة» المعتمدة (اختيار محمد 16 أكتوبر) — the card reuses the approved update sheet's texts
+  const MSG = { SKIP: 'تخطي', NEXT: 'التالي', BACK: 'السابق', START: 'ابدأ', CARD_TITLE: 'نسخة جديدة متاحة', CARD_TEXT: 'يتوفر تحديث جديد للتطبيق، حدّث نسختك للاستفادة من أحدث التحسينات', UPDATE: 'تحديث الآن', LATER: 'لاحقًا' };
+  const UPD_ICON = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>';
   let overlay = null, keyHandler = null, resizeHandler = null;
 
   function slides_() { const s = global.SEC2_TOUR && global.SEC2_TOUR.SLIDES; return Array.isArray(s) ? s : []; }
@@ -40,21 +42,28 @@
   }
 
   /**
-   * showCard(opts) — بطاقة «نسخة جديدة محسّنة»؛ «تحديث» يفتح الجولة. opts: { onDone() } بعد انتهاء الجولة أو تخطيها
+   * showCard(opts) — بطاقة الترحيب بتصميم لوحة «نسخة جديدة متاحة» الكهرماني (أنماط styles/update-sheet.css)؛
+   * «تحديث الآن» يفتح الجولة، و«لاحقًا» أو ✕ يتخطيانها. opts: { onDone() } بعد انتهاء الجولة أو تخطيها
+   * The welcome card in the amber «new version available» look (update-sheet.css styles); «update now» opens the tour,
+   * «later» or ✕ skip it.
    */
   function showCard(opts) {
     const o = opts || {}, box = mount_();
     box.classList.add('tour-card-mode');
     box.setAttribute('aria-label', MSG.CARD_TITLE);
-    const sheet = el_('div', 'tour-sheet');
-    sheet.appendChild(el_('div', 'tour-sheet-ic', '🎉'));
-    sheet.appendChild(el_('h2', '', MSG.CARD_TITLE));
-    sheet.appendChild(el_('p', '', MSG.CARD_TEXT));
-    const btn = el_('button', 'tour-btn primary', MSG.UPDATE); btn.type = 'button'; btn.dataset.act = 'tour-update';
-    sheet.appendChild(btn);
+    const sheet = el_('div', 'upd-sheet show tour-card');
+    const x = el_('button', 'upd-x', '✕'); x.type = 'button'; x.dataset.act = 'tour-later'; x.setAttribute('aria-label', 'إغلاق');
+    const badge = el_('div', 'upd-badge'); badge.innerHTML = UPD_ICON + '<span class="upd-alert" aria-hidden="true">!</span>';
+    const now = el_('button', 'upd-now', MSG.UPDATE); now.type = 'button'; now.dataset.act = 'tour-update';
+    const later = el_('button', 'upd-later', MSG.LATER); later.type = 'button'; later.dataset.act = 'tour-later';
+    [x, el_('div', 'upd-grab'), badge, el_('b', 'upd-title', MSG.CARD_TITLE), el_('p', 'upd-text', MSG.CARD_TEXT), now, later].forEach(function (n) { sheet.appendChild(n); });
     box.appendChild(sheet);
-    btn.addEventListener('click', function () { open({ onDone: o.onDone }); });
-    btn.focus();
+    sheet.addEventListener('click', function (e) {
+      const t = e.target.closest('[data-act]'); if (!t) return;
+      if (t.dataset.act === 'tour-update') open({ onDone: o.onDone });
+      else { close_(); if (o.onDone) { try { o.onDone(); } catch (err) { /* لا شيء / nothing */ } } }
+    });
+    now.focus();
   }
 
   /**
