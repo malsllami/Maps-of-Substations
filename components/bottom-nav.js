@@ -1,12 +1,14 @@
 /* ============================================================
- * components/bottom-nav.js — الشريط السفلي الثابت: الرئيسية، الخريطة، ＋ إضافة، المحطات، المزيد (إعادة التصميم، 19 أكتوبر)
+ * components/bottom-nav.js — الشريط السفلي الثابت: الرئيسية (الخريطة)، البيانات، ＋ إضافة، المحطات، المزيد (إعادة التصميم)
+ * 20 أكتوبر (طلب محمد): الرئيسية صارت الخريطة، وتبويب «الخريطة» صار «البيانات» (الأرقام وآخر المحطات والأعطال).
  * ============================================================
  * يرسم الأزرار ويُبلغ الصفحة بالاختيار فقط — لا منطق تنقل هنا (الصفحة تقرر ماذا تعرض).
  * - زر ＋ في الوسط بارز (كهرماني) ويستدعي onAdd.
  * - setActive(name) يميّز التبويب الحالي (aria-current).
  * - يختفي تلقائيًا أثناء الملاحة بشاشة كاملة (body.nav-full) ونماذج الشاشة الكاملة — بالأنماط فقط.
  *
- * The fixed bottom bar: home, map, ＋ add, stations, more (redesign, 19 Oct). Draws the buttons and reports the choice
+ * The fixed bottom bar: home (the map), data, ＋ add, stations, more (redesign; on 20 Oct home became the map and the map
+ * tab became «data»). Draws the buttons and reports the choice
  * only — no navigation logic here (the page decides what to show). The centre ＋ calls onAdd; setActive marks the
  * current tab; hidden during full-screen navigation by the styles alone.
  * ============================================================ */
@@ -15,13 +17,13 @@
 
   const ICONS = {
     home: '<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h5v-6h4v6h5V9.5"/>',
-    map: '<polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>',
+    data: '<line x1="4" y1="20" x2="20" y2="20"/><rect x="5" y="11" width="3.2" height="6.5" rx="1"/><rect x="10.4" y="6" width="3.2" height="11.5" rx="1"/><rect x="15.8" y="9" width="3.2" height="8.5" rx="1"/>',
     stations: '<line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4.5" cy="6" r="1.5"/><circle cx="4.5" cy="12" r="1.5"/><circle cx="4.5" cy="18" r="1.5"/>',
     more: '<circle cx="5" cy="5" r="1.6"/><circle cx="12" cy="5" r="1.6"/><circle cx="19" cy="5" r="1.6"/><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/><circle cx="5" cy="19" r="1.6"/><circle cx="12" cy="19" r="1.6"/><circle cx="19" cy="19" r="1.6"/>'
   };
   const TABS = [
     { name: 'home', label: 'الرئيسية' },
-    { name: 'map', label: 'الخريطة' },
+    { name: 'data', label: 'البيانات' },
     { name: 'add' },
     { name: 'stations', label: 'المحطات' },
     { name: 'more', label: 'المزيد' }
@@ -62,8 +64,8 @@
     return { setActive: setActive, active: function () { return current; }, element: el };
   }
 
-  /* الشريط في صفحة غير الرئيسية (حسابي، الورديات، لوحة المدير): كل زر يفتح شاشته في الرئيسية (#map، #stations، #more، #add)
-     The bar on a page other than home: every button opens its screen on home (#map, #stations, #more, #add) */
+  /* الشريط في صفحة غير الرئيسية (حسابي، الورديات، لوحة المدير): كل زر يفتح شاشته في الرئيسية (#data، #stations، #more، #add)
+     The bar on a page other than home: every button opens its screen on home (#data, #stations, #more, #add) */
   function mountLinks(el, active) {
     global.document.body.classList.add('has-bottom-nav');
     const go = function (name) { global.location.href = 'index.html' + (name && name !== 'home' ? '#' + name : ''); };

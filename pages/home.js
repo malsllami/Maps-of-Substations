@@ -13,6 +13,9 @@
  *   (إصلاح بند V1 رقم 3)؛ حذف المدير يعيد للبحث؛ الإحصاءات تتحدث بعد أي حفظ أو حذف.
  * إعادة التصميم (19 أكتوبر): بلا كرة؛ ثلاث شاشات (الرئيسية، الخريطة، المحطات) يبدّل بينها الشريط السفلي (setView) بلا إعادة
  *   تحميل — الخريطة تُنشأ مرة وتبقى، والملاحة الجارية لا تتأثر بالتنقل. وُجدت محطة ← شاشة الخريطة مباشرة.
+ * 20 أكتوبر (طلب محمد): تبويب «الرئيسية» يفتح الخريطة بكامل الصفحة (الشاشة الافتراضية)، وشاشة الأرقام والإجراءات (view
+ *   'home') صار تبويبها «البيانات». عند الدخول تطلب شاشة «تحديد موقعك» الموقع قبل ظهور البحث (مع «متابعة بدون موقع»)، فتتوسط
+ *   الخريطة موقعه بنقطة زرقاء؛ وزر «موقعي» يعيد القراءة. وجد محطة ← البطاقة، و«المسار» (أو زر الملاحة في العمود) ← الملاحة.
  *
  * The home page: links the approved components in V1's flow (no business logic here). V2: each part in its tested
  * component; the map in its own container under the card; a save updates the card, marker and copy (V1 bug 3).
@@ -24,6 +27,8 @@
   const $ = function (id) { return doc.getElementById(id); };
   const MORPH_SETTLE_MS = 200, OUTAGE_AFTER_MS = 650;
   const MAP_GAP = 12; // هامش المساحة المرئية تحت ما يعلو الخريطة وفوق البطاقة / the visible area's margin under the top items and above the card
+  const ME_ZOOM = 16; // تكبير الخريطة على موقع المستخدم / the map zoom on the user's location
+  let myPos = null; // آخر موقع للمستخدم { lat, lng, accuracy } / the user's last location
   const SYNC_NOTE_MS = 6000; // مدة رسالة «تم تحديث بيانات المحطات» / how long the «stations updated» note stays
   const loggedIn = function () { return S.isLoggedIn(); };
 
@@ -80,7 +85,9 @@
 
   // ===== الشاشات والشريط السفلي (إعادة التصميم) — The screens and the bottom bar (redesign) =====
   const VIEWS = ['home', 'map', 'stations', 'details', 'more', 'storage'];
-  const TAB_OF = { details: 'map', storage: 'more' }; // الشاشات الفرعية تُبقي تبويب أصلها — sub-screens keep their parent's tab
+  // الخريطة تحت تبويب «الرئيسية»، وشاشة الأرقام (home) تحت «البيانات»، والشاشات الفرعية تُبقي تبويب أصلها
+  // The map is under «home», the numbers screen (home) under «data», and sub-screens keep their parent's tab
+  const TAB_OF = { map: 'home', details: 'home', home: 'data', storage: 'more' };
   let nav = null;
   /* يعرض شاشة واحدة؛ الخريطة تُنشأ عند أول فتح لشاشتها وتبقى — shows one screen; the map is created on first open and kept */
   function setView(name) {
@@ -140,7 +147,12 @@
   function ensureMap_() {
     if (view) return view;
     if (!global.L) { showMapMissing_(); return null; }
-    view = SecMapView.mount($('mapStage'), {});
+    view = SecMapView.mount($('mapStage'), {
+      onNavigate: function () { if (current) SecNavView.start(current); }, // الملاحة المباشرة من العمود / direct navigation from the column
+      onLocate: locateMe_,
+      onOverlayChange: function () { global.requestAnimationFrame(layout); }
+    });
+    if (myPos) view.showMe(myPos);
     nearby = SecNearbyLayer.mount(view, {
       getStation: function () { return current; },
       query: function (mode) { return mode === 'nearby' ? card.nearby() : card.feeder(); },
@@ -204,19 +216,21 @@
     tools.stop(); outageMap.clear(); nearby.reset(); view.hideHint();
     showCard_(s);
     layout();
+    view.setNavTarget(true);
     view.showStation(s);
     global.setTimeout(layout, 50);
   }
   function goBackToSearch() {
     if (SecNavView.isActive()) SecNavView.stop();
     if (SecStationForm.isOpen()) SecStationForm.close();
-    if (!current && doc.body.dataset.view === 'home') return;
+    if (!current && doc.body.dataset.view === 'map') return;
     current = null;
-    if (view) { tools.stop(); outageMap.clear(); nearby.reset(); view.hideHint(); view.clearStation(); }
+    if (view) { tools.stop(); outageMap.clear(); nearby.reset(); view.hideHint(); view.clearStation(); view.setNavTarget(false); }
     if (card) { card.destroy(); card = null; }
     $('heroSection').classList.remove('station-framed');
     bar.clear();
-    setView('home');
+    setView('map'); // البحث على الخريطة (الرئيسية) / the search is on the map (home)
+    if (myPos && view) view.centerOn([myPos.lat, myPos.lng], ME_ZOOM); // الخريطة تعود لموقعه / the map returns to his location
   }
   // «الصفحة الرئيسية» من القائمة والخريطة ظاهرة ← رجوع بلا إعادة تحميل (V1) / «home» from the menu while the map shows ← back, no reload (V1)
   $('appHeader').addEventListener('click', function (e) {
@@ -457,12 +471,36 @@
     onChange: function (fn) { return SYNC.onChange(fn); }
   });
 
+  // ===== تحديد الموقع قبل البحث (طلب محمد 20 أكتوبر) — Locating before search =====
+  // شاشة «تحديد موقعك الحالي» عند الدخول تُخفي البحث حتى يُحدَّد الموقع أو يختار «متابعة بدون موقع» (لا يُحرم أحد من البحث)
+  // The «locate yourself» screen on entry hides the search until located or «continue without location» (never blocks search)
+  function placeMe_(pos) {
+    myPos = pos;
+    if (!view) return;
+    view.showMe(pos);
+    if (!current) view.centerOn([pos.lat, pos.lng], ME_ZOOM, true); // لا يُزيح محطة معروضة / never moves away from a shown station
+  }
+  const locGate = SecLocationGate.mount($('locationGate'), {
+    onLocated: function (pos) { $('heroSection').classList.remove('gate-open'); placeMe_(pos); },
+    onSkip: function () { $('heroSection').classList.remove('gate-open'); }
+  });
+  /* زر «موقعي»: قراءة جديدة وتوسيط عليها — «my location»: a fresh reading, centered */
+  function locateMe_() {
+    SecLocationGate.read().then(function (pos) {
+      myPos = pos; view.showMe(pos); view.centerOn([pos.lat, pos.lng], Math.max(view.map.getZoom(), ME_ZOOM), true);
+    }, function (e) {
+      notify_(e.code === 'denied' ? 'صلاحية الموقع مرفوضة — فعّلها من إعدادات المتصفح' : e.code === 'nogeo' ? 'هذا الجهاز لا يدعم تحديد الموقع' : 'تعذّر تحديد موقعك الآن — حاول مرة أخرى');
+    });
+  }
+  if (loggedIn()) { $('heroSection').classList.add('gate-open'); locGate.open(); }
+
   // ===== الشريط السفلي — The bottom bar =====
   nav = SecBottomNav.mount($('bottomNav'), {
     active: 'home',
     onSelect: function (name) {
       if (name === 'more') more.render(); // حالة التثبيت والجلسة الحالية / the current install and session state
-      if (name === 'home') { goBackToSearch(); setView('home'); return; }
+      if (name === 'home') { setView('map'); return; } // «الرئيسية» = الخريطة (المحطة المختارة تبقى) / home = the map (the chosen station stays)
+      if (name === 'data') { setView('home'); return; } // «البيانات» = الأرقام والإجراءات / data = the numbers and actions
       setView(name);
     },
     onAdd: function () { if (loggedIn()) SecStationForm.openAdd(); else global.location.href = 'auth.html'; }
@@ -476,14 +514,15 @@
       try { global.history.replaceState(null, '', global.location.pathname + global.location.search); } catch (e) { /* لا شيء / nothing */ }
       if (want === 'add') SecStationForm.openAdd();
       else if (want === 'more') { setView('more'); more.render(); }
+      else if (want === 'data') setView('home');
       else if (want === 'map' || want === 'stations') setView(want);
-    }
+    } else setView('map');
   }
 
   // للاختبار والتكامل: الحالة الحالية فقط — for tests: the current state only
   global.SecHome = {
     goToStation: goToStation, goBackToSearch: goBackToSearch, setView: setView, openDetails: openDetails_,
-    state: function () { return { view: doc.body.dataset.view, map: !!view && doc.body.dataset.view === 'map', station: current, card: !!card, sync: lastSyncKind }; },
-    parts: function () { return { view: view, details: details, stationsList: stationsList, more: more, lens: lens, bar: bar, stats: stats, recent: recent, gate: gate, status: status, header: header, nav: nav }; }
+    state: function () { return { view: doc.body.dataset.view, map: !!view && doc.body.dataset.view === 'map', station: current, card: !!card, sync: lastSyncKind, me: myPos }; },
+    parts: function () { return { view: view, locGate: locGate, details: details, stationsList: stationsList, more: more, lens: lens, bar: bar, stats: stats, recent: recent, gate: gate, status: status, header: header, nav: nav }; }
   };
 })(typeof window !== 'undefined' ? window : globalThis);

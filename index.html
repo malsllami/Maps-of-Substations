@@ -46,13 +46,14 @@
 <link rel="stylesheet" href="styles/storage-section.css">
 <link rel="stylesheet" href="styles/profile-gate.css">
 <link rel="stylesheet" href="styles/home.css">
+<link rel="stylesheet" href="styles/location-gate.css">
 <link rel="stylesheet" href="styles/bottom-nav.css">
 <link rel="stylesheet" href="styles/station-details.css">
 <link rel="stylesheet" href="styles/stations-list.css">
 <link rel="stylesheet" href="styles/more-menu.css">
 <link rel="stylesheet" href="styles/contact-admin.css">
 </head>
-<body class="home-page" data-view="home">
+<body class="home-page" data-view="map">
 
 <header id="appHeader"></header>
 
@@ -108,13 +109,15 @@
   </section>
 </section>
 
-<!-- شاشة «الخريطة» (المرحلة ج): شريط البحث، ثم الخريطة بباقي الشاشة، ثم لوحة المحطة المدمجة — the map screen -->
+<!-- الرئيسية = الخريطة بكامل الصفحة (20 أكتوبر): البحث عائم أعلاها، وبطاقة المحطة أسفلها، وشاشة «تحديد موقعك» عند الدخول
+     Home = the full-page map: the floating search above, the station card below, and the «locate yourself» screen on entry -->
 <section class="hero app-view view-map" id="heroSection">
   <div class="top-content-area" id="topContentArea">
     <div id="barBox"></div>
   </div>
   <div class="map-stage-slot"><div id="mapStage"></div></div>
   <div class="station-table station-sheet" id="stationTable"></div>
+  <div id="locationGate"></div>
 </section>
 
 <!-- شاشة «تفاصيل المحطة» (تُفتح من لوحة المحطة) — the station details screen (opened from the station sheet) -->
@@ -175,6 +178,7 @@
 <script src="components/bottom-nav.js"></script>
 <script src="components/station-details.js"></script>
 <script src="components/stations-list.js"></script>
+<script src="components/location-gate.js"></script>
 <script src="components/more-menu.js"></script>
 <script src="pages/home.js"></script>
 </body>

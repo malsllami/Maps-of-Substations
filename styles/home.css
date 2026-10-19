@@ -292,8 +292,6 @@ body:not(.nav-full) .view-map [data-tools="more"]{padding:8px 11px;}
 body:not(.nav-full) .view-map .map-mode-panel,body:not(.nav-full) .view-map .map-panels > *,body:not(.nav-full) .view-map .map-tool-hint{
   border:1px solid var(--glass-line);border-radius:14px;background:var(--glass-strong);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);}
 /* التكبير والتنبيه فوق البطاقة دائمًا — zoom and the toast always above the card */
-body:not(.nav-full) .view-map .zoom-controls{bottom:calc(var(--sheet-h, 0px) + 12px);left:12px;border-color:var(--glass-line);}
-body:not(.nav-full) .view-map .zoom-btn{background:var(--glass-strong);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);}
 body:not(.nav-full) .view-map .map-toast{bottom:calc(var(--sheet-h, 0px) + 16px);}
 /* بطاقة المحطة عائمة أسفل الخريطة بخلفية زجاجية — the station card floats at the bottom on glass */
 body:not(.nav-full) .view-map .station-sheet{position:absolute;left:8px;right:8px;bottom:8px;margin:0;z-index:20;max-height:56%;overflow-y:auto;overscroll-behavior:contain;
@@ -308,3 +306,25 @@ body:not(.nav-full) .view-map [data-tools="more"]{padding:7px 10px;}
 /* «⋯» أيقونة فقط (لا يلتبس بتبويب «المزيد» في الشريط السفلي) — «⋯» icon only (not confused with the bottom bar's «More») */
 body:not(.nav-full) .view-map .toolbar-btn[data-tools="more"] .tb-label{display:none;}
 body:not(.nav-full) .view-map .toolbar-btn[data-tools="more"] .tb-icon{display:inline;font-size:16px;}
+
+/* ===== الرئيسية = الخريطة (طلب محمد 20 أكتوبر، نموذج الصورة) =====
+   عمود أزرار زجاجية على اليمين تحت البحث: الملاحة المباشرة (عند وجود محطة)، التكبير/التصغير، الطبقات، الأدوات؛ و«موقعي»
+   أسفل يمين الخريطة فوق البطاقة. أدوات الشريط (قريب، مغذي، أعطال، ⋯) مطوية خلف «الأدوات» فلا تُحذف أي ميزة.
+   Home = the map: a glass button column on the right under the search (direct navigation when a station is chosen, zoom,
+   layers, tools) and «my location» bottom-right above the card. The toolbar tools fold behind «tools», no feature lost. */
+body:not(.nav-full) .view-map .map-stage-slot .globe-stage.map-active{padding-right:66px;}
+body:not(.nav-full) .view-map .map-side{display:flex;flex-direction:column;align-items:center;gap:8px;position:absolute;
+  top:calc(var(--search-h, 46px) + 16px);right:12px;z-index:12;}
+body:not(.nav-full) .view-map .side-btn{display:flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;border-radius:50%;cursor:pointer;
+  background:var(--glass-strong);border:1px solid var(--glass-line);color:var(--text-primary);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);}
+body:not(.nav-full) .view-map .side-btn[hidden]{display:none;}
+body:not(.nav-full) .view-map .side-nav{background:var(--c-dist-fg);border-color:var(--c-dist-fg);color:#07261C;}
+[data-theme="light"] body:not(.nav-full) .view-map .side-nav{color:#FFFFFF;}
+body:not(.nav-full) .view-map .side-tools[aria-expanded="true"]{border-color:var(--teal);color:var(--teal);}
+/* أداة نشطة (قريب/مغذي) والأدوات مطوية ← نقطة على زر الأدوات — an active tool while folded ← a dot on the tools button */
+body:not(.nav-full) .view-map .globe-stage:not(.tools-open):has(.toolbar-btn.active) .side-tools{border-color:var(--teal);color:var(--teal);box-shadow:inset 0 0 0 2px var(--teal);}
+body:not(.nav-full) .view-map .map-side .zoom-controls{position:static;display:flex;flex-direction:column;border-radius:22px;overflow:hidden;
+  border:1px solid var(--glass-line);box-shadow:none;}
+body:not(.nav-full) .view-map .map-side .zoom-btn{width:44px;height:42px;background:var(--glass-strong);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);}
+body:not(.nav-full) .view-map .map-locate{position:absolute;right:12px;bottom:calc(var(--sheet-h, 0px) + 12px);z-index:12;width:50px;height:50px;color:#2F86F6;}
+body:not(.nav-full) .view-map .globe-stage:not(.tools-open) .map-toolbar-bar{display:none;}

@@ -142,3 +142,8 @@
    The station marker clearer without hiding details: a larger number with a white edge, a dot with a dark ring */
 .ssm-label{font-size:14px;border:1.5px solid #FFFFFF;box-shadow:0 1px 4px rgba(0,0,0,.35);}
 .ssm-dot{box-shadow:0 0 0 2px rgba(7,17,31,.55), 0 0 10px rgba(46,204,113,.8);}
+
+/* العمود الجانبي و«موقعي» (20 أكتوبر): مخفيان افتراضيًا ويبقى التكبير وحده كما كان؛ تُظهرهما الرئيسية في home.css
+   The side column and «my location»: hidden by default with the zoom alone as before; home shows them in home.css */
+.map-side{display:contents;}
+.side-btn{display:none;}
