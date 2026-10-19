@@ -93,3 +93,9 @@
 .sb-table tr.sb-sub td:first-child{color:var(--sub);}
 .stats-board .sb-foot{margin-top:0;font-size:12.5px;color:var(--text-muted);}
 @media (max-width:340px){ .st-num{font-size:22px;} .st-label{font-size:13px;} .st-tile{padding:12px 10px 10px;} }
+/* سطر حالة التحميل — the load state line */
+.sb-state{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px 12px;padding:10px 12px;border-radius:var(--radius);
+  font-size:13.5px;font-weight:700;background:var(--bg-card);border:1px solid var(--border-strong);color:var(--text-secondary);text-align:center;}
+.sb-state[data-kind="failed"],.sb-state[data-kind="stale"]{border-color:var(--c-alert-line);color:var(--c-alert-fg);background:var(--c-alert-bg);}
+.sb-state[data-kind="offline"]{border-color:var(--c-info-line);color:var(--c-info-fg);background:var(--c-info-bg);}
+.sb-retry{font-family:inherit;font-size:13.5px;font-weight:700;padding:7px 14px;border-radius:10px;cursor:pointer;background:var(--bg-card);color:var(--text-primary);border:1px solid var(--border-strong);}

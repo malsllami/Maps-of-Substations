@@ -69,6 +69,8 @@
           '</tbody></table></div>' +
         '</details>' +
         '<div class="sb-foot">آخر تحديث للأرقام: <span data-role="updated">—</span></div>' +
+        // حالة التحميل (قائمة محمد 2): يُحمَّل / بلا اتصال / تعذّر + إعادة المحاولة — the load state: loading / offline / failed + retry
+        '<div class="sb-state" data-role="state" role="status" hidden><span data-role="state-text"></span><button type="button" class="sb-retry" data-act="retry" hidden>إعادة المحاولة</button></div>' +
         '<details class="sb-removed" hidden><summary data-role="removed-summary"></summary>' +
           '<p class="sb-removed-note">عمليات اليوم على محطات لم تعد موجودة في أي جدول — غير محسوبة في الأرقام أعلاه. راجعها: حذف طبيعي بعد إضافة/تعديل، أم مشكلة فعلية.</p>' +
           '<div class="sec-table-wrap"><table class="sec-table"><thead><tr>' + REMOVED_HEAD.map(function (h) { return '<th>' + h + '</th>'; }).join('') +
@@ -92,6 +94,21 @@
     let stats = null, lastOkAt = 0, lastTryAt = 0, inFlight = null, alive = true;
     container.innerHTML = html_();
     const removedBox = container.querySelector('.sb-removed');
+
+    /* سطر الحالة: لا يُظن أن الأرقام اختفت — the state line, so the numbers never seem to vanish */
+    const STATE = {
+      loading: 'جارٍ تحميل أرقام المحطات…',
+      offline: 'لا يوجد اتصال بالإنترنت — تُحدَّث الأرقام عند عودته',
+      failed: 'تعذّر تحميل الأرقام من الخادم',
+      stale: 'تعذّر تحديث الأرقام — المعروضة من آخر تحديث ناجح'
+    };
+    function setState_(kind) {
+      const box = container.querySelector('[data-role="state"]');
+      box.hidden = !kind; box.dataset.kind = kind || '';
+      container.querySelector('[data-role="state-text"]').textContent = kind ? STATE[kind] : '';
+      container.querySelector('[data-act="retry"]').hidden = !(kind === 'failed' || kind === 'stale' || kind === 'offline');
+    }
+    container.addEventListener('click', function (e) { if (e.target.closest('[data-act="retry"]')) refresh(); });
 
     function paint_() {
       container.querySelectorAll('[data-v]').forEach(function (el) {
@@ -130,16 +147,19 @@
     function refresh() {
       if (!alive) return Promise.resolve(false);
       if (inFlight) return inFlight;
-      if (global.navigator.onLine === false) return Promise.resolve(false); // بلا إنترنت فعلًا ← لا طلب محكوم بالفشل / truly offline ← no doomed request
+      if (global.navigator.onLine === false) { setState_(stats ? 'stale' : 'offline'); return Promise.resolve(false); } // بلا إنترنت فعلًا ← لا طلب محكوم بالفشل / truly offline ← no doomed request
       lastTryAt = Date.now();
+      if (!stats) setState_('loading');
       inFlight = (async function () {
         try {
           const res = await global.SecApi.call('getStats', {}, { phone: true });
-          if (!alive || !res || !res.success) return false;
+          if (!alive) return false;
+          if (!res || !res.success) { setState_(stats ? 'stale' : 'failed'); return false; }
           stats = res; lastOkAt = Date.now();
-          paint_();
+          paint_(); setState_(null);
           return true;
         } catch (e) {
+          if (alive) setState_(stats ? 'stale' : 'failed');
           return false; // الأرقام الحالية تبقى كما هي / the shown numbers stay
         } finally { inFlight = null; }
       })();

@@ -27,9 +27,9 @@
   --bar-bg:rgba(9,20,36,0.94);
   --text-primary:#EEF4FA;
   --text-secondary:#C3D2E2; /* واضح (طلب محمد، 15 أكتوبر) — clear (Mohammed, 15 Oct) */
-  --text-muted:#8FA6BF;
-  --border:rgba(150,185,225,0.13);
-  --border-strong:rgba(150,185,225,0.26);
+  --text-muted:#A9BCD1;   /* أوضح (قائمة محمد 3) — clearer */
+  --border:rgba(150,185,225,0.18);
+  --border-strong:rgba(150,185,225,0.32);
   --dist:#2BC48A;        /* التوزيع — distribution */
   --dist-soft:rgba(43,196,138,0.13);
   --sub:#3B8BEB;         /* التحويل — substations */
@@ -60,7 +60,7 @@
   --bar-bg:rgba(255,255,255,0.96);
   --text-primary:#0F1F33;
   --text-secondary:#2F4358; /* واضح (طلب محمد، 15 أكتوبر) — clear (Mohammed, 15 Oct) */
-  --text-muted:#5E7186;
+  --text-muted:#4A5D73;   /* أوضح (قائمة محمد 3) — clearer */
   --border:rgba(15,31,51,0.16);
   --border-strong:rgba(15,31,51,0.28);
   --card-shadow:0 1px 3px rgba(15,31,51,0.12), 0 1px 1px rgba(15,31,51,0.06);

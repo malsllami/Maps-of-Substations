@@ -137,3 +137,8 @@
 .nearby-popup .sb-data-row{margin-bottom:8px;}
 .nearby-popup .cell-value{font-size:12px;}
 @media (max-width:767px){ .globe-stage.map-active{width:calc(100% - 32px);} }
+
+/* علامة المحطة أوضح دون أن تحجب التفاصيل (قائمة محمد 4): رقم بخط أكبر بإطار أبيض، ونقطة بحد داكن تبرز على الخريطة الفاتحة
+   The station marker clearer without hiding details: a larger number with a white edge, a dot with a dark ring */
+.ssm-label{font-size:14px;border:1.5px solid #FFFFFF;box-shadow:0 1px 4px rgba(0,0,0,.35);}
+.ssm-dot{box-shadow:0 0 0 2px rgba(7,17,31,.55), 0 0 10px rgba(46,204,113,.8);}
