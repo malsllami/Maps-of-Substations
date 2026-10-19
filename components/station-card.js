@@ -98,7 +98,6 @@
           (s.region ? '<div class="sb-data-cell"><div class="cell-label">المنطقة</div><div class="cell-value ar">' + esc(s.region) + '</div></div>' : '') +
         '</div>' +
       '</div>' +
-      searchTime_(s) +
       (coords ? '' : '<div class="st-note-warn" data-role="no-coords">' + NO_COORDS_MSG + '</div>') +
     '</div>';
   }
@@ -135,7 +134,10 @@
       '<div class="st-sub sheet-actions" style="--n:' + buttons.length + '">' + buttons.join('') +
         (canEdit ? '' : '<button class="st-btn" type="button" data-act="edit" hidden>✏️ تعديل</button>') +
       '</div>' +
+      // تذييل واحد: مدة البحث ومصدره ثم آخر تحديث للبيانات (طلب محمد 19 أكتوبر) — one footer: search time/source, then freshness
+      '<div class="sheet-foot">' + searchTime_(s) +
       (fresh ? '<div class="db-freshness-note"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.5A8.5 8.5 0 1 1 3 12.5a8.38 8.38 0 0 1 .9-3.8"/><path d="M21 3v6h-6"/></svg><span>آخر تحديث: ' + freshness_(fresh) + '</span></div>' : '') +
+      '</div>' +
     '</div>';
   }
 

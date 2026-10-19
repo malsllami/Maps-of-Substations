@@ -198,3 +198,7 @@ body.nav-full .station-sheet{display:none !important;}
 /* بطاقة «محطات المغذي»: الرقم كبير في المنتصف بلون التوزيع — the feeder card: a large centered number in the distribution color */
 .station-table.station-sheet .sheet-actions .st-feeder{background:var(--c-dist-bg);border-color:var(--c-dist-line);color:var(--c-dist-fg);}
 .station-sheet .st-count{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:800;line-height:1;}
+/* التذييل: مدة البحث ومصدره وآخر تحديث في كتلة واحدة بنفس الخط والمحاذاة (طلب محمد) — the footer: search time/source and freshness together */
+.station-sheet .sheet-foot{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:4px;}
+.station-sheet .sheet-foot .st-search-time{margin:0;font-size:12.5px;text-align:start;justify-content:flex-start;display:flex;align-items:center;gap:4px;color:var(--text-secondary);}
+.station-sheet .sheet-foot .db-freshness-note{margin:0;padding:0;border:none;}
