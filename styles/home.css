@@ -127,3 +127,27 @@ body.guest-mode .home-title{display:none;}
 /* النص الإرشادي عربي فيُعرض من اليمين ما دام الحقل فارغًا؛ الكتابة نفسها (أرقام وأحرف لاتينية) كما هي
    The Arabic placeholder reads right-to-left while the field is empty; typing (digits/Latin) is unchanged */
 #lensBox .station-search-bar input:placeholder-shown{direction:rtl;text-align:right;}
+
+/* ===== ملاحظات محمد على المرحلة ب: نصوص ثانوية أكبر، والبيانات المؤقتة مطوية =====
+   Mohammed's notes on stage B: larger secondary text, the cached data folded */
+.home-date{font-size:14px;}
+.stats-board .sb-foot{font-size:13.5px;color:var(--text-secondary);}
+.home-fold{width:100%;max-width:560px;background:var(--bg-card);border:1px solid var(--border-strong);border-radius:var(--radius-lg);}
+.home-fold > summary{display:flex;align-items:center;gap:10px;padding:14px;cursor:pointer;font-size:15px;font-weight:700;color:var(--text-primary);list-style:none;}
+.home-fold > summary::-webkit-details-marker{display:none;}
+.home-fold > summary::after{content:'';margin-inline-start:auto;width:9px;height:9px;border-inline-start:2px solid var(--text-muted);border-bottom:2px solid var(--text-muted);transform:rotate(-45deg);transition:transform .2s;}
+.home-fold[open] > summary::after{transform:rotate(135deg);}
+.fold-icon{display:flex;color:var(--sub);}
+.fold-sub{font-size:13px;font-weight:600;color:var(--text-muted);}
+.home-fold .home-slot{padding:0 0 4px;}
+.home-fold .storage-row{border:none;background:none;padding-top:0;}
+.home-fold .storage-title{display:none;}
+.storage-usage-top,.storage-percent{font-size:13.5px;}
+.storage-clear-btn{font-size:13.5px;padding:8px 12px;}
+/* خانات البيانات المؤقتة: 2×2 بخط أوضح بدل أربع خانات ضيقة — cached-data cells: 2×2 with clearer text instead of four narrow ones */
+.home-fold .storage-cells{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:14px;}
+.home-fold .storage-cell:nth-child(3){border-right:none;}
+.home-fold .storage-cell-label{font-size:13px;}
+.home-fold .storage-cell-val{font-size:14.5px;}
+.home-fold .storage-cell-val small{font-size:12px;}
+.home-fold .stations-cache-info{font-size:13px;}

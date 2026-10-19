@@ -50,3 +50,6 @@
   .header-row-status{padding:0 16px 10px;}
   .conn-status-pill{padding:4px 6px 4px 12px;font-size:12.5px;gap:10px;flex-wrap:nowrap;}
 }
+.conn-status-pill{font-size:13.5px;}
+@media (max-width:600px){ .conn-status-pill{font-size:13.5px;} }
+@media (max-width:340px){ .conn-status-pill{font-size:12.5px;gap:8px;} }
