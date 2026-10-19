@@ -85,3 +85,8 @@
 .status-refresh-btn[data-sync="partial"]::after{color:var(--st-yellow);}
 .status-refresh-btn[data-sync="pending"]{color:var(--st-orange);border-color:var(--st-orange);}
 .status-refresh-btn[data-sync="offline"]{color:var(--st-red);}
+/* نص الحالة يحل محل سطر الاتصال في كل لون عدا الأخضر (طلب محمد) — the state text replaces the connection line in every color but green */
+.sync-text{flex:1;min-width:0;font-weight:700;line-height:1.5;white-space:normal;}
+.sync-text:empty{display:none;}
+.header-row-status[data-sync]:not([data-sync="ready"]) .conn-status-pill > .status-bar-item{display:none;}
+.header-row-status[data-sync]:not([data-sync="ready"]) .conn-status-pill{flex-wrap:nowrap;}

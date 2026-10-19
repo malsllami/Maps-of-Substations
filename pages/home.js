@@ -345,40 +345,64 @@
   // التحميل يصير تحذيرًا)، رمادي بلا نسخة، برتقالي متقطع تحديث جديد لم يُحمَّل بعد (التلقائي بموعده، والزر يسرّعه)، أخضر مكتملة.
   // The status bar and the cached-data card share one color by priority: red offline, yellow a stopped partial load (the
   // load button becomes a warning), gray no copy, dashed orange a newer update not loaded yet, green complete.
+  // النص يتغير مع اللون (طلب محمد): الأخضر يُبقي سطر الاتصال وآخر تحديث كما هو، وبقية الحالات نص يشرحها في الشريط نفسه
+  // The text changes with the color: green keeps the connection/last-update line; every other state explains itself in the bar
+  const D = global.SecDates, AUTO_MS = global.SEC2_CONFIG.TIMING.STATIONS_CONFIRM_MAX_AGE_MS; // التحديث التلقائي بمدة الثقة نفسها (دقيقتان)
   const SYNC_TEXT = {
-    offline: 'لا يوجد اتصال بالإنترنت — البحث يعمل من نسخة الجهاز إن وُجدت',
-    partial: function (r) { return 'توقف تحميل نسخة المحطات عند ' + r.loaded + (r.total ? '/' + r.total : '') + ' — اضغط ⚠ للمتابعة'; },
+    offlineCopy: function (at) { return 'لا يوجد اتصال بالإنترنت — آخر تحديث للنسخة: ' + (at ? D.relativeTime(at) : '—'); },
+    offlineNone: 'لا توجد نسخة محطات على الجهاز ولا يوجد اتصال بالإنترنت',
+    partial: function (r) { return 'توقف تحميل النسخة عند ' + r.loaded + (r.total ? '/' + r.total : '') + ' — اضغط ⚠ لإكمال التحميل'; },
     none: 'لم تُحمَّل نسخة المحطات على هذا الجهاز بعد',
     notStarted: 'تعذّر بدء تحميل نسخة المحطات — اضغط ⟳ للمحاولة',
     loading: function (l) { return 'جارٍ تحميل نسخة المحطات: ' + l.loaded + (l.total ? '/' + l.total : ''); },
-    pending: 'يوجد تحديث جديد لبيانات المحطات — يُحمَّل تلقائيًا، أو اضغط ⟳ للتسريع',
+    pending: function (sec) { return 'توجد نسخة جديدة — تحديث تلقائي بعد ' + Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0') + ' أو اضغط ⟳ الآن'; },
+    pendingNow: 'توجد نسخة جديدة — جارٍ التحديث…',
     ready: 'نسخة المحطات مكتملة ومطابقة للخادم'
   };
-  const SYNC_BTN = { partial: 'استكمال تحميل نسخة المحطات', pending: 'تحميل التحديث الجديد الآن' };
+  const SYNC_BTN = { partial: 'إكمال تحميل نسخة المحطات', pending: 'تحميل النسخة الجديدة الآن' };
+  let pendingDueAt = 0, autoRunning = false;
   function syncState_() {
     const st = SYNC.state(), conn = status.state ? status.state() : '';
-    if (global.navigator.onLine === false || conn === 'offline' || conn === 'saved') return { k: 'offline', t: SYNC_TEXT.offline };
-    // أصفر: توقف بعد تحميل جزء فعلًا؛ التوقف قبل أي جزء يبقى رماديًا — yellow: stopped after loading a part; stopping before any stays gray
+    if (global.navigator.onLine === false || conn === 'offline' || conn === 'saved') {
+      return st.loaded ? { k: 'offline', t: SYNC_TEXT.offlineCopy(st.syncedAt || (st.lastSync ? new Date(st.lastSync) : null)) } : { k: 'offline', t: SYNC_TEXT.offlineNone };
+    }
     // «قابل للاستكمال» لا يوجد إلا بعد التوقف (يُصفَّر عند بدء أي تحميل) — «resumable» exists only after a stop (reset when any load starts)
     if (!st.loaded && st.resumable && st.resumable.loaded > 0) return { k: 'partial', t: SYNC_TEXT.partial(st.resumable) };
     if (!st.loaded) return { k: 'none', t: st.resumable ? SYNC_TEXT.notStarted : st.loading ? SYNC_TEXT.loading(st.loading) : SYNC_TEXT.none };
-    if (st.pending) return { k: 'pending', t: SYNC_TEXT.pending };
+    if (st.pending) {
+      if (!pendingDueAt) pendingDueAt = Date.now() + AUTO_MS;
+      const sec = Math.max(0, Math.ceil((pendingDueAt - Date.now()) / 1000));
+      return { k: 'pending', t: autoRunning || sec === 0 ? SYNC_TEXT.pendingNow : SYNC_TEXT.pending(sec), due: sec === 0 };
+    }
+    pendingDueAt = 0;
     return { k: 'ready', t: SYNC_TEXT.ready };
+  }
+  /* التحديث التلقائي عند انتهاء العدّاد؛ تعذّر ← عدّاد جديد — the automatic update when the countdown ends; failed ← a new countdown */
+  function autoSync_() {
+    if (autoRunning) return;
+    autoRunning = true;
+    SYNC.sync().catch(function () { return null; }).then(function () { autoRunning = false; pendingDueAt = SYNC.state().pending ? Date.now() + AUTO_MS : 0; paintSync_(); });
   }
   let lastSyncKind = '';
   function paintSync_() {
     const s = syncState_(), bar = header.status.bar, btn = header.refreshButton;
-    if (bar) { bar.dataset.sync = s.k; bar.title = s.t; }
+    if (bar) {
+      bar.dataset.sync = s.k; bar.title = s.t;
+      let line = bar.querySelector('[data-role="sync-text"]');
+      if (!line) { line = doc.createElement('span'); line.className = 'sync-text'; line.dataset.role = 'sync-text'; line.setAttribute('role', 'status'); bar.querySelector('.conn-status-pill').prepend(line); }
+      line.textContent = s.k === 'ready' ? '' : s.t;
+    }
     if (btn) { btn.dataset.sync = s.k; btn.setAttribute('aria-label', SYNC_BTN[s.k] || btn.title); }
-    const box = doc.querySelector('.storage-screen'), line = $('storageSyncLine');
+    const box = doc.querySelector('.storage-screen'), line2 = $('storageSyncLine');
     if (box) box.dataset.sync = s.k;
-    if (line) line.textContent = s.t;
+    if (line2) line2.textContent = s.t;
     lastSyncKind = s.k;
+    if (s.due) autoSync_();
   }
   if (loggedIn()) {
     SYNC.onChange(paintSync_);
     global.addEventListener('online', paintSync_); global.addEventListener('offline', paintSync_);
-    global.setInterval(paintSync_, 3000); // حالة الاتصال تُفحص دوريًا من مكوّنها / the connection state is checked periodically by its component
+    global.setInterval(paintSync_, 1000); // العدّاد ثانية بثانية، وحالة الاتصال تُفحص من مكوّنها / the countdown per second
     paintSync_();
   }
 
