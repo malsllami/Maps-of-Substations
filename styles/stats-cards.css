@@ -63,3 +63,33 @@
   .sb-k{font-size:10.5px;}
   .sb-v{font-size:15px;}
 }
+
+/* ===== إعادة التصميم (19 أكتوبر): أربع بطاقات بأرقام كبيرة + جدول اليوم عند الطلب =====
+   Redesign (19 Oct): four tiles with large numbers + today's table on demand */
+.stats-board{border:none;background:none;padding:0;gap:10px;max-width:560px;align-items:stretch;}
+.st-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+.st-tile{
+  --sb-c:var(--text-secondary);
+  min-width:0;display:flex;flex-direction:column;gap:8px;padding:14px 14px 12px;
+  background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);
+}
+.st-tile.sb-dist{--sb-c:var(--dist);background:linear-gradient(var(--dist-soft),var(--dist-soft)),var(--bg-card);border-color:color-mix(in srgb, var(--dist) 45%, transparent);}
+.st-tile.sb-sub{--sb-c:var(--sub);background:linear-gradient(var(--sub-soft),var(--sub-soft)),var(--bg-card);border-color:color-mix(in srgb, var(--sub) 45%, transparent);}
+.st-tile.sb-all{--sb-c:var(--text-primary);}
+.st-tile.sb-today{--sb-c:var(--accent);}
+[data-theme="light"] .st-tile.sb-today{--sb-c:#9A6B00;}
+.st-top{display:flex;align-items:center;gap:8px;min-width:0;}
+.st-icon{display:flex;color:var(--sb-c);flex-shrink:0;}
+.st-icon svg{width:20px;height:20px;}
+.st-label{font-size:14px;font-weight:700;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.st-num{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;line-height:1.1;color:var(--text-primary);direction:ltr;text-align:right;}
+.st-ops{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:14px;font-weight:700;color:var(--text-secondary);}
+.st-op b{font-family:'JetBrains Mono',monospace;font-size:22px;color:var(--text-primary);margin-left:2px;}
+.sb-detail{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;}
+.sb-detail summary{cursor:pointer;font-size:14px;font-weight:700;color:var(--text-primary);}
+.sb-detail .sec-table-wrap{margin-top:10px;}
+.sb-table td:first-child{font-weight:700;}
+.sb-table tr.sb-dist td:first-child{color:var(--dist);}
+.sb-table tr.sb-sub td:first-child{color:var(--sub);}
+.stats-board .sb-foot{margin-top:0;font-size:12.5px;color:var(--text-muted);}
+@media (max-width:340px){ .st-num{font-size:22px;} .st-label{font-size:13px;} .st-tile{padding:12px 10px 10px;} }

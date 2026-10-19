@@ -31,13 +31,16 @@
 
   // ===== الرأس وشريط الحالة — The header and status bar =====
   const header = SecAppHeader.mount($('appHeader'), {
-    page: 'index', title: 'الشركة السعودية للطاقة', subtitle: 'نظام الإحداثيات الجغرافية',
+    page: 'index', title: 'إحداثيات المحطات', subtitle: 'الشركة السعودية للطاقة',
     refreshTitle: 'تحديث بيانات المحطات — لو لاحظت نتائج بحث غير محدّثة'
   });
   const status = SecConnStatus.mount(header.status, {
     hasLocalData: function () { return SYNC.state().loaded; },
     lastUpdateAt: function () { return SYNC.state().syncedAt; }
   });
+  // التاريخ (ميلادي + هجري) في أعلى الرئيسية بدل سطر الحالة، فيبقى الرأس سطرًا واحدًا مدمجًا (ملاحظة محمد)
+  // The date (Gregorian + Hijri) at the top of home instead of the status line, keeping the header one compact line
+  if (header.status.dateLine) $('homeDate').appendChild(header.status.dateLine);
   function syncHeaderHeight() { doc.documentElement.style.setProperty('--header-h', $('appHeader').getBoundingClientRect().height + 'px'); }
   syncHeaderHeight();
   if (global.ResizeObserver) new global.ResizeObserver(function () { syncHeaderHeight(); layout(); }).observe($('appHeader'));
@@ -192,7 +195,8 @@
     if (view) { view.showStation(current); view.toast('تم تحديث إحداثيات المحطة'); }
     if (SecNavView.isActive()) SecNavView.updateTarget(current);
   }
-  const lens = SecStationSearchBox.mount($('lensBox'), { variant: 'lens', isLoggedIn: loggedIn, onFound: goToStation, onAdd: function (q) { SecStationForm.openAdd(q); }, onUpdated: onUpdated_ });
+  // حقل ظاهر دائمًا بدل العدسة الدائرية (ملاحظة محمد 19 أكتوبر) — an always-visible field instead of the round lens
+  const lens = SecStationSearchBox.mount($('lensBox'), { variant: 'bar', placeholder: 'مثال: 39070 أو ABN', isLoggedIn: loggedIn, onFound: goToStation, onAdd: function (q) { SecStationForm.openAdd(q); }, onUpdated: onUpdated_ });
   const bar = SecStationSearchBox.mount($('barBox'), { variant: 'bar', isLoggedIn: loggedIn, onFound: goToStation, onAdd: function (q) { SecStationForm.openAdd(q); }, onUpdated: onUpdated_ });
   // بطاقة «بحث عن حالة عطل» في صف الإجراءات تفتح لوحة الأرقام تحته (تصميم محمد، 15 أكتوبر) / the outage tile opens the panel below it
   const outage = SecOutageSearch.mountHome($('homeOutage'), {
@@ -226,7 +230,6 @@
   const recent = SecRecentStations.mount($('recentSlot'), { onSelect: goToStation });
   SecStorageSection.mount($('storageSlot'), { onCleared: function () { status.refreshOffline(); } });
   // لوحة واحدة مفتوحة في كل مرة: الأعطال أو آخر المحطات / one panel open at a time: outage or recent
-  $('addStationToggle').addEventListener('click', function () { recent.toggle(false); outage.toggle(false); SecStationForm.openAdd(); });
   $('recentToggleBtn').addEventListener('click', function () { outage.toggle(false); recent.toggle(); });
   $('outageTileBtn').addEventListener('click', function () { recent.toggle(false); });
   // زر «تحديث» في البطاقات يحدّث أرقام لوحة المعلومات فقط، ويشرح ذلك برسالة (طلب محمد، 15 أكتوبر) — بخلاف زر الشريط العلوي الذي يزامن بيانات المحطات

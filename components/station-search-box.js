@@ -31,7 +31,7 @@
   const PROGRESS = '<div class="search-progress-track"><div class="search-progress-fill" data-role="fill"></div></div><div class="search-progress-label"><span>جاري البحث عن المحطة...</span><span data-role="pct">0%</span></div>';
 
   /**
-   * mount(container, opts) — opts: { variant: 'lens'|'bar', isLoggedIn() (افتراضيًا session.js), onFound(station),
+   * mount(container, opts) — opts: { variant: 'lens'|'bar', placeholder (للشريط، اختياري)، isLoggedIn() (افتراضيًا session.js), onFound(station),
    *   onAdd(query), onUpdated(station), closeOnOutside() → bool (للعدسة: الافتراضي true) }
    * يُرجع { search(text)، setCompact(on)، clear()، focus()، isOpen()، isSearching()، destroy() }
    */
@@ -47,6 +47,7 @@
         '<div class="station-search-progress" data-role="progress">' + PROGRESS + '</div><div class="station-search-hint" data-role="hint" role="status"></div>';
     const r = function (n) { return container.querySelector('[data-role="' + n + '"]'); };
     const input = r('input'), box = r('box'), hint = r('hint');
+    if (o.placeholder) input.placeholder = String(o.placeholder);
     TI.code(input, MAX_LEN);
     const hintCls = lens ? 'search-hint' : 'station-search-hint';
 

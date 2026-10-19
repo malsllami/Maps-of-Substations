@@ -39,3 +39,14 @@
   .header-row-status{padding:0 14px 10px;}
   .conn-status-pill{padding:8px 12px;font-size:10.5px;gap:10px;flex-wrap:wrap;}
 }
+
+/* ===== إعادة التصميم: سطر حالة واحد مدمج بخط أوضح (ملاحظات محمد) — Redesign: one compact status line, clearer text ===== */
+.header-row-status{padding:0 16px 10px;}
+.conn-status-pill{padding:4px 6px 4px 12px;gap:12px;font-size:12.5px;font-weight:600;border-radius:var(--radius);flex-wrap:nowrap;min-height:42px;}
+.conn-status-pill .status-bar-item{white-space:nowrap;min-width:0;}
+.conn-status-pill [data-role="last-label"]{overflow:hidden;text-overflow:ellipsis;}
+.conn-status-pill .status-bar-item:has([data-role="last-label"]){flex:1;min-width:0;}
+@media (max-width:600px){
+  .header-row-status{padding:0 16px 10px;}
+  .conn-status-pill{padding:4px 6px 4px 12px;font-size:12.5px;gap:10px;flex-wrap:nowrap;}
+}

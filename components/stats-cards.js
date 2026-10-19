@@ -44,21 +44,31 @@
   ];
   const REMOVED_HEAD = ['رقم المحطة', 'الجدول', 'العملية', 'الوقت', 'بواسطة'];
 
+  /* إعادة التصميم (19 أكتوبر، ملاحظة محمد): أربع بطاقات بأرقام كبيرة واضحة (التوزيع، التحويل، الإجمالي، عمليات اليوم)،
+     وإضافة/تعديل اليوم لكل نوع في جدول بصف لكل نوع يُفتح عند الطلب — نفس الأرقام كلها بلا ازدحام.
+     Redesign (19 Oct, Mohammed's note): four tiles with large clear numbers, and today's adds/edits per type in a table
+     with one row per type, opened on demand — every number kept, without the clutter. */
   function html_() {
-    return '<div class="dashboard-label">📊 لوحة المعلومات</div>' +
-      '<div class="stats-board">' +
-        '<div class="sb-head"><span class="sb-icon">🏢</span><span class="sb-title">إجمالي المحطات</span></div>' +
-        '<span class="sb-total" data-v="totalStations">—</span>' +
-        '<div class="sb-cols">' + COLUMNS.map(function (c) {
-          return '<div class="sb-col ' + c[1] + '" data-col="' + c[0] + '">' +
-            '<div class="sb-col-icon">' + ICONS[c[0]] + '</div>' +
-            '<div class="sb-col-title">' + c[2] + '</div><span class="sb-col-num" data-v="' + c[3] + '">—</span>' +
-            '<div class="sb-pair">' +
-              '<div class="sb-cell"><span class="sb-op sb-add">' + OP_ICONS.add + '</span><span class="sb-k">إضافة</span><span class="sb-v" data-v="' + c[4] + '">—</span></div>' +
-              '<div class="sb-cell"><span class="sb-op sb-edit">' + OP_ICONS.edit + '</span><span class="sb-k">تعديل</span><span class="sb-v" data-v="' + c[5] + '">—</span></div>' +
-            '</div></div>';
-        }).join('') + '</div>' +
-        '<div class="sb-foot">الإضافة والتعديل لليوم · آخر تحديث: <span data-role="updated">—</span></div>' +
+    const tile = function (cls, icon, label, key) {
+      return '<div class="st-tile ' + cls + '"><div class="st-top"><span class="st-icon">' + icon + '</span><span class="st-label">' + label + '</span></div>' +
+        '<span class="st-num" data-v="' + key + '">—</span></div>';
+    };
+    return '<div class="stats-board">' +
+        '<div class="st-grid">' +
+          tile('sb-dist', ICONS.dist, 'محطات التوزيع', 'distribution') +
+          tile('sb-sub', ICONS.sub, 'محطات التحويل', 'substations') +
+          tile('sb-all', ICONS.all, 'إجمالي المحطات', 'totalStations') +
+          '<div class="st-tile sb-today"><div class="st-top"><span class="st-icon">' + OP_ICONS.edit + '</span><span class="st-label">عمليات اليوم</span></div>' +
+            '<div class="st-ops"><span class="st-op"><b data-v="additions">—</b> إضافة</span><span class="st-op"><b data-v="edits">—</b> تعديل</span></div></div>' +
+        '</div>' +
+        '<details class="sb-detail"><summary>إضافة وتعديل اليوم حسب النوع</summary>' +
+          '<div class="sec-table-wrap"><table class="sec-table sb-table"><thead><tr><th>النوع</th><th>إضافة</th><th>تعديل</th></tr></thead><tbody>' +
+          COLUMNS.map(function (c) {
+            return '<tr class="' + c[1] + '"><td>' + c[2] + '</td><td class="mono" data-v="' + c[4] + '">—</td><td class="mono" data-v="' + c[5] + '">—</td></tr>';
+          }).join('') +
+          '</tbody></table></div>' +
+        '</details>' +
+        '<div class="sb-foot">آخر تحديث للأرقام: <span data-role="updated">—</span></div>' +
         '<details class="sb-removed" hidden><summary data-role="removed-summary"></summary>' +
           '<p class="sb-removed-note">عمليات اليوم على محطات لم تعد موجودة في أي جدول — غير محسوبة في الأرقام أعلاه. راجعها: حذف طبيعي بعد إضافة/تعديل، أم مشكلة فعلية.</p>' +
           '<div class="sec-table-wrap"><table class="sec-table"><thead><tr>' + REMOVED_HEAD.map(function (h) { return '<th>' + h + '</th>'; }).join('') +

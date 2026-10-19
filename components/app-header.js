@@ -71,7 +71,7 @@
     }
     function menu_() {
       const admin = SESSION.isAdmin();
-      return '<div class="mobile-user-menu" data-role="menu"><button type="button" class="mobile-menu-trigger" data-act="menu" aria-haspopup="true" aria-expanded="false"><span data-role="name"></span>' + ICON.chev + '</button>' +
+      return '<div class="mobile-user-menu" data-role="menu"><button type="button" class="mobile-menu-trigger" data-act="menu" aria-haspopup="true" aria-expanded="false" aria-label="القائمة"><span class="avatar-initial" data-role="initial" aria-hidden="true"></span><span class="menu-name" data-role="name"></span>' + ICON.chev + '</button>' +
         '<div class="mobile-menu-panel" role="menu">' +
           '<div class="mobile-menu-row"><span class="menu-icon" style="color:#8B6DD6">' + ICON.sun + '</span><span style="flex:1">الوضع الداكن</span>' +
             '<button type="button" class="theme-switch" data-act="theme" role="switch" aria-label="تبديل الوضع الداكن"><span class="theme-switch-knob"></span></button></div>' +
@@ -125,7 +125,9 @@
       row.querySelector('[data-role="title"]').textContent = o.title || (home ? 'الشركة السعودية للطاقة' : '');
       row.querySelector('[data-role="subtitle"]').textContent = o.subtitle || (home ? 'نظام الإحداثيات الجغرافية' : '');
       if (loggedIn) {
-        row.querySelector('[data-role="name"]').textContent = (SESSION.getName() || '').trim().split(/\s+/)[0] || 'القائمة';
+        const first = (SESSION.getName() || '').trim().split(/\s+/)[0] || 'القائمة';
+        row.querySelector('[data-role="name"]').textContent = first;
+        row.querySelector('[data-role="initial"]').textContent = first === 'القائمة' ? '☰' : Array.from(first)[0].toUpperCase();
         const call = row.querySelector('[data-act="call"]');
         if (call && global.SecContactAdmin) global.SecContactAdmin.bindCallLink(call);
       }

@@ -119,3 +119,18 @@
   .logo-text{font-size:11px;}
   .login-btn{padding:6px 9px;font-size:11px;}
 }
+
+/* ===== إعادة التصميم (19 أكتوبر، ملاحظات محمد): رأس مدمج — سطر الشعار والعنوان والصورة الشخصية، وتحته سطر حالة واحد =====
+   Redesign (19 Oct, Mohammed's notes): a compact header — one row of logo, title and avatar, then one status line */
+.header-row-main{padding:10px 16px 8px;}
+.logo{gap:10px;}
+.logo-mark{height:34px;}
+.logo-text{font-size:17px;}
+.logo-sub{font-size:12px;color:var(--text-muted);}
+.mobile-menu-trigger{width:42px;height:42px;padding:0;border-radius:50%;justify-content:center;gap:0;background:var(--dist-soft);border-color:var(--border-strong);color:var(--dist);}
+.avatar-initial{font-size:17px;font-weight:700;line-height:1;}
+.mobile-menu-trigger .menu-name,.mobile-menu-trigger svg{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+.mobile-menu-link,.mobile-menu-row,.mobile-menu-logout{font-size:14px;padding:12px 10px;}
+.mobile-menu-panel{min-width:240px;border-radius:var(--radius);}
+.status-refresh-btn{width:34px;height:34px;}
+@media (max-width:767px){ .header-row-main{padding:10px 16px 8px;} }
