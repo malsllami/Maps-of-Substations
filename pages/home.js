@@ -11,6 +11,8 @@
  * - زر التحديث في الشريط: الخادم يعيد بناء فهرسه، ثم مزامنة (أو تحميل كامل بلا نسخة) — للعضو فقط.
  * V2: كل جزء في مكوّنه المختبر؛ الخريطة في حاوية خاصة تحت البطاقة؛ حفظ الإضافة/التعديل يحدّث البطاقة والعلامة والنسخة
  *   (إصلاح بند V1 رقم 3)؛ حذف المدير يعيد للبحث؛ الإحصاءات تتحدث بعد أي حفظ أو حذف.
+ * إعادة التصميم (19 أكتوبر): بلا كرة؛ ثلاث شاشات (الرئيسية، الخريطة، المحطات) يبدّل بينها الشريط السفلي (setView) بلا إعادة
+ *   تحميل — الخريطة تُنشأ مرة وتبقى، والملاحة الجارية لا تتأثر بالتنقل. وُجدت محطة ← شاشة الخريطة مباشرة.
  *
  * The home page: links the approved components in V1's flow (no business logic here). V2: each part in its tested
  * component; the map in its own container under the card; a save updates the card, marker and copy (V1 bug 3).
@@ -20,7 +22,7 @@
 
   const doc = global.document, S = global.SecSession, SYNC = global.SecStationsSync;
   const $ = function (id) { return doc.getElementById(id); };
-  const INTRO_FADE_MS = 480, MORPH_SETTLE_MS = 200, OUTAGE_AFTER_MS = 650;
+  const MORPH_SETTLE_MS = 200, OUTAGE_AFTER_MS = 650;
   const SYNC_NOTE_MS = 6000; // مدة رسالة «تم تحديث بيانات المحطات» / how long the «stations updated» note stays
   const loggedIn = function () { return S.isLoggedIn(); };
 
@@ -39,26 +41,27 @@
   function syncHeaderHeight() { doc.documentElement.style.setProperty('--header-h', $('appHeader').getBoundingClientRect().height + 'px'); }
   syncHeaderHeight();
   if (global.ResizeObserver) new global.ResizeObserver(function () { syncHeaderHeight(); layout(); }).observe($('appHeader'));
-  global.addEventListener('resize', function () { syncHeaderHeight(); layout(); alignHeroBelowGlobe(); });
+  global.addEventListener('resize', function () { syncHeaderHeight(); layout(); });
 
-  // ===== الكرة والشاشة الافتتاحية — The globe and the intro =====
-  const globe = SecGlobe.mount($('globeStage'), {
-    onIntroDone: function () {
-      const o = $('introOverlay');
-      o.classList.add('fade-out');
-      global.setTimeout(function () { o.classList.add('hidden-done'); }, INTRO_FADE_MS);
+  // ===== الشاشات والشريط السفلي (إعادة التصميم) — The screens and the bottom bar (redesign) =====
+  const VIEWS = ['home', 'map', 'stations'];
+  let nav = null;
+  /* يعرض شاشة واحدة؛ الخريطة تُنشأ عند أول فتح لشاشتها وتبقى — shows one screen; the map is created on first open and kept */
+  function setView(name) {
+    if (VIEWS.indexOf(name) === -1) return;
+    doc.body.dataset.view = name;
+    $('heroSection').classList.toggle('map-active', name === 'map');
+    if (nav) nav.setActive(name);
+    if (name === 'map') {
+      ensureMap_();
+      global.setTimeout(function () { layout(); if (view) view.map.invalidateSize(); }, 30);
     }
-  });
-  /* البحث تحت الكرة الظاهرة (V1) — the search under the visible globe (V1) */
-  function alignHeroBelowGlobe() {
-    const heading = doc.querySelector('.hero-heading'), stage = $('globeStage');
-    if (!heading || $('heroSection').classList.contains('map-active')) return;
-    const r = stage.getBoundingClientRect(), gap = Math.max(0, r.top + r.height * 0.88 - heading.getBoundingClientRect().bottom);
-    doc.querySelectorAll('.globe-bottom-anchor').forEach(function (el) { el.style.marginTop = (gap + (el.classList.contains('guest-login-cta') ? 46 : 2)) + 'px'; });
+    global.scrollTo(0, 0);
   }
-  global.addEventListener('load', alignHeroBelowGlobe);
-  global.setTimeout(alignHeroBelowGlobe, 400);
-  global.setTimeout(alignHeroBelowGlobe, 1200);
+  function bottomNavHeight_() {
+    const el = $('bottomNav');
+    return el && global.getComputedStyle(el).display !== 'none' ? el.getBoundingClientRect().height : 0;
+  }
 
   // ===== خريطة جدة بدون إنترنت — The offline Jeddah map =====
   let view = null;
@@ -93,7 +96,7 @@
     const top = box.getBoundingClientRect().top + global.scrollY;
     // كل ما تبقى من الشاشة (V1) بعد الجزء السفلي من البطاقة / the rest of the screen (V1) after the card's bottom part
     const below = $('stationActions').classList.contains('show') ? $('stationActions').offsetHeight : 0;
-    box.style.height = Math.max(320, global.innerHeight - top - below - 16) + 'px';
+    box.style.height = Math.max(320, global.innerHeight - top - below - bottomNavHeight_() - 12) + 'px';
     global.requestAnimationFrame(function () { view.map.invalidateSize(); });
   }
   function ensureMap_() {
@@ -151,21 +154,11 @@
     if (SecNavView.isActive()) SecNavView.stop(); // محطة أخرى تنهي الملاحة السابقة (V1) / another station ends navigation (V1)
     current = s;
     SecRecentStations.add(s);
-    const hero = $('heroSection'), wasMap = hero.classList.contains('map-active');
-    $('heroContent').classList.add('hidden');
-    $('cardsSection').classList.add('hidden');
     lens.clear();
-    if (wasMap) { showStation_(s); return Promise.resolve(true); }
-    const lat = Number(s.lat), lng = Number(s.lng);
-    return (isFinite(lat) && isFinite(lng) ? globe.turnTo(lat, lng) : Promise.resolve()).then(function () {
-      if (current !== s) return false;
-      ensureMap_();
-      globe.pause();
-      hero.classList.add('map-active');
-      showStation_(s);
-      if (view) global.setTimeout(function () { layout(); view.map.invalidateSize(); }, MORPH_SETTLE_MS);
-      return true;
-    });
+    if (doc.body.dataset.view !== 'map') setView('map');
+    showStation_(s);
+    if (view) global.setTimeout(function () { layout(); view.map.invalidateSize(); }, MORPH_SETTLE_MS);
+    return Promise.resolve(true);
   }
   function showStation_(s) {
     if (!view) { showCard_(s); return; } // بلا خريطة: البطاقة وحدها مع الرسالة / no map: the card alone with the message
@@ -177,24 +170,18 @@
   function goBackToSearch() {
     if (SecNavView.isActive()) SecNavView.stop();
     if (SecStationForm.isOpen()) SecStationForm.close();
-    const hero = $('heroSection');
-    if (!hero.classList.contains('map-active')) return;
+    if (!current && doc.body.dataset.view === 'home') return;
     current = null;
     if (view) { tools.stop(); outageMap.clear(); nearby.reset(); view.hideHint(); view.clearStation(); }
     if (card) { card.destroy(); card = null; }
-    hero.classList.remove('station-framed');
+    $('heroSection').classList.remove('station-framed');
     bar.clear();
-    hero.classList.remove('map-active');
-    $('heroContent').classList.remove('hidden');
-    $('cardsSection').classList.remove('hidden');
-    globe.reset();
-    global.setTimeout(alignHeroBelowGlobe, 50);
-    global.scrollTo(0, 0);
+    setView('home');
   }
   // «الصفحة الرئيسية» من القائمة والخريطة ظاهرة ← رجوع بلا إعادة تحميل (V1) / «home» from the menu while the map shows ← back, no reload (V1)
   $('appHeader').addEventListener('click', function (e) {
     const link = e.target.closest('a[data-page="index"]');
-    if (link && $('heroSection').classList.contains('map-active')) { e.preventDefault(); header.closeMenu(); goBackToSearch(); }
+    if (link && doc.body.dataset.view !== 'home') { e.preventDefault(); header.closeMenu(); goBackToSearch(); }
   });
 
   // ===== البحث — Search =====
@@ -319,10 +306,21 @@
     S.ensureFresh().then(function (ok) { if (ok) gate.check(); });
   }
 
+  // ===== الشريط السفلي — The bottom bar =====
+  nav = SecBottomNav.mount($('bottomNav'), {
+    active: 'home',
+    onSelect: function (name) {
+      if (name === 'more') { header.openMenu(); return; } // «المزيد» مؤقتًا = القائمة الحالية حتى مرحلتها / for now = the current menu
+      if (name === 'home') { goBackToSearch(); setView('home'); return; }
+      setView(name);
+    },
+    onAdd: function () { if (loggedIn()) SecStationForm.openAdd(); else global.location.href = 'auth.html'; }
+  });
+
   // للاختبار والتكامل: الحالة الحالية فقط — for tests: the current state only
   global.SecHome = {
-    goToStation: goToStation, goBackToSearch: goBackToSearch,
-    state: function () { return { map: !!view && $('heroSection').classList.contains('map-active'), station: current, card: !!card }; },
-    parts: function () { return { view: view, globe: globe, lens: lens, bar: bar, stats: stats, recent: recent, gate: gate, status: status, header: header }; }
+    goToStation: goToStation, goBackToSearch: goBackToSearch, setView: setView,
+    state: function () { return { view: doc.body.dataset.view, map: !!view && doc.body.dataset.view === 'map', station: current, card: !!card }; },
+    parts: function () { return { view: view, lens: lens, bar: bar, stats: stats, recent: recent, gate: gate, status: status, header: header, nav: nav }; }
   };
 })(typeof window !== 'undefined' ? window : globalThis);
