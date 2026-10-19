@@ -220,3 +220,6 @@ body.guest-mode .home-title{display:none;}
 .stats-board .st-tile[class] .st-num,.stats-board .st-tile[class] .st-label,.stats-board .st-tile[class] .st-icon,
 .stats-board .st-tile[class] .st-ops,.stats-board .st-tile[class] .st-op b{color:var(--t-ink);}
 .st-tile{min-height:92px;}
+/* البيانات المؤقتة بخلفية البطاقات الداكنة نفسها، والحالة المفتوحة بإطار هادئ بلا شريط فاتح (ملاحظة محمد) — the cached data on the dark card background */
+.home-fold{background:var(--bg-card);}
+.home-fold[open]{box-shadow:none;border-color:var(--c-info-line);}
