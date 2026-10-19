@@ -60,18 +60,20 @@
       doc.head.appendChild(s);
     });
   }
-  /* الزر تحت الكرة الظاهرة (الموقع الحي) — the button under the visible globe (the live site) */
+  /* الزر تحت الكرة كاملة (طلب محمد): من حدها السفلي الفعلي بعد الرسم — the button under the whole globe, from its real bottom edge */
+  const CTA_GAP = 18;
   function alignGuestCta_() {
-    const stage = $('globeStage'), cta = doc.querySelector('.guest-landing .guest-login-cta'), hero = doc.querySelector('.guest-hero');
+    const stage = $('globeStage'), cta = doc.querySelector('.guest-landing .guest-login-cta');
     if (!stage || !cta || $('guestLanding').hidden) return;
-    const r = stage.getBoundingClientRect(), gap = Math.max(0, r.top + r.height * 0.88 - hero.getBoundingClientRect().top - cta.offsetTop);
-    cta.style.marginTop = Math.round(gap) + 'px';
+    const bottom = stage.getBoundingClientRect().bottom, cur = parseFloat(cta.style.marginTop) || 0;
+    const delta = bottom + CTA_GAP - cta.getBoundingClientRect().top;
+    cta.style.marginTop = Math.max(0, Math.round(cur + delta)) + 'px';
   }
   if (!loggedIn()) {
     $('guestLanding').hidden = false;
     loadThree_().then(function () {
       SecGlobe.mount($('globeStage'), { onIntroDone: function () { /* بلا شاشة افتتاحية / no intro */ } });
-      global.setTimeout(alignGuestCta_, 50); global.setTimeout(alignGuestCta_, 600);
+      alignGuestCta_(); global.setTimeout(alignGuestCta_, 300); global.setTimeout(alignGuestCta_, 1200);
     });
     global.addEventListener('resize', alignGuestCta_);
   }
