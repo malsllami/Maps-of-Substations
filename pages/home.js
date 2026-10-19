@@ -339,6 +339,13 @@
   }
   global.addEventListener('popstate', function () { if (doc.body.dataset.view === 'details') setView('map'); });
 
+  // ===== شاشة «المحطات»: القريبة من موقعي والتصفية (المرحلة و) — the stations screen: nearby and filters =====
+  const stationsList = SecStationsList.mount($('stationsBox'), {
+    localStations: function () { return SYNC.stations(); },
+    onOpen: function (s) { goToStation(s); },
+    onChange: function (fn) { return SYNC.onChange(fn); }
+  });
+
   // ===== الشريط السفلي — The bottom bar =====
   nav = SecBottomNav.mount($('bottomNav'), {
     active: 'home',
@@ -356,6 +363,6 @@
   global.SecHome = {
     goToStation: goToStation, goBackToSearch: goBackToSearch, setView: setView, openDetails: openDetails_,
     state: function () { return { view: doc.body.dataset.view, map: !!view && doc.body.dataset.view === 'map', station: current, card: !!card }; },
-    parts: function () { return { view: view, details: details, lens: lens, bar: bar, stats: stats, recent: recent, gate: gate, status: status, header: header, nav: nav }; }
+    parts: function () { return { view: view, details: details, stationsList: stationsList, lens: lens, bar: bar, stats: stats, recent: recent, gate: gate, status: status, header: header, nav: nav }; }
   };
 })(typeof window !== 'undefined' ? window : globalThis);

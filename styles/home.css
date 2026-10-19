@@ -30,7 +30,6 @@ body:not(.nav-full) .map-stage-slot .globe-stage.map-active{position:relative;to
 .hero-content h1{font-size:clamp(19px,5.2vw,24px);font-weight:700;line-height:1.35;color:var(--text-primary);text-align:start;text-wrap:balance;}
 .search-wrap{width:100%;max-width:560px;display:flex;flex-direction:column;align-items:center;gap:10px;}
 body.guest-mode .search-wrap{display:none;}
-.view-stub{margin:24px 16px;padding:22px 16px;border-radius:var(--radius-lg);border:1px dashed var(--border-strong);color:var(--text-muted);text-align:center;font-weight:700;font-size:13px;}
 
 /* زر الدخول للزائر — the guest login button */
 .guest-login-cta{
