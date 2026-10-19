@@ -195,3 +195,6 @@ body.nav-full .station-sheet{display:none !important;}
 .station-table.station-sheet .sheet-actions .st-btn .st-ico{color:inherit;}
 .station-table.station-sheet .sheet-actions .st-btn:hover,.station-table.station-sheet .sheet-actions .st-btn:focus-visible{border-color:currentColor;outline:none;}
 [data-theme="light"] .station-table.station-sheet .sheet-actions .st-edit .st-ico{color:inherit;}
+/* بطاقة «محطات المغذي»: الرقم كبير في المنتصف بلون التوزيع — the feeder card: a large centered number in the distribution color */
+.station-table.station-sheet .sheet-actions .st-feeder{background:var(--c-dist-bg);border-color:var(--c-dist-line);color:var(--c-dist-fg);}
+.station-sheet .st-count{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:800;line-height:1;}

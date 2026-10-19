@@ -142,7 +142,9 @@
       offlineMapUI: global.SecOfflineMapUI || null,
       toast: notify_,
       dataFreshness: function () { return SYNC.state().syncedAt; },
-      localStations: function () { return SYNC.stations(); }
+      localStations: function () { return SYNC.stations(); },
+      // «محطات المغذي» في اللوحة ← نفس زر «مغذي» في شريط الخريطة — the sheet's feeder card ← the toolbar's feeder button
+      onFeeder: function () { const b = $('mapStage').querySelector('[data-nearby="feeder"]'); if (b) b.click(); }
     };
   }
   function showCard_(s) {

@@ -223,3 +223,8 @@ body.guest-mode .home-title{display:none;}
 /* البيانات المؤقتة بخلفية البطاقات الداكنة نفسها، والحالة المفتوحة بإطار هادئ بلا شريط فاتح (ملاحظة محمد) — the cached data on the dark card background */
 .home-fold{background:var(--bg-card);}
 .home-fold[open]{box-shadow:none;border-color:var(--c-info-line);}
+/* الأرقام دائمًا في المنتصف (طلب محمد) — numbers always centered */
+.st-tile{align-items:center;text-align:center;}
+.st-top{justify-content:center;}
+.st-num{text-align:center;}
+.st-ops{justify-content:center;}

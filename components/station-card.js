@@ -78,6 +78,7 @@
     share: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg>',
     edit: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1 10.5-10.5a2.1 2.1 0 0 0-3-3L5 16l-1 4z"/></svg>',
     del: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>',
+    feeder: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
     om: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>'
   };
   function btn_(act, cls, icon, label, extra) {
@@ -102,6 +103,16 @@
     '</div>';
   }
 
+  /* عدد محطات المغذي من نسخة الجهاز (طلب محمد 19 أكتوبر): كل محطة بنفس اسم المغذي بعد إزالة المسافات الطرفية (قاعدة الخادم
+   * وstation-query)، والمحطة نفسها منها. بلا مغذي أو بلا نسخة مكتملة ← null فلا تُعرض البطاقة (لا رقم غير مؤكد).
+   * The feeder's station count from the device copy: every station with the same trimmed feeder name (the server's rule),
+   * this one included. No feeder or no complete copy ← null, so no card (never an unconfirmed number). */
+  function feederCount_(s, deps) {
+    const feeder = String(s.feeder || '').trim(), all = deps.localStations ? deps.localStations() : null;
+    if (!feeder || !Array.isArray(all) || !all.length) return null;
+    return all.filter(function (x) { return String(x.feeder || '').trim() === feeder; }).length;
+  }
+
   /* الأزرار في صف واحد (يلتف على الشاشات الضيقة)، ثم «آخر تحديث لبيانات المحطات» — the buttons in one row, then the freshness */
   function bottomHtml_(s, deps) {
     const coords = Q.hasCoordinates(s), om = !!deps.offlineMapUI, canEdit = !!(deps.canEdit && deps.canEdit());
@@ -115,7 +126,11 @@
     ];
     if (canEdit) buttons.push(btn_('edit', 'st-edit', 'edit', 'تعديل'));
     if (canDelete) buttons.push(btn_('delete', 'st-danger', 'del', 'حذف'));
-    if (om) buttons.push('<button class="st-btn st-om" type="button" data-act="offline-map"><span class="st-ico">' + BTN_ICON.om + '</span><span class="st-lbl">خريطة جدة</span><small data-om-status></small></button>');
+    // بطاقة «محطات المغذي» مكان «خريطة جدة» إن وُجد مغذي (طلب محمد) — إدارة خريطة جدة باقية في «حسابي» و«المزيد»
+    // The «feeder stations» card replaces «Jeddah map» when there is a feeder — the Jeddah map stays in «My account» and «More»
+    const fc = feederCount_(s, deps);
+    if (fc != null) buttons.push('<button class="st-btn st-feeder" type="button" data-act="feeder" title="عرض محطات المغذي على الخريطة"><span class="st-count">' + fc + '</span><span class="st-lbl">محطة بالمغذي</span></button>');
+    else if (om) buttons.push('<button class="st-btn st-om" type="button" data-act="offline-map"><span class="st-ico">' + BTN_ICON.om + '</span><span class="st-lbl">خريطة جدة</span><small data-om-status></small></button>');
     return '<div class="sb-inner sb-bottom">' +
       '<div class="st-sub sheet-actions" style="--n:' + buttons.length + '">' + buttons.join('') +
         (canEdit ? '' : '<button class="st-btn" type="button" data-act="edit" hidden>✏️ تعديل</button>') +
@@ -126,7 +141,7 @@
 
   /**
    * render(container, station, deps) ← { update(station), nearby(), feeder(), station(), destroy() }
-   * deps: { onNavigate(s), onEdit(s), canEdit(), isAdmin(), onDelete(s), offlineMapUI, toast(text), dataFreshness() → Date|null,
+   * deps: { onNavigate(s), onEdit(s), canEdit(), isAdmin(), onDelete(s), onFeeder(s) (عرض محطات المغذي), offlineMapUI, toast(text), dataFreshness() → Date|null,
    *         localStations() → Array|null, actionsContainer } — isAdmin + onDelete يُظهران «🗑️ حذف» (نافذته في delete-station.js)؛
    *         actionsContainer: مكان الجزء السفلي تحت الخريطة (بدونه يُرسم الجزءان معًا في container)
    *         / where the bottom part goes under the map (without it both parts draw in container)
@@ -152,6 +167,7 @@
       try {
         if (act === 'navigate') { if (Q.hasCoordinates(s)) await deps.onNavigate(s); else toast(NO_COORDS_MSG); }
         else if (act === 'offline-map') deps.offlineMapUI.open();
+        else if (act === 'feeder') { if (deps.onFeeder) deps.onFeeder(s); }
         else if (act === 'share') await share_();
         else if (act === 'edit') {
           if (global.navigator.onLine === false) { toast(OFFLINE_WRITE_MSG); return; }
