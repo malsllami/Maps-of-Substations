@@ -197,3 +197,26 @@ body.guest-mode .home-title{display:none;}
 .action-tile[aria-expanded="true"],.home-fold[open]{border-color:var(--k-fg);box-shadow:inset -4px 0 0 var(--k-fg);}
 .tile-outage[aria-expanded="true"]{background:var(--k-bg);}
 [data-theme="light"] .tile-outage,[data-theme="light"] .tile-recent{color:var(--k-fg);}
+
+/* ===== لوحة التصميم المحسّنة (19 أكتوبر): بطاقات الأرقام والإجراءات بتعبئة لونها =====
+   التوزيع أخضر، التحويل أزرق، الإجمالي بنفسجي، عمليات اليوم ذهبي، الأعطال برتقالي، آخر المحطات أزرق فاتح، التحديث محايد.
+   ممتلئة في الداكن والنص أبيض (أو داكن على الذهبي والبرتقالي)، وهادئة في الفاتح بنص بلون النوع.
+   The enhanced board: tiles filled with their color — solid in dark with white text (dark on gold/orange), calm in light. */
+.st-tile.sb-dist{--t-fill:var(--c-dist-fill);--t-ink:var(--c-dist-ink);--t-line:var(--c-dist-line);}
+.st-tile.sb-sub{--t-fill:var(--c-sub-fill);--t-ink:var(--c-sub-ink);--t-line:var(--c-sub-line);}
+.st-tile.sb-all{--t-fill:var(--c-total-fill);--t-ink:var(--c-total-ink);--t-line:var(--c-total-line);}
+.st-tile.sb-today{--t-fill:var(--c-ops-fill);--t-ink:var(--c-ops-ink);--t-line:var(--c-ops-line);}
+.tile-outage{--t-fill:var(--c-alert-fill);--t-ink:var(--c-alert-ink);--t-line:var(--c-alert-line);--k-fg:var(--c-alert-ink);}
+.tile-recent{--t-fill:var(--c-recent-fill);--t-ink:var(--c-recent-ink);--t-line:var(--c-recent-line);--k-fg:var(--c-recent-ink);}
+.st-tile.sb-dist,.st-tile.sb-sub,.st-tile.sb-all,.st-tile.sb-today,.tile-outage,.tile-recent{background:var(--t-fill);border:1px solid var(--t-line);color:var(--t-ink);}
+.st-tile.sb-dist *,.st-tile.sb-sub *,.st-tile.sb-all *,.st-tile.sb-today *{color:var(--t-ink);}
+.tile-outage,.tile-recent,[data-theme="light"] .tile-outage,[data-theme="light"] .tile-recent{color:var(--t-ink);}
+.tile-outage:hover,.tile-recent:hover,.tile-outage[aria-expanded="true"]{background:var(--t-fill);}
+/* الحالة المفتوحة على الممتلئة: إطار ونص بلون النص نفسه — the open state on a filled tile */
+.action-tile.tile-outage[aria-expanded="true"],.action-tile.tile-recent[aria-expanded="true"]{border-color:var(--t-ink);box-shadow:inset -4px 0 0 var(--t-ink);}
+/* ارتفاع موحّد لكل بطاقات الأرقام (لوحة التصميم: توحيد الارتفاع والمحاذاة) — one height for all number tiles */
+.st-tile{min-height:104px;justify-content:space-between;}
+.action-tile{min-height:96px;}
+.stats-board .st-tile[class] .st-num,.stats-board .st-tile[class] .st-label,.stats-board .st-tile[class] .st-icon,
+.stats-board .st-tile[class] .st-ops,.stats-board .st-tile[class] .st-op b{color:var(--t-ink);}
+.st-tile{min-height:92px;}
