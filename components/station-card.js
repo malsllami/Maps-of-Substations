@@ -67,7 +67,9 @@
    * Redesign — stage C (19 Oct, Mohammed's mock-up): one compact sheet under the map instead of parts above and below it,
    * so the map takes the rest of the screen and every button shows with no scrolling. */
   const TYPE_ICON = {
-    'توزيع': '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 6 22"/><path d="M12 2l6 20"/><path d="M8.2 14h7.6"/><path d="M9.6 9h4.8"/><path d="M4 6h16"/></svg>',
+    // الرمزان المعتمدان (ملاحظة محمد 2.8): الشبكة للتوزيع، والسهمان للتحويل — نفس رمزي بطاقات الأرقام (stats-cards.js)
+    // The approved symbols (Mohammed's note 2.8): the network for distribution, the two arrows for substations
+    'توزيع': '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M12 7.5v4M12 11.5l-5.5 5.2M12 11.5l5.5 5.2"/></svg>',
     'تحويل': '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"/></svg>'
   };
   const BTN_ICON = {
@@ -118,7 +120,7 @@
       '<div class="st-sub sheet-actions" style="--n:' + buttons.length + '">' + buttons.join('') +
         (canEdit ? '' : '<button class="st-btn" type="button" data-act="edit" hidden>✏️ تعديل</button>') +
       '</div>' +
-      (fresh ? '<div class="db-freshness-note"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.5A8.5 8.5 0 1 1 3 12.5a8.38 8.38 0 0 1 .9-3.8"/><path d="M21 3v6h-6"/></svg><span>آخر تحديث لبيانات المحطات من قاعدة البيانات: ' + freshness_(fresh) + '</span></div>' : '') +
+      (fresh ? '<div class="db-freshness-note"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.5A8.5 8.5 0 1 1 3 12.5a8.38 8.38 0 0 1 .9-3.8"/><path d="M21 3v6h-6"/></svg><span>آخر تحديث: ' + freshness_(fresh) + '</span></div>' : '') +
     '</div>';
   }
 

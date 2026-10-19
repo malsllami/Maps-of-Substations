@@ -121,7 +121,9 @@
       }
       offlineFlavor = null;
       if (tileLayer) map.removeLayer(tileLayer);
-      tileLayer = L.tileLayer(r === 'satellite' ? TILES.SATELLITE : TILES.STREET, { maxZoom: TILES.MAX_ZOOM, className: r === 'dark' ? 'map-night-tiles' : '' }).addTo(map);
+      // النهاري يحمل اسمًا خاصًا لتحسين وضوحه في الثيم الفاتح بالأنماط فقط (ملاحظة محمد 6) — نفس المصدر والبيانات والتحميل
+      // The day layer gets its own class so the light theme can sharpen it by styles alone — same source, data and loading
+      tileLayer = L.tileLayer(r === 'satellite' ? TILES.SATELLITE : TILES.STREET, { maxZoom: TILES.MAX_ZOOM, className: r === 'dark' ? 'map-night-tiles' : r === 'light' ? 'map-day-tiles' : '' }).addTo(map);
       watchErrors_(tileLayer);
       layerChanged_();
       renderUI_();

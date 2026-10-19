@@ -169,3 +169,8 @@ body.nav-full .station-sheet{display:none !important;}
 /* التسمية الطويلة («خريطة جدة») تلتف سطرين بدل قصّها — a long label wraps to two lines instead of being cut */
 .station-table.station-sheet .sheet-actions .st-btn{white-space:normal;}
 .station-sheet .st-lbl{white-space:normal;line-height:1.2;text-align:center;overflow:visible;}
+/* وضوح أكبر للمغذي والمنطقة والتسميات (ملاحظة محمد 7.2) — clearer feeder, region and labels */
+.station-sheet .sheet-meta .cell-label{font-size:13px;}
+.station-sheet .sheet-meta .cell-value{font-size:15px;}
+.station-sheet .db-freshness-note{font-size:13px;}
+.station-sheet .db-freshness-note{font-size:12.5px;letter-spacing:-.1px;}

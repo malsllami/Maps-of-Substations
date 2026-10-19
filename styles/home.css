@@ -158,3 +158,10 @@ body.guest-mode .home-title{display:none;}
 .view-map .top-content-area .station-search-bar{height:46px;}
 .view-map .map-stage-slot .globe-stage.map-active{width:100%;}
 .view-map .tb-title{display:none;} /* التبويب نفسه اسمه «الخريطة» فيتسع الشريط للأدوات — the tab is already «map», leaving room for the tools */
+/* شريط أدوات الخريطة بلا ازدحام: كل الأدوات في سطر واحد على 390 بلا قص (ملاحظة محمد 5.6) — the map toolbar uncluttered */
+.view-map .tb-div{display:none;}
+.view-map .toolbar-scroll{justify-content:space-between;gap:2px;padding:6px 6px;}
+.view-map .toolbar-btn,.view-map .map-mode-chip{padding:7px 7px;font-size:13px;gap:4px;}
+.view-map .map-mode-chip .mm-auto-badge{font-size:11px;padding:2px 6px;}
+.view-map [data-tools="more"]{font-size:0;gap:0;padding:7px 9px;} /* «⋯» أيقونة فقط فتتسع كل الأدوات — «⋯» icon only so every tool fits */
+.view-map [data-tools="more"] .tb-icon{font-size:17px;}

@@ -12,3 +12,10 @@
 /* خلفية الخريطة الليلية قبل وصول الصور: كحلية داكنة بدل رمادي Leaflet الفاتح — لا ومضة فاتحة على الجوال (قرار محمد 6 أكتوبر)
    The night map's background before tiles arrive: dark navy instead of Leaflet's light grey — no bright flash on phones */
 .leaflet-container:has(.map-night-tiles){background:#26303C;}
+
+/* ===== وضوح الخريطة النهارية في الثيم الفاتح (ملاحظة محمد 6، 19 أكتوبر) =====
+   تباين وتشبّع أعلى قليلًا وخفض البياض: الطرق الرئيسية (الملوّنة) أوضح، والفرعية (البيضاء) تبرز عن خلفية القطع والمباني.
+   الثيم الداكن والليلي والأقمار وخريطة جدة المحفوظة كما هي. الأنماط فقط — لا تغيير في المصدر أو التحميل.
+   The day map in the light theme: slightly higher contrast and saturation, less white — main roads clearer, minor roads
+   stand out from plots and buildings. Dark theme, night, satellite and the saved Jeddah map unchanged. Styles only. */
+[data-theme="light"] .map-day-tiles{filter:contrast(1.32) saturate(1.5) brightness(.92);}
