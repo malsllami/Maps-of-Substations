@@ -151,3 +151,10 @@ body.guest-mode .home-title{display:none;}
 .home-fold .storage-cell-val{font-size:14.5px;}
 .home-fold .storage-cell-val small{font-size:12px;}
 .home-fold .stations-cache-info{font-size:13px;}
+
+/* ===== المرحلة ج: شاشة الخريطة بارتفاع الشاشة — stage C: the map screen fits the screen height ===== */
+.view-map.hero{padding:8px 12px 0;}
+.view-map .map-stage-slot{margin-top:8px;}
+.view-map .top-content-area .station-search-bar{height:46px;}
+.view-map .map-stage-slot .globe-stage.map-active{width:100%;}
+.view-map .tb-title{display:none;} /* التبويب نفسه اسمه «الخريطة» فيتسع الشريط للأدوات — the tab is already «map», leaving room for the tools */

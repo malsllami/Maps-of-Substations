@@ -23,6 +23,7 @@
   const doc = global.document, S = global.SecSession, SYNC = global.SecStationsSync;
   const $ = function (id) { return doc.getElementById(id); };
   const MORPH_SETTLE_MS = 200, OUTAGE_AFTER_MS = 650;
+  const MAP_MIN_H = 200; // أصغر ارتفاع للخريطة على الشاشات القصيرة / the map's smallest height on short screens
   const SYNC_NOTE_MS = 6000; // مدة رسالة «تم تحديث بيانات المحطات» / how long the «stations updated» note stays
   const loggedIn = function () { return S.isLoggedIn(); };
 
@@ -97,9 +98,10 @@
     if (!view || !$('heroSection').classList.contains('map-active') || doc.body.classList.contains('nav-full')) return;
     const box = $('mapStage').querySelector('#map-container');
     const top = box.getBoundingClientRect().top + global.scrollY;
-    // كل ما تبقى من الشاشة (V1) بعد الجزء السفلي من البطاقة / the rest of the screen (V1) after the card's bottom part
-    const below = $('stationActions').classList.contains('show') ? $('stationActions').offsetHeight : 0;
-    box.style.height = Math.max(320, global.innerHeight - top - below - bottomNavHeight_() - 12) + 'px';
+    // الخريطة تأخذ باقي الشاشة فوق لوحة المحطة والشريط السفلي، فتظهر كل الأزرار بلا تمرير (ملاحظة محمد، المرحلة ج)
+    // The map takes the rest of the screen above the station sheet and the bottom bar, so every button shows unscrolled
+    const sheet = $('stationTable').classList.contains('show') ? $('stationTable').offsetHeight + 8 : 0;
+    box.style.height = Math.max(MAP_MIN_H, global.innerHeight - top - sheet - bottomNavHeight_() - 10) + 'px';
     global.requestAnimationFrame(function () { view.map.invalidateSize(); });
   }
   function ensureMap_() {
@@ -124,7 +126,7 @@
     // البطاقة أو شريط الأدوات يغيّر ارتفاعه ← الخريطة تأخذ ما تبقى (V1) / the card or toolbar resizes ← the map takes the rest (V1)
     if (global.ResizeObserver) {
       const ro = new global.ResizeObserver(function () { global.requestAnimationFrame(layout); });
-      ro.observe($('topContentArea')); ro.observe($('mapStage').querySelector('.map-toolbar-bar'));
+      ro.observe($('topContentArea')); ro.observe($('mapStage').querySelector('.map-toolbar-bar')); ro.observe($('stationTable'));
     }
     return view;
   }
@@ -140,14 +142,12 @@
       offlineMapUI: global.SecOfflineMapUI || null,
       toast: notify_,
       dataFreshness: function () { return SYNC.state().syncedAt; },
-      localStations: function () { return SYNC.stations(); },
-      actionsContainer: $('stationActions') // الجزء السفلي تحت الخريطة / the bottom part under the map
+      localStations: function () { return SYNC.stations(); }
     };
   }
   function showCard_(s) {
     if (card) card.update(s);
     else card = SecStationCard.render($('stationTable'), s, cardDeps_());
-    $('heroSection').classList.toggle('station-framed', !!view); // البطاقة تحيط بالخريطة / the card frames the map
   }
 
   // ===== الانتقال لمحطة والرجوع — Going to a station and back =====
@@ -313,7 +313,9 @@
   nav = SecBottomNav.mount($('bottomNav'), {
     active: 'home',
     onSelect: function (name) {
-      if (name === 'more') { header.openMenu(); return; } // «المزيد» مؤقتًا = القائمة الحالية حتى مرحلتها / for now = the current menu
+      // «المزيد» مؤقتًا = القائمة الحالية حتى مرحلتها؛ تُفتح بعد انتهاء الضغطة، وإلا أغلقها «الضغط خارج القائمة» فورًا
+      // «more» = the current menu for now; opened after the tap ends, or «tap outside the menu» would close it at once
+      if (name === 'more') { global.setTimeout(function () { header.openMenu(); }, 0); return; }
       if (name === 'home') { goBackToSearch(); setView('home'); return; }
       setView(name);
     },

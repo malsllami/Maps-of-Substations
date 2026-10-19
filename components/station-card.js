@@ -62,42 +62,60 @@
     return '<div class="st-search-time server" data-role="search-time">⏱ وُجدت في ' + sec + ' — من الخادم · حمّل البيانات المؤقتة لبحث فوري</div>';
   }
 
-  /* الجزء العلوي (فوق الخريطة): البيانات في ثلاثة أقسام ثم «المسار من موقعي» بعرض البطاقة
-   * The top part (above the map): the data in three sections, then a full-width «route from my location» */
+  /* إعادة التصميم — المرحلة ج (19 أكتوبر، نموذج محمد): لوحة مدمجة تحت الخريطة بدل جزأين فوقها وتحتها، فتأخذ الخريطة
+   * باقي الشاشة وتظهر كل الأزرار بلا تمرير. الرأس: شارة النوع (أخضر توزيع / أزرق تحويل) ورقم المحطة، ثم المغذي والمنطقة.
+   * Redesign — stage C (19 Oct, Mohammed's mock-up): one compact sheet under the map instead of parts above and below it,
+   * so the map takes the rest of the screen and every button shows with no scrolling. */
+  const TYPE_ICON = {
+    'توزيع': '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 6 22"/><path d="M12 2l6 20"/><path d="M8.2 14h7.6"/><path d="M9.6 9h4.8"/><path d="M4 6h16"/></svg>',
+    'تحويل': '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"/></svg>'
+  };
+  const BTN_ICON = {
+    navigate: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M21 3 3 10.5l7.5 2.9L13.4 21z"/></svg>',
+    google: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+    share: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg>',
+    edit: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1 10.5-10.5a2.1 2.1 0 0 0-3-3L5 16l-1 4z"/></svg>',
+    del: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>',
+    om: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>'
+  };
+  function btn_(act, cls, icon, label, extra) {
+    return '<button class="st-btn ' + cls + '" type="button" data-act="' + act + '"' + (extra || '') + '><span class="st-ico">' + BTN_ICON[icon] + '</span><span class="st-lbl">' + label + '</span></button>';
+  }
+
+  /* رأس اللوحة: النوع والرقم، ثم المغذي والمنطقة — the sheet head: type and number, then feeder and region */
   function topHtml_(s) {
-    const coords = Q.hasCoordinates(s);
+    const coords = Q.hasCoordinates(s), sub = s.type === 'تحويل';
     return '<div class="sb-inner sb-top">' +
-      '<div class="sb-data-row">' +
-        '<div class="sb-data-cell"><div class="cell-label">' + (s.type === 'تحويل' ? '⚡ رقم المحطة' : '🏭 رقم المحطة') + '</div><div class="cell-value">' + esc(s.id) + '</div></div>' +
-        (s.feeder ? '<div class="sb-data-cell"><div class="cell-label">🔌 المغذي</div><div class="cell-value">' + esc(s.feeder) + '</div></div>' : '') +
-        (s.region ? '<div class="sb-data-cell"><div class="cell-label">📍 المنطقة</div><div class="cell-value ar">' + esc(s.region) + '</div></div>' : '') +
+      '<div class="sheet-head">' +
+        '<span class="sheet-badge ' + (sub ? 'is-sub' : 'is-dist') + '" aria-hidden="true">' + (TYPE_ICON[s.type] || TYPE_ICON['توزيع']) + '</span>' +
+        '<div class="sheet-title"><div class="sheet-id"><span class="sheet-id-k">محطة</span> <bdi class="cell-value">' + esc(s.id) + '</bdi></div>' +
+          '<div class="sheet-type ' + (sub ? 'is-sub' : 'is-dist') + '">' + (sub ? 'محطة تحويل' : 'محطة توزيع') + '</div></div>' +
+        '<div class="sb-data-row sheet-meta">' +
+          (s.feeder ? '<div class="sb-data-cell"><div class="cell-label">المغذي</div><div class="cell-value">' + esc(s.feeder) + '</div></div>' : '') +
+          (s.region ? '<div class="sb-data-cell"><div class="cell-label">المنطقة</div><div class="cell-value ar">' + esc(s.region) + '</div></div>' : '') +
+        '</div>' +
       '</div>' +
       searchTime_(s) +
       (coords ? '' : '<div class="st-note-warn" data-role="no-coords">' + NO_COORDS_MSG + '</div>') +
-      '<div class="st-actions st-actions-v2">' +
-        '<button class="st-btn primary st-main" type="button" data-act="navigate"' + (coords ? '' : ' disabled') + '>🧭 المسار من موقعي</button>' +
-      '</div>' +
     '</div>';
   }
 
-  /* الجزء السفلي (تحت الخريطة — تصميم محمد، 15 أكتوبر): صفّان متساويان — قوقل ماب | مشاركة، ثم تعديل | حذف للمدير
-   * أو «خريطة جدة بدون إنترنت» لغيره (للمدير صف ثالث بعرض البطاقة)؛ ثم «آخر تحديث لبيانات المحطات».
-   * The bottom part (under the map — Mohammed's design, 15 Oct): two equal rows — Google Maps | share, then edit | delete
-   * for the admin or «Jeddah offline map» for others (a third full-width row for the admin); then the data freshness. */
+  /* الأزرار في صف واحد (يلتف على الشاشات الضيقة)، ثم «آخر تحديث لبيانات المحطات» — the buttons in one row, then the freshness */
   function bottomHtml_(s, deps) {
     const coords = Q.hasCoordinates(s), om = !!deps.offlineMapUI, canEdit = !!(deps.canEdit && deps.canEdit());
     const canDelete = !!(deps.isAdmin && deps.isAdmin() && deps.onDelete); // للمدير فقط (التصميم «أ») / admin only (design «A»)
     const fresh = deps.dataFreshness ? deps.dataFreshness() : null;
     const buttons = [
-      coords ? '<a class="st-btn st-google" data-act="google" href="' + esc(googleMapsUrl(s)) + '" target="_blank" rel="noopener">🗺️ قوقل ماب</a>' : '<span class="st-btn st-google st-disabled" aria-disabled="true">🗺️ قوقل ماب</span>',
-      '<button class="st-btn st-share" type="button" data-act="share">📤 مشاركة</button>'
+      btn_('navigate', 'primary st-main', 'navigate', 'المسار', coords ? '' : ' disabled'),
+      coords ? '<a class="st-btn st-google" data-act="google" href="' + esc(googleMapsUrl(s)) + '" target="_blank" rel="noopener"><span class="st-ico">' + BTN_ICON.google + '</span><span class="st-lbl">قوقل ماب</span></a>'
+        : '<span class="st-btn st-google st-disabled" aria-disabled="true"><span class="st-ico">' + BTN_ICON.google + '</span><span class="st-lbl">قوقل ماب</span></span>',
+      btn_('share', 'st-share', 'share', 'مشاركة')
     ];
-    if (canEdit) buttons.push('<button class="st-btn st-edit" type="button" data-act="edit">✏️ تعديل</button>');
-    if (canDelete) buttons.push('<button class="st-btn st-danger" type="button" data-act="delete">🗑️ حذف</button>');
-    if (om) buttons.push('<button class="st-btn st-om" type="button" data-act="offline-map"><span class="st-om-text"><b>🗺️ خريطة جدة بدون إنترنت</b><small data-om-status></small></span></button>');
-    if (buttons.length % 2) buttons[buttons.length - 1] = buttons[buttons.length - 1].replace('class="st-btn ', 'class="st-btn st-span ');
+    if (canEdit) buttons.push(btn_('edit', 'st-edit', 'edit', 'تعديل'));
+    if (canDelete) buttons.push(btn_('delete', 'st-danger', 'del', 'حذف'));
+    if (om) buttons.push('<button class="st-btn st-om" type="button" data-act="offline-map"><span class="st-ico">' + BTN_ICON.om + '</span><span class="st-lbl">خريطة جدة</span><small data-om-status></small></button>');
     return '<div class="sb-inner sb-bottom">' +
-      '<div class="st-sub">' + buttons.join('') +
+      '<div class="st-sub sheet-actions" style="--n:' + buttons.length + '">' + buttons.join('') +
         (canEdit ? '' : '<button class="st-btn" type="button" data-act="edit" hidden>✏️ تعديل</button>') +
       '</div>' +
       (fresh ? '<div class="db-freshness-note"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.5A8.5 8.5 0 1 1 3 12.5a8.38 8.38 0 0 1 .9-3.8"/><path d="M21 3v6h-6"/></svg><span>آخر تحديث لبيانات المحطات من قاعدة البيانات: ' + freshness_(fresh) + '</span></div>' : '') +

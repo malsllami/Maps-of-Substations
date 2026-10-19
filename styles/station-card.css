@@ -117,3 +117,55 @@ body.nav-full .station-actions{display:none !important;}
 .st-search-time b{font-family:'JetBrains Mono',monospace;color:var(--text-primary);unicode-bidi:isolate;}
 .st-search-time.local b{color:var(--teal);}
 .st-search-time.server b{color:#E5B53A;}
+
+/* ===== إعادة التصميم — المرحلة ج (19 أكتوبر): لوحة المحطة المدمجة تحت الخريطة =====
+   رأس بشارة النوع والرقم والمغذي والمنطقة، ثم صف أزرار بأيقونات (يلتف على الشاشات الضيقة)، ثم سطر «آخر تحديث».
+   Redesign — stage C: the compact station sheet under the map — a head (type badge, number, feeder, region), one icon
+   button row (wraps on narrow screens), then the freshness line. */
+.station-sheet{margin:8px auto 0;max-width:1100px;border-radius:var(--radius-lg);box-shadow:none;border-color:var(--border-strong);}
+body.nav-full .station-sheet{display:none !important;}
+.station-sheet .sb-inner{padding:12px 14px;}
+.station-sheet .sb-top{padding-bottom:6px;}
+.station-sheet .sb-bottom{padding-top:4px;}
+.sheet-head{display:flex;align-items:center;gap:10px;min-width:0;}
+.sheet-badge{width:44px;height:44px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.sheet-badge.is-dist{background:var(--dist-soft);color:var(--dist);}
+.sheet-badge.is-sub{background:var(--sub-soft);color:var(--sub);}
+.sheet-title{min-width:0;flex-shrink:0;}
+.sheet-id{font-size:18px;font-weight:700;color:var(--text-primary);white-space:nowrap;}
+.sheet-id-k{font-size:14px;font-weight:600;color:var(--text-secondary);}
+.sheet-id .cell-value{font-family:'JetBrains Mono',monospace;font-weight:800;}
+.sheet-type{font-size:13px;font-weight:700;}
+.sheet-type.is-dist{color:var(--dist);}
+.sheet-type.is-sub{color:var(--sub);}
+.station-sheet .sheet-meta{flex:1;min-width:0;margin:0;border-radius:12px;}
+.station-sheet .sheet-meta .sb-data-cell{padding:6px 4px;}
+.station-sheet .sheet-meta .cell-label{font-size:12px;margin-bottom:2px;}
+.station-sheet .sheet-meta .cell-value{font-size:14.5px;}
+.station-sheet .st-search-time{margin-top:8px;font-size:12.5px;}
+.station-sheet .st-note-warn{margin:8px 0 0;font-size:13px;}
+/* صف الأزرار: أيقونة فوق تسمية، كلها بنفس العرض — the button row: icon over label, all the same width */
+.station-sheet .sheet-actions{display:grid;grid-template-columns:repeat(var(--n, 5), minmax(0,1fr));gap:6px;}
+.station-table.station-sheet .sheet-actions .st-btn{
+  flex-direction:column;justify-content:center;gap:3px;min-height:58px;padding:6px 2px;border-radius:12px;
+  font-size:12.5px;font-weight:700;color:var(--text-primary);background:var(--bg-elev);border:1px solid var(--border);white-space:nowrap;min-width:0;
+}
+.station-sheet .st-ico{display:flex;}
+.station-sheet .st-lbl{max-width:100%;overflow:hidden;text-overflow:ellipsis;}
+.station-table.station-sheet .sheet-actions .st-btn.primary.st-main{background:var(--dist);border-color:var(--dist);color:#fff;}
+.station-table.station-sheet .sheet-actions .st-google .st-ico,.station-table.station-sheet .sheet-actions .st-share .st-ico{color:var(--sub);}
+.station-table.station-sheet .sheet-actions .st-edit .st-ico{color:var(--accent);}
+[data-theme="light"] .station-table.station-sheet .sheet-actions .st-edit .st-ico{color:#9A6B00;}
+.station-table.station-sheet .sheet-actions .st-om .st-ico{color:var(--dist);}
+.station-table.station-sheet .sheet-actions .st-danger{color:var(--danger);background:var(--danger-bg);}
+.station-sheet .st-om small{display:none;} /* حالة خريطة جدة تظهر في نافذتها — its status shows in its own sheet */
+.station-sheet .db-freshness-note{margin-top:8px;padding-top:8px;font-size:12.5px;color:var(--text-secondary);}
+/* الشاشات الضيقة: صفّان من ثلاثة — narrow screens: two rows of three */
+@media (max-width:359px){ .station-sheet .sheet-actions{grid-template-columns:repeat(3,minmax(0,1fr));} }
+@media (max-width:380px){ .sheet-badge{width:38px;height:38px;} .sheet-id{font-size:16px;} }
+.station-table.station-sheet .sheet-actions .st-btn .st-lbl{font-size:12.5px;font-weight:700;}
+/* الأزرار لا ترث خط الصفحة افتراضيًا بخلاف الرابط («قوقل ماب») — نفس الخط للجميع — buttons don't inherit the page font, unlike the link */
+.station-sheet .st-btn{font-family:inherit;}
+/* التسمية الطويلة («خريطة جدة») تلتف سطرين بدل قصّها — a long label wraps to two lines instead of being cut */
+.station-table.station-sheet .sheet-actions .st-btn{white-space:normal;}
+.station-sheet .st-lbl{white-space:normal;line-height:1.2;text-align:center;overflow:visible;}

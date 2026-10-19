@@ -53,3 +53,7 @@
 .conn-status-pill{font-size:13.5px;}
 @media (max-width:600px){ .conn-status-pill{font-size:13.5px;} }
 @media (max-width:340px){ .conn-status-pill{font-size:12.5px;gap:8px;} }
+/* يلتف فقط حين لا يتسع السطر (الصفحات التي يبقى التاريخ فيها داخل السطر)؛ الرئيسية سطر واحد لأن التاريخ نُقل منها
+   Wraps only when the line doesn't fit (pages that keep the date inside it); home stays one line since its date moved out */
+.conn-status-pill{flex-wrap:wrap;}
+@media (max-width:600px){ .conn-status-pill{flex-wrap:wrap;} }
