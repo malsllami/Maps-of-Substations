@@ -49,6 +49,33 @@
   if (global.ResizeObserver) new global.ResizeObserver(function () { syncHeaderHeight(); layout(); }).observe($('appHeader'));
   global.addEventListener('resize', function () { syncHeaderHeight(); layout(); });
 
+  // ===== صفحة الزائر: الكرة وتحتها «تسجيل الدخول» (طلب محمد 19 أكتوبر) — The guest page: the globe, «login» below =====
+  // مكتبة الكرة تُحمَّل للزائر وحده فلا تُبطئ الرئيسية على الأعضاء؛ تعذّرها ← الكرة تختفي ويبقى الزر (حالة globe.js البديلة)
+  // The globe library loads for guests only, never slowing members' home; if it fails ← no globe, the button stays
+  function loadThree_() {
+    return new Promise(function (resolve) {
+      if (global.THREE) { resolve(); return; }
+      const s = doc.createElement('script');
+      s.src = global.SEC2_CONFIG.LIBRARIES.THREE_JS; s.onload = s.onerror = function () { resolve(); };
+      doc.head.appendChild(s);
+    });
+  }
+  /* الزر تحت الكرة الظاهرة (الموقع الحي) — the button under the visible globe (the live site) */
+  function alignGuestCta_() {
+    const stage = $('globeStage'), cta = doc.querySelector('.guest-landing .guest-login-cta'), hero = doc.querySelector('.guest-hero');
+    if (!stage || !cta || $('guestLanding').hidden) return;
+    const r = stage.getBoundingClientRect(), gap = Math.max(0, r.top + r.height * 0.88 - hero.getBoundingClientRect().top - cta.offsetTop);
+    cta.style.marginTop = Math.round(gap) + 'px';
+  }
+  if (!loggedIn()) {
+    $('guestLanding').hidden = false;
+    loadThree_().then(function () {
+      SecGlobe.mount($('globeStage'), { onIntroDone: function () { /* بلا شاشة افتتاحية / no intro */ } });
+      global.setTimeout(alignGuestCta_, 50); global.setTimeout(alignGuestCta_, 600);
+    });
+    global.addEventListener('resize', alignGuestCta_);
+  }
+
   // ===== الشاشات والشريط السفلي (إعادة التصميم) — The screens and the bottom bar (redesign) =====
   const VIEWS = ['home', 'map', 'stations', 'details', 'more', 'storage'];
   const TAB_OF = { details: 'map', storage: 'more' }; // الشاشات الفرعية تُبقي تبويب أصلها — sub-screens keep their parent's tab
@@ -311,6 +338,48 @@
     finally { header.refreshButton.disabled = false; header.refreshButton.classList.remove('spinning'); afterLoad_(); }
   });
 
+  // ===== لون حالة النسخة (طلب محمد 19 أكتوبر) — The copy's state color =====
+  // شريط الحالة العلوي وبطاقة البيانات المؤقتة يأخذان لونًا واحدًا بالأولوية: أحمر انقطاع الإنترنت، أصفر تحميل جزئي توقف (وزر
+  // التحميل يصير تحذيرًا)، رمادي بلا نسخة، برتقالي متقطع تحديث جديد لم يُحمَّل بعد (التلقائي بموعده، والزر يسرّعه)، أخضر مكتملة.
+  // The status bar and the cached-data card share one color by priority: red offline, yellow a stopped partial load (the
+  // load button becomes a warning), gray no copy, dashed orange a newer update not loaded yet, green complete.
+  const SYNC_TEXT = {
+    offline: 'لا يوجد اتصال بالإنترنت — البحث يعمل من نسخة الجهاز إن وُجدت',
+    partial: function (r) { return 'توقف تحميل نسخة المحطات عند ' + r.loaded + (r.total ? '/' + r.total : '') + ' — اضغط ⚠ للمتابعة'; },
+    none: 'لم تُحمَّل نسخة المحطات على هذا الجهاز بعد',
+    notStarted: 'تعذّر بدء تحميل نسخة المحطات — اضغط ⟳ للمحاولة',
+    loading: function (l) { return 'جارٍ تحميل نسخة المحطات: ' + l.loaded + (l.total ? '/' + l.total : ''); },
+    pending: 'يوجد تحديث جديد لبيانات المحطات — يُحمَّل تلقائيًا، أو اضغط ⟳ للتسريع',
+    ready: 'نسخة المحطات مكتملة ومطابقة للخادم'
+  };
+  const SYNC_BTN = { partial: 'استكمال تحميل نسخة المحطات', pending: 'تحميل التحديث الجديد الآن' };
+  function syncState_() {
+    const st = SYNC.state(), conn = status.state ? status.state() : '';
+    if (global.navigator.onLine === false || conn === 'offline' || conn === 'saved') return { k: 'offline', t: SYNC_TEXT.offline };
+    // أصفر: توقف بعد تحميل جزء فعلًا؛ التوقف قبل أي جزء يبقى رماديًا — yellow: stopped after loading a part; stopping before any stays gray
+    // «قابل للاستكمال» لا يوجد إلا بعد التوقف (يُصفَّر عند بدء أي تحميل) — «resumable» exists only after a stop (reset when any load starts)
+    if (!st.loaded && st.resumable && st.resumable.loaded > 0) return { k: 'partial', t: SYNC_TEXT.partial(st.resumable) };
+    if (!st.loaded) return { k: 'none', t: st.resumable ? SYNC_TEXT.notStarted : st.loading ? SYNC_TEXT.loading(st.loading) : SYNC_TEXT.none };
+    if (st.pending) return { k: 'pending', t: SYNC_TEXT.pending };
+    return { k: 'ready', t: SYNC_TEXT.ready };
+  }
+  let lastSyncKind = '';
+  function paintSync_() {
+    const s = syncState_(), bar = header.status.bar, btn = header.refreshButton;
+    if (bar) { bar.dataset.sync = s.k; bar.title = s.t; }
+    if (btn) { btn.dataset.sync = s.k; btn.setAttribute('aria-label', SYNC_BTN[s.k] || btn.title); }
+    const box = doc.querySelector('.storage-screen'), line = $('storageSyncLine');
+    if (box) box.dataset.sync = s.k;
+    if (line) line.textContent = s.t;
+    lastSyncKind = s.k;
+  }
+  if (loggedIn()) {
+    SYNC.onChange(paintSync_);
+    global.addEventListener('online', paintSync_); global.addEventListener('offline', paintSync_);
+    global.setInterval(paintSync_, 3000); // حالة الاتصال تُفحص دوريًا من مكوّنها / the connection state is checked periodically by its component
+    paintSync_();
+  }
+
   if (loggedIn()) {
     SYNC.start({ onProgress: progress_ }).then(afterLoad_, afterLoad_);
     S.ensureFresh().then(function (ok) { if (ok) gate.check(); });
@@ -374,7 +443,7 @@
   // للاختبار والتكامل: الحالة الحالية فقط — for tests: the current state only
   global.SecHome = {
     goToStation: goToStation, goBackToSearch: goBackToSearch, setView: setView, openDetails: openDetails_,
-    state: function () { return { view: doc.body.dataset.view, map: !!view && doc.body.dataset.view === 'map', station: current, card: !!card }; },
+    state: function () { return { view: doc.body.dataset.view, map: !!view && doc.body.dataset.view === 'map', station: current, card: !!card, sync: lastSyncKind }; },
     parts: function () { return { view: view, details: details, stationsList: stationsList, more: more, lens: lens, bar: bar, stats: stats, recent: recent, gate: gate, status: status, header: header, nav: nav }; }
   };
 })(typeof window !== 'undefined' ? window : globalThis);

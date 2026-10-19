@@ -106,7 +106,8 @@
       return '<button type="button" class="mobile-menu-link mobile-menu-btn" data-act="tour"><span class="menu-icon" style="color:#1FB8C9">' + ICON.tour + '</span>الجولة التعريفية</button>';
     }
     function guest_() {
-      return '<a href="auth.html" class="login-btn" data-role="login">تسجيل الدخول</a>' +
+      // الرئيسية (identity) لا تكرر «تسجيل الدخول» في الشريط العلوي: زرها تحت الكرة (طلب محمد) — home doesn't repeat «login» in the top bar
+      return (o.identity ? '' : '<a href="auth.html" class="login-btn" data-role="login">تسجيل الدخول</a>') +
         (home ? '<a href="shifts.html" class="theme-toggle" title="تقويم دوام الورديات" aria-label="تقويم دوام الورديات">' + ICON.calSmall + '</a>' : '') +
         '<button type="button" class="theme-toggle" data-act="theme" aria-label="تبديل الوضع الداكن والفاتح">' + ICON.toggle + '</button>';
     }

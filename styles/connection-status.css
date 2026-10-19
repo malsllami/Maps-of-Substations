@@ -57,3 +57,31 @@
    Wraps only when the line doesn't fit (pages that keep the date inside it); home stays one line since its date moved out */
 .conn-status-pill{flex-wrap:wrap;}
 @media (max-width:600px){ .conn-status-pill{flex-wrap:wrap;} }
+
+/* ===== لون حالة نسخة المحطات (طلب محمد 19 أكتوبر) — the stations copy state color =====
+   الشريط كله بلون الحالة: أحمر انقطاع، رمادي بلا نسخة، أصفر توقف جزئي (والزر تحذير)، برتقالي متقطع تحديث جديد، أخضر مكتملة.
+   The whole bar in the state color: red offline, gray no copy, yellow stopped partial (the button a warning),
+   dashed orange a new update, green complete. */
+.header-row-status[data-sync] .conn-status-pill{transition:background .3s ease,border-color .3s ease;border-width:1.5px;}
+.header-row-status[data-sync="offline"] .conn-status-pill{background:var(--danger-bg);border-color:var(--danger);}
+.header-row-status[data-sync="none"] .conn-status-pill{background:var(--c-info-bg);border-color:var(--c-info-line);}
+.header-row-status[data-sync="partial"] .conn-status-pill{background:var(--c-ops-bg);border-color:var(--c-ops-fg);}
+.header-row-status[data-sync="ready"] .conn-status-pill{background:var(--c-dist-bg);border-color:var(--c-dist-line);}
+.header-row-status[data-sync="pending"] .conn-status-pill{background:var(--c-alert-bg);border:2px dashed var(--c-alert-fg);}
+/* زر التحميل: تحذير في التوقف الجزئي، ونابض خفيف في التحديث الجديد — the load button: a warning when stopped, a soft pulse on a new update */
+.status-refresh-btn[data-sync="partial"] [data-role="refresh-icon"]{display:none;}
+.status-refresh-btn[data-sync="partial"]::after{content:'⚠';font-size:18px;line-height:1;color:var(--c-ops-fg);}
+.status-refresh-btn[data-sync="partial"]{background:var(--bg-card);border:1.5px solid var(--c-ops-fg);border-radius:10px;}
+.status-refresh-btn[data-sync="pending"]{color:var(--c-alert-fg);border:1.5px solid var(--c-alert-fg);border-radius:10px;animation:syncNudge 1.6s ease-in-out infinite;}
+@keyframes syncNudge{0%,100%{transform:scale(1);}50%{transform:scale(1.12);}}
+@media (prefers-reduced-motion:reduce){ .status-refresh-btn[data-sync="pending"]{animation:none;} }
+/* ألوان صريحة لكل حالة (الأحمر والبرتقالي والأصفر متميزة) — an explicit color per state (red, orange and yellow distinct) */
+.header-row-status[data-sync="offline"] .conn-status-pill{background:var(--st-red-bg);border:2px solid var(--st-red);}
+.header-row-status[data-sync="none"] .conn-status-pill{background:var(--st-gray-bg);border:2px solid var(--st-gray);}
+.header-row-status[data-sync="partial"] .conn-status-pill{background:var(--st-yellow-bg);border:2px solid var(--st-yellow);}
+.header-row-status[data-sync="ready"] .conn-status-pill{background:var(--st-green-bg);border:2px solid var(--st-green);}
+.header-row-status[data-sync="pending"] .conn-status-pill{background:var(--st-orange-bg);border:2px dashed var(--st-orange);}
+.status-refresh-btn[data-sync="partial"]{border-color:var(--st-yellow);}
+.status-refresh-btn[data-sync="partial"]::after{color:var(--st-yellow);}
+.status-refresh-btn[data-sync="pending"]{color:var(--st-orange);border-color:var(--st-orange);}
+.status-refresh-btn[data-sync="offline"]{color:var(--st-red);}

@@ -50,6 +50,10 @@
   let store = 'idb';          // 'idb' | 'memory'
   let syncedAt = 0;           // آخر تأكيد من الخادم (تحميل/مزامنة/مطابقة) / the last server confirmation
   let loader = null;          // مجمّع تحميل متوقف للاستكمال / a stopped load's assembler, to resume
+  // إصدار أحدث معروف من الخادم لم تكتمل مزامنته بعد — للعرض فقط (شريط الحالة البرتقالي، طلب محمد 19 أكتوبر)؛ لا يغيّر موعد
+  // المزامنة ولا طريقتها. A newer known server version not yet synced — display only (the orange status bar); never changes
+  // when or how syncing happens.
+  let pendingVersion = null;
   let loading = null;         // { loaded, total } أثناء التحميل / while loading
   let firstLoadFailed = false;
   let opChain = Promise.resolve();
@@ -73,7 +77,8 @@
     return {
       loaded: !!copy, count: copy ? copy.stations.length : 0, version: copy ? copy.version : null, lastSync: copy ? copy.lastSync : null,
       sizeBytes: copy ? copy.sizeBytes || 0 : 0, persisted: persisted, store: store, syncedAt: syncedAt ? new Date(syncedAt) : null,
-      loading: loading ? Object.assign({}, loading) : null, resumable: loader ? loader.progress() : null, firstLoadFailed: firstLoadFailed
+      loading: loading ? Object.assign({}, loading) : null, resumable: loader ? loader.progress() : null, firstLoadFailed: firstLoadFailed,
+      pending: pendingVersion
     };
   }
   function emit_(event, detail) {
@@ -100,7 +105,8 @@
     if (!copy) return;
     lsSet_(K.STATIONS_META, JSON.stringify({ version: copy.version, count: copy.stations.length, bytes: copy.sizeBytes || 0, savedAt: copy.savedAt || null, lastSync: copy.lastSync || null, syncedAt: syncedAt || null, store: store, persisted: persisted }));
   }
-  function markSynced_() { syncedAt = now_(); firstLoadFailed = false; writeMeta_(); emit_('confirmed'); }
+  function markSynced_() { syncedAt = now_(); firstLoadFailed = false; pendingVersion = null; writeMeta_(); emit_('confirmed'); }
+  function markPending_(version) { pendingVersion = String(version); emit_('pending'); }
 
   // ===== الاعتماد والتحقق — Commit and verify =====
   /* يعتمد النسخة ثم يقرؤها من الجهاز ويطابق الإصدار والعدد؛ فشل أي خطوة ← الذاكرة فقط (غير محفوظة)
@@ -157,6 +163,7 @@
     if (!copy) return (await fullLoad(opts)).ok ? 'loaded' : 'failed';
     if (!v || !v.success) return 'failed';
     if (DB.isCurrent(copy, v.version)) { markSynced_(); return 'fresh'; }
+    markPending_(v.version);
     return (await sync()).ok ? 'synced' : 'failed';
   }
 
@@ -276,6 +283,7 @@
           const v = await global.SecApi.call('getDataVersion');
           if (!v || !v.success) return 'unverified';
           if (DB.isCurrent(copy, v.version)) { markSynced_(); return 'fresh'; }
+          markPending_(v.version);
           return (await sync()).ok ? 'updated' : 'unverified';
         } catch (e) { return 'unverified'; }
       })().finally(function () { if (freshCheck === check) freshCheck = null; });
@@ -341,7 +349,7 @@
   /* زر «مسح البيانات المؤقتة»: نسخة V2 فقط (لا يمس V1) — The «clear temporary data» button: the V2 copy only */
   function clear() {
     return serial_(async function () {
-      copy = null; persisted = false; loader = null; syncedAt = 0;
+      copy = null; persisted = false; loader = null; syncedAt = 0; pendingVersion = null;
       try { global.localStorage.removeItem(K.STATIONS_META); } catch (e) { /* محظور / blocked */ }
       try { if (store === 'idb') await DB.clear(); } catch (e) { /* تبقى الصفحة تعمل / the page keeps working */ }
       emit_('cleared');

@@ -230,3 +230,17 @@ body.guest-mode .home-title{display:none;}
 .st-top{justify-content:center;}
 .st-num{text-align:center;}
 .st-ops{justify-content:center;}
+
+/* ===== صفحة الزائر كما في الموقع الحي: الكرة وتحتها «تسجيل الدخول» (طلب محمد 19 أكتوبر) =====
+   The guest page as on the live site: the globe with «login» under it */
+body.guest-mode .app-views{display:none;}
+.guest-landing{position:relative;min-height:100dvh;overflow-x:clip;}
+.guest-landing[hidden]{display:none;}
+.guest-hero{position:relative;z-index:5;display:flex;flex-direction:column;align-items:center;gap:14px;padding:calc(var(--header-h, 120px) + 24px) 20px 40px;}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--teal-light);text-transform:uppercase;text-align:center;
+  background:rgba(5,15,25,0.45);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border-radius:20px;padding:6px 16px;white-space:nowrap;}
+[data-theme="light"] .eyebrow{color:var(--blue-deep);background:rgba(255,255,255,0.65);}
+.guest-title{width:min(700px,90%);font-size:clamp(24px,6vw,42px);font-weight:700;text-align:center;line-height:1.3;margin:0;
+  background:linear-gradient(90deg, #ffffff, var(--teal-light));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 2px 14px rgba(0,0,0,0.55);}
+[data-theme="light"] .guest-title{background:linear-gradient(90deg, var(--text-primary), var(--teal));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:none;}
+.guest-landing .guest-login-cta{display:flex;margin-top:0;}

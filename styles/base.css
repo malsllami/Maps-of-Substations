@@ -11,6 +11,12 @@
    amber = add. The old variable names keep new values, so every component follows the new look automatically. */
 :root{
   --blue-deep:#1B4D8C;
+  /* ألوان حالة نسخة المحطات (طلب محمد 19 أكتوبر) — صريحة ومتميزة في الثيمين — the stations copy state colors, distinct in both themes */
+  --st-red:#E5484D;    --st-red-bg:rgba(229,72,77,0.22);
+  --st-gray:#8C9BAF;   --st-gray-bg:rgba(140,155,175,0.18);
+  --st-yellow:#E2B93B; --st-yellow-bg:rgba(240,200,60,0.24);
+  --st-green:#2BC48A;  --st-green-bg:rgba(43,196,138,0.18);
+  --st-orange:#F28C32; --st-orange-bg:rgba(245,140,50,0.20);
   --blue-mid:#2E7DD1;
   --teal:#1FAE8C;
   --teal-light:#4DD6B5;

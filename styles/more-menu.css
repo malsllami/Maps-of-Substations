@@ -44,3 +44,23 @@
 .storage-screen .storage-cell-val{font-size:14.5px;}
 .storage-screen .storage-cell-val small{font-size:12px;}
 .storage-screen .stations-cache-info{font-size:13px;}
+
+/* بطاقة البيانات المؤقتة بنفس ألوان حالة النسخة، وسطر نصي بالحالة (طلب محمد) — the cached-data card in the same state colors, with a state line */
+.sync-line{padding:12px 14px;border-radius:var(--radius);font-size:14px;font-weight:700;line-height:1.6;border:1.5px solid var(--border-strong);background:var(--bg-card);color:var(--text-primary);}
+.storage-screen .storage-row{border:1.5px solid var(--border-strong);}
+.storage-screen[data-sync="offline"] .sync-line,.storage-screen[data-sync="offline"] .storage-row{background:var(--danger-bg);border-color:var(--danger);}
+.storage-screen[data-sync="none"] .sync-line,.storage-screen[data-sync="none"] .storage-row{background:var(--c-info-bg);border-color:var(--c-info-line);}
+.storage-screen[data-sync="partial"] .sync-line,.storage-screen[data-sync="partial"] .storage-row{background:var(--c-ops-bg);border-color:var(--c-ops-fg);}
+.storage-screen[data-sync="ready"] .sync-line,.storage-screen[data-sync="ready"] .storage-row{background:var(--c-dist-bg);border-color:var(--c-dist-line);}
+.storage-screen[data-sync="pending"] .sync-line,.storage-screen[data-sync="pending"] .storage-row{background:var(--c-alert-bg);border:2px dashed var(--c-alert-fg);}
+.storage-screen[data-sync="offline"] .sync-line{color:var(--danger);}
+.storage-screen[data-sync="partial"] .sync-line{color:var(--c-ops-fg);}
+.storage-screen[data-sync="ready"] .sync-line{color:var(--c-dist-fg);}
+.storage-screen[data-sync="pending"] .sync-line{color:var(--c-alert-fg);}
+/* بطاقة البيانات المؤقتة بنفس الألوان الصريحة — the cached-data card in the same explicit colors */
+.storage-screen[data-sync="offline"] .sync-line,.storage-screen[data-sync="offline"] .storage-row{background:var(--st-red-bg);border:2px solid var(--st-red);}
+.storage-screen[data-sync="none"] .sync-line,.storage-screen[data-sync="none"] .storage-row{background:var(--st-gray-bg);border:2px solid var(--st-gray);}
+.storage-screen[data-sync="partial"] .sync-line,.storage-screen[data-sync="partial"] .storage-row{background:var(--st-yellow-bg);border:2px solid var(--st-yellow);}
+.storage-screen[data-sync="ready"] .sync-line,.storage-screen[data-sync="ready"] .storage-row{background:var(--st-green-bg);border:2px solid var(--st-green);}
+.storage-screen[data-sync="pending"] .sync-line,.storage-screen[data-sync="pending"] .storage-row{background:var(--st-orange-bg);border:2px dashed var(--st-orange);}
+.storage-screen[data-sync] .sync-line{color:var(--text-primary);}
