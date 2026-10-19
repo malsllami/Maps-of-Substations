@@ -256,3 +256,55 @@ body.guest-mode .app-views{display:none;}
 /* سطر رسائل البحث لا يحجز مساحة وهو فارغ (كان 22 نقطة فوق الخريطة)، ويظهر بنصه عند وجود رسالة
    The search message line takes no space while empty (it was 22px above the map), and shows when there is a message */
 .view-map .station-search-hint:empty{min-height:0;padding:0;}
+
+/* ===== الخريطة بكامل الصفحة (طلب محمد 20 أكتوبر) =====
+   الخريطة تملأ المساحة بين الرأس والشريط السفلي؛ فوقها حقل بحث زجاجي شبه شفاف وأدوات الخريطة كأزرار عائمة، وأسفلها بطاقة
+   المحطة بخلفية زجاجية شبه شفافة وأزرار واضحة. التوسيط في المساحة المرئية بينهما (pages/home.js layout + map-view insets).
+   أثناء الملاحة تبقى قواعد navigation.css كما هي (كلها هنا مقيّدة بـ body:not(.nav-full)).
+   The full-page map: the map fills the space between the header and the bottom bar; a translucent glass search and the map
+   tools float above it, the station card floats below on translucent glass. Navigation keeps its own rules. */
+:root{--glass-bg:rgba(13,24,38,0.62);--glass-strong:rgba(13,24,38,0.80);--glass-line:rgba(255,255,255,0.14);}
+[data-theme="light"]{--glass-bg:rgba(255,255,255,0.66);--glass-strong:rgba(255,255,255,0.84);--glass-line:rgba(20,40,60,0.16);}
+body.home-page[data-view="map"]{min-height:0;}
+body:not(.nav-full) .view-map.hero{position:fixed;top:var(--header-h, 120px);left:0;right:0;
+  bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));padding:0;overflow:hidden;z-index:1;}
+/* البحث عائم أعلى الخريطة — the search floats at the top */
+body:not(.nav-full) .view-map .top-content-area{position:absolute;top:8px;left:12px;right:12px;width:auto;max-width:none;margin:0;z-index:20;}
+body:not(.nav-full) .view-map .station-search-bar{background:var(--glass-bg);border-color:var(--glass-line);box-shadow:none;
+  -webkit-backdrop-filter:blur(14px) saturate(1.2);backdrop-filter:blur(14px) saturate(1.2);}
+body:not(.nav-full) .view-map .station-search-bar input{font-family:'JetBrains Mono','IBM Plex Sans Arabic',monospace;font-weight:700;color:var(--text-primary);}
+/* المسرح بكامل المساحة: الخريطة خلفية، والأدوات واللوحات تتراص تحت البحث فوقها — the stage fills the area: the map behind, tools stacked above it */
+body:not(.nav-full) .view-map .map-stage-slot{position:absolute;inset:0;margin:0;width:auto;padding:0;}
+body:not(.nav-full) .view-map .map-stage-slot .globe-stage.map-active{position:absolute;inset:0;width:100%;height:100%;min-height:0;margin:0;
+  padding:calc(var(--search-h, 46px) + 16px) 12px 0;box-sizing:border-box;gap:6px;pointer-events:none;}
+body:not(.nav-full) .view-map .globe-stage.map-active > *{pointer-events:auto;}
+body:not(.nav-full) .view-map .globe-stage.map-active #map-container{position:absolute;inset:0;height:100% !important;border-radius:0;z-index:0;}
+body:not(.nav-full) .view-map .map-toolbar-bar,body:not(.nav-full) .view-map .map-mode-panel,body:not(.nav-full) .view-map .map-panels > *,
+body:not(.nav-full) .view-map .map-tool-hint{position:relative;z-index:10;}
+/* أدوات الخريطة أزرار زجاجية منفصلة — the map tools as separate glass pills */
+body:not(.nav-full) .view-map .map-toolbar-bar{background:none;border:none;border-radius:0;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;overflow:visible;}
+body:not(.nav-full) .view-map .toolbar-scroll{height:auto;padding:0 0 2px;gap:6px;justify-content:flex-start;}
+body:not(.nav-full) .view-map .toolbar-btn,body:not(.nav-full) .view-map .map-mode-chip{padding:8px 11px;border-radius:999px;font-size:13px;
+  background:var(--glass-bg);border:1px solid var(--glass-line);color:var(--text-primary);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);}
+body:not(.nav-full) .view-map .toolbar-btn.active{background:var(--teal);border-color:var(--teal);color:#04241c;}
+body:not(.nav-full) .view-map [data-tools="more"]{padding:8px 11px;}
+/* لوحات الأدوات والتلميح بطاقات زجاجية تحت الأزرار — the tool panels and the hint as glass cards under the pills */
+body:not(.nav-full) .view-map .map-mode-panel,body:not(.nav-full) .view-map .map-panels > *,body:not(.nav-full) .view-map .map-tool-hint{
+  border:1px solid var(--glass-line);border-radius:14px;background:var(--glass-strong);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);}
+/* التكبير والتنبيه فوق البطاقة دائمًا — zoom and the toast always above the card */
+body:not(.nav-full) .view-map .zoom-controls{bottom:calc(var(--sheet-h, 0px) + 12px);left:12px;border-color:var(--glass-line);}
+body:not(.nav-full) .view-map .zoom-btn{background:var(--glass-strong);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);}
+body:not(.nav-full) .view-map .map-toast{bottom:calc(var(--sheet-h, 0px) + 16px);}
+/* بطاقة المحطة عائمة أسفل الخريطة بخلفية زجاجية — the station card floats at the bottom on glass */
+body:not(.nav-full) .view-map .station-sheet{position:absolute;left:8px;right:8px;bottom:8px;margin:0;z-index:20;max-height:56%;overflow-y:auto;overscroll-behavior:contain;
+  background:var(--glass-bg);border:1px solid var(--glass-line);-webkit-backdrop-filter:blur(16px) saturate(1.25);backdrop-filter:blur(16px) saturate(1.25);}
+body:not(.nav-full) .view-map .station-sheet .sheet-meta{background:var(--glass-strong);border-color:var(--glass-line);}
+body:not(.nav-full) .view-map .station-sheet .sheet-foot{border-top-color:var(--glass-line);}
+/* الأدوات الخمس في سطر واحد بلا قص على 390 (الأنماط، قريب، مغذي، أعطال، ⋯) — all five tools on one line at 390 */
+body:not(.nav-full) .view-map .toolbar-scroll{gap:5px;}
+body:not(.nav-full) .view-map .toolbar-btn,body:not(.nav-full) .view-map .map-mode-chip{padding:7px 9px;gap:4px;font-size:12.5px;}
+body:not(.nav-full) .view-map [data-tools="more"]{padding:7px 10px;}
+@media (max-width:440px){ body:not(.nav-full) .view-map .map-mode-chip .mm-auto-badge{display:none;} body:not(.nav-full) .view-map .toolbar-btn .tb-icon{display:none;} }
+/* «⋯» أيقونة فقط (لا يلتبس بتبويب «المزيد» في الشريط السفلي) — «⋯» icon only (not confused with the bottom bar's «More») */
+body:not(.nav-full) .view-map .toolbar-btn[data-tools="more"] .tb-label{display:none;}
+body:not(.nav-full) .view-map .toolbar-btn[data-tools="more"] .tb-icon{display:inline;font-size:16px;}

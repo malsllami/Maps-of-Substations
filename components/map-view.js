@@ -25,6 +25,7 @@
   if (!CONFIG || !H) throw new Error('map-view.js يحتاج الإعدادات وhtml.js قبله / needs config and html.js first');
   const TILES = CONFIG.MAP_TILES, KEY = CONFIG.STORAGE_KEYS.MAP_MODE;
   const CENTER = [21.54, 39.19], START_ZOOM = 12, STATION_ZOOM = 18;
+  const INSET_GAP = 12; // هامش المساحة المرئية تحت ما يطفو فوق الخريطة / the visible area's margin under what floats over the map
   const AUTO_REFRESH_MS = 5 * 60 * 1000, TILE_ERRORS = 4, TILE_WINDOW_MS = 15000, FALLBACK_MS = 60000, TOAST_MS = 2000;
   const MODES = ['auto', 'light', 'dark', 'satellite'];
   const META = {
@@ -158,6 +159,38 @@
     }
     function closePanel_() { togglePanel_(false); }
 
+    // ===== المساحة المرئية (طلب محمد 20 أكتوبر): الخريطة بكامل الصفحة وفوقها البحث وتحتها البطاقة؛ التوسيط يكون في المساحة
+    // الظاهرة بينهما لا في منتصف الشاشة هندسيًا، حتى لا تظهر المحطة خلف البطاقة. الصفحة تمرّر ما يغطي الخريطة من أعلى وأسفل.
+    // The visible area (Mohammed, 20 Oct): the map fills the page with the search above and the card below; centering is
+    // inside the visible space between them, not the geometric middle, so the station never sits behind the card.
+    let insets = { top: 0, bottom: 0 };
+    function setInsets(top, bottom) { insets = { top: Math.max(0, Math.round(top || 0)), bottom: Math.max(0, Math.round(bottom || 0)) }; }
+    /* ما يطفو فوق الخريطة من أدواتها (الأزرار، قائمة الأنماط، اللوحات، التلميح) يُقاس لحظة التوسيط؛ وحين تكون فوقها لا فوق
+     * الخريطة (الملاحة، صفحات أخرى) لا يتقاطع معها فيكون صفرًا.
+     * The map's own floating tools (pills, mode menu, panels, hint) are measured at centering time; when they sit above the
+     * map instead of over it (navigation, other pages) they don't overlap it, so this is zero. */
+    function overlayTop_() {
+      const mc = map.getContainer().getBoundingClientRect(); let b = 0;
+      stage.querySelectorAll('.map-toolbar-bar, .map-mode-panel, .map-panels > *, .map-tool-hint').forEach(function (el) {
+        if (!el.offsetHeight) return;
+        const r = el.getBoundingClientRect();
+        if (r.bottom > mc.top && r.top < mc.bottom) b = Math.max(b, r.bottom - mc.top + INSET_GAP);
+      });
+      return b;
+    }
+    function current_() { return { top: Math.max(insets.top, overlayTop_()), bottom: insets.bottom }; }
+    /* مركز الخريطة الذي يضع النقطة في منتصف المساحة المرئية — the map center that puts the point mid visible area */
+    function visibleCenter_(latlng, zoom) {
+      const i = current_(), dy = (i.bottom - i.top) / 2;
+      return dy ? map.unproject(map.project(latlng, zoom).add([0, dy]), zoom) : L.latLng(latlng);
+    }
+    function centerOn(latlng, zoom, fly) {
+      const z = zoom == null ? map.getZoom() : zoom, c = visibleCenter_(latlng, z);
+      if (fly) map.flyTo(c, z, { duration: 1.4 }); else map.setView(c, z);
+    }
+    /* حشوة fitBounds بما يغطي الخريطة — fitBounds padding including what covers the map */
+    function fitPadding(pad) { const p = pad || 0, i = current_(); return { paddingTopLeft: [p, p + i.top], paddingBottomRight: [p, p + i.bottom] }; }
+
     // ===== المحطة — The station =====
     function showStation(s) {
       map.invalidateSize();
@@ -166,7 +199,7 @@
       const lat = Number(s && s.lat), lng = Number(s && s.lng);
       if (!isFinite(lat) || !isFinite(lng) || (lat === 0 && lng === 0) || Math.abs(lat) > 90 || Math.abs(lng) > 180) return null; // بلا إحداثيات: لا علامة / no coordinates: no marker
       marker = L.marker([lat, lng], { icon: stationIcon(s.id) }).addTo(map);
-      map.flyTo([lat, lng], STATION_ZOOM, { duration: 1.4 });
+      centerOn([lat, lng], STATION_ZOOM, true);
       return marker;
     }
     function clearStation() { if (marker) { map.removeLayer(marker); marker = null; } }
@@ -211,7 +244,8 @@
       map: map, tools: q('tools'), panels: q('panels'),
       mode: function () { return mode; }, resolvedMode: resolved, setMode: setMode, refresh: apply,
       usingOffline: function () { return offlineFlavor !== null; },
-      showStation: showStation, clearStation: clearStation, hint: hint, hideHint: hideHint, toast: toast,
+      showStation: showStation, clearStation: clearStation, setInsets: setInsets, centerOn: centerOn, fitPadding: fitPadding,
+      insets: current_, hint: hint, hideHint: hideHint, toast: toast,
       destroy: function () {
         global.clearInterval(autoTimer); global.clearTimeout(toastTimer); global.clearTimeout(fallbackTimer);
         stage.removeEventListener('click', onClick_); stage.removeEventListener('keydown', onKey_);

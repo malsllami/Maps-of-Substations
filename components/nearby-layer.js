@@ -112,7 +112,7 @@
       const hasCenter = Q.hasCoordinates(st);
       data = (res.stations || []).filter(function (s) { return Q.hasCoordinates(s) && !(String(s.id) === String(st.id) && s.type === st.type); })
         .map(function (s) { const d = typeof s.distanceKm === 'number' ? s.distanceKm : (hasCenter ? Q.distanceKm(center, { lat: Number(s.lat), lng: Number(s.lng) }) : 0); return Object.assign({}, s, { lat: Number(s.lat), lng: Number(s.lng), _dist: d }); });
-      if (data.length && hasCenter) map.setView([center.lat, center.lng], 17);
+      if (data.length && hasCenter) { if (view.centerOn) view.centerOn([center.lat, center.lng], 17); else map.setView([center.lat, center.lng], 17); } // في المساحة المرئية / in the visible area
       render();
       if (!toasted[m]) { view.toast(m === 'nearby' ? 'تم عرض ' + data.length + ' محطة قريبة' : 'تم عرض ' + data.length + ' محطة بالمغذي'); toasted[m] = true; }
     }

@@ -23,7 +23,7 @@
   const doc = global.document, S = global.SecSession, SYNC = global.SecStationsSync;
   const $ = function (id) { return doc.getElementById(id); };
   const MORPH_SETTLE_MS = 200, OUTAGE_AFTER_MS = 650;
-  const MAP_MIN_H = 200; // أصغر ارتفاع للخريطة على الشاشات القصيرة / the map's smallest height on short screens
+  const MAP_GAP = 12; // هامش المساحة المرئية تحت ما يعلو الخريطة وفوق البطاقة / the visible area's margin under the top items and above the card
   const SYNC_NOTE_MS = 6000; // مدة رسالة «تم تحديث بيانات المحطات» / how long the «stations updated» note stays
   const loggedIn = function () { return S.isLoggedIn(); };
 
@@ -94,10 +94,6 @@
     }
     global.scrollTo(0, 0);
   }
-  function bottomNavHeight_() {
-    const el = $('bottomNav');
-    return el && global.getComputedStyle(el).display !== 'none' ? el.getBoundingClientRect().height : 0;
-  }
 
   // ===== خريطة جدة بدون إنترنت — The offline Jeddah map =====
   let view = null;
@@ -128,12 +124,17 @@
   }
   function layout() {
     if (!view || !$('heroSection').classList.contains('map-active') || doc.body.classList.contains('nav-full')) return;
-    const box = $('mapStage').querySelector('#map-container');
-    const top = box.getBoundingClientRect().top + global.scrollY;
-    // الخريطة تأخذ باقي الشاشة فوق لوحة المحطة والشريط السفلي، فتظهر كل الأزرار بلا تمرير (ملاحظة محمد، المرحلة ج)
-    // The map takes the rest of the screen above the station sheet and the bottom bar, so every button shows unscrolled
-    const sheet = $('stationTable').classList.contains('show') ? $('stationTable').offsetHeight + 8 : 0;
-    box.style.height = Math.max(MAP_MIN_H, global.innerHeight - top - sheet - bottomNavHeight_() - 10) + 'px';
+    // الخريطة بكامل الصفحة (طلب محمد 20 أكتوبر): البحث والأدوات عائمة فوقها والبطاقة عائمة أسفلها. يُقاس ما يغطي الخريطة
+    // من أعلى (آخر عنصر عائم في الأعلى) ومن أسفل (البطاقة)، فيتوسط كل شيء في المساحة المرئية وتصعد أزرار التكبير فوق البطاقة.
+    // The full-page map: the search and tools float above it, the card below. What covers it from the top (the last floating
+    // element up there) and the bottom (the card) is measured, so centering uses the visible area and zoom sits above the card.
+    const hero = $('heroSection'), hr = hero.getBoundingClientRect(), stage = $('mapStage');
+    stage.querySelector('#map-container').style.height = '';
+    const sheetEl = $('stationTable'), sheet = sheetEl.classList.contains('show') ? Math.max(0, hr.bottom - sheetEl.getBoundingClientRect().top) : 0;
+    hero.style.setProperty('--search-h', Math.round($('topContentArea').offsetHeight) + 'px');
+    hero.style.setProperty('--sheet-h', Math.round(sheet) + 'px');
+    // أدوات الخريطة العائمة تقيسها الخريطة بنفسها لحظة التوسيط — the map measures its own floating tools when centering
+    view.setInsets($('topContentArea').getBoundingClientRect().bottom - hr.top + MAP_GAP, sheet ? sheet + MAP_GAP : 0);
     global.requestAnimationFrame(function () { view.map.invalidateSize(); });
   }
   function ensureMap_() {
@@ -202,6 +203,7 @@
     if (!view) { showCard_(s); return; } // بلا خريطة: البطاقة وحدها مع الرسالة / no map: the card alone with the message
     tools.stop(); outageMap.clear(); nearby.reset(); view.hideHint();
     showCard_(s);
+    layout();
     view.showStation(s);
     global.setTimeout(layout, 50);
   }
