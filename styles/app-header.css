@@ -134,3 +134,12 @@
 .mobile-menu-panel{min-width:240px;border-radius:var(--radius);}
 .status-refresh-btn{width:34px;height:34px;}
 @media (max-width:767px){ .header-row-main{padding:10px 16px 8px;} }
+
+/* هوية العضو بدل القائمة المنسدلة (طلب محمد 19 أكتوبر): الاسم والجوال بجانب الصورة الرمزية — the member identity instead of the dropdown */
+.hdr-id{display:flex;align-items:center;gap:10px;padding:4px 4px 4px 10px;border-radius:24px;border:1px solid var(--border-strong);background:var(--bg-card);
+  font-family:inherit;color:var(--text-primary);cursor:pointer;max-width:52vw;min-width:0;}
+.hdr-id-av{width:38px;height:38px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  background:var(--c-dist-bg);color:var(--c-dist-fg);border:1px solid var(--c-dist-line);}
+.hdr-id-text{display:flex;flex-direction:column;align-items:flex-start;min-width:0;line-height:1.25;}
+.hdr-id-name{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+.hdr-id-phone{font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:600;color:var(--text-secondary);}

@@ -52,6 +52,7 @@
 
   /**
    * mount(headerEl, opts) — opts: { page: 'index'|'member'|'shifts'|'admin', title, subtitle, contact (عناصر المدير في القائمة),
+   *   identity + onIdentity() (إعادة التصميم: هوية العضو — الصورة والاسم والجوال — بدل القائمة المنسدلة؛ عناصرها في «المزيد»),
    *   refreshTitle (زر التحديث في شريط الحالة، اختياري), logoSrc, onLogout (افتراضيًا SecSession.logout) }
    * يُرجع { status: { bar, dot, label, lastLabel, dateLine }، refreshButton، openMenu()، closeMenu()، isMenuOpen()، render()، destroy() }
    */
@@ -84,6 +85,12 @@
           tour_() +
           '<button type="button" class="mobile-menu-logout" data-act="logout"><span class="menu-icon" style="color:#E0654F">' + ICON.out + '</span><span data-role="logout-label">' + LOGOUT + '</span></button>' +
         '</div></div>';
+    }
+    /* هوية العضو بدل القائمة (طلب محمد 19 أكتوبر): الصورة الرمزية بالحرف الأول، والاسم، ورقم الجوال بالصيغة المحلية؛
+       الضغط يفتح «المزيد» — The member identity instead of the menu: avatar initial, name, local phone; a tap opens «More» */
+    function identity_() {
+      return '<button type="button" class="hdr-id" data-act="identity" aria-label="حسابي والمزيد"><span class="hdr-id-text"><span class="hdr-id-name" data-role="name"></span>' +
+        '<bdi class="hdr-id-phone" data-role="phone" dir="ltr"></bdi></span><span class="avatar-initial hdr-id-av" data-role="initial" aria-hidden="true"></span></button>';
     }
     /* «حفظ الموقع كتطبيق» تحت «الصفحة الرئيسية» — يختفي إن كان يعمل كتطبيق مثبت (اعتماد محمد 9 أكتوبر)
        «Save the site as an app» under «home» — hidden when running as an installed app */
@@ -121,13 +128,18 @@
     function render() {
       const loggedIn = SESSION.isLoggedIn();
       const row = headerEl.querySelector('[data-role="main"]');
-      row.innerHTML = brand_() + '<div class="header-actions' + (loggedIn ? ' logged-in' : '') + '">' + (loggedIn ? menu_() : guest_()) + '</div>';
+      row.innerHTML = brand_() + '<div class="header-actions' + (loggedIn ? ' logged-in' : '') + '">' + (loggedIn ? (o.identity ? identity_() : menu_()) : guest_()) + '</div>';
       row.querySelector('[data-role="title"]').textContent = o.title || (home ? 'الشركة السعودية للطاقة' : '');
       row.querySelector('[data-role="subtitle"]').textContent = o.subtitle || (home ? 'نظام الإحداثيات الجغرافية' : '');
       if (loggedIn) {
         const first = (SESSION.getName() || '').trim().split(/\s+/)[0] || 'القائمة';
         row.querySelector('[data-role="name"]').textContent = first;
         row.querySelector('[data-role="initial"]').textContent = first === 'القائمة' ? '☰' : Array.from(first)[0].toUpperCase();
+        if (o.identity) {
+          if (first === 'القائمة') row.querySelector('[data-role="name"]').textContent = 'حسابي';
+          const ph = String(SESSION.getPhone() || '');
+          row.querySelector('[data-role="phone"]').textContent = /^\+966\d{9}$/.test(ph) ? '0' + ph.slice(4) : ph; // الصيغة المحلية / the local form
+        }
         const call = row.querySelector('[data-act="call"]');
         if (call && global.SecContactAdmin) global.SecContactAdmin.bindCallLink(call);
       }
@@ -159,6 +171,7 @@
       if (act === 'menu') { e.stopPropagation(); setMenu_(!isMenuOpen()); }
       else if (act === 'theme') THEME.toggle();
       else if (act === 'home') global.location.href = 'index.html';
+      else if (act === 'identity') { if (o.onIdentity) o.onIdentity(); }
       else if (act === 'message') { e.preventDefault(); setMenu_(false); if (global.SecContactAdmin) global.SecContactAdmin.open(); }
       else if (act === 'install') { setMenu_(false); if (global.SecInstallSheet) global.SecInstallSheet.open(); }
       else if (act === 'tour') { setMenu_(false); if (global.SecFeatureTour) global.SecFeatureTour.open(); }

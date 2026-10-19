@@ -48,6 +48,7 @@
 <link rel="stylesheet" href="styles/bottom-nav.css">
 <link rel="stylesheet" href="styles/station-details.css">
 <link rel="stylesheet" href="styles/stations-list.css">
+<link rel="stylesheet" href="styles/more-menu.css">
 </head>
 <body class="home-page" data-view="home">
 
@@ -92,10 +93,6 @@
     <div class="action-note" id="refreshNote" role="status" hidden></div>
     <div class="home-slot" id="homeOutage"></div>
     <div class="home-slot" id="recentSlot"></div>
-    <details class="home-fold" id="storageFold">
-      <summary><span class="fold-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg></span>البيانات المؤقتة<span class="fold-sub">الذاكرة ونسخة المحطات</span></summary>
-      <div class="home-slot" id="storageSlot"></div>
-    </details>
   </section>
 </section>
 
@@ -110,6 +107,15 @@
 
 <!-- شاشة «تفاصيل المحطة» (تُفتح من لوحة المحطة) — the station details screen (opened from the station sheet) -->
 <section class="app-view view-details" id="viewDetails"><div id="detailsBox"></div></section>
+
+<!-- شاشة «المزيد» (المرحلة ز) وشاشة «البيانات المؤقتة» المستقلة منها — the «More» screen and its own cached-data screen -->
+<section class="app-view view-more" id="viewMore"><div id="moreBox"></div></section>
+<section class="app-view view-storage" id="viewStorage">
+  <div class="storage-screen">
+    <div class="ss-head"><button type="button" class="ss-back" id="storageBack" aria-label="رجوع"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button><span class="ss-title">البيانات المؤقتة</span></div>
+    <div class="home-slot" id="storageSlot"></div>
+  </div>
+</section>
 
 <!-- شاشة «المحطات» — the stations screen -->
 <section class="app-view view-stations" id="viewStations"><div id="stationsBox"></div></section>
@@ -154,6 +160,7 @@
 <script src="components/bottom-nav.js"></script>
 <script src="components/station-details.js"></script>
 <script src="components/stations-list.js"></script>
+<script src="components/more-menu.js"></script>
 <script src="pages/home.js"></script>
 </body>
 </html>

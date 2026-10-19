@@ -33,7 +33,9 @@
   // ===== الرأس وشريط الحالة — The header and status bar =====
   const header = SecAppHeader.mount($('appHeader'), {
     page: 'index', title: 'إحداثيات المحطات', subtitle: 'الشركة السعودية للطاقة',
-    refreshTitle: 'تحديث بيانات المحطات — لو لاحظت نتائج بحث غير محدّثة'
+    refreshTitle: 'تحديث بيانات المحطات — لو لاحظت نتائج بحث غير محدّثة',
+    // هوية العضو في الرأس، وعناصر القائمة كلها في «المزيد» (طلب محمد) — the identity in the header, the menu items in «More»
+    identity: true, onIdentity: function () { if (nav) { setView('more'); more.render(); } }
   });
   const status = SecConnStatus.mount(header.status, {
     hasLocalData: function () { return SYNC.state().loaded; },
@@ -48,14 +50,15 @@
   global.addEventListener('resize', function () { syncHeaderHeight(); layout(); });
 
   // ===== الشاشات والشريط السفلي (إعادة التصميم) — The screens and the bottom bar (redesign) =====
-  const VIEWS = ['home', 'map', 'stations', 'details'];
+  const VIEWS = ['home', 'map', 'stations', 'details', 'more', 'storage'];
+  const TAB_OF = { details: 'map', storage: 'more' }; // الشاشات الفرعية تُبقي تبويب أصلها — sub-screens keep their parent's tab
   let nav = null;
   /* يعرض شاشة واحدة؛ الخريطة تُنشأ عند أول فتح لشاشتها وتبقى — shows one screen; the map is created on first open and kept */
   function setView(name) {
     if (VIEWS.indexOf(name) === -1) return;
     doc.body.dataset.view = name;
     $('heroSection').classList.toggle('map-active', name === 'map');
-    if (nav) nav.setActive(name === 'details' ? 'map' : name); // التفاصيل جزء من «الخريطة» / details belong to «map»
+    if (nav) nav.setActive(TAB_OF[name] || name);
     if (name === 'map') {
       ensureMap_();
       global.setTimeout(function () { layout(); if (view) view.map.invalidateSize(); }, 30);
@@ -337,7 +340,18 @@
     setView('map'); // فورًا قبل أي إجراء بعدها (الملاحة تحتاج الخريطة ظاهرة) — at once, before any next action (navigation needs the map shown)
     if (global.history.state && global.history.state.secView === 'details') global.history.back(); // يُزيل خطوة السجل فقط / only drops the history step
   }
-  global.addEventListener('popstate', function () { if (doc.body.dataset.view === 'details') setView('map'); });
+  global.addEventListener('popstate', function () { const v = doc.body.dataset.view; if (v === 'details') setView('map'); else if (v === 'storage') setView('more'); });
+
+  // ===== «المزيد» والبيانات المؤقتة (المرحلة ز) — «More» and the cached data screen =====
+  const more = SecMoreMenu.mount($('moreBox'), { onStorage: function () { openStorage_(); } });
+  function openStorage_() {
+    setView('storage');
+    try { global.history.pushState({ secView: 'storage' }, ''); } catch (e) { /* بلا سجل تنقل / no history */ }
+  }
+  $('storageBack').addEventListener('click', function () {
+    setView('more');
+    if (global.history.state && global.history.state.secView === 'storage') global.history.back();
+  });
 
   // ===== شاشة «المحطات»: القريبة من موقعي والتصفية (المرحلة و) — the stations screen: nearby and filters =====
   const stationsList = SecStationsList.mount($('stationsBox'), {
@@ -350,9 +364,7 @@
   nav = SecBottomNav.mount($('bottomNav'), {
     active: 'home',
     onSelect: function (name) {
-      // «المزيد» مؤقتًا = القائمة الحالية حتى مرحلتها؛ تُفتح بعد انتهاء الضغطة، وإلا أغلقها «الضغط خارج القائمة» فورًا
-      // «more» = the current menu for now; opened after the tap ends, or «tap outside the menu» would close it at once
-      if (name === 'more') { global.setTimeout(function () { header.openMenu(); }, 0); return; }
+      if (name === 'more') more.render(); // حالة التثبيت والجلسة الحالية / the current install and session state
       if (name === 'home') { goBackToSearch(); setView('home'); return; }
       setView(name);
     },
@@ -363,6 +375,6 @@
   global.SecHome = {
     goToStation: goToStation, goBackToSearch: goBackToSearch, setView: setView, openDetails: openDetails_,
     state: function () { return { view: doc.body.dataset.view, map: !!view && doc.body.dataset.view === 'map', station: current, card: !!card }; },
-    parts: function () { return { view: view, details: details, stationsList: stationsList, lens: lens, bar: bar, stats: stats, recent: recent, gate: gate, status: status, header: header, nav: nav }; }
+    parts: function () { return { view: view, details: details, stationsList: stationsList, more: more, lens: lens, bar: bar, stats: stats, recent: recent, gate: gate, status: status, header: header, nav: nav }; }
   };
 })(typeof window !== 'undefined' ? window : globalThis);
