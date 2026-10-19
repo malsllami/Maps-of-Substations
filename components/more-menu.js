@@ -55,7 +55,7 @@
       const g = global, P = g.SecPWA;
       const install = g.SecInstallSheet && P && P.installMode() !== 'installed';
       container.innerHTML =
-        '<div class="mm-head"><span class="mm-avatar" data-role="initial"></span><div class="mm-who"><span class="mm-name" data-role="name"></span>' +
+        '<div class="mm-head"><img class="mm-avatar" src="assets/member-avatar.webp" alt="" aria-hidden="true"><div class="mm-who"><span class="mm-name" data-role="name"></span>' +
           '<span class="mm-role"><bdi class="mm-phone" data-role="phone" dir="ltr"></bdi> · ' + (SESSION.isAdmin() ? 'مدير' : 'عضو') + '</span></div></div>' +
         group_('الحساب', link_('member.html', 'k-sub', 'user', 'حسابي') + link_('shifts.html', 'k-total', 'cal', 'تقويم دوام الورديات') +
           (SESSION.isAdmin() ? link_('admin.html', 'k-ops', 'shield', 'لوحة المدير') : '')) +
@@ -67,7 +67,6 @@
         '<button type="button" class="mm-logout" data-act="logout"><span class="mm-ic">' + ICON.out + '</span><span data-role="logout-label">' + LOGOUT + '</span></button>';
       const first = (SESSION.getName() || '').trim().split(/\s+/)[0] || '';
       container.querySelector('[data-role="name"]').textContent = first || 'حسابي';
-      container.querySelector('[data-role="initial"]').textContent = first ? Array.from(first)[0].toUpperCase() : '☰';
       const ph = String(SESSION.getPhone() || '');
       container.querySelector('[data-role="phone"]').textContent = /^\+966\d{9}$/.test(ph) ? '0' + ph.slice(4) : ph; // الصيغة المحلية / the local form
       syncTheme_();

@@ -90,7 +90,7 @@
        الضغط يفتح «المزيد» — The member identity instead of the menu: avatar initial, name, local phone; a tap opens «More» */
     function identity_() {
       return '<button type="button" class="hdr-id" data-act="identity" aria-label="حسابي والمزيد"><span class="hdr-id-text"><span class="hdr-id-name" data-role="name"></span>' +
-        '<bdi class="hdr-id-phone" data-role="phone" dir="ltr"></bdi></span><span class="avatar-initial hdr-id-av" data-role="initial" aria-hidden="true"></span></button>';
+        '<bdi class="hdr-id-phone" data-role="phone" dir="ltr"></bdi></span><img class="hdr-id-av" src="assets/member-avatar.webp" alt="" aria-hidden="true"></button>';
     }
     /* «حفظ الموقع كتطبيق» تحت «الصفحة الرئيسية» — يختفي إن كان يعمل كتطبيق مثبت (اعتماد محمد 9 أكتوبر)
        «Save the site as an app» under «home» — hidden when running as an installed app */
@@ -135,7 +135,10 @@
       if (loggedIn) {
         const first = (SESSION.getName() || '').trim().split(/\s+/)[0] || 'القائمة';
         row.querySelector('[data-role="name"]').textContent = first;
-        row.querySelector('[data-role="initial"]').textContent = first === 'القائمة' ? '☰' : Array.from(first)[0].toUpperCase();
+        // بلا اسم: أيقونة شخص لا ☰ (لا تشبه قائمة منسدلة — ملاحظة محمد) — no name: a person icon, not ☰ (no dropdown look)
+        const initial = row.querySelector('[data-role="initial"]'); // القائمة القديمة فقط (الصفحات الأخرى) / the old menu only (other pages)
+        if (!initial) { /* الهوية بصورة العضو / the identity uses the member picture */ }
+        else if (first === 'القائمة') initial.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'; else initial.textContent = Array.from(first)[0].toUpperCase();
         if (o.identity) {
           if (first === 'القائمة') row.querySelector('[data-role="name"]').textContent = 'حسابي';
           const ph = String(SESSION.getPhone() || '');

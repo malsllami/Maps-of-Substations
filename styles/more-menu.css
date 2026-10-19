@@ -64,3 +64,4 @@
 .storage-screen[data-sync="ready"] .sync-line,.storage-screen[data-sync="ready"] .storage-row{background:var(--st-green-bg);border:2px solid var(--st-green);}
 .storage-screen[data-sync="pending"] .sync-line,.storage-screen[data-sync="pending"] .storage-row{background:var(--st-orange-bg);border:2px dashed var(--st-orange);}
 .storage-screen[data-sync] .sync-line{color:var(--text-primary);}
+img.mm-avatar{width:54px;height:54px;object-fit:contain;background:none;border:none;}
