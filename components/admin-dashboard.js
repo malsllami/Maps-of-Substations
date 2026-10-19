@@ -329,7 +329,7 @@
         let html = top.length ? '<div class="peak-top">' + top.map(function (x) {
           return '<div class="peak-row"><span class="peak-hour">' + hourLabel(x.hour) + '</span><div class="peak-track"><div class="peak-fill" style="width:' + Math.round(x.count / topMax * 100) + '%"></div></div><b class="peak-count">' + x.count + '</b></div>';
         }).join('') + '</div>' : '<div class="coming-soon">' + MSG.NO_REGIONS + '</div>';
-        html += '<details class="peak-details"><summary>الخريطة الحرارية الكاملة</summary><div class="heatmap-grid"><div></div>';
+        html += '<details class="peak-details"><summary>الخريطة الحرارية الكاملة</summary><div class="heatmap-scroll"><div class="heatmap-grid"><div></div>';
         for (let h = 0; h < 24; h++) html += '<div class="heatmap-hour">' + (h % 3 === 0 ? h : '') + '</div>';
         matrix.forEach(function (row, d) {
           html += '<div class="heatmap-label">' + esc((r.weekdayLabels || [])[d] || '') + '</div>';
@@ -338,7 +338,7 @@
             html += '<div class="heatmap-cell" style="background:' + (count ? 'rgba(31,174,140,' + (0.15 + k * 0.85).toFixed(3) + ')' : 'var(--bg-elev)') + '" title="' + count + ' — ' + h + ':00"></div>';
           });
         });
-        html += '</div></details>';
+        html += '</div></div></details>';
         if (r.peak) html += '<div class="heatmap-peak-note">🔥 أكثر وقت نشاطًا: <b>' + esc(r.peak.day) + ' — الساعة ' + r.peak.hour + ':00</b> (' + show_(r.peak.count) + ' حدث)</div>';
         box.innerHTML = html;
       },

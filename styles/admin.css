@@ -76,6 +76,7 @@ body.admin-page header{position:sticky;top:0;z-index:20;}
 .ops-card-title{font-size:13.5px;font-weight:700;margin-bottom:10px;}
 .ops-card-body{font-size:12.5px;color:var(--text-secondary);}
 .ops-grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+.ops-grid2>*{min-width:0;} /* لا يوسّع محتوى عريض البطاقة خارج عمودها — wide content never stretches a card past its column */
 .ops-grid2 .ops-card{margin-bottom:10px;}
 .present-avatars{display:flex;gap:10px;overflow-x:auto;padding:4px 0 12px;}
 .present-avatar{flex-shrink:0;width:64px;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;}
@@ -89,7 +90,10 @@ body.admin-page header{position:sticky;top:0;z-index:20;}
 .peak-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,#E5B53A,#E0654F);}
 .peak-count{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-primary);text-align:center;}
 .peak-details summary{cursor:pointer;font-size:11.5px;color:var(--teal-light);margin:6px 0;}
-.peak-details .heatmap-grid{margin-top:8px;}
+.peak-details{min-width:0;max-width:100%;}
+/* الخريطة الحرارية تتكيف مع عرض البطاقة؛ وتحت حدها الأدنى تتمرر داخلها أفقيًا ولا تتجاوز حدود البطاقة أبدًا
+   The heatmap fits the card's width; below its minimum it scrolls inside, never past the card's edges */
+.heatmap-scroll{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;margin-top:8px;padding-bottom:2px;}
 .region-donut-wrap{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;}
 .region-donut{flex-shrink:0;color:var(--text-primary);}
 .region-legend{display:flex;flex-direction:column;gap:6px;min-width:110px;flex:1;}
@@ -119,9 +123,9 @@ body.admin-page header{position:sticky;top:0;z-index:20;}
 .quality-row{display:flex;align-items:center;gap:14px;margin-bottom:8px;color:var(--text-primary);}
 .log-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);}
 .log-row b{color:var(--text-primary);font-family:'JetBrains Mono',monospace;}
-.heatmap-grid{display:grid;grid-template-columns:34px repeat(24,1fr);gap:2px;font-size:8.5px;color:var(--text-secondary);}
-.heatmap-hour{text-align:center;}
-.heatmap-cell{aspect-ratio:1;border-radius:3px;}
+.heatmap-grid{display:grid;grid-template-columns:34px repeat(24,minmax(0,1fr));min-width:250px;gap:2px;font-size:8.5px;color:var(--text-secondary);}
+.heatmap-hour{text-align:center;white-space:nowrap;overflow:visible;}
+.heatmap-cell{aspect-ratio:1;min-width:0;border-radius:3px;}
 .heatmap-label{display:flex;align-items:center;justify-content:flex-end;padding-left:4px;font-size:9px;}
 .heatmap-peak-note{margin-top:10px;font-size:11.5px;color:var(--text-primary);text-align:center;}
 .region-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
@@ -175,7 +179,7 @@ body.admin-page header{position:sticky;top:0;z-index:20;}
   .ops-card{padding:12px;}
   .rep-row{flex-wrap:wrap;}
 }
-@media (max-width:360px){ .ops-grid2{grid-template-columns:1fr;} }
+@media (max-width:360px){ .ops-grid2{grid-template-columns:minmax(0,1fr);} }
 
 /* ===== إضافات 15 أكتوبر: سرعة الموقع، كل المناطق، جميع الأعضاء — 15 Oct additions: site speed, all regions, all members ===== */
 .speed-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;padding-top:4px;}
