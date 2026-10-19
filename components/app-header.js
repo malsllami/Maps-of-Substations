@@ -107,7 +107,7 @@
     }
     function guest_() {
       // الرئيسية (identity) لا تكرر «تسجيل الدخول» في الشريط العلوي: زرها تحت الكرة (طلب محمد) — home doesn't repeat «login» in the top bar
-      return (o.identity ? '' : '<a href="auth.html" class="login-btn" data-role="login">تسجيل الدخول</a>') +
+      return (o.identity && home ? '' : '<a href="auth.html" class="login-btn" data-role="login">تسجيل الدخول</a>') +
         (home ? '<a href="shifts.html" class="theme-toggle" title="تقويم دوام الورديات" aria-label="تقويم دوام الورديات">' + ICON.calSmall + '</a>' : '') +
         '<button type="button" class="theme-toggle" data-act="theme" aria-label="تبديل الوضع الداكن والفاتح">' + ICON.toggle + '</button>';
     }
@@ -130,6 +130,7 @@
       const loggedIn = SESSION.isLoggedIn();
       const row = headerEl.querySelector('[data-role="main"]');
       row.innerHTML = brand_() + '<div class="header-actions' + (loggedIn ? ' logged-in' : '') + '">' + (loggedIn ? (o.identity ? identity_() : menu_()) : guest_()) + '</div>';
+      headerEl.classList.toggle('hdr-identity', !!(o.identity && loggedIn)); // سطر حالة واحد بلا تاريخ (التاريخ في الصفحة نفسها) / one status line, the date lives on the page
       row.querySelector('[data-role="title"]').textContent = o.title || (home ? 'الشركة السعودية للطاقة' : '');
       row.querySelector('[data-role="subtitle"]').textContent = o.subtitle || (home ? 'نظام الإحداثيات الجغرافية' : '');
       if (loggedIn) {

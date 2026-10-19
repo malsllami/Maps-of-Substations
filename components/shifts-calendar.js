@@ -10,6 +10,8 @@
  * التغيير الوحيد المطلوب من محمد (الورديات): بطاقات أيام التقويم بخلفية البطاقات العادية، والحدود ورقم التاريخ والتاريخ
  *   الهجري والرمز هي التي تُلوَّن بلون الحالة (بدل الخلفية الملوّنة كلها في V1).
  * V2: النصوص تُكتب نصًا؛ اختيار وردية العضو يأتي من الصفحة (select)؛ الأسماء والثوابت من الإعدادات.
+ * إعادة التصميم (19 أكتوبر، طلب محمد): حُذفت تبويبات الورديات الصغيرة لأنها تكرار لبطاقات «دوام اليوم» الكبيرة (نفس الاسم والحالة
+ *   والاختيار)؛ البطاقات الكبيرة وحدها تختار الوردية التي يعرضها التقويم.
  *
  * The shifts page body, V1's behavior and texts with no change to the maths. The only change Mohammed asked for: calendar
  * day cards keep the normal card background; the border, the date and the icon take the status colour.
@@ -66,9 +68,6 @@
     container.innerHTML =
       '<div class="page-title">دوام اليوم لكل وردية</div><div class="page-sub" data-role="today-line">—</div>' +
       '<div class="today-grid" data-role="today"></div>' +
-      '<div class="group-tabs" role="tablist" data-role="tabs">' + groups.map(function (g) {
-        return '<div class="group-tab" data-group="' + g + '" role="tab" tabindex="0" aria-selected="false"></div>';
-      }).join('') + '</div>' +
       '<div class="cal-nav"><button type="button" class="cal-nav-btn" data-act="prev" aria-label="الشهر السابق">‹</button>' +
         '<div class="cal-month-label"><span data-role="month"></span><span class="hijri" data-role="month-hijri"></span></div>' +
         '<button type="button" class="cal-nav-btn" data-act="next" aria-label="الشهر التالي">›</button></div>' +
@@ -88,22 +87,13 @@
         const card = doc.createElement('div');
         card.className = 'today-card ' + info.cls + (g === group ? ' active-group' : '');
         card.setAttribute('role', 'button'); card.setAttribute('tabindex', '0'); card.setAttribute('aria-label', 'اختيار وردية ' + g);
+        card.setAttribute('aria-pressed', g === group ? 'true' : 'false'); // الوردية التي يعرضها التقويم / the group the calendar shows
         card.dataset.group = g;
         card.innerHTML = icon_(info.cls, 'card-icon ' + info.cls);
         const grp = doc.createElement('div'); grp.className = 'grp'; grp.textContent = 'وردية ' + g;
         const st = doc.createElement('div'); st.className = 'status ' + info.cls; st.textContent = info.label;
         card.appendChild(grp); card.appendChild(st);
         grid.appendChild(card);
-      });
-    }
-    function renderTabs_() {
-      const t = ROT.todayUTC(now());
-      container.querySelectorAll('.group-tab').forEach(function (tab) {
-        const g = tab.dataset.group, info = ROT.shiftFor(g, t), on = g === group;
-        tab.className = 'group-tab ' + info.cls + (on ? ' active' : '');
-        tab.setAttribute('aria-selected', String(on));
-        tab.innerHTML = icon_(info.cls, 'tab-icon');
-        const s = doc.createElement('span'); s.textContent = 'وردية ' + g; tab.appendChild(s);
       });
     }
     function renderCalendar_() {
@@ -124,7 +114,7 @@
         grid.appendChild(cell);
       }
     }
-    function render() { renderToday_(); renderTabs_(); renderCalendar_(); }
+    function render() { renderToday_(); renderCalendar_(); }
     function select(g) { if (!ROT.isGroup(g)) return false; group = g; render(); return true; }
     function go(delta) {
       viewMonth += delta;

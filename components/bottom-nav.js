@@ -62,5 +62,13 @@
     return { setActive: setActive, active: function () { return current; }, element: el };
   }
 
-  global.SecBottomNav = { mount: mount };
+  /* الشريط في صفحة غير الرئيسية (حسابي، الورديات، لوحة المدير): كل زر يفتح شاشته في الرئيسية (#map، #stations، #more، #add)
+     The bar on a page other than home: every button opens its screen on home (#map, #stations, #more, #add) */
+  function mountLinks(el, active) {
+    global.document.body.classList.add('has-bottom-nav');
+    const go = function (name) { global.location.href = 'index.html' + (name && name !== 'home' ? '#' + name : ''); };
+    return mount(el, { active: active || 'more', onSelect: go, onAdd: function () { go('add'); } });
+  }
+
+  global.SecBottomNav = { mount: mount, mountLinks: mountLinks };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -466,6 +466,18 @@
     onAdd: function () { if (loggedIn()) SecStationForm.openAdd(); else global.location.href = 'auth.html'; }
   });
 
+  // ===== الوصول من صفحة أخرى بالشريط السفلي: #map، #stations، #more، #add — arriving from another page through the bottom bar =====
+  if (loggedIn()) {
+    if (global.SecContactAdmin) SecContactAdmin.loadInfo();
+    const want = String(global.location.hash || '').replace('#', '');
+    if (want) {
+      try { global.history.replaceState(null, '', global.location.pathname + global.location.search); } catch (e) { /* لا شيء / nothing */ }
+      if (want === 'add') SecStationForm.openAdd();
+      else if (want === 'more') { setView('more'); more.render(); }
+      else if (want === 'map' || want === 'stations') setView(want);
+    }
+  }
+
   // للاختبار والتكامل: الحالة الحالية فقط — for tests: the current state only
   global.SecHome = {
     goToStation: goToStation, goBackToSearch: goBackToSearch, setView: setView, openDetails: openDetails_,

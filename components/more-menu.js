@@ -28,6 +28,8 @@
     moon: S('<path d="M21 12.5A8.5 8.5 0 1 1 11.5 3 6.8 6.8 0 0 0 21 12.5z"/>'),
     install: S('<rect x="3" y="3" width="18" height="18" rx="4"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>'),
     tour: S('<circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>'),
+    phone: S('<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/>'),
+    chat: S('<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>'),
     out: S('<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>'),
     chev: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>'
   };
@@ -61,6 +63,9 @@
           (SESSION.isAdmin() ? link_('admin.html', 'k-ops', 'shield', 'لوحة المدير') : '')) +
         group_('البيانات', (g.SecOfflineMapUI ? item_('offline-map', 'k-dist', 'map', 'خريطة جدة بدون إنترنت') : '') +
           (d.onStorage ? item_('storage', 'k-info', 'db', 'البيانات المؤقتة') : '')) +
+        // التواصل مع المدير (كان في القائمة المنسدلة للصفحات الأخرى) — contacting the admin (was in the other pages' dropdown)
+        (g.SecContactAdmin ? group_('التواصل', '<a class="mm-item k-dist" href="#" data-act="call"><span class="mm-ic">' + ICON.phone + '</span><span class="mm-lbl">اتصال بالمدير</span>' + ICON.chev + '</a>' +
+          item_('message', 'k-sub', 'chat', 'مراسلة المدير')) : '') +
         group_('التطبيق', item_('theme', 'k-info', 'moon', 'الوضع الداكن', '<span class="mm-switch" data-role="switch" role="switch"><span></span></span>') +
           (install ? item_('install', 'k-dist', 'install', 'حفظ الموقع كتطبيق') : '') +
           (g.SecFeatureTour ? item_('tour', 'k-sub', 'tour', 'الجولة التعريفية') : '')) +
@@ -70,6 +75,8 @@
       const ph = String(SESSION.getPhone() || '');
       container.querySelector('[data-role="phone"]').textContent = /^\+966\d{9}$/.test(ph) ? '0' + ph.slice(4) : ph; // الصيغة المحلية / the local form
       syncTheme_();
+      const call = container.querySelector('[data-act="call"]');
+      if (call && global.SecContactAdmin) global.SecContactAdmin.bindCallLink(call);
     }
     function syncTheme_() {
       const sw = container.querySelector('[data-role="switch"]'); if (!sw) return;
@@ -90,6 +97,7 @@
       else if (act === 'storage') { if (d.onStorage) d.onStorage(); }
       else if (act === 'install') { if (g.SecInstallSheet) g.SecInstallSheet.open(); }
       else if (act === 'tour') { if (g.SecFeatureTour) g.SecFeatureTour.open(); }
+      else if (act === 'message') { e.preventDefault(); if (g.SecContactAdmin) g.SecContactAdmin.open(); }
       else if (act === 'logout') {
         if (t.dataset.confirm === '1') { resetLogout_(); (d.onLogout || SESSION.logout)(); return; }
         t.dataset.confirm = '1';

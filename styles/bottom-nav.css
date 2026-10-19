@@ -27,3 +27,5 @@
 .bn-tab:focus-visible,.bn-add:focus-visible{outline:2px solid var(--dist);outline-offset:2px;}
 /* الملاحة بشاشة كاملة والزائر: لا شريط — full navigation and guests: no bar */
 body.nav-full .bottom-nav, body.guest-mode .bottom-nav{display:none;}
+/* الصفحات الأخرى بالشريط: مسافة سفلية حتى لا يغطي المحتوى — other pages with the bar: bottom room so it never covers content */
+body.has-bottom-nav{padding-bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 12px);}
