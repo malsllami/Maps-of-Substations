@@ -57,11 +57,12 @@
     let draft = null, me = null, geo = 'idle', shown = PAGE, last = [];
     container.classList.add('stations-list');
     container.innerHTML =
-      '<div class="sl-head"><span class="sl-title">المحطات القريبة</span></div>' +
+      // العنوان والزران في سطر واحد (طلب محمد 19 أكتوبر) — the title and both buttons on one line
+      '<div class="sl-head"><span class="sl-title">المحطات القريبة</span>' +
       '<div class="sl-bar">' +
         '<button type="button" class="sl-chip sl-locate" data-act="locate">' + ICON.locate + '<span>تحديد موقعي</span></button>' +
         '<button type="button" class="sl-chip" data-act="filter" aria-expanded="false">' + ICON.filter + '<span>التصفية</span></button>' +
-      '</div>' +
+      '</div></div>' +
       '<div class="sl-summary" data-role="summary"></div>' +
       '<div class="sl-filter" data-role="filter" hidden></div>' +
       '<div class="sl-body" data-role="body"></div>';

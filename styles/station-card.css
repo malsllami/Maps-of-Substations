@@ -204,3 +204,16 @@ body.nav-full .station-sheet{display:none !important;}
 .station-sheet .sheet-foot .db-freshness-note{margin:0;padding:0;border:none;}
 /* زر «التفاصيل» تحت نوع المحطة — the «details» button under the station type */
 .sheet-more{margin-top:4px;padding:4px 10px;border-radius:9px;border:1px solid var(--border-strong);background:var(--bg-elev);color:var(--text-primary);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;}
+
+/* ===== رأس اللوحة (طلب محمد 19 أكتوبر): رمز النوع صغير في سطر علوي، والرقم خانة بجانب المغذي والمنطقة =====
+   The sheet head: a small type symbol on a top line, and the number a cell beside the feeder and region */
+.sheet-head{flex-direction:column;align-items:stretch;gap:8px;}
+.sheet-line{display:flex;align-items:center;gap:8px;min-width:0;}
+.sheet-badge{width:28px;height:28px;border-radius:8px;}
+.sheet-badge svg{width:16px;height:16px;}
+.sheet-line .sheet-type{font-size:14px;flex:1;min-width:0;}
+.sheet-line .sheet-more{margin:0;flex-shrink:0;}
+.station-sheet .sheet-meta{flex:none;width:100%;}
+.station-sheet .sheet-meta .sb-data-cell .cell-value{display:block;}
+.station-sheet .sheet-meta .sheet-id .cell-value{font-size:16px;}
+@media (max-width:380px){ .sheet-badge{width:26px;height:26px;} }

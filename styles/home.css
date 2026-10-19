@@ -244,3 +244,15 @@ body.guest-mode .app-views{display:none;}
   background:linear-gradient(90deg, #ffffff, var(--teal-light));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 2px 14px rgba(0,0,0,0.55);}
 [data-theme="light"] .guest-title{background:linear-gradient(90deg, var(--text-primary), var(--teal));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:none;}
 .guest-landing .guest-login-cta{display:flex;margin-top:0;}
+
+/* ===== الخريطة بلا فراغ فوقها وتحتها (طلب محمد 19 أكتوبر): مسافات أضيق، وبلا حد أدنى لارتفاع المسرح —
+   فالشاشات القصيرة لم تعد تترك فراغًا بين الخريطة ولوحة المحطة (كان المسرح 280 والخريطة 200).
+   The map with no gap above or below it: tighter spacing and no stage minimum height, so short screens no longer leave a
+   gap between the map and the station sheet. */
+.view-map.hero{padding-top:6px;}
+.view-map .map-stage-slot{margin-top:6px;}
+.view-map .map-stage-slot .globe-stage.map-active{min-height:0;}
+.view-map .station-sheet{margin-top:6px;}
+/* سطر رسائل البحث لا يحجز مساحة وهو فارغ (كان 22 نقطة فوق الخريطة)، ويظهر بنصه عند وجود رسالة
+   The search message line takes no space while empty (it was 22px above the map), and shows when there is a message */
+.view-map .station-search-hint:empty{min-height:0;padding:0;}

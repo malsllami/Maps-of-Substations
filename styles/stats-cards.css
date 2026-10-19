@@ -99,3 +99,15 @@
 .sb-state[data-kind="failed"],.sb-state[data-kind="stale"]{border-color:var(--c-alert-line);color:var(--c-alert-fg);background:var(--c-alert-bg);}
 .sb-state[data-kind="offline"]{border-color:var(--c-info-line);color:var(--c-info-fg);background:var(--c-info-bg);}
 .sb-retry{font-family:inherit;font-size:13.5px;font-weight:700;padding:7px 14px;border-radius:10px;cursor:pointer;background:var(--bg-card);color:var(--text-primary);border:1px solid var(--border-strong);}
+
+/* ===== بطاقات الأرقام أصغر قليلًا بارتفاع موحّد، و«عمليات اليوم» بفاصل (طلب محمد 19 أكتوبر) =====
+   Number tiles slightly smaller with one height, and «today's operations» with a separator */
+.stats-board .st-grid{gap:8px;}
+.stats-board .st-tile{height:78px;min-height:0;padding:10px 10px 8px;gap:4px;justify-content:space-between;}
+.stats-board .st-icon svg{width:17px;height:17px;}
+.stats-board .st-label{font-size:13px;}
+.stats-board .st-num{font-size:22px;}
+.stats-board .st-ops{flex-wrap:nowrap;gap:8px;align-items:baseline;}
+.stats-board .st-op b{font-size:20px;}
+.stats-board .st-op + .st-op::before{content:'|';margin-inline-end:8px;font-weight:400;opacity:.55;}
+@media (max-width:340px){ .stats-board .st-num{font-size:20px;} .stats-board .st-op b{font-size:18px;} .stats-board .st-tile{padding:10px 8px 8px;} }

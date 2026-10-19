@@ -50,3 +50,21 @@
 .sl-state{display:flex;flex-direction:column;align-items:center;gap:12px;padding:22px 14px;border-radius:var(--radius-lg);border:1px dashed var(--border-strong);
   color:var(--text-secondary);font-size:14.5px;font-weight:600;text-align:center;line-height:1.7;}
 .sl-retry{padding:0 18px;}
+
+/* ===== طلب محمد (19 أكتوبر): الزران صغيران بجانب العنوان، والقائمة تملأ المساحة حتى الشريط السفلي =====
+   الشاشة عمود بارتفاع المساحة بين الرأس والشريط السفلي؛ القائمة تأخذ الباقي وتتمرر داخله، ولوحة التصفية تتمرر داخلها.
+   Mohammed's request: two small buttons beside the title, and the list fills the space down to the bottom bar. */
+.stations-list{box-sizing:border-box;gap:8px;padding-top:8px;
+  height:calc(100dvh - var(--header-h, 120px) - var(--tabbar-h) - env(safe-area-inset-bottom, 0px) - 12px);}
+.sl-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex-shrink:0;}
+.sl-title{flex:1;min-width:0;font-size:17px;white-space:nowrap;}
+.sl-bar{display:flex;gap:6px;flex-shrink:0;}
+.sl-chip{min-height:34px;padding:0 10px;gap:5px;border-radius:10px;font-size:13px;}
+.sl-chip svg{width:15px;height:15px;}
+.sl-summary{flex-shrink:0;font-size:13px;}
+.sl-filter{flex:0 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;}
+.sl-body{flex:1;min-height:0;display:flex;flex-direction:column;gap:6px;}
+.sl-count{flex-shrink:0;}
+.sl-list{flex:1;min-height:0;max-height:none;}
+.sl-body > .sl-state{flex-shrink:0;}
+@media (max-width:359px){ .sl-title{font-size:15px;} .sl-chip{padding:0 8px;} .sl-chip svg{display:none;} }

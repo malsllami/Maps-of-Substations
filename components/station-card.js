@@ -85,16 +85,20 @@
     return '<button class="st-btn ' + cls + '" type="button" data-act="' + act + '"' + (extra || '') + '><span class="st-ico">' + BTN_ICON[icon] + '</span><span class="st-lbl">' + label + '</span></button>';
   }
 
-  /* رأس اللوحة: النوع والرقم، ثم المغذي والمنطقة — the sheet head: type and number, then feeder and region */
+  /* رأس اللوحة (طلب محمد 19 أكتوبر): سطر علوي برمز النوع الصغير والنوع و«التفاصيل»، ثم خانات «محطة | المغذي | المنطقة»
+   * The sheet head (Mohammed, 19 Oct): a top line with the small type symbol, the type and «details», then the cells
+   * «station | feeder | region» */
   function topHtml_(s, deps) {
-    const coords = Q.hasCoordinates(s), sub = s.type === 'تحويل';
+    const coords = Q.hasCoordinates(s), sub = s.type === 'تحويل', kind = sub ? 'is-sub' : 'is-dist';
     return '<div class="sb-inner sb-top">' +
       '<div class="sheet-head">' +
-        '<span class="sheet-badge ' + (sub ? 'is-sub' : 'is-dist') + '" aria-hidden="true">' + (TYPE_ICON[s.type] || TYPE_ICON['توزيع']) + '</span>' +
-        '<div class="sheet-title"><div class="sheet-id"><span class="sheet-id-k">محطة</span> <bdi class="cell-value">' + esc(s.id) + '</bdi></div>' +
-          '<div class="sheet-type ' + (sub ? 'is-sub' : 'is-dist') + '">' + (sub ? 'محطة تحويل' : 'محطة توزيع') + '</div>' +
-          (deps && deps.onDetails ? '<button type="button" class="sheet-more" data-act="details">التفاصيل ‹</button>' : '') + '</div>' +
+        '<div class="sheet-line">' +
+          '<span class="sheet-badge ' + kind + '" aria-hidden="true">' + (TYPE_ICON[s.type] || TYPE_ICON['توزيع']) + '</span>' +
+          '<span class="sheet-type ' + kind + '">' + (sub ? 'محطة تحويل' : 'محطة توزيع') + '</span>' +
+          (deps && deps.onDetails ? '<button type="button" class="sheet-more" data-act="details">التفاصيل ‹</button>' : '') +
+        '</div>' +
         '<div class="sb-data-row sheet-meta">' +
+          '<div class="sb-data-cell sheet-id"><div class="cell-label">محطة</div><bdi class="cell-value">' + esc(s.id) + '</bdi></div>' +
           (s.feeder ? '<div class="sb-data-cell"><div class="cell-label">المغذي</div><div class="cell-value">' + esc(s.feeder) + '</div></div>' : '') +
           (s.region ? '<div class="sb-data-cell"><div class="cell-label">المنطقة</div><div class="cell-value ar">' + esc(s.region) + '</div></div>' : '') +
         '</div>' +
