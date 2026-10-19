@@ -8,9 +8,7 @@
  * is dimmed while roads and text stay clear and the blue route stands out. A colour filter over the same OSM tiles (markers
  * and routes untouched), no API-key provider.
  * ============================================================ */
-/* تباين وإضاءة أعلى درجة (قائمة محمد 4، 19 أكتوبر): كانت المباني تذوب في الخلفية؛ نفس اللون الكحلي المعتمد (6 أكتوبر)
-   One step more contrast and light (Mohammed's list 4): buildings blended into the ground; the same approved navy tone */
-.map-night-tiles{filter:invert(1) contrast(.84) sepia(.5) hue-rotate(178deg) saturate(1.05) brightness(.95);}
+.map-night-tiles{filter:invert(1) contrast(.66) sepia(.55) hue-rotate(178deg) saturate(.95) brightness(.86);}
 /* خلفية الخريطة الليلية قبل وصول الصور: كحلية داكنة بدل رمادي Leaflet الفاتح — لا ومضة فاتحة على الجوال (قرار محمد 6 أكتوبر)
    The night map's background before tiles arrive: dark navy instead of Leaflet's light grey — no bright flash on phones */
 .leaflet-container:has(.map-night-tiles){background:#26303C;}
