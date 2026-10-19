@@ -15,7 +15,8 @@ body.home-page > header{position:fixed;top:0;left:0;right:0;z-index:160;}
 .app-view{display:none;}
 body[data-view="home"] .view-home,
 body[data-view="map"] .view-map,
-body[data-view="stations"] .view-stations{display:block;}
+body[data-view="stations"] .view-stations,
+body[data-view="details"] .view-details{display:block;}
 
 /* شاشة الخريطة — the map screen */
 .hero{position:relative;padding:10px 12px 0;}

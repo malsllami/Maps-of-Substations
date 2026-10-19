@@ -46,6 +46,7 @@
 <link rel="stylesheet" href="styles/profile-gate.css">
 <link rel="stylesheet" href="styles/home.css">
 <link rel="stylesheet" href="styles/bottom-nav.css">
+<link rel="stylesheet" href="styles/station-details.css">
 </head>
 <body class="home-page" data-view="home">
 
@@ -106,6 +107,9 @@
   <div class="station-table station-sheet" id="stationTable"></div>
 </section>
 
+<!-- شاشة «تفاصيل المحطة» (تُفتح من لوحة المحطة) — the station details screen (opened from the station sheet) -->
+<section class="app-view view-details" id="viewDetails"><div id="detailsBox"></div></section>
+
 <!-- شاشة «المحطات» — the stations screen -->
 <section class="app-view view-stations" id="viewStations">
   <!-- مؤقت أثناء البناء (المرحلة «و»: قائمة المحطات القريبة والتصفية) — a build-time stub until stage «و» -->
@@ -150,6 +154,7 @@
 <script src="components/storage-section.js"></script>
 <script src="components/profile-gate.js"></script>
 <script src="components/bottom-nav.js"></script>
+<script src="components/station-details.js"></script>
 <script src="pages/home.js"></script>
 </body>
 </html>

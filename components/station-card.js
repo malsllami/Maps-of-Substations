@@ -86,13 +86,14 @@
   }
 
   /* رأس اللوحة: النوع والرقم، ثم المغذي والمنطقة — the sheet head: type and number, then feeder and region */
-  function topHtml_(s) {
+  function topHtml_(s, deps) {
     const coords = Q.hasCoordinates(s), sub = s.type === 'تحويل';
     return '<div class="sb-inner sb-top">' +
       '<div class="sheet-head">' +
         '<span class="sheet-badge ' + (sub ? 'is-sub' : 'is-dist') + '" aria-hidden="true">' + (TYPE_ICON[s.type] || TYPE_ICON['توزيع']) + '</span>' +
         '<div class="sheet-title"><div class="sheet-id"><span class="sheet-id-k">محطة</span> <bdi class="cell-value">' + esc(s.id) + '</bdi></div>' +
-          '<div class="sheet-type ' + (sub ? 'is-sub' : 'is-dist') + '">' + (sub ? 'محطة تحويل' : 'محطة توزيع') + '</div></div>' +
+          '<div class="sheet-type ' + (sub ? 'is-sub' : 'is-dist') + '">' + (sub ? 'محطة تحويل' : 'محطة توزيع') + '</div>' +
+          (deps && deps.onDetails ? '<button type="button" class="sheet-more" data-act="details">التفاصيل ‹</button>' : '') + '</div>' +
         '<div class="sb-data-row sheet-meta">' +
           (s.feeder ? '<div class="sb-data-cell"><div class="cell-label">المغذي</div><div class="cell-value">' + esc(s.feeder) + '</div></div>' : '') +
           (s.region ? '<div class="sb-data-cell"><div class="cell-label">المنطقة</div><div class="cell-value ar">' + esc(s.region) + '</div></div>' : '') +
@@ -143,7 +144,7 @@
 
   /**
    * render(container, station, deps) ← { update(station), nearby(), feeder(), station(), destroy() }
-   * deps: { onNavigate(s), onEdit(s), canEdit(), isAdmin(), onDelete(s), onFeeder(s) (عرض محطات المغذي), offlineMapUI, toast(text), dataFreshness() → Date|null,
+   * deps: { onNavigate(s), onEdit(s), canEdit(), isAdmin(), onDelete(s), onFeeder(s) (عرض محطات المغذي), onDetails(s) (شاشة التفاصيل), offlineMapUI, toast(text), dataFreshness() → Date|null,
    *         localStations() → Array|null, actionsContainer } — isAdmin + onDelete يُظهران «🗑️ حذف» (نافذته في delete-station.js)؛
    *         actionsContainer: مكان الجزء السفلي تحت الخريطة (بدونه يُرسم الجزءان معًا في container)
    *         / where the bottom part goes under the map (without it both parts draw in container)
@@ -155,8 +156,8 @@
     const toast = function (t) { try { if (deps.toast) deps.toast(t); } catch (e) { /* التنبيه لا يكسر البطاقة / never breaks the card */ } };
 
     function draw_() {
-      if (bottom) { container.innerHTML = topHtml_(s); bottom.innerHTML = bottomHtml_(s, deps); }
-      else container.innerHTML = topHtml_(s) + bottomHtml_(s, deps);
+      if (bottom) { container.innerHTML = topHtml_(s, deps); bottom.innerHTML = bottomHtml_(s, deps); }
+      else container.innerHTML = topHtml_(s, deps) + bottomHtml_(s, deps);
       boxes.forEach(function (b) { b.classList.add('show'); });
       if (deps.offlineMapUI) { try { deps.offlineMapUI.renderCard(); } catch (e) { /* سطر الحالة اختياري / the status line is optional */ } }
     }
@@ -170,6 +171,7 @@
         if (act === 'navigate') { if (Q.hasCoordinates(s)) await deps.onNavigate(s); else toast(NO_COORDS_MSG); }
         else if (act === 'offline-map') deps.offlineMapUI.open();
         else if (act === 'feeder') { if (deps.onFeeder) deps.onFeeder(s); }
+        else if (act === 'details') { if (deps.onDetails) deps.onDetails(s); }
         else if (act === 'share') await share_();
         else if (act === 'edit') {
           if (global.navigator.onLine === false) { toast(OFFLINE_WRITE_MSG); return; }

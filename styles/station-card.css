@@ -202,3 +202,5 @@ body.nav-full .station-sheet{display:none !important;}
 .station-sheet .sheet-foot{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:4px;}
 .station-sheet .sheet-foot .st-search-time{margin:0;font-size:12.5px;text-align:start;justify-content:flex-start;display:flex;align-items:center;gap:4px;color:var(--text-secondary);}
 .station-sheet .sheet-foot .db-freshness-note{margin:0;padding:0;border:none;}
+/* زر «التفاصيل» تحت نوع المحطة — the «details» button under the station type */
+.sheet-more{margin-top:4px;padding:4px 10px;border-radius:9px;border:1px solid var(--border-strong);background:var(--bg-elev);color:var(--text-primary);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;}

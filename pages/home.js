@@ -48,14 +48,14 @@
   global.addEventListener('resize', function () { syncHeaderHeight(); layout(); });
 
   // ===== الشاشات والشريط السفلي (إعادة التصميم) — The screens and the bottom bar (redesign) =====
-  const VIEWS = ['home', 'map', 'stations'];
+  const VIEWS = ['home', 'map', 'stations', 'details'];
   let nav = null;
   /* يعرض شاشة واحدة؛ الخريطة تُنشأ عند أول فتح لشاشتها وتبقى — shows one screen; the map is created on first open and kept */
   function setView(name) {
     if (VIEWS.indexOf(name) === -1) return;
     doc.body.dataset.view = name;
     $('heroSection').classList.toggle('map-active', name === 'map');
-    if (nav) nav.setActive(name);
+    if (nav) nav.setActive(name === 'details' ? 'map' : name); // التفاصيل جزء من «الخريطة» / details belong to «map»
     if (name === 'map') {
       ensureMap_();
       global.setTimeout(function () { layout(); if (view) view.map.invalidateSize(); }, 30);
@@ -144,7 +144,8 @@
       dataFreshness: function () { return SYNC.state().syncedAt; },
       localStations: function () { return SYNC.stations(); },
       // «محطات المغذي» في اللوحة ← نفس زر «مغذي» في شريط الخريطة — the sheet's feeder card ← the toolbar's feeder button
-      onFeeder: function () { const b = $('mapStage').querySelector('[data-nearby="feeder"]'); if (b) b.click(); }
+      onFeeder: function () { const b = $('mapStage').querySelector('[data-nearby="feeder"]'); if (b) b.click(); },
+      onDetails: function (s) { openDetails_(s); }
     };
   }
   function showCard_(s) {
@@ -312,6 +313,32 @@
     S.ensureFresh().then(function (ok) { if (ok) gate.check(); });
   }
 
+  // ===== تفاصيل المحطة (إعادة التصميم) — Station details (redesign) =====
+  // تُفتح من لوحة المحطة؛ «رجوع» (أو زر الرجوع في الجوال) يعيد للخريطة على المحطة نفسها
+  // Opened from the station sheet; «back» (or the phone's back button) returns to the map on the same station
+  const details = SecStationDetails.mount($('detailsBox'), {
+    onBack: function () { closeDetails_(); },
+    onNavigate: function (s) { closeDetails_(); if (!view) { notify_(NAV_NEEDS_MAP); return; } SecNavView.start(s); },
+    onEdit: function (s) { if (global.navigator.onLine === false) { notify_(SecStationCard.MSG.OFFLINE_WRITE); return; } SecStationForm.openEdit(s); },
+    canEdit: loggedIn,
+    onShowOnMap: function () { closeDetails_(); },
+    onOpenStation: function (s) { closeDetails_(); goToStation(s); },
+    googleMapsUrl: SecStationCard.googleMapsUrl, shareText: SecStationCard.shareText,
+    localStations: function () { return SYNC.stations(); },
+    toast: notify_
+  });
+  function openDetails_(s) {
+    details.open(s);
+    setView('details');
+    try { global.history.pushState({ secView: 'details' }, ''); } catch (e) { /* بلا سجل تنقل / no history */ }
+  }
+  function closeDetails_() {
+    if (doc.body.dataset.view !== 'details') return;
+    setView('map'); // فورًا قبل أي إجراء بعدها (الملاحة تحتاج الخريطة ظاهرة) — at once, before any next action (navigation needs the map shown)
+    if (global.history.state && global.history.state.secView === 'details') global.history.back(); // يُزيل خطوة السجل فقط / only drops the history step
+  }
+  global.addEventListener('popstate', function () { if (doc.body.dataset.view === 'details') setView('map'); });
+
   // ===== الشريط السفلي — The bottom bar =====
   nav = SecBottomNav.mount($('bottomNav'), {
     active: 'home',
@@ -327,8 +354,8 @@
 
   // للاختبار والتكامل: الحالة الحالية فقط — for tests: the current state only
   global.SecHome = {
-    goToStation: goToStation, goBackToSearch: goBackToSearch, setView: setView,
+    goToStation: goToStation, goBackToSearch: goBackToSearch, setView: setView, openDetails: openDetails_,
     state: function () { return { view: doc.body.dataset.view, map: !!view && doc.body.dataset.view === 'map', station: current, card: !!card }; },
-    parts: function () { return { view: view, lens: lens, bar: bar, stats: stats, recent: recent, gate: gate, status: status, header: header, nav: nav }; }
+    parts: function () { return { view: view, details: details, lens: lens, bar: bar, stats: stats, recent: recent, gate: gate, status: status, header: header, nav: nav }; }
   };
 })(typeof window !== 'undefined' ? window : globalThis);
