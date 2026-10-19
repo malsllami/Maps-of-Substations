@@ -165,3 +165,22 @@ body.guest-mode .home-title{display:none;}
 .view-map .map-mode-chip .mm-auto-badge{font-size:11px;padding:2px 6px;}
 .view-map [data-tools="more"]{font-size:0;gap:0;padding:7px 9px;} /* «⋯» أيقونة فقط فتتسع كل الأدوات — «⋯» icon only so every tool fits */
 .view-map [data-tools="more"] .tb-icon{font-size:17px;}
+
+/* ===== الوضع الفاتح: ألوان حقيقية ممتلئة للأزرار والبطاقات بدل الدرجات الفاتحة (ملاحظة محمد) =====
+   Light theme: solid real colors for buttons and tiles instead of pale tints (Mohammed's note); the dark theme is unchanged */
+[data-theme="light"] .st-tile,[data-theme="light"] .sb-detail,[data-theme="light"] .home-fold,[data-theme="light"] .station-sheet,
+[data-theme="light"] .map-toolbar-bar,[data-theme="light"] #lensBox .station-search-bar,[data-theme="light"] .view-map .station-search-bar,
+[data-theme="light"] .conn-status-pill{box-shadow:var(--card-shadow);border-color:var(--border-strong);}
+/* بطاقتا التوزيع والتحويل ممتلئتان بلونيهما والنص أبيض — the distribution and substation tiles filled, white text */
+[data-theme="light"] .st-tile.sb-dist{background:#14996A;border-color:#14996A;}
+[data-theme="light"] .st-tile.sb-sub{background:#2470D0;border-color:#2470D0;}
+[data-theme="light"] .st-tile.sb-dist .st-label,[data-theme="light"] .st-tile.sb-dist .st-num,[data-theme="light"] .st-tile.sb-dist .st-icon,
+[data-theme="light"] .st-tile.sb-sub .st-label,[data-theme="light"] .st-tile.sb-sub .st-num,[data-theme="light"] .st-tile.sb-sub .st-icon{color:#FFFFFF;}
+/* الإجراءات السريعة ممتلئة: الأعطال كهرماني، آخر المحطات أزرق، التحديث كحلي — quick actions filled */
+[data-theme="light"] .action-tile{border-width:1px;box-shadow:var(--card-shadow);}
+[data-theme="light"] .tile-outage{background:#E8A800;border-color:#E8A800;color:#2B1F00;}
+[data-theme="light"] .tile-recent{background:#2470D0;border-color:#2470D0;color:#FFFFFF;}
+[data-theme="light"] .tile-refresh{background:#2F4358;border-color:#2F4358;color:#FFFFFF;}
+[data-theme="light"] .tile-outage:hover,[data-theme="light"] .tile-outage[aria-expanded="true"]{background:#D29800;}
+[data-theme="light"] .tile-recent:hover{background:#1C5DB0;}
+[data-theme="light"] .tile-refresh:hover{background:#22334A;color:#FFFFFF;}

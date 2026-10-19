@@ -41,15 +41,16 @@
   color-scheme:dark;
 }
 [data-theme="light"]{
-  --bg:#F2F4F3;
+  --bg:#E9EDEC;          /* أغمق قليلًا فتبرز البطاقات البيضاء (ملاحظة محمد) — a touch darker so white cards stand out */
   --bg-elev:#E8EEEC;
   --bg-card:#FFFFFF;
   --bar-bg:rgba(255,255,255,0.96);
   --text-primary:#0F1F33;
   --text-secondary:#2F4358; /* واضح (طلب محمد، 15 أكتوبر) — clear (Mohammed, 15 Oct) */
   --text-muted:#5E7186;
-  --border:rgba(15,31,51,0.10);
-  --border-strong:rgba(15,31,51,0.20);
+  --border:rgba(15,31,51,0.16);
+  --border-strong:rgba(15,31,51,0.28);
+  --card-shadow:0 1px 3px rgba(15,31,51,0.12), 0 1px 1px rgba(15,31,51,0.06);
   --dist:#14996A;
   --dist-soft:rgba(20,153,106,0.10);
   --sub:#2470D0;
