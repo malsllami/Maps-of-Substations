@@ -230,7 +230,8 @@
   const recent = SecRecentStations.mount($('recentSlot'), { onSelect: goToStation });
   SecStorageSection.mount($('storageSlot'), { onCleared: function () { status.refreshOffline(); } });
   // لوحة واحدة مفتوحة في كل مرة: الأعطال أو آخر المحطات / one panel open at a time: outage or recent
-  $('recentToggleBtn').addEventListener('click', function () { outage.toggle(false); recent.toggle(); });
+  $('recentToggleBtn').addEventListener('click', function () { outage.toggle(false); $('recentToggleBtn').setAttribute('aria-expanded', recent.toggle() ? 'true' : 'false'); });
+  $('outageTileBtn').addEventListener('click', function () { $('recentToggleBtn').setAttribute('aria-expanded', 'false'); });
   $('outageTileBtn').addEventListener('click', function () { recent.toggle(false); });
   // زر «تحديث» في البطاقات يحدّث أرقام لوحة المعلومات فقط، ويشرح ذلك برسالة (طلب محمد، 15 أكتوبر) — بخلاف زر الشريط العلوي الذي يزامن بيانات المحطات
   // The tiles' «refresh» updates the dashboard numbers only, and says so (Mohammed, 15 Oct) — unlike the header button, which syncs the stations

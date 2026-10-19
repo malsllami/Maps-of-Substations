@@ -34,6 +34,12 @@
   --dist-soft:rgba(43,196,138,0.13);
   --sub:#3B8BEB;         /* التحويل — substations */
   --sub-soft:rgba(59,139,235,0.14);
+  /* نظام الألوان الوظيفي (اعتماد محمد 19 أكتوبر): لكل نوع بيانات خلفية ونص وإطار — the functional palette: bg, text, line per data type */
+  --c-dist-bg:#173D35;  --c-dist-fg:#7EE0B5;  --c-dist-line:#2E7D63;   /* التوزيع — distribution */
+  --c-sub-bg:#18365A;   --c-sub-fg:#9CC8F7;   --c-sub-line:#3A6FAE;    /* التحويل — substations */
+  --c-ops-bg:#3C3423;   --c-ops-fg:#E8C77E;   --c-ops-line:#7A6535;    /* العمليات والتعديلات — operations and edits */
+  --c-alert-bg:#3A2B1F; --c-alert-fg:#F0A56C; --c-alert-line:#8A5A35;  /* الأعطال والتنبيهات — faults and alerts */
+  --c-info-bg:#252F40;  --c-info-fg:#B4C3D6;  --c-info-line:#46566E;   /* المعلومات التقنية — technical info */
   --globe-line:rgba(77,214,181,0.35);
   --globe-point:#4DD6B5;
   --danger:#EF5B5B;
@@ -55,6 +61,11 @@
   --dist-soft:rgba(20,153,106,0.10);
   --sub:#2470D0;
   --sub-soft:rgba(36,112,208,0.10);
+  --c-dist-bg:#E2F1EA;  --c-dist-fg:#135E45;  --c-dist-line:#8CC7AE;
+  --c-sub-bg:#E4EFFB;   --c-sub-fg:#1D4F8F;   --c-sub-line:#94B9E6;
+  --c-ops-bg:#F7EED8;   --c-ops-fg:#6E5212;   --c-ops-line:#D9C08A;
+  --c-alert-bg:#F9E9D9; --c-alert-fg:#8E4518; --c-alert-line:#E3B58F;
+  --c-info-bg:#EDF1F5;  --c-info-fg:#3A4C63;  --c-info-line:#BCC8D6;
   --globe-line:rgba(27,77,140,0.45);
   --globe-point:#1FAE8C;
   --danger:#C8412C;

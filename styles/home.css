@@ -166,21 +166,34 @@ body.guest-mode .home-title{display:none;}
 .view-map [data-tools="more"]{font-size:0;gap:0;padding:7px 9px;} /* «⋯» أيقونة فقط فتتسع كل الأدوات — «⋯» icon only so every tool fits */
 .view-map [data-tools="more"] .tb-icon{font-size:17px;}
 
-/* ===== الوضع الفاتح: ألوان حقيقية ممتلئة للأزرار والبطاقات بدل الدرجات الفاتحة (ملاحظة محمد) =====
-   Light theme: solid real colors for buttons and tiles instead of pale tints (Mohammed's note); the dark theme is unchanged */
-[data-theme="light"] .st-tile,[data-theme="light"] .sb-detail,[data-theme="light"] .home-fold,[data-theme="light"] .station-sheet,
-[data-theme="light"] .map-toolbar-bar,[data-theme="light"] #lensBox .station-search-bar,[data-theme="light"] .view-map .station-search-bar,
-[data-theme="light"] .conn-status-pill{box-shadow:var(--card-shadow);border-color:var(--border-strong);}
-/* بطاقتا التوزيع والتحويل ممتلئتان بلونيهما والنص أبيض — the distribution and substation tiles filled, white text */
-[data-theme="light"] .st-tile.sb-dist{background:#14996A;border-color:#14996A;}
-[data-theme="light"] .st-tile.sb-sub{background:#2470D0;border-color:#2470D0;}
-[data-theme="light"] .st-tile.sb-dist .st-label,[data-theme="light"] .st-tile.sb-dist .st-num,[data-theme="light"] .st-tile.sb-dist .st-icon,
-[data-theme="light"] .st-tile.sb-sub .st-label,[data-theme="light"] .st-tile.sb-sub .st-num,[data-theme="light"] .st-tile.sb-sub .st-icon{color:#FFFFFF;}
-/* الإجراءات السريعة ممتلئة: الأعطال كهرماني، آخر المحطات أزرق، التحديث كحلي — quick actions filled */
-[data-theme="light"] .action-tile{border-width:1px;box-shadow:var(--card-shadow);}
-[data-theme="light"] .tile-outage{background:#E8A800;border-color:#E8A800;color:#2B1F00;}
-[data-theme="light"] .tile-recent{background:#2470D0;border-color:#2470D0;color:#FFFFFF;}
-[data-theme="light"] .tile-refresh{background:#2F4358;border-color:#2F4358;color:#FFFFFF;}
-[data-theme="light"] .tile-outage:hover,[data-theme="light"] .tile-outage[aria-expanded="true"]{background:#D29800;}
-[data-theme="light"] .tile-recent:hover{background:#1C5DB0;}
-[data-theme="light"] .tile-refresh:hover{background:#22334A;color:#FFFFFF;}
+/* ===== نظام الألوان الوظيفي (اعتماد محمد، 19 أكتوبر) — the functional color system =====
+   اللون يدل على نوع البيانات في الوضعين (الدرجة تتغير فقط): التوزيع أخضر، التحويل أزرق، العمليات ذهبي، الأعطال نحاسي،
+   المعلومات التقنية رمادي مزرق؛ والثانوية محايدة. لا ظلال ولا إضاءة للتمييز. ثلاث حالات: عادية ← محددة (إطار أوضح) ←
+   نشطة/مفتوحة (إطار + شريط جانبي بلون البطاقة). التحديد لا يغيّر لون البطاقة إلى لون نوع آخر.
+   Color marks the data type in both themes (only the shade changes); secondary cards stay neutral. No shadows or glow.
+   Three states: normal ← selected (clearer frame) ← active/open (frame + a side bar in the card's color). */
+.k-dist,.st-tile.sb-dist{--k-bg:var(--c-dist-bg);--k-fg:var(--c-dist-fg);--k-line:var(--c-dist-line);}
+.k-sub,.st-tile.sb-sub,.tile-recent{--k-bg:var(--c-sub-bg);--k-fg:var(--c-sub-fg);--k-line:var(--c-sub-line);}
+.k-ops,.st-tile.sb-today{--k-bg:var(--c-ops-bg);--k-fg:var(--c-ops-fg);--k-line:var(--c-ops-line);}
+.k-alert,.tile-outage{--k-bg:var(--c-alert-bg);--k-fg:var(--c-alert-fg);--k-line:var(--c-alert-line);}
+.k-info,.home-fold{--k-bg:var(--c-info-bg);--k-fg:var(--c-info-fg);--k-line:var(--c-info-line);}
+
+/* البطاقات الملوّنة — the colored cards */
+.st-tile.sb-dist,.st-tile.sb-sub,.st-tile.sb-today,.tile-outage,.tile-recent,.home-fold{
+  background:var(--k-bg);border:1px solid var(--k-line);color:var(--k-fg);box-shadow:none;
+}
+.st-tile.sb-dist .st-num,.st-tile.sb-sub .st-num,.st-tile.sb-today .st-op b,
+.st-tile.sb-dist .st-icon,.st-tile.sb-sub .st-icon,.st-tile.sb-today .st-icon,
+.st-tile.sb-dist .st-label,.st-tile.sb-sub .st-label,.st-tile.sb-today .st-label,.st-tile.sb-today .st-ops{color:var(--k-fg);}
+.home-fold > summary,.home-fold .fold-icon{color:var(--k-fg);}
+.home-fold .fold-sub{color:var(--k-fg);opacity:.8;}
+/* المحايدة: الإجمالي والتحديث وجدول اليوم — the neutral ones: total, refresh, today's table */
+.st-tile.sb-all,.tile-refresh,.sb-detail{background:var(--bg-card);border:1px solid var(--border-strong);color:var(--text-primary);box-shadow:none;}
+.tile-refresh .tile-sub{color:var(--text-secondary);}
+/* المحددة (تمرير/تركيز): إطار أوضح بنفس اللون — selected: a clearer frame in the same color */
+.action-tile:hover,.action-tile:focus-visible,.home-fold > summary:focus-visible{border-color:var(--k-fg, var(--text-secondary));outline:none;}
+.tile-outage:hover,.tile-recent:hover{background:var(--k-bg);}
+/* النشطة/المفتوحة: إطار + شريط جانبي بلون البطاقة — active/open: frame + a side bar in the card's color */
+.action-tile[aria-expanded="true"],.home-fold[open]{border-color:var(--k-fg);box-shadow:inset -4px 0 0 var(--k-fg);}
+.tile-outage[aria-expanded="true"]{background:var(--k-bg);}
+[data-theme="light"] .tile-outage,[data-theme="light"] .tile-recent{color:var(--k-fg);}

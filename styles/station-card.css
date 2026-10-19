@@ -175,14 +175,23 @@ body.nav-full .station-sheet{display:none !important;}
 .station-sheet .db-freshness-note{font-size:13px;}
 .station-sheet .db-freshness-note{font-size:12.5px;letter-spacing:-.1px;}
 
-/* الوضع الفاتح: أزرار لوحة المحطة بألوان ممتلئة حقيقية والنص أبيض (ملاحظة محمد) — light theme: solid button colors, white text */
-[data-theme="light"] .station-table.station-sheet .sheet-actions .st-btn{border:none;box-shadow:var(--card-shadow);color:#FFFFFF;}
-[data-theme="light"] .station-table.station-sheet .sheet-actions .st-btn .st-ico{color:#FFFFFF;}
-[data-theme="light"] .station-table.station-sheet .sheet-actions .st-btn.primary.st-main{background:#14996A;}
-[data-theme="light"] .station-table.station-sheet .sheet-actions .st-google{background:#2470D0;}
-[data-theme="light"] .station-table.station-sheet .sheet-actions .st-share{background:#5B4FC4;}
-[data-theme="light"] .station-table.station-sheet .sheet-actions .st-edit{background:#E8A800;color:#2B1F00;}
-[data-theme="light"] .station-table.station-sheet .sheet-actions .st-edit .st-ico{color:#2B1F00;}
-[data-theme="light"] .station-table.station-sheet .sheet-actions .st-om{background:#0E7C8C;}
-[data-theme="light"] .station-table.station-sheet .sheet-actions .st-danger{background:#C8412C;}
-[data-theme="light"] .station-sheet .sheet-meta{border-color:var(--border-strong);background:var(--bg-elev);}
+/* ===== نظام الألوان الوظيفي في لوحة المحطة (اعتماد محمد) — the functional colors in the station sheet =====
+   «المسار» الأبرز بلون التوزيع الصريح؛ قوقل ماب والمشاركة بلون التحويل (الموقع)؛ التعديل ذهبي (عملية)؛ خريطة جدة رمادي
+   مزرق (تقنية)؛ الحذف أحمر (خطر). خلفيات هادئة وإطار بلون كل نوع، بلا ظلال.
+   «Route» the most prominent in the solid distribution color; maps/share in the substation blue; edit gold; Jeddah map
+   blue-gray; delete red. Calm backgrounds with a frame in each type's color, no shadows. */
+.sheet-badge.is-dist{background:var(--c-dist-bg);color:var(--c-dist-fg);border:1px solid var(--c-dist-line);}
+.sheet-badge.is-sub{background:var(--c-sub-bg);color:var(--c-sub-fg);border:1px solid var(--c-sub-line);}
+.sheet-type.is-dist{color:var(--c-dist-fg);}
+.sheet-type.is-sub{color:var(--c-sub-fg);}
+.station-table.station-sheet .sheet-actions .st-btn{box-shadow:none;border:1px solid var(--border-strong);background:var(--bg-card);color:var(--text-primary);}
+.station-table.station-sheet .sheet-actions .st-btn.primary.st-main{background:var(--c-dist-fg);border-color:var(--c-dist-fg);color:#07261C;}
+[data-theme="light"] .station-table.station-sheet .sheet-actions .st-btn.primary.st-main{color:#FFFFFF;}
+.station-table.station-sheet .sheet-actions .st-btn.primary.st-main .st-ico{color:inherit;}
+.station-table.station-sheet .sheet-actions .st-google,.station-table.station-sheet .sheet-actions .st-share{background:var(--c-sub-bg);border-color:var(--c-sub-line);color:var(--c-sub-fg);}
+.station-table.station-sheet .sheet-actions .st-edit{background:var(--c-ops-bg);border-color:var(--c-ops-line);color:var(--c-ops-fg);}
+.station-table.station-sheet .sheet-actions .st-om{background:var(--c-info-bg);border-color:var(--c-info-line);color:var(--c-info-fg);}
+.station-table.station-sheet .sheet-actions .st-danger{background:var(--danger-bg);border-color:var(--danger);color:var(--danger);}
+.station-table.station-sheet .sheet-actions .st-btn .st-ico{color:inherit;}
+.station-table.station-sheet .sheet-actions .st-btn:hover,.station-table.station-sheet .sheet-actions .st-btn:focus-visible{border-color:currentColor;outline:none;}
+[data-theme="light"] .station-table.station-sheet .sheet-actions .st-edit .st-ico{color:inherit;}
