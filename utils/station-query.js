@@ -13,9 +13,9 @@
   'use strict';
 
   const NEARBY_KM = 2; // القريبة في القوائم (المحطات، التفاصيل) — nearby in the lists (stations, details)
-  // نطاق القرب على الخريطة من المحطة المبحوث عنها (مواصفات محمد 20 أكتوبر): 5 كم حدًا أقصى، و3.5 كم حد «القريبة»
-  // The map's nearby range from the searched station (Mohammed's spec, 20 Oct): 5 km at most, 3.5 km the «close» limit
-  const MAP_NEARBY_KM = 5, MAP_CLOSE_KM = 3.5;
+  // نطاق القرب على الخريطة من المحطة المبحوث عنها (قرار محمد 20 أكتوبر، بعد تجربة 5 كم): 1.5 كم حدًا أقصى، و1 كم حد «القريبة»
+  // The map's nearby range from the searched station (Mohammed, 20 Oct, after trying 5 km): 1.5 km at most, 1 km the «close» limit
+  const MAP_NEARBY_KM = 1.5, MAP_CLOSE_KM = 1;
 
   function hasCoordinates(s) {
     const empty = function (v) { return v === null || v === undefined || v === ''; };

@@ -321,13 +321,10 @@ body:not(.nav-full) .view-map .map-side{display:flex;flex-direction:column;flex-
   top:calc(var(--search-h, 46px) + 14px);bottom:calc(var(--sheet-h, 0px) + 10px);right:12px;z-index:12;pointer-events:none;}
 body:not(.nav-full) .view-map .map-side > *{pointer-events:auto;}
 /* المساحة ضيقة: «+ / −» ثم زر الملاحة يُخفيان (map-view fitSide) — short space: «+ / −», then the navigation button, hide */
-body:not(.nav-full) .view-map .globe-stage.side-no-zoom .map-side .zoom-controls,
-body:not(.nav-full) .view-map .globe-stage.side-no-nav .map-side .side-nav{display:none;}
+body:not(.nav-full) .view-map .globe-stage.side-no-zoom .map-side .zoom-controls{display:none;}
 body:not(.nav-full) .view-map .side-btn{display:flex;align-items:center;justify-content:center;width:42px;height:42px;padding:0;border-radius:50%;cursor:pointer;
   background:var(--glass-strong);border:1px solid var(--glass-line);color:var(--text-primary);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);}
 body:not(.nav-full) .view-map .side-btn[hidden]{display:none;}
-body:not(.nav-full) .view-map .side-nav{background:var(--c-dist-fg);border-color:var(--c-dist-fg);color:#07261C;}
-[data-theme="light"] body:not(.nav-full) .view-map .side-nav{color:#FFFFFF;}
 /* أداة نشطة (قريب/مغذي) والأدوات مطوية ← نقطة على زر الأدوات — an active tool while folded ← a dot on the tools button */
 /* زر الأدوات في مربع البحث: مفتوحة أو فيها أداة نشطة وهي مطوية ← بلون التوزيع — the search box's tools button: open, or an active tool while folded */
 .ssb-tools{display:none;}
@@ -382,5 +379,8 @@ body:not(.nav-full) .view-map .ssb-status{display:flex;align-items:center;justif
 
 /* ===== وضع البحث: صف الأدوات (الأنماط، قريب، مغذي، أعطال، ⋯) ظاهر تلقائيًا ويتمرر أفقيًا، فلا ميزة مخفية خلف أيقونة؛
    وفي الوضع العادي يُفتح من أيقونته (نموذج محمد 20 أكتوبر). Search mode: the tools row shows by itself and scrolls sideways. */
-body.search-mode:not(.nav-full) .view-map .globe-stage .map-toolbar-bar{display:flex;}
-body.search-mode:not(.nav-full) .view-map .ssb-tools{display:none;}
+/* (20 أكتوبر، طلب محمد) الصف ظاهر دائمًا في الوضعين ما لم يُخفه المستخدم بأيقونته — the row shows in both modes unless hidden by its icon */
+
+/* الأزرار الجانبية أسفل الخريطة قرب الشريط السفلي (أو فوق البطاقة) — طلب محمد 20 أكتوبر
+   The side buttons at the bottom of the map, near the bottom bar (or above the card) */
+body:not(.nav-full) .view-map .map-side{justify-content:flex-end;}

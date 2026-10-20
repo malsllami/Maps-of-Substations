@@ -73,7 +73,8 @@
   };
   const BTN_ICON = {
     navigate: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M21 3 3 10.5l7.5 2.9L13.4 21z"/></svg>',
-    google: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+    // دبوس قوقل ماب بألوانه (طلب محمد) — the Google Maps pin in its colors
+    google: '<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5a8 8 0 0 0-8 8c0 5.6 6.4 11.9 7.3 12.8a1 1 0 0 0 1.4 0C13.6 21.4 20 15.1 20 9.5a8 8 0 0 0-8-8z" fill="#EA4335"/><path d="M12 1.5a8 8 0 0 0-6.6 3.5l4.3 3.6A3 3 0 0 1 12 6.5V1.5z" fill="#1A73E8"/><path d="M5.4 5A8 8 0 0 0 4 9.5c0 1.7.6 3.5 1.5 5.2l4.4-4.6a3 3 0 0 1-.2-1.5z" fill="#FBBC04"/><path d="M5.5 14.7c1.7 3.2 4.8 6.3 5.8 7.6a1 1 0 0 0 1.4 0l-2.8-12.2z" fill="#34A853"/><circle cx="12" cy="9.5" r="3" fill="#fff"/></svg>',
     share: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg>',
     edit: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1 10.5-10.5a2.1 2.1 0 0 0-3-3L5 16l-1 4z"/></svg>',
     del: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>',
@@ -93,23 +94,23 @@
     const fc = feederCount_(s, deps);
     return '<div class="sb-inner sb-top">' +
       '<div class="sheet-head">' +
+        // الصف الأول: رمز النوع | رقم المحطة | المغذي | مدة البحث — row one: type symbol | number | feeder | search time
         '<div class="sheet-line">' +
           '<span class="sheet-badge ' + kind + '" aria-hidden="true">' + (TYPE_ICON[s.type] || TYPE_ICON['توزيع']) + '</span>' +
-          // الرقم كبيرًا، وتحته الحي والمغذي وعدد محطاته (زر يعرضها) — النوع يدل عليه لون الرمز ويُقرأ لقارئ الشاشة
-          // The number large, under it the district, the feeder and its count (a button showing them) — the type is the symbol's color, read aloud
           '<div class="sheet-title"><span class="sheet-type sr-only ' + kind + '">' + (sub ? 'محطة تحويل' : 'محطة توزيع') + '</span>' +
-            '<bdi class="sheet-id">' + esc(s.id) + '</bdi><span class="sheet-explore-txt" data-role="explore-txt"></span>' +
-            ((s.region || s.feeder || fc != null) ? '<div class="sheet-sub">' +
-              (s.region ? '<span class="ss-region">' + esc(s.region) + '</span>' : '') +
-              (s.feeder ? '<bdi class="ss-feeder">' + esc(s.feeder) + '</bdi>' : '') +
-              (fc != null ? '<button type="button" class="ss-count st-feeder" data-act="feeder" title="عرض محطات المغذي على الخريطة"><b class="st-count">' + fc + '</b> محطة ›</button>' : '') +
-            '</div>' : '') + '</div>' +
-          // وضع الاستكشاف (قريب/مغذي): العدد والمسار وإنهاء العرض في السطر نفسه — explore mode: the count, route and end in the same line
+            '<bdi class="sheet-id">' + esc(s.id) + '</bdi><span class="sheet-explore-txt" data-role="explore-txt"></span></div>' +
+          (s.feeder ? '<bdi class="sheet-feeder">' + esc(s.feeder) + '</bdi>' : '') +
+          '<span class="sheet-time">' + searchTime_(s) + '</span>' +
+          // وضع الاستكشاف (قريب/مغذي): المسار وإنهاء العرض في السطر نفسه — explore mode: route and end in the same line
           '<div class="sheet-explore">' +
             '<button type="button" class="sheet-go" data-act="navigate"' + (coords ? '' : ' disabled') + '>' + BTN_ICON.navigate + '<span>المسار</span></button>' +
             '<button type="button" class="sheet-end" data-act="end-explore">إنهاء العرض</button></div>' +
-          '<div class="sheet-side">' + searchTime_(s) +
-            (deps && deps.onDetails ? '<button type="button" class="sheet-more" data-act="details">التفاصيل ‹</button>' : '') + '</div>' +
+        '</div>' +
+        // الصف الثاني: المنطقة | عدد محطات المغذي (يعرضها) | التفاصيل — row two: district | feeder count (shows them) | details
+        '<div class="sheet-row2">' +
+          (s.region ? '<span class="ss-region">' + esc(s.region) + '</span>' : '<span class="ss-region"></span>') +
+          (fc != null ? '<button type="button" class="ss-count st-feeder" data-act="feeder" title="عرض محطات المغذي على الخريطة"><b class="st-count">' + fc + '</b> محطة ›</button>' : '') +
+          (deps && deps.onDetails ? '<button type="button" class="sheet-more" data-act="details">التفاصيل ‹</button>' : '') +
         '</div>' +
       '</div>' +
       (coords ? '' : '<div class="st-note-warn" data-role="no-coords">' + NO_COORDS_MSG + '</div>') +

@@ -14,6 +14,9 @@
 <!-- تطبيق قابل للتثبيت: الملف والأيقونة ولون الشريط، وتسجيل عامل الخدمة بعد التحميل — installable app: manifest, icon, bar colour, SW registered after load -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0D1826">
+<!-- التطبيق المثبّت على الآيفون: الصفحة تمتد تحت شريط الساعة (الخريطة بكامل الشاشة)، والرأس ينزل تحته بالمنطقة الآمنة
+     The installed iPhone app: the page extends under the clock bar (a full-screen map), the header moves below it by the safe area -->
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="assets/icon-192.png">
 <script src="services/pwa.js"></script>
 <link rel="stylesheet" href="styles/update-sheet.css">

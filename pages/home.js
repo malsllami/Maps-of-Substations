@@ -150,11 +150,13 @@
     if (view) return view;
     if (!global.L) { showMapMissing_(); return null; }
     view = SecMapView.mount($('mapStage'), {
-      onNavigate: function () { if (current) SecNavView.start(current); }, // الملاحة المباشرة من العمود / direct navigation from the column
       onLocate: locateMe_,
       onOverlayChange: function () { global.requestAnimationFrame(layout); }
     });
     if (myPos) view.showMe(myPos);
+    // صف الأدوات ظاهر دائمًا ما لم يُخفه المستخدم (طلب محمد 20 أكتوبر) — the tools row shown unless the user hid it
+    view.toggleTools(!pref_(KEYS.MAP_TOOLS_HIDDEN));
+    const tb = doc.querySelector('#barBox [data-act="tools"]'); if (tb) tb.setAttribute('aria-expanded', pref_(KEYS.MAP_TOOLS_HIDDEN) ? 'false' : 'true');
     // أسماء أحياء جدة الحقيقية من نسخة المحطات، وتتحدث حين يتغير عدد المحطات — the real district names from the copy
     const districts = SecDistrictLabels.mount(view, {
       stations: function () { return SYNC.state().loaded ? SYNC.stations() : null; },
@@ -171,7 +173,7 @@
       onChange: function (mode, count) {
         if (!card) return;
         // اسم المرشح مع العدد (مراجعة 20 أكتوبر) — the filter's name with the count
-        card.setExplore(mode ? (mode === 'feeder' ? 'المغذي ' + String((current && current.feeder) || '').trim() + ' — ' + count + ' محطة' : 'قريب 5 كم — ' + count + ' محطة') : null);
+        card.setExplore(mode ? (mode === 'feeder' ? 'المغذي ' + String((current && current.feeder) || '').trim() + ' — ' + count + ' محطة' : 'قريب ' + SecStationQuery.MAP_NEARBY_KM + ' كم — ' + count + ' محطة') : null);
         global.requestAnimationFrame(layout);
       },
       onEdit: function (s) { goToStation(s); global.setTimeout(function () { SecStationForm.openEdit(s); }, MORPH_SETTLE_MS); }
@@ -261,7 +263,6 @@
     tools.stop(); outageMap.clear(); nearby.reset(); view.hideHint();
     showCard_(s);
     layout();
-    view.setNavTarget(true);
     view.showStation(s);
     global.setTimeout(layout, 50);
   }
@@ -270,7 +271,7 @@
     if (SecStationForm.isOpen()) SecStationForm.close();
     if (!current && doc.body.dataset.view === 'map') return;
     current = null;
-    if (view) { tools.stop(); outageMap.clear(); nearby.reset(); view.hideHint(); view.clearStation(); view.setNavTarget(false); }
+    if (view) { tools.stop(); outageMap.clear(); nearby.reset(); view.hideHint(); view.clearStation(); }
     if (card) { card.destroy(); card = null; }
     $('heroSection').classList.remove('station-framed');
     bar.clear();
@@ -297,8 +298,8 @@
   const lens = SecStationSearchBox.mount($('lensBox'), { variant: 'bar', placeholder: 'اكتب رقم المحطة أو رمزها', isLoggedIn: loggedIn, onFound: goToStation, onAdd: function (q) { SecStationForm.openAdd(q); }, onUpdated: onUpdated_ });
   const bar = SecStationSearchBox.mount($('barBox'), { variant: 'bar', isLoggedIn: loggedIn, onFound: goToStation, onAdd: function (q) { SecStationForm.openAdd(q); }, onUpdated: onUpdated_,
     onFocus: function () { enterSearchMode_(); }, onClose: function () { closeSearchMode_(); },
-    onStatus: function () { statusOpen = !statusOpen; paintSync_(); }, // نقطة الحالة / the status dot
-    onTools: function () { return view ? view.toggleTools() : false; } }); // أدوات الخريطة من مربع البحث (النموذج) / the map tools from the search box
+    onStatus: function () { statusOpen = !statusOpen; setPref_(KEYS.MAP_STATUS_HIDDEN, !statusOpen); paintSync_(); }, // نقطة الحالة / the status dot
+    onTools: function () { if (!view) return false; const on = view.toggleTools(); setPref_(KEYS.MAP_TOOLS_HIDDEN, !on); return on; } }); // أدوات الخريطة من مربع البحث (النموذج) / the map tools from the search box
   // بطاقة «بحث عن حالة عطل» في صف الإجراءات تفتح لوحة الأرقام تحته (تصميم محمد، 15 أكتوبر) / the outage tile opens the panel below it
   const outage = SecOutageSearch.mountHome($('homeOutage'), {
     toggle: $('outageTileBtn'),
@@ -454,7 +455,11 @@
    * التحديث تحت البحث؛ وتظهر البطاقة وحدها حين لا تكون الحالة خضراء (انقطاع، توقف، نسخة جديدة) حتى لا تفوت المستخدم.
    * Home has no top bar: the copy status is a colored dot in the search box; tapping it shows the text and the refresh
    * button under the search; the card shows by itself whenever the status isn't green so the user never misses it. */
-  let statusOpen = false;
+  // ظاهرة دائمًا ما لم يُخفها المستخدم بالنقطة، والاختيار محفوظ (طلب محمد 20 أكتوبر) — shown unless the user hid it with the dot, remembered
+  const KEYS = global.SEC2_CONFIG.STORAGE_KEYS;
+  const pref_ = function (k) { try { return global.localStorage.getItem(k) === '1'; } catch (e) { return false; } };
+  const setPref_ = function (k, on) { try { if (on) global.localStorage.setItem(k, '1'); else global.localStorage.removeItem(k); } catch (e) { /* بلا تخزين / no storage */ } };
+  let statusOpen = !pref_(KEYS.MAP_STATUS_HIDDEN);
   function paintMapStatus_(s) {
     const dot = doc.querySelector('#barBox [data-act="status"]'), card = $('mapStatus');
     if (!dot || !card) return;
@@ -500,12 +505,10 @@
   // Opened from the station sheet; «back» (or the phone's back button) returns to the map on the same station
   const details = SecStationDetails.mount($('detailsBox'), {
     onBack: function () { closeDetails_(); },
-    onNavigate: function (s) { closeDetails_(); if (!view) { notify_(NAV_NEEDS_MAP); return; } SecNavView.start(s); },
     onEdit: function (s) { if (global.navigator.onLine === false) { notify_(SecStationCard.MSG.OFFLINE_WRITE); return; } SecStationForm.openEdit(s); },
     canEdit: loggedIn,
-    onShowOnMap: function () { closeDetails_(); },
     onOpenStation: function (s) { closeDetails_(); goToStation(s); },
-    googleMapsUrl: SecStationCard.googleMapsUrl, shareText: SecStationCard.shareText,
+    shareText: SecStationCard.shareText,
     localStations: function () { return SYNC.stations(); },
     dataFreshness: function () { return SYNC.state().syncedAt; }, // «آخر تحديث» لنسخة المحطات / the copy's last update
     toast: notify_

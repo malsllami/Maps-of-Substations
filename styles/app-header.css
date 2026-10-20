@@ -147,3 +147,7 @@
 img.hdr-id-av{width:40px;height:40px;object-fit:contain;background:none;border:none;border-radius:50%;}
 /* مع هوية العضو: سطر الحالة واحد بلا التاريخ (الرئيسية تنقله لأعلاها، والورديات ولوحة المدير تعرضانه في سطريهما) — one status line */
 .app-header.hdr-identity [data-role="date-line"]{display:none;}
+
+/* التطبيق المثبّت على الآيفون (شريط الساعة شفاف): الرأس ينزل تحت الساعة بالمنطقة الآمنة؛ في المتصفح القيمة صفر فلا يتغير شيء
+   The installed iPhone app (a translucent clock bar): the header moves below the clock by the safe area; zero in the browser */
+.app-header{padding-top:env(safe-area-inset-top, 0px);}

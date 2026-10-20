@@ -60,3 +60,17 @@
    LTR values (numbers, codes) stay at the row's far left; a nearby station's number aligns with its second line */
 .sd-v{margin-inline-start:0;margin-right:auto;}
 .sd-near-id,.sd-near-sub{align-self:flex-start;}
+
+/* ===== شاشة التفاصيل (طلب محمد 20 أكتوبر): الرجوع داخل بطاقة الرقم بلون مميز، والشاشة أعلى، وجدول القريبة أكبر ببحث =====
+   The details screen: back inside the number card in a distinct color, the screen higher, a larger nearby table with search */
+.station-details{padding-top:8px;gap:10px;}
+.sd-hero{padding:10px 12px;}
+.sd-hero-text{flex:1;}
+.station-details .sd-back{width:auto;height:44px;padding:0 14px;gap:4px;flex-shrink:0;font-family:inherit;font-size:14px;font-weight:700;
+  background:var(--accent, #F5B70A);border-color:var(--accent, #F5B70A);color:#2A1E00;}
+.sd-actions.one{grid-template-columns:minmax(0,1fr);}
+.sd-link{color:var(--c-sub-fg);font-weight:700;text-decoration:underline;text-underline-offset:3px;}
+.sd-near-search{width:100%;box-sizing:border-box;min-height:46px;padding:0 14px;border-radius:12px;border:1px solid var(--border-strong);background:var(--bg-card);
+  color:var(--text-primary);font-family:inherit;font-size:16px;}
+.sd-near{max-height:calc(100dvh - var(--header-h, 120px) - 270px - var(--tabbar-h) - env(safe-area-inset-bottom, 0px));min-height:260px;}
+.sd-near-empty{padding:18px 14px;text-align:center;font-size:14px;font-weight:600;color:var(--text-secondary);}

@@ -319,3 +319,33 @@ body.nav-full .station-sheet{display:none !important;}
 .station-sheet.is-explore .sheet-explore-txt{white-space:normal;line-height:1.35;overflow-wrap:anywhere;}
 .station-sheet.is-explore .sheet-title{min-width:0;}
 .station-sheet.is-explore .sheet-go,.station-sheet.is-explore .sheet-end{padding:0 10px;}
+
+/* ===== البطاقة بصفّين (طلب محمد 20 أكتوبر): «الرمز | الرقم | المغذي | مدة البحث» ثم «المنطقة | عدد محطات المغذي | التفاصيل»،
+   والأزرار بحجم واحد وألوان مختلفة (المسار أخضر، قوقل ماب بدبوسه الحقيقي، المشاركة بنفسجي، التعديل ذهبي، الحذف أحمر).
+   The card in two rows; the buttons one size in different colors (route green, Maps with its real pin, share purple,
+   edit gold, delete red). ===== */
+.sheet-badge{width:30px;height:30px;border-radius:9px;}
+.sheet-badge svg{width:17px;height:17px;}
+.sheet-line{gap:8px;}
+.sheet-line .sheet-title{flex:0 1 auto;}
+.sheet-title .sheet-id{font-size:22px;}
+.sheet-feeder{flex-shrink:0;padding:2px 8px;border-radius:8px;background:var(--bg-elev);border:1px solid var(--border-strong);
+  font-family:'JetBrains Mono',monospace;font-size:13.5px;font-weight:800;color:var(--text-primary);}
+.sheet-time{margin-inline-start:auto;flex-shrink:0;}
+.station-sheet .sheet-time .st-search-time{display:block;margin:0;font-size:11.5px;font-weight:600;white-space:nowrap;color:var(--text-secondary);}
+.sheet-row2{display:flex;align-items:center;gap:8px;margin-top:6px;}
+.sheet-row2 .ss-region{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13.5px;font-weight:700;color:var(--text-secondary);}
+.station-sheet .sheet-row2 button.ss-count{flex-shrink:0;display:inline-flex;align-items:center;gap:3px;min-height:30px;padding:0 9px;border-radius:9px;cursor:pointer;
+  font-family:inherit;font-size:12.5px;font-weight:700;background:var(--c-dist-bg);border:1px solid var(--c-dist-line);color:var(--c-dist-fg);}
+.station-sheet .sheet-row2 .st-count{font-size:13px;color:inherit;}
+.sheet-row2 .sheet-more{margin:0;flex-shrink:0;}
+.station-sheet.is-explore .sheet-row2,.station-sheet.is-explore .sheet-feeder,.station-sheet.is-explore .sheet-time{display:none;}
+/* أزرار بحجم واحد — one button size */
+.station-table.station-sheet .sheet-actions .st-btn,.station-table.station-sheet .sheet-actions .st-btn.st-main{flex:1 1 0;}
+.station-table.station-sheet .sheet-actions .st-btn.st-main .st-lbl{font-size:11.5px;}
+.station-table.station-sheet .sheet-actions .st-google{background:var(--bg-card);border-color:var(--border-strong);color:var(--text-primary);}
+.station-table.station-sheet .sheet-actions .st-share{background:var(--c-total-fill, #3A2E6E);border-color:var(--c-total-line, #6C5BC9);color:var(--c-total-ink, #FFFFFF);}
+.station-table.station-sheet .sheet-actions .st-edit{background:var(--c-ops-fill, #C9962B);border-color:var(--c-ops-line, #C9962B);color:var(--c-ops-ink, #2A1E00);}
+.station-table.station-sheet .sheet-actions .st-edit .st-ico{color:inherit;}
+.station-table.station-sheet .sheet-actions .st-danger{background:var(--danger-bg);border-color:var(--danger);color:var(--danger);}
+.station-table.station-sheet .sheet-actions .st-danger .st-ico{color:inherit;}

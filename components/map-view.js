@@ -41,10 +41,9 @@
     dark: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.5A8.5 8.5 0 1 1 11.5 3 6.8 6.8 0 0 0 21 12.5z"/></svg>',
     satellite: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="6" height="6" rx="1"/><rect x="1" y="10.5" width="5" height="3" rx="0.5"/><rect x="18" y="10.5" width="5" height="3" rx="0.5"/><line x1="6" y1="12" x2="9" y2="12"/><line x1="15" y1="12" x2="18" y2="12"/><line x1="12" y1="9" x2="12" y2="4"/><circle cx="12" cy="3" r="1"/></svg>'
   };
-  // العمود الجانبي (نموذج محمد 20 أكتوبر): الملاحة المباشرة، التكبير/التصغير، الطبقات، «موقعي» (الأدوات في مربع البحث)
-  // The side column (Mohammed's mock-up, 20 Oct): direct navigation, zoom, layers, «my location» (the tools are in the search box)
+  // العمود الجانبي: التكبير/التصغير، الطبقات، «موقعي» — «المسار» في بطاقة المحطة وحدها (طلب محمد 20 أكتوبر)
+  // The side column: zoom, layers, «my location» — «route» lives in the station card only (Mohammed, 20 Oct)
   const SIDE = {
-    nav: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M21 3 3 10.5l7.5 2.9L13.4 21z"/></svg>',
     layers: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 7.5 12 13 2 7.5 12 2"/><polyline points="2 12.5 12 18 22 12.5"/></svg>',
     locate: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/><line x1="12" y1="1.5" x2="12" y2="4.5"/><line x1="12" y1="19.5" x2="12" y2="22.5"/><line x1="1.5" y1="12" x2="4.5" y2="12"/><line x1="19.5" y1="12" x2="22.5" y2="12"/></svg>'
   };
@@ -69,7 +68,6 @@
       // العمود الجانبي يحتوي التكبير؛ يظهر عموده في الرئيسية فقط، وفي غيرها (والملاحة) يبقى التكبير وحده كما كان
       // The side column holds the zoom; its column shows on home only, elsewhere (and in navigation) the zoom stays alone as before
       '<div class="map-side" data-role="side">' +
-        '<button type="button" class="side-btn side-nav" data-act="side-nav" title="الملاحة إلى المحطة" aria-label="الملاحة إلى المحطة" hidden>' + SIDE.nav + '</button>' +
       '<div class="zoom-controls show"><div class="zoom-btn" data-act="zoom-in" role="button" title="تكبير" aria-label="تكبير"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>' +
         '<div class="zoom-btn" data-act="zoom-out" role="button" title="تصغير" aria-label="تصغير"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg></div></div>' +
         '<button type="button" class="side-btn" data-act="side-layers" title="نوع الخريطة" aria-label="نوع الخريطة">' + SIDE.layers + '</button>' +
@@ -89,10 +87,10 @@
 
   /**
    * mount(stage, opts) — stage: عنصر .globe-stage. opts: { offlineMapUI (الافتراضي window.SecOfflineMapUI)، onLayerChange()،
-   *   onNavigate() (زر الملاحة في العمود)، onLocate() (زر «موقعي»)، onOverlayChange() (فتح/طي الأدوات)، now() للاختبار }
+   *   onLocate() (زر «موقعي»)، onOverlayChange() (فتح/طي الأدوات)، now() للاختبار }
    * يُرجع { map، mode()، resolvedMode()، setMode(m)، showStation(s)، clearStation()، tools (مكان الأزرار)، panels،
    *   hint(text)، hideHint()، toast(text)، usingOffline()، refresh()، destroy()، setInsets(top, bottom)، centerOn(latlng, zoom, fly)،
-   *   fitPadding(pad)، insets()، showMe(pos)، setNavTarget(on)، toggleTools(open)، recenter()، fitSide(topMin, bottom) }
+   *   fitPadding(pad)، insets()، showMe(pos)، toggleTools(open)، recenter()، fitSide(topMin, bottom) }
    */
   function mount(stage, opts) {
     const o = opts || {};
@@ -227,9 +225,8 @@
       const side = q('side');
       side.style.top = Math.round(Math.max(topMin, overlayTop_() - INSET_GAP + 8)) + 'px';
       side.style.bottom = Math.round(bottom) + 'px';
-      stage.classList.remove('side-no-zoom', 'side-no-nav');
+      stage.classList.remove('side-no-zoom');
       if (side.scrollHeight > side.clientHeight + 1) stage.classList.add('side-no-zoom');
-      if (side.scrollHeight > side.clientHeight + 1) stage.classList.add('side-no-nav');
     }
     /* حشوة fitBounds بما يغطي الخريطة — fitBounds padding including what covers the map */
     function fitPadding(pad) { const p = pad || 0, i = current_(); return { paddingTopLeft: [p, p + i.top], paddingBottomRight: [p, p + i.bottom] }; }
@@ -257,8 +254,6 @@
       } else { me.setLatLng(ll); meRing.setLatLng(ll).setRadius(acc); }
       return me;
     }
-    /* زر الملاحة في العمود يظهر حين توجد محطة مختارة — the column's navigation button shows when a station is chosen */
-    function setNavTarget(on) { stage.querySelector('[data-act="side-nav"]').hidden = !on; }
     /* أدوات الشريط (قريب، مغذي، أعطال، ⋯) مطوية ويفتحها زر الأدوات في مربع البحث؛ يُرجع الحالة الجديدة
      * The toolbar tools (nearby, feeder, outage, ⋯) are folded; the search box's tools button opens them; returns the new state */
     function toggleTools_(open) {
@@ -284,7 +279,6 @@
       const act = t.dataset.act;
       if (act === 'chip') { e.stopPropagation(); togglePanel_(!q('panel').classList.contains('show')); }
       else if (act === 'side-layers') { e.stopPropagation(); togglePanel_(!q('panel').classList.contains('show')); }
-      else if (act === 'side-nav') { if (o.onNavigate) o.onNavigate(); }
       else if (act === 'side-locate') { if (o.onLocate) o.onLocate(); }
       else if (act === 'zoom-in') map.zoomIn();
       else if (act === 'zoom-out') map.zoomOut();
@@ -311,8 +305,8 @@
       map: map, tools: q('tools'), panels: q('panels'),
       mode: function () { return mode; }, resolvedMode: resolved, setMode: setMode, refresh: apply,
       usingOffline: function () { return offlineFlavor !== null; },
-      showStation: showStation, clearStation: clearStation, setInsets: setInsets, centerOn: centerOn, fitPadding: fitPadding, recenter: recenter, fitSide: fitSide, overview: overview,
-      insets: current_, hint: hint, hideHint: hideHint, toast: toast, showMe: showMe, setNavTarget: setNavTarget,
+      showStation: showStation, clearStation: clearStation, setInsets: setInsets, centerOn: centerOn, fitPadding: fitPadding, recenter: recenter, fitSide: fitSide, overview: overview, stationZoom: STATION_ZOOM,
+      insets: current_, hint: hint, hideHint: hideHint, toast: toast, showMe: showMe,
       toggleTools: toggleTools_,
       destroy: function () {
         global.clearInterval(autoTimer); global.clearTimeout(toastTimer); global.clearTimeout(fallbackTimer);

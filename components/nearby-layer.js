@@ -8,8 +8,8 @@
  * - النافذة المنبثقة: الرقم والمغذي والمسافة + «قوقل ماب» و«مشاركة» و«تعديل»؛ تلميح «الرقم — المسافة كم».
  * - السطر: «📍 محطات قريبة (٢ كم) — العدد» أو «⚡ المغذي "…" — عدد … محطة مرتبطة»، وتنبيه «تم عرض …» أول مرة.
  * - الجلب نفسه ليس هنا: من بطاقة المحطة (nearby/feeder) — نسخة الجهاز أولًا بلا طلب، والخادم بلا نسخة فقط.
- * 20 أكتوبر (مواصفات محمد): نطاق «قريب» 5 كم ثابت حول المحطة المبحوث عنها (لا يتغير مع التكبير)؛ الأخضر حتى 3.5 كم والرمادي
- *   حتى 5 كم؛ الخريطة تُضبط لإظهار النطاق كله بحلقتين خافتتين (3.5 و5 كم)؛ كل المحطات نقاط ملوّنة في مواقعها بلا تجميع،
+ * 20 أكتوبر (قرار محمد): نطاق «قريب» 1.5 كم ثابت حول المحطة المبحوث عنها؛ الأخضر حتى 1 كم والرمادي حتى 1.5 كم، بحلقتين
+ *   خافتتين؛ الخريطة على تكبير المحطة نفسه (قريب ومغذي) والمحطة في منتصف المساحة الظاهرة؛ كل المحطات نقاط ملوّنة في مواقعها بلا تجميع،
  *   وبطاقات الرقم والمسافة تظهر حيث تتسع لها المساحة بلا تداخل (الأقرب أولًا، فتزيد مع التكبير)؛ لا سطر توضيحي أعلى الخريطة
  *   (العدد واسم المرشح في الشريط السفلي)؛ الزر يكتب «5كم».
  * V2: زر القريبة يكتب «2كم» عند تفعيله (V1 كان «3كم» خطأً — بند V1 رقم 1)؛ كل نص في العلامات والنوافذ يُهرَّب؛
@@ -67,7 +67,7 @@
     let mode = null, data = [], markers = [], seq = 0;
     const toasted = { nearby: false, feeder: false };
     view.tools.insertAdjacentHTML('beforeend',
-      '<button type="button" class="toolbar-btn" data-nearby="nearby" title="محطات قريبة (٥ كم)"><span class="tb-icon">📍</span><span class="tb-label" data-role="nearby-label">قريب</span></button>' +
+      '<button type="button" class="toolbar-btn" data-nearby="nearby" title="محطات قريبة (1.5 كم)"><span class="tb-icon">📍</span><span class="tb-label" data-role="nearby-label">قريب</span></button>' +
       '<button type="button" class="toolbar-btn" data-nearby="feeder" title="محطات المغذي"><span class="tb-icon">⚡</span><span class="tb-label" data-role="feeder-label">مغذي</span></button>');
     const btn = function (m) { return view.tools.querySelector('[data-nearby="' + m + '"]'); };
 
@@ -76,7 +76,7 @@
       const st = deps.getStation ? deps.getStation() : null;
       btn('nearby').classList.toggle('active', mode === 'nearby');
       btn('feeder').classList.toggle('active', mode === 'feeder');
-      btn('nearby').querySelector('[data-role="nearby-label"]').textContent = mode === 'nearby' ? '5كم' : 'قريب';
+      btn('nearby').querySelector('[data-role="nearby-label"]').textContent = mode === 'nearby' ? Q.MAP_NEARBY_KM + 'كم' : 'قريب';
       btn('feeder').querySelector('[data-role="feeder-label"]').textContent = mode === 'feeder' && st && st.feeder ? String(st.feeder) : 'مغذي';
     }
     function clear_() { markers.forEach(function (m) { map.removeLayer(m); }); markers = []; }
@@ -129,11 +129,11 @@
     }
 
     function reset() { seq++; mode = null; data = []; center = null; clear_(); view.hideHint(); syncButtons_(); }
-    /* الخريطة على النطاق كله في المساحة المرئية: دائرة 5 كم للقريبة، ومحطات المغذي كلها للمغذي (التكبير اليدوي متاح بعدها)
-     * The map on the whole range in the visible area: the 5 km circle for nearby, all the feeder's stations for feeder */
+    /* الخريطة على تكبير المحطة نفسه والمحطة في منتصف المساحة الظاهرة (قرار محمد 20 أكتوبر)، وبلا إحداثيات ← كل المحطات
+     * The map at the station's own zoom, the station mid visible area; without coordinates ← all the stations */
     function fit_() {
       const pad = view.fitPadding ? view.fitPadding(16) : { padding: [16, 16] };
-      if (mode === 'nearby' && center) { map.fitBounds(L.latLng(center.lat, center.lng).toBounds(Q.MAP_NEARBY_KM * 2000), pad); return; }
+      if (center) { const z = view.stationZoom || 16; if (view.centerOn) view.centerOn([center.lat, center.lng], z); else map.setView([center.lat, center.lng], z); return; }
       const pts = data.map(function (s) { return [s.lat, s.lng]; }).concat(center ? [[center.lat, center.lng]] : []);
       if (pts.length) map.fitBounds(pts.length > 1 ? pts : [pts[0], pts[0]], Object.assign(pad, { maxZoom: 16 }));
     }
