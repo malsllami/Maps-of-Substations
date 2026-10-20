@@ -94,13 +94,16 @@
     const fc = feederCount_(s, deps);
     return '<div class="sb-inner sb-top">' +
       '<div class="sheet-head">' +
-        // الصف الأول: رمز النوع | رقم المحطة | المنطقة | المغذي — row one: type symbol | number | district | feeder
+        // الصف الأول: رمز النوع ثم جدول «المحطة | المنطقة | المغذي» — row one: the type symbol, then the «station | district | feeder» table
         '<div class="sheet-line">' +
           '<span class="sheet-badge ' + kind + '" aria-hidden="true">' + (TYPE_ICON[s.type] || TYPE_ICON['توزيع']) + '</span>' +
-          '<div class="sheet-title"><span class="sheet-type sr-only ' + kind + '">' + (sub ? 'محطة تحويل' : 'محطة توزيع') + '</span>' +
-            '<bdi class="sheet-id">' + esc(s.id) + '</bdi><span class="sheet-explore-txt" data-role="explore-txt"></span></div>' +
-          (s.region ? '<span class="ss-region">' + esc(s.region) + '</span>' : '') +
-          (s.feeder ? '<bdi class="sheet-feeder">' + esc(s.feeder) + '</bdi>' : '') +
+          // جدول بثلاث خانات في الوسط: المحطة | المنطقة | المغذي (طلب محمد 20 أكتوبر) — a centered 3-cell table: station | district | feeder
+          '<div class="sheet-grid">' +
+            '<div class="sheet-title sg-cell"><span class="sg-k">المحطة</span><span class="sheet-type sr-only ' + kind + '">' + (sub ? 'محطة تحويل' : 'محطة توزيع') + '</span>' +
+              '<bdi class="sheet-id">' + esc(s.id) + '</bdi><span class="sheet-explore-txt" data-role="explore-txt"></span></div>' +
+            '<div class="sg-cell sg-region"><span class="sg-k">المنطقة</span><span class="ss-region">' + (s.region ? esc(s.region) : '—') + '</span></div>' +
+            '<div class="sg-cell sg-feeder"><span class="sg-k">المغذي</span><bdi class="sheet-feeder">' + (s.feeder ? esc(s.feeder) : '—') + '</bdi></div>' +
+          '</div>' +
           // وضع الاستكشاف (قريب/مغذي): المسار وإنهاء العرض في السطر نفسه — explore mode: route and end in the same line
           '<div class="sheet-explore">' +
             '<button type="button" class="sheet-go" data-act="navigate"' + (coords ? '' : ' disabled') + '>' + BTN_ICON.navigate + '<span>المسار</span></button>' +

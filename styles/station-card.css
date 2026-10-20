@@ -356,3 +356,18 @@ body.nav-full .station-sheet{display:none !important;}
 .sheet-line .sheet-feeder{margin-inline-start:auto;}
 .sheet-row2 .sheet-time{flex:1;min-width:0;margin:0;}
 .station-sheet.is-explore .sheet-line .ss-region{display:none;}
+
+/* ===== «المحطة | المنطقة | المغذي» جدولًا بثلاث خانات متساوية، كل خانة عنوان صغير وقيمتها، والمحتوى في الوسط (طلب محمد 20 أكتوبر)
+   «station | district | feeder» as a table of three equal cells, each a small label and its value, centered ===== */
+.sheet-grid{flex:1;min-width:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--border-strong);border-radius:12px;overflow:hidden;background:var(--bg-card);}
+.sheet-grid .sg-cell{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 4px;min-width:0;text-align:center;}
+.sheet-grid .sg-cell + .sg-cell{border-inline-start:1px solid var(--border-strong);}
+.sheet-grid .sg-k{font-size:11px;font-weight:600;color:var(--text-secondary);line-height:1.2;}
+.sheet-line .sheet-grid .sheet-title{flex:none;align-items:center;}
+.sheet-grid .sheet-id{font-size:18px;line-height:1.2;max-width:100%;}
+.sheet-line .sheet-grid .ss-region{flex:none;max-width:100%;font-size:14px;line-height:1.25;}
+.sheet-line .sheet-grid .sheet-feeder{margin:0;padding:0;border:none;background:none;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;line-height:1.25;}
+/* الاستكشاف (قريب/مغذي): خانة الرقم وحدها بلا إطار — explore: the number cell alone, unframed */
+.station-sheet.is-explore .sheet-grid{display:flex;border:none;background:none;flex:0 1 auto;}
+.station-sheet.is-explore .sheet-grid .sg-region,.station-sheet.is-explore .sheet-grid .sg-feeder,.station-sheet.is-explore .sheet-grid .sg-k{display:none;}
+.station-sheet.is-explore .sheet-grid .sheet-title{align-items:flex-start;padding:0;}
