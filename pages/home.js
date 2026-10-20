@@ -156,7 +156,10 @@
     });
     if (myPos) view.showMe(myPos);
     // أسماء أحياء جدة الحقيقية من نسخة المحطات، وتتحدث حين يتغير عدد المحطات — the real district names from the copy
-    const districts = SecDistrictLabels.mount(view, { stations: function () { return SYNC.state().loaded ? SYNC.stations() : null; } });
+    const districts = SecDistrictLabels.mount(view, {
+      stations: function () { return SYNC.state().loaded ? SYNC.stations() : null; },
+      avoid: function () { return current && SecStationQuery.hasCoordinates(current) ? [Number(current.lat), Number(current.lng)] : null; }
+    });
     let districtsN = -1;
     SYNC.onChange(function () { const st = SYNC.state(), n = st.loaded ? SYNC.stations().length : 0; if (st.loaded && n !== districtsN) { districtsN = n; districts.refresh(); } });
     nearby = SecNearbyLayer.mount(view, {

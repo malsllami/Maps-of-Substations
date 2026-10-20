@@ -8,6 +8,9 @@
  * - النافذة المنبثقة: الرقم والمغذي والمسافة + «قوقل ماب» و«مشاركة» و«تعديل»؛ تلميح «الرقم — المسافة كم».
  * - السطر: «📍 محطات قريبة (٢ كم) — العدد» أو «⚡ المغذي "…" — عدد … محطة مرتبطة»، وتنبيه «تم عرض …» أول مرة.
  * - الجلب نفسه ليس هنا: من بطاقة المحطة (nearby/feeder) — نسخة الجهاز أولًا بلا طلب، والخادم بلا نسخة فقط.
+ * 20 أكتوبر (مواصفات محمد): نطاق «قريب» 5 كم ثابت حول المحطة المبحوث عنها (لا يتغير مع التكبير)؛ الأخضر حتى 3.5 كم والرمادي
+ *   حتى 5 كم؛ الخريطة تُضبط لإظهار النطاق كله بحلقتين خافتتين (3.5 و5 كم)؛ كل المحطات نقاط ملوّنة في مواقعها بلا تجميع،
+ *   وبطاقات الرقم والمسافة من التكبير 15 (وأقرب 10 دائمًا)؛ الزر يكتب «5كم».
  * V2: زر القريبة يكتب «2كم» عند تفعيله (V1 كان «3كم» خطأً — بند V1 رقم 1)؛ كل نص في العلامات والنوافذ يُهرَّب؛
  *   أزرار النافذة بتفويض لا بـ onclick وكائنات عامة؛ رسالة خطأ للمستخدم بدل «الميزة تحتاج تفعيل بالباك إند»؛ محطة بلا
  *   إحداثيات صالحة لا تُرسم؛ تغيير المحطة يعيد الطبقة (reset).
@@ -22,13 +25,13 @@
 
   const H = global.SecHtml, Q = global.SecStationQuery;
   if (!H || !Q) throw new Error('nearby-layer.js يحتاج html.js وstation-query.js قبله / needs html.js and station-query.js first');
-  const NEAREST = 10;
-  const MSG = { LOADING: 'جاري التحميل...', FAILED: 'تعذّر جلب المحطات، حاول مرة أخرى', ZOOM_IN: ' — قرّب الخريطة لعرض المحطات المجاورة', NEAREST: ' — أقرب 10 محطات', ALL: ' — كل المحطات بالشاشة الحالية' };
+  const NEAREST = 10, LABEL_ZOOM = 15; // بطاقات كل المحطات من هذا التكبير / every station's card from this zoom
+  const MSG = { LOADING: 'جاري التحميل...', FAILED: 'تعذّر جلب المحطات، حاول مرة أخرى', NEAREST: ' — قرّب الخريطة لعرض أرقام كل المحطات', ALL: ' — كل المحطات بالشاشة الحالية',
+    RANGE: ' · الأخضر حتى 3.5 كم والرمادي حتى 5 كم' };
 
+  /* اللون بالمسافة: قريبة حتى 3.5 كم أخضر، وبعيدة نسبيًا حتى 5 كم رمادي — color by distance: close green, farther gray */
   function tier(km) {
-    if (km < 0.1) return { tier: 0, color: '#2ECC71' };
-    if (km <= 0.3) return { tier: 1, color: '#4DD6B5' };
-    return { tier: 2, color: '#A8B5C2' };
+    return km <= Q.MAP_CLOSE_KM ? { tier: 0, color: '#2ECC71' } : { tier: 2, color: '#A8B5C2' };
   }
   /* المسافة بصيغة قصيرة (م تحت الكيلو) — the distance, short (metres under a kilometre) */
   function dist_(km) { return km < 1 ? Math.round(km * 1000) + ' م' : (Math.round(km * 10) / 10) + ' كم'; }
@@ -64,7 +67,7 @@
     let mode = null, data = [], markers = [], seq = 0;
     const toasted = { nearby: false, feeder: false };
     view.tools.insertAdjacentHTML('beforeend',
-      '<button type="button" class="toolbar-btn" data-nearby="nearby" title="محطات قريبة (٢ كم)"><span class="tb-icon">📍</span><span class="tb-label" data-role="nearby-label">قريب</span></button>' +
+      '<button type="button" class="toolbar-btn" data-nearby="nearby" title="محطات قريبة (٥ كم)"><span class="tb-icon">📍</span><span class="tb-label" data-role="nearby-label">قريب</span></button>' +
       '<button type="button" class="toolbar-btn" data-nearby="feeder" title="محطات المغذي"><span class="tb-icon">⚡</span><span class="tb-label" data-role="feeder-label">مغذي</span></button>');
     const btn = function (m) { return view.tools.querySelector('[data-nearby="' + m + '"]'); };
 
@@ -73,19 +76,34 @@
       const st = deps.getStation ? deps.getStation() : null;
       btn('nearby').classList.toggle('active', mode === 'nearby');
       btn('feeder').classList.toggle('active', mode === 'feeder');
-      btn('nearby').querySelector('[data-role="nearby-label"]').textContent = mode === 'nearby' ? '2كم' : 'قريب';
+      btn('nearby').querySelector('[data-role="nearby-label"]').textContent = mode === 'nearby' ? '5كم' : 'قريب';
       btn('feeder').querySelector('[data-role="feeder-label"]').textContent = mode === 'feeder' && st && st.feeder ? String(st.feeder) : 'مغذي';
     }
     function clear_() { markers.forEach(function (m) { map.removeLayer(m); }); markers = []; }
 
-    /* العرض حسب التكبير (V1) — Display by zoom (V1) */
+    const dotRenderer = L.canvas({ padding: 0.5 }); // آلاف النقاط بلا بطء / thousands of dots without lag
+    let center = null;
+    /* كل محطة نقطة ملوّنة في موقعها الحقيقي (بلا تجميع)، وبطاقات الرقم والمسافة: من التكبير 15 لكل ما في الشاشة، وقبله لأقرب 10
+     * Every station a colored dot at its real place (no clustering); number/distance cards for everything on screen from
+     * zoom 15, and for the nearest 10 before it */
     function render() {
       if (!mode) return;
       clear_();
       const zoom = map.getZoom();
-      let show = [];
-      if (zoom <= 13) show = [];
-      else if (zoom <= 15) show = data.slice().sort(function (a, b) { return a._dist - b._dist; }).slice(0, NEAREST);
+      if (mode === 'nearby' && center) [Q.MAP_CLOSE_KM, Q.MAP_NEARBY_KM].forEach(function (km, i) {
+        markers.push(L.circle([center.lat, center.lng], { radius: km * 1000, color: i ? '#A8B5C2' : '#2ECC71', weight: 1.5, opacity: 0.55, dashArray: '6 6', fill: false, interactive: false }).addTo(map));
+      });
+      // حجم النقطة بالتكبير: صغيرة عند رؤية النطاق كله (آلاف المحطات تبقى مقروءة كتوزيع)، وتكبر مع التقريب
+      // The dot size by zoom: small when the whole range shows (thousands stay readable as a spread), larger as you zoom in
+      const dotR = zoom <= 12 ? 2.2 : zoom === 13 ? 3 : zoom === 14 ? 4 : 5, dotW = zoom <= 13 ? 0 : 1;
+      data.forEach(function (s) {
+        const dot = L.circleMarker([s.lat, s.lng], { renderer: dotRenderer, radius: dotR, color: '#08101A', weight: dotW, fillColor: tier(s._dist).color, fillOpacity: 0.9 });
+        dot.bindPopup(popup_(s, deps.googleMapsUrl ? deps.googleMapsUrl(s) : ''));
+        dot._secStation = s;
+        markers.push(dot.addTo(map));
+      });
+      let show;
+      if (zoom < LABEL_ZOOM) show = data.slice().sort(function (a, b) { return a._dist - b._dist; }).slice(0, NEAREST);
       else { const b = map.getBounds(); show = data.filter(function (s) { return b.contains([s.lat, s.lng]); }); }
       show.forEach(function (s) {
         const mk = L.marker([s.lat, s.lng], { icon: pinIcon_(s, tier(s._dist), mode === 'nearby') });
@@ -96,11 +114,19 @@
         markers.push(mk);
       });
       const st = deps.getStation();
-      const label = mode === 'feeder' ? '⚡ المغذي "' + (st && st.feeder) + '" — عدد ' + data.length + ' محطة مرتبطة' : '📍 محطات قريبة (٢ كم) — ' + data.length + ' محطة';
-      view.hint(label + (zoom <= 13 ? MSG.ZOOM_IN : zoom <= 15 ? MSG.NEAREST : MSG.ALL));
+      const label = mode === 'feeder' ? '⚡ المغذي "' + (st && st.feeder) + '" — عدد ' + data.length + ' محطة مرتبطة' : '📍 محطات قريبة (٥ كم) — ' + data.length + ' محطة' + MSG.RANGE;
+      view.hint(label + (zoom < LABEL_ZOOM ? MSG.NEAREST : MSG.ALL));
     }
 
-    function reset() { seq++; mode = null; data = []; clear_(); view.hideHint(); syncButtons_(); }
+    function reset() { seq++; mode = null; data = []; center = null; clear_(); view.hideHint(); syncButtons_(); }
+    /* الخريطة على النطاق كله في المساحة المرئية: دائرة 5 كم للقريبة، ومحطات المغذي كلها للمغذي (التكبير اليدوي متاح بعدها)
+     * The map on the whole range in the visible area: the 5 km circle for nearby, all the feeder's stations for feeder */
+    function fit_() {
+      const pad = view.fitPadding ? view.fitPadding(16) : { padding: [16, 16] };
+      if (mode === 'nearby' && center) { map.fitBounds(L.latLng(center.lat, center.lng).toBounds(Q.MAP_NEARBY_KM * 2000), pad); return; }
+      const pts = data.map(function (s) { return [s.lat, s.lng]; }).concat(center ? [[center.lat, center.lng]] : []);
+      if (pts.length) map.fitBounds(pts.length > 1 ? pts : [pts[0], pts[0]], Object.assign(pad, { maxZoom: 16 }));
+    }
 
     /* تفعيل/إخفاء نمط (V1) — Toggle a mode (V1) */
     async function activate(m) {
@@ -114,12 +140,12 @@
       try { res = await deps.query(m); } catch (e) { res = { error: MSG.FAILED }; }
       if (my !== seq) return; // تغيّرت المحطة أو النمط أثناء الجلب / the station or mode changed meanwhile
       if (!res || res.error) { view.hint((res && res.error) || MSG.FAILED); mode = null; syncButtons_(); return; }
-      const center = { lat: Number(st.lat), lng: Number(st.lng) };
       const hasCenter = Q.hasCoordinates(st);
+      center = hasCenter ? { lat: Number(st.lat), lng: Number(st.lng) } : null;
       data = (res.stations || []).filter(function (s) { return Q.hasCoordinates(s) && !(String(s.id) === String(st.id) && s.type === st.type); })
         .map(function (s) { const d = typeof s.distanceKm === 'number' ? s.distanceKm : (hasCenter ? Q.distanceKm(center, { lat: Number(s.lat), lng: Number(s.lng) }) : 0); return Object.assign({}, s, { lat: Number(s.lat), lng: Number(s.lng), _dist: d }); });
       syncButtons_(); // العدد صار معروفًا / the count is now known
-      if (data.length && hasCenter) { if (view.centerOn) view.centerOn([center.lat, center.lng], 16); else map.setView([center.lat, center.lng], 16); } // في المساحة المرئية / in the visible area
+      fit_();
       render();
       if (!toasted[m]) { view.toast(m === 'nearby' ? 'تم عرض ' + data.length + ' محطة قريبة' : 'تم عرض ' + data.length + ' محطة بالمغذي'); toasted[m] = true; }
     }

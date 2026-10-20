@@ -218,7 +218,7 @@
       if (mode === 'nearby' && !Q.hasCoordinates(s)) return { error: NO_COORDS_MSG };
       const local = deps.localStations ? deps.localStations() : null;
       if ((!local || !local.length) && global.navigator.onLine === false) return { error: 'تحتاج نسخة المحطات أو اتصالًا بالإنترنت' };
-      try { return await Q.query(mode, s, local); }
+      try { return await Q.query(mode, s, local, mode === 'nearby' ? Q.MAP_NEARBY_KM : null); } // قريب الخريطة: 5 كم / the map's nearby: 5 km
       catch (err) { return { error: 'تعذّر جلب المحطات، حاول مرة أخرى' }; }
     }
 

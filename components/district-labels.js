@@ -35,7 +35,7 @@
 
   /**
    * mount(view, deps) ← { refresh(), shown(), destroy() }
-   * deps: { stations() → Array|null (نسخة المحطات / the station copy) }
+   * deps: { stations() → Array|null (نسخة المحطات / the station copy)، avoid() → [lat, lng]|null (المحطة المختارة / the chosen station) }
    */
   function mount(view, deps) {
     const L = global.L, map = view.map, layer = L.layerGroup().addTo(map);
@@ -50,6 +50,9 @@
       if (z < MIN_ZOOM || z > MAX_ZOOM || !list.length) return;
       // لا اسم تحت البحث والأدوات أعلاها، ولا تحت عمود الأزرار، ولا تحت البطاقة — no name under the search/tools, the column or the card
       const size = map.getSize(), boxes = [], ins = view.insets ? view.insets() : { top: 0, bottom: 0 }, right = size.x - SIDE_W;
+      // المحطة المختارة وعلامتها محجوزة فلا يغطيها اسم حي — the chosen station and its label are reserved, no district name over them
+      const keep = deps.avoid ? deps.avoid() : null;
+      if (keep) { const k = map.latLngToContainerPoint(keep); boxes.push({ x1: k.x - 90, y1: k.y - 70, x2: k.x + 90, y2: k.y + 40 }); }
       list.forEach(function (d) {
         const p = map.latLngToContainerPoint([d.lat, d.lng]);
         const w = widthOf(d.name), h = 24, b = { x1: p.x - w / 2 - PAD, y1: p.y - h / 2 - PAD, x2: p.x + w / 2 + PAD, y2: p.y + h / 2 + PAD };

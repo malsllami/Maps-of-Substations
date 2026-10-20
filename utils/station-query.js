@@ -12,7 +12,10 @@
 (function (global) {
   'use strict';
 
-  const NEARBY_KM = 2;
+  const NEARBY_KM = 2; // القريبة في القوائم (المحطات، التفاصيل) — nearby in the lists (stations, details)
+  // نطاق القرب على الخريطة من المحطة المبحوث عنها (مواصفات محمد 20 أكتوبر): 5 كم حدًا أقصى، و3.5 كم حد «القريبة»
+  // The map's nearby range from the searched station (Mohammed's spec, 20 Oct): 5 km at most, 3.5 km the «close» limit
+  const MAP_NEARBY_KM = 5, MAP_CLOSE_KM = 3.5;
 
   function hasCoordinates(s) {
     const empty = function (v) { return v === null || v === undefined || v === ''; };
@@ -56,17 +59,18 @@
    * القريبة أو المغذي: من النسخة المحلية إن وُجدت، وإلا من الخادم عبر api-client. يُرجع { source: 'local'|'server', stations }
    * Nearby or feeder: from the local copy if any, else the server through api-client.
    */
-  async function query(mode, station, localStations) {
+  async function query(mode, station, localStations, radiusKm) {
+    const r = radiusKm || NEARBY_KM; // نصف القطر للقريبة (الخريطة تمرّر 5 كم) — the nearby radius (the map passes 5 km)
     if (Array.isArray(localStations) && localStations.length) {
-      return { source: 'local', stations: mode === 'feeder' ? feederLocal(localStations, station) : nearbyLocal(localStations, { id: station.id, type: station.type, lat: Number(station.lat), lng: Number(station.lng) }) };
+      return { source: 'local', stations: mode === 'feeder' ? feederLocal(localStations, station) : nearbyLocal(localStations, { id: station.id, type: station.type, lat: Number(station.lat), lng: Number(station.lng) }, r) };
     }
     const res = mode === 'feeder'
       ? await global.SecApi.call('getFeederStations', { feeder: station.feeder })
-      : await global.SecApi.call('getNearbyStations', { lat: station.lat, lng: station.lng, radiusKm: NEARBY_KM }, { phone: true });
+      : await global.SecApi.call('getNearbyStations', { lat: station.lat, lng: station.lng, radiusKm: r }, { phone: true });
     if (!res || !res.success || !Array.isArray(res.stations)) throw new Error(res && res.error ? res.error : 'تعذّر جلب المحطات');
     const center = { lat: Number(station.lat), lng: Number(station.lng) };
     return { source: 'server', stations: res.stations.filter(function (s) { return !sameStation_(s, station); }).map(function (s) { return shape_(s, center); }) };
   }
 
-  global.SecStationQuery = { NEARBY_KM: NEARBY_KM, hasCoordinates: hasCoordinates, distanceKm: distanceKm, nearbyLocal: nearbyLocal, feederLocal: feederLocal, query: query };
+  global.SecStationQuery = { NEARBY_KM: NEARBY_KM, MAP_NEARBY_KM: MAP_NEARBY_KM, MAP_CLOSE_KM: MAP_CLOSE_KM, hasCoordinates: hasCoordinates, distanceKm: distanceKm, nearbyLocal: nearbyLocal, feederLocal: feederLocal, query: query };
 })(typeof window !== 'undefined' ? window : globalThis);
