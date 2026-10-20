@@ -7,9 +7,7 @@
  * buttons, and the nearby list scrolling inside its own area above the bottom bar. No shadows; same layout in both themes.
  * ============================================================ */
 .station-details{max-width:592px;margin:0 auto;padding:10px 16px 0;display:flex;flex-direction:column;gap:12px;}
-.sd-head{display:flex;align-items:center;gap:8px;}
 .sd-back{width:42px;height:42px;border-radius:12px;border:1px solid var(--border-strong);background:var(--bg-card);color:var(--text-primary);display:flex;align-items:center;justify-content:center;cursor:pointer;}
-.sd-title{font-size:17px;font-weight:700;color:var(--text-primary);}
 .sd-hero{display:flex;align-items:center;gap:12px;padding:14px;border-radius:var(--radius-lg);background:var(--bg-card);border:1px solid var(--border-strong);}
 .sd-badge{width:52px;height:52px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
 .sd-badge.is-dist{background:var(--c-dist-bg);color:var(--c-dist-fg);border:1px solid var(--c-dist-line);}
@@ -30,7 +28,6 @@
 .sd-k{font-size:14px;color:var(--text-secondary);flex-shrink:0;}
 .sd-v{margin-inline-start:auto;font-size:15px;font-weight:700;color:var(--text-primary);text-align:end;min-width:0;overflow-wrap:anywhere;}
 .sd-v.mono{font-family:'JetBrains Mono',monospace;direction:ltr;}
-.sd-copy{width:36px;height:36px;border-radius:10px;border:1px solid var(--c-sub-line);background:var(--c-sub-bg);color:var(--c-sub-fg);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
 /* الأزرار بنظام الألوان الوظيفي — buttons in the functional colors */
 .sd-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
 .sd-btn{min-height:50px;border-radius:12px;font-family:inherit;font-size:14.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;text-decoration:none;padding:6px 8px;text-align:center;}

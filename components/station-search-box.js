@@ -66,6 +66,7 @@
     function progress_(on) {
       const p = r('progress'), fill = r('fill'), pct = r('pct');
       global.clearInterval(progressTimer);
+      if (!p) return null; // أُزيل المربع (destroy) أثناء بحث جارٍ — the box was destroyed during a running search
       if (!on) { p.classList.remove('show'); fill.style.width = '0%'; pct.textContent = '0%'; return null; }
       p.classList.add('show');
       let v = 0; fill.style.width = '0%'; pct.textContent = '0%';

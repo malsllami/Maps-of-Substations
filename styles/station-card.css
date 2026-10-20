@@ -2,12 +2,6 @@
  * styles/station-card.css — تنسيق بطاقة المحطة (components/station-card.js) — منقول من V1 حرفيًا + إضافات V2 في آخره
  * Station card styles — moved verbatim from V1 + V2 additions at the end
  * ============================================================ */
-.db-freshness-note{
-  display:flex;align-items:center;justify-content:center;gap:6px;
-  font-size:10.5px;color:var(--text-secondary);
-  margin-top:10px;padding-top:10px;border-top:1px solid var(--border);
-}
-.db-freshness-note svg{flex-shrink:0;color:var(--teal);}
 .station-table{
   position:relative;z-index:6;
   width:100%;
@@ -39,14 +33,9 @@
 .station-table td.v{color:var(--text-primary);font-weight:500;text-align:left;font-family:'JetBrains Mono',monospace;direction:ltr;}
 .station-table .st-actions{display:flex;gap:8px;flex-wrap:wrap;}
 /* ترتيب الإجراءات المعتمد: المسار رئيسي بارز، سطر خريطة جدة بحالتها، ثم ثلاثة أزرار مساعدة — the approved action order */
-.station-table .st-actions-v2{display:grid;grid-template-columns:1fr;gap:8px;}
 .station-table .st-btn.primary.st-main{justify-content:center;padding:13px;font-size:15px;font-weight:700;background:var(--teal);border-color:var(--teal);color:#fff;}
 .station-table .st-btn.primary.st-main:hover{background:var(--teal-light);color:#fff;}
 .station-table .st-btn.st-om{justify-content:space-between;text-align:right;padding:9px 14px;}
-.station-table .st-om-text{display:grid;gap:1px;}
-.station-table .st-om-text b{font-size:13px;color:var(--text-primary);}
-.station-table .st-om-text small{font-size:11.5px;color:var(--text-secondary);}
-.station-table .st-om-chev{color:var(--text-secondary);font-size:15px;}
 .station-table .st-sub{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
 .station-table .st-sub .st-btn{justify-content:center;}
 .station-table .st-btn[hidden]{display:none;}
@@ -58,7 +47,6 @@
 .station-table .st-btn:hover{border-color:var(--teal);color:var(--text-primary);}
 .station-table .st-btn.primary{background:transparent;border-color:rgba(31,174,140,0.4);color:var(--teal-light);}
 /* زر الحذف للمدير (التصميم «أ»): أحمر خافت، والصف يصير 2×2 (قوقل/مشاركة، تعديل/حذف) — admin delete (design «A») */
-.station-table .st-sub.st-sub-admin{grid-template-columns:repeat(2,1fr);}
 .station-table .st-btn.st-danger{border-color:rgba(224,101,79,0.45);color:#E0654F;background:rgba(224,101,79,0.06);}
 .station-table .st-btn.st-danger:hover{border-color:#E0654F;background:rgba(224,101,79,0.14);color:#E0654F;}
 /* V2: محطة بلا إحداثيات صالحة — ملاحظة وأزرار معطلة بنفس ألوان V1 — V2: a station without valid coordinates */
@@ -75,20 +63,13 @@
 .sb-top .sb-data-cell .cell-label{font-size:12px;margin-bottom:4px;}
 .sb-top .sb-data-cell .cell-value{font-size:17px;}
 .station-table .sb-top .st-btn.primary.st-main{padding:14px;font-size:16px;border-radius:14px;}
-.station-actions{width:min(1100px, 96vw);margin:0 auto;box-sizing:border-box;}
-body.nav-full .station-actions{display:none !important;}
 .sb-bottom .st-sub{display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:10px;}
 .station-table .sb-bottom .st-btn{justify-content:center;font-size:14px;font-weight:700;padding:11px 10px;border-radius:12px;color:var(--text-primary);background:transparent;min-width:0;}
-.station-table .sb-bottom .st-btn.st-span{grid-column:1 / -1;}
 .station-table .sb-bottom .st-google,.station-table .sb-bottom .st-share{border-color:rgba(46,125,209,0.7);}
 .station-table .sb-bottom .st-edit{border-color:rgba(229,181,58,0.75);}
 .station-table .sb-bottom .st-om{border-color:rgba(31,174,140,0.6);}
-.station-table .sb-bottom .st-om .st-om-text{text-align:center;}
-.station-table .sb-bottom .st-om .st-om-text b{font-size:13px;white-space:normal;}
 .station-table .sb-bottom .st-btn.st-danger{color:#E0654F;}
 .station-table .sb-bottom .st-btn:hover{border-color:var(--teal);}
-.sb-bottom .db-freshness-note{justify-content:flex-start;align-items:flex-start;font-size:12px;line-height:1.7;margin-top:12px;padding-top:12px;text-align:start;}
-.sb-bottom .db-freshness-note svg{margin-top:3px;}
 .hero.station-framed .top-content-area .station-table{margin-top:12px;border-radius:16px 16px 0 0;border-bottom:none;box-shadow:none;}
 .hero.station-framed .top-content-area .sb-inner{padding-bottom:4px;}
 .hero.station-framed .map-stage-slot{
@@ -96,10 +77,8 @@ body.nav-full .station-actions{display:none !important;}
   background:var(--bg-card);border-left:1px solid var(--border-strong);border-right:1px solid var(--border-strong);
 }
 .hero.station-framed .map-stage-slot .globe-stage.map-active{width:100%;}
-.hero.station-framed .station-actions{border-radius:0 0 16px 16px;border-top:none;box-shadow:none;}
-.hero.station-framed .station-actions .sb-inner{padding-top:12px;}
 @media (max-width:767px){
-  .station-actions,.hero.station-framed .map-stage-slot{width:100%;}
+  .hero.station-framed .map-stage-slot{width:100%;}
   .hero.station-framed .map-stage-slot{padding:8px 12px 0;}
   .hero.station-framed .station-table .sb-inner{padding-left:12px;padding-right:12px;}
 }
@@ -133,15 +112,10 @@ body.nav-full .station-sheet{display:none !important;}
 .sheet-badge.is-sub{background:var(--sub-soft);color:var(--sub);}
 .sheet-title{min-width:0;flex-shrink:0;}
 .sheet-id{font-size:18px;font-weight:700;color:var(--text-primary);white-space:nowrap;}
-.sheet-id-k{font-size:14px;font-weight:600;color:var(--text-secondary);}
 .sheet-id .cell-value{font-family:'JetBrains Mono',monospace;font-weight:800;}
 .sheet-type{font-size:13px;font-weight:700;}
 .sheet-type.is-dist{color:var(--dist);}
 .sheet-type.is-sub{color:var(--sub);}
-.station-sheet .sheet-meta{flex:1;min-width:0;margin:0;border-radius:12px;}
-.station-sheet .sheet-meta .sb-data-cell{padding:6px 4px;}
-.station-sheet .sheet-meta .cell-label{font-size:12px;margin-bottom:2px;}
-.station-sheet .sheet-meta .cell-value{font-size:14.5px;}
 .station-sheet .st-search-time{margin-top:8px;font-size:12.5px;}
 .station-sheet .st-note-warn{margin:8px 0 0;font-size:13px;}
 /* صف الأزرار: أيقونة فوق تسمية، كلها بنفس العرض — the button row: icon over label, all the same width */
@@ -159,7 +133,6 @@ body.nav-full .station-sheet{display:none !important;}
 .station-table.station-sheet .sheet-actions .st-om .st-ico{color:var(--dist);}
 .station-table.station-sheet .sheet-actions .st-danger{color:var(--danger);background:var(--danger-bg);}
 .station-sheet .st-om small{display:none;} /* حالة خريطة جدة تظهر في نافذتها — its status shows in its own sheet */
-.station-sheet .db-freshness-note{margin-top:8px;padding-top:8px;font-size:12.5px;color:var(--text-secondary);}
 /* الشاشات الضيقة: صفّان من ثلاثة — narrow screens: two rows of three */
 @media (max-width:359px){ .station-sheet .sheet-actions{grid-template-columns:repeat(3,minmax(0,1fr));} }
 @media (max-width:380px){ .sheet-badge{width:38px;height:38px;} .sheet-id{font-size:16px;} }
@@ -169,11 +142,6 @@ body.nav-full .station-sheet{display:none !important;}
 /* التسمية الطويلة («خريطة جدة») تلتف سطرين بدل قصّها — a long label wraps to two lines instead of being cut */
 .station-table.station-sheet .sheet-actions .st-btn{white-space:normal;}
 .station-sheet .st-lbl{white-space:normal;line-height:1.2;text-align:center;overflow:visible;}
-/* وضوح أكبر للمغذي والمنطقة والتسميات (ملاحظة محمد 7.2) — clearer feeder, region and labels */
-.station-sheet .sheet-meta .cell-label{font-size:13px;}
-.station-sheet .sheet-meta .cell-value{font-size:15px;}
-.station-sheet .db-freshness-note{font-size:13px;}
-.station-sheet .db-freshness-note{font-size:12.5px;letter-spacing:-.1px;}
 
 /* ===== نظام الألوان الوظيفي في لوحة المحطة (اعتماد محمد) — the functional colors in the station sheet =====
    «المسار» الأبرز بلون التوزيع الصريح؛ قوقل ماب والمشاركة بلون التحويل (الموقع)؛ التعديل ذهبي (عملية)؛ خريطة جدة رمادي
@@ -198,10 +166,6 @@ body.nav-full .station-sheet{display:none !important;}
 /* بطاقة «محطات المغذي»: الرقم كبير في المنتصف بلون التوزيع — the feeder card: a large centered number in the distribution color */
 .station-table.station-sheet .sheet-actions .st-feeder{background:var(--c-dist-bg);border-color:var(--c-dist-line);color:var(--c-dist-fg);}
 .station-sheet .st-count{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:800;line-height:1;}
-/* التذييل: مدة البحث ومصدره وآخر تحديث في كتلة واحدة بنفس الخط والمحاذاة (طلب محمد) — the footer: search time/source and freshness together */
-.station-sheet .sheet-foot{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:4px;}
-.station-sheet .sheet-foot .st-search-time{margin:0;font-size:12.5px;text-align:start;justify-content:flex-start;display:flex;align-items:center;gap:4px;color:var(--text-secondary);}
-.station-sheet .sheet-foot .db-freshness-note{margin:0;padding:0;border:none;}
 /* زر «التفاصيل» تحت نوع المحطة — the «details» button under the station type */
 .sheet-more{margin-top:4px;padding:4px 10px;border-radius:9px;border:1px solid var(--border-strong);background:var(--bg-elev);color:var(--text-primary);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;}
 
@@ -213,9 +177,6 @@ body.nav-full .station-sheet{display:none !important;}
 .sheet-badge svg{width:16px;height:16px;}
 .sheet-line .sheet-type{font-size:14px;flex:1;min-width:0;}
 .sheet-line .sheet-more{margin:0;flex-shrink:0;}
-.station-sheet .sheet-meta{flex:none;width:100%;}
-.station-sheet .sheet-meta .sb-data-cell .cell-value{display:block;}
-.station-sheet .sheet-meta .sheet-id .cell-value{font-size:16px;}
 @media (max-width:380px){ .sheet-badge{width:26px;height:26px;} }
 
 /* ===== البطاقة المختصرة (نموذج محمد 20 أكتوبر): مقبض، رأس بالرمز والنوع والرقم الكبير، خانات «المغذي | المنطقة | عدد
@@ -225,20 +186,11 @@ body.nav-full .station-sheet{display:none !important;}
 .station-sheet .sb-inner{padding:6px 12px 10px;}
 .station-sheet .sb-top{padding-bottom:4px;}
 .station-sheet .sb-bottom{padding-top:2px;}
-.sheet-handle{display:block;width:40px;height:4px;border-radius:2px;background:var(--border-strong);margin:0 auto 8px;}
 .sheet-badge{width:44px;height:44px;border-radius:12px;}
 .sheet-badge svg{width:24px;height:24px;}
 .sheet-line .sheet-title{display:flex;flex-direction:column;align-items:flex-start;flex:1;min-width:0;line-height:1.2;}
 .sheet-line .sheet-type{flex:none;font-size:13px;}
 .sheet-title .sheet-id{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:800;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.station-sheet .sheet-meta{margin:0;}
-.station-sheet .sheet-meta .sb-data-cell{padding:5px 4px;}
-.station-sheet .sheet-meta .cell-label{font-size:12px;margin-bottom:1px;}
-.station-sheet .sheet-meta .cell-value{font-size:14.5px;}
-/* خانة عدد محطات المغذي زر بلون التوزيع — the feeder count cell is a button in the distribution color */
-.station-sheet .sheet-meta button.st-feeder{font-family:inherit;background:none;border:none;border-inline-start:1px solid var(--border-strong);color:var(--c-dist-fg);cursor:pointer;}
-.station-sheet .sheet-meta button.st-feeder .cell-label{color:inherit;opacity:.85;}
-.station-sheet .sheet-meta .st-count{font-size:15px;color:var(--c-dist-fg);}
 /* صف أزرار واحد دائمًا — always one button row */
 .station-sheet .sheet-actions{grid-template-columns:repeat(var(--n, 5), minmax(0,1fr));gap:6px;}
 @media (max-width:359px){ .station-sheet .sheet-actions{grid-template-columns:repeat(var(--n, 5), minmax(0,1fr));gap:4px;} }
@@ -246,15 +198,12 @@ body.nav-full .station-sheet{display:none !important;}
 .station-table.station-sheet .sheet-actions .st-btn .st-ico svg{width:18px;height:18px;}
 .station-table.station-sheet .sheet-actions .st-btn .st-lbl{font-size:11.5px;line-height:1.15;}
 @media (max-width:359px){ .station-table.station-sheet .sheet-actions .st-btn .st-lbl{font-size:10.5px;} }
-.station-sheet .sheet-foot{margin-top:6px;padding-top:6px;}
-.station-sheet .sheet-foot .st-search-time{font-size:12px;}
 
 /* ===== البطاقة أقصر (مراجعة الاستخدام الميداني 20 أكتوبر) =====
    بلا مقبض، ومدة البحث شارة قصيرة فوق «التفاصيل»، وحشو أقل؛ «المسار» الأعرض والأبرز، ثم قوقل ماب والمشاركة، و«تعديل»
    و«حذف» (للمدير) بمظهر هادئ — ومساحة اللمس لا تقل عن 46 نقطة.
    Shorter card (field-use review): no handle, the search time a short chip above «details», less padding; «route» the
    widest and boldest, then maps and share, «edit» and «delete» (admin) quieter — touch targets stay at least 46px. */
-.sheet-handle{display:none;}
 .station-sheet .sb-inner{padding:8px 10px 8px;}
 .station-sheet .sb-top{padding-bottom:6px;}
 .station-sheet .sb-bottom{padding-top:0;}
@@ -263,13 +212,6 @@ body.nav-full .station-sheet{display:none !important;}
 .sheet-badge svg{width:21px;height:21px;}
 .sheet-line .sheet-type{font-size:12.5px;}
 .sheet-title .sheet-id{font-size:22px;}
-.sheet-side{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
-.station-sheet .sheet-side .st-search-time{display:block;margin:0;font-size:11.5px;font-weight:600;white-space:nowrap;color:var(--text-secondary);}
-.station-sheet .sheet-side .st-search-time b{font-size:11.5px;}
-.sheet-side .sheet-more{padding:3px 10px;font-size:12.5px;}
-.station-sheet .sheet-meta .sb-data-cell{padding:4px 4px;}
-.station-sheet .sheet-meta .cell-label{font-size:11.5px;margin-bottom:0;}
-.station-sheet .sheet-meta .cell-value{font-size:14px;}
 .station-sheet .sheet-actions{display:flex;gap:6px;}
 .station-table.station-sheet .sheet-actions .st-btn{flex:1 1 0;min-height:46px;padding:4px 1px;}
 .station-table.station-sheet .sheet-actions .st-btn.st-main{flex:1.7 1 0;font-size:13.5px;}
@@ -284,7 +226,7 @@ body.nav-full .station-sheet{display:none !important;}
 .sheet-explore,.sheet-explore-txt{display:none;}
 .station-sheet.is-explore .sheet-explore{display:flex;align-items:center;gap:6px;flex-shrink:0;}
 .station-sheet.is-explore .sheet-explore-txt{display:block;font-size:12.5px;font-weight:700;color:var(--c-dist-fg);white-space:nowrap;}
-.station-sheet.is-explore .sheet-type,.station-sheet.is-explore .sheet-side,.station-sheet.is-explore .sheet-meta{display:none;}
+.station-sheet.is-explore .sheet-type{display:none;}
 .station-table.station-sheet.is-explore .sb-bottom,.station-sheet.is-explore .sb-bottom{display:none;}
 .station-sheet.is-explore .sb-top{padding-bottom:8px;}
 .sheet-go,.sheet-end{min-height:42px;padding:0 12px;border-radius:12px;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;}
@@ -297,23 +239,10 @@ body.nav-full .station-sheet{display:none !important;}
 /* ===== البطاقة بسطر معلومات واحد (نموذج محمد 20 أكتوبر): الرقم، وتحته الحي · المغذي · «164 محطة ›»؛ والأزرار بأسمائها كما هي.
    The card with one info line: the number, under it district · feeder · «164 stations ›»; the buttons keep their labels. ===== */
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
-.sheet-sub{display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px;margin-top:2px;font-size:12.5px;font-weight:600;color:var(--text-secondary);line-height:1.4;}
-.sheet-sub > * + *::before{content:'·';margin-inline-end:6px;color:var(--text-muted);}
-.sheet-sub .ss-feeder{font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--text-primary);}
-.station-sheet .sheet-sub button.ss-count{display:inline-flex;align-items:center;gap:3px;min-height:28px;padding:0 8px;border-radius:8px;cursor:pointer;
-  font-family:inherit;font-size:12.5px;font-weight:700;background:var(--c-dist-bg);border:1px solid var(--c-dist-line);color:var(--c-dist-fg);}
-.station-sheet .sheet-sub button.ss-count::before{display:none;}
-.station-sheet .sheet-sub .st-count{font-size:13px;color:inherit;}
-.station-sheet.is-explore .sheet-sub{display:none;}
 .station-sheet .sb-top{padding-bottom:8px;}
 
 /* سطر المعلومات سطرًا واحدًا دائمًا (اعتماد محمد 20 أكتوبر): اسم الحي يُختصر بـ«…» إن ضاق، والمغذي والعدد كاملان
    The info line always one line: the district shortens with «…» when tight, the feeder and count stay whole */
-.sheet-sub{flex-wrap:nowrap;min-width:0;font-size:12px;gap:0 5px;}
-.sheet-sub > *{flex-shrink:0;white-space:nowrap;}
-.sheet-sub .ss-region{flex-shrink:1;min-width:0;overflow:hidden;text-overflow:ellipsis;}
-.sheet-sub > * + *::before{margin-inline-end:5px;}
-.station-sheet .sheet-sub button.ss-count{min-height:26px;padding:0 7px;font-size:12px;}
 .station-sheet .sheet-explore-txt{font-size:12px;}
 /* نص شريط الاستكشاف («قريب 5 كم — 2010 محطة») يلتف تحت الرقم ولا يدخل تحت الأزرار — the explore text wraps under the number */
 .station-sheet.is-explore .sheet-explore-txt{white-space:normal;line-height:1.35;overflow-wrap:anywhere;}

@@ -28,7 +28,6 @@ body:not(.nav-full) .map-stage-slot .globe-stage.map-active{position:relative;to
 
 /* شاشة الرئيسية — the home screen */
 .hero-content{position:relative;z-index:5;width:100%;display:flex;flex-direction:column;align-items:center;gap:14px;padding:18px 16px 4px;}
-.hero-heading{width:100%;max-width:560px;}
 .hero-content h1{font-size:clamp(19px,5.2vw,24px);font-weight:700;line-height:1.35;color:var(--text-primary);text-align:start;text-wrap:balance;}
 .search-wrap{width:100%;max-width:560px;display:flex;flex-direction:column;align-items:center;gap:10px;}
 body.guest-mode .search-wrap{display:none;}
@@ -53,14 +52,6 @@ body.guest-mode .guest-login-cta{display:flex;}
 body.guest-mode #cardsSection{display:none;}
 /* أزرار الإجراءات (تصميم محمد، 15 أكتوبر): «إضافة محطة» بعرض الصف، ثم ثلاث بطاقات بأيقونات بنفس الحجم
    Action buttons (Mohammed's design, 15 Oct): a full-row «add station», then three equal icon tiles */
-.action-add{
-  width:100%;max-width:560px;display:flex;align-items:center;justify-content:center;position:relative;
-  padding:16px 52px;border-radius:22px;border:1.6px solid rgba(77,214,181,0.75);background:rgba(31,174,140,0.08);
-  color:var(--teal-light);font-family:inherit;font-size:18px;font-weight:700;cursor:pointer;transition:.2s;
-}
-.action-add:hover{background:rgba(31,174,140,0.18);border-color:var(--teal);}
-.action-add-label{display:inline-flex;align-items:center;gap:8px;}
-.action-add-plus{position:absolute;inset-inline-end:20px;top:50%;transform:translateY(-50%);font-size:28px;font-weight:400;line-height:1;}
 .action-tiles{width:100%;max-width:560px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
 .action-tile{
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:118px;
@@ -86,11 +77,9 @@ body.guest-mode #cardsSection{display:none;}
 .action-note[data-kind="ok"]{color:var(--teal-light);border-color:rgba(77,214,181,0.5);}
 .action-note[data-kind="fail"]{color:#E0654F;border-color:rgba(224,101,79,0.45);}
 [data-theme="light"] .action-note[data-kind="ok"]{color:var(--teal);}
-[data-theme="light"] .action-add{color:var(--teal);}
 [data-theme="light"] .tile-outage{color:#A57C12;}
 [data-theme="light"] .tile-recent{color:var(--blue-mid);}
 @media (max-width:767px){
-  .action-add{font-size:17px;padding:15px 48px;}
   .action-tiles{gap:8px;}
   .action-tile{min-height:108px;padding:12px 6px;}
   .tile-label{font-size:13.5px;}
@@ -134,25 +123,8 @@ body.guest-mode .home-title{display:none;}
    Mohammed's notes on stage B: larger secondary text, the cached data folded */
 .home-date{font-size:14px;}
 .stats-board .sb-foot{font-size:13.5px;color:var(--text-secondary);}
-.home-fold{width:100%;max-width:560px;background:var(--bg-card);border:1px solid var(--border-strong);border-radius:var(--radius-lg);}
-.home-fold > summary{display:flex;align-items:center;gap:10px;padding:14px;cursor:pointer;font-size:15px;font-weight:700;color:var(--text-primary);list-style:none;}
-.home-fold > summary::-webkit-details-marker{display:none;}
-.home-fold > summary::after{content:'';margin-inline-start:auto;width:9px;height:9px;border-inline-start:2px solid var(--text-muted);border-bottom:2px solid var(--text-muted);transform:rotate(-45deg);transition:transform .2s;}
-.home-fold[open] > summary::after{transform:rotate(135deg);}
-.fold-icon{display:flex;color:var(--sub);}
-.fold-sub{font-size:13px;font-weight:600;color:var(--text-muted);}
-.home-fold .home-slot{padding:0 0 4px;}
-.home-fold .storage-row{border:none;background:none;padding-top:0;}
-.home-fold .storage-title{display:none;}
 .storage-usage-top,.storage-percent{font-size:13.5px;}
 .storage-clear-btn{font-size:13.5px;padding:8px 12px;}
-/* خانات البيانات المؤقتة: 2×2 بخط أوضح بدل أربع خانات ضيقة — cached-data cells: 2×2 with clearer text instead of four narrow ones */
-.home-fold .storage-cells{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:14px;}
-.home-fold .storage-cell:nth-child(3){border-right:none;}
-.home-fold .storage-cell-label{font-size:13px;}
-.home-fold .storage-cell-val{font-size:14.5px;}
-.home-fold .storage-cell-val small{font-size:12px;}
-.home-fold .stations-cache-info{font-size:13px;}
 
 /* ===== المرحلة ج: شاشة الخريطة بارتفاع الشاشة — stage C: the map screen fits the screen height ===== */
 .view-map.hero{padding:8px 12px 0;}
@@ -177,26 +149,24 @@ body.guest-mode .home-title{display:none;}
 .k-dist,.st-tile.sb-dist{--k-bg:var(--c-dist-bg);--k-fg:var(--c-dist-fg);--k-line:var(--c-dist-line);}
 .k-sub,.st-tile.sb-sub,.tile-recent{--k-bg:var(--c-sub-bg);--k-fg:var(--c-sub-fg);--k-line:var(--c-sub-line);}
 .k-ops,.st-tile.sb-today{--k-bg:var(--c-ops-bg);--k-fg:var(--c-ops-fg);--k-line:var(--c-ops-line);}
-.k-alert,.tile-outage{--k-bg:var(--c-alert-bg);--k-fg:var(--c-alert-fg);--k-line:var(--c-alert-line);}
-.k-info,.home-fold{--k-bg:var(--c-info-bg);--k-fg:var(--c-info-fg);--k-line:var(--c-info-line);}
+.tile-outage{--k-bg:var(--c-alert-bg);--k-fg:var(--c-alert-fg);--k-line:var(--c-alert-line);}
+.k-info{--k-bg:var(--c-info-bg);--k-fg:var(--c-info-fg);--k-line:var(--c-info-line);}
 
 /* البطاقات الملوّنة — the colored cards */
-.st-tile.sb-dist,.st-tile.sb-sub,.st-tile.sb-today,.tile-outage,.tile-recent,.home-fold{
+.st-tile.sb-dist,.st-tile.sb-sub,.st-tile.sb-today,.tile-outage,.tile-recent{
   background:var(--k-bg);border:1px solid var(--k-line);color:var(--k-fg);box-shadow:none;
 }
 .st-tile.sb-dist .st-num,.st-tile.sb-sub .st-num,.st-tile.sb-today .st-op b,
 .st-tile.sb-dist .st-icon,.st-tile.sb-sub .st-icon,.st-tile.sb-today .st-icon,
 .st-tile.sb-dist .st-label,.st-tile.sb-sub .st-label,.st-tile.sb-today .st-label,.st-tile.sb-today .st-ops{color:var(--k-fg);}
-.home-fold > summary,.home-fold .fold-icon{color:var(--k-fg);}
-.home-fold .fold-sub{color:var(--k-fg);opacity:.8;}
 /* المحايدة: الإجمالي والتحديث وجدول اليوم — the neutral ones: total, refresh, today's table */
 .st-tile.sb-all,.tile-refresh,.sb-detail{background:var(--bg-card);border:1px solid var(--border-strong);color:var(--text-primary);box-shadow:none;}
 .tile-refresh .tile-sub{color:var(--text-secondary);}
 /* المحددة (تمرير/تركيز): إطار أوضح بنفس اللون — selected: a clearer frame in the same color */
-.action-tile:hover,.action-tile:focus-visible,.home-fold > summary:focus-visible{border-color:var(--k-fg, var(--text-secondary));outline:none;}
+.action-tile:hover,.action-tile:focus-visible{border-color:var(--k-fg, var(--text-secondary));outline:none;}
 .tile-outage:hover,.tile-recent:hover{background:var(--k-bg);}
 /* النشطة/المفتوحة: إطار + شريط جانبي بلون البطاقة — active/open: frame + a side bar in the card's color */
-.action-tile[aria-expanded="true"],.home-fold[open]{border-color:var(--k-fg);box-shadow:inset -4px 0 0 var(--k-fg);}
+.action-tile[aria-expanded="true"]{border-color:var(--k-fg);box-shadow:inset -4px 0 0 var(--k-fg);}
 .tile-outage[aria-expanded="true"]{background:var(--k-bg);}
 [data-theme="light"] .tile-outage,[data-theme="light"] .tile-recent{color:var(--k-fg);}
 
@@ -222,9 +192,6 @@ body.guest-mode .home-title{display:none;}
 .stats-board .st-tile[class] .st-num,.stats-board .st-tile[class] .st-label,.stats-board .st-tile[class] .st-icon,
 .stats-board .st-tile[class] .st-ops,.stats-board .st-tile[class] .st-op b{color:var(--t-ink);}
 .st-tile{min-height:92px;}
-/* البيانات المؤقتة بخلفية البطاقات الداكنة نفسها، والحالة المفتوحة بإطار هادئ بلا شريط فاتح (ملاحظة محمد) — the cached data on the dark card background */
-.home-fold{background:var(--bg-card);}
-.home-fold[open]{box-shadow:none;border-color:var(--c-info-line);}
 /* الأرقام دائمًا في المنتصف (طلب محمد) — numbers always centered */
 .st-tile{align-items:center;text-align:center;}
 .st-top{justify-content:center;}
@@ -296,8 +263,6 @@ body:not(.nav-full) .view-map .map-toast{bottom:calc(var(--sheet-h, 0px) + 16px)
 /* بطاقة المحطة عائمة أسفل الخريطة بخلفية زجاجية — the station card floats at the bottom on glass */
 body:not(.nav-full) .view-map .station-sheet{position:absolute;left:8px;right:8px;width:auto;bottom:8px;margin:0;z-index:20;max-height:56%;overflow-y:auto;overscroll-behavior:contain;
   background:var(--glass-strong);border:1px solid var(--glass-line);-webkit-backdrop-filter:blur(16px) saturate(1.25);backdrop-filter:blur(16px) saturate(1.25);} /* أوضح فوق الخريطة النهارية / clearer over the day map */
-body:not(.nav-full) .view-map .station-sheet .sheet-meta{background:var(--glass-strong);border-color:var(--glass-line);}
-body:not(.nav-full) .view-map .station-sheet .sheet-foot{border-top-color:var(--glass-line);}
 /* الأدوات الخمس في سطر واحد بلا قص على 390 (الأنماط، قريب، مغذي، أعطال، ⋯) — all five tools on one line at 390 */
 body:not(.nav-full) .view-map .toolbar-scroll{gap:5px;}
 body:not(.nav-full) .view-map .toolbar-btn,body:not(.nav-full) .view-map .map-mode-chip{padding:7px 9px;gap:4px;font-size:12.5px;}
