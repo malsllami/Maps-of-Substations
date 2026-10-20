@@ -248,3 +248,33 @@ body.nav-full .station-sheet{display:none !important;}
 @media (max-width:359px){ .station-table.station-sheet .sheet-actions .st-btn .st-lbl{font-size:10.5px;} }
 .station-sheet .sheet-foot{margin-top:6px;padding-top:6px;}
 .station-sheet .sheet-foot .st-search-time{font-size:12px;}
+
+/* ===== البطاقة أقصر (مراجعة الاستخدام الميداني 20 أكتوبر) =====
+   بلا مقبض، ومدة البحث شارة قصيرة فوق «التفاصيل»، وحشو أقل؛ «المسار» الأعرض والأبرز، ثم قوقل ماب والمشاركة، و«تعديل»
+   و«حذف» (للمدير) بمظهر هادئ — ومساحة اللمس لا تقل عن 46 نقطة.
+   Shorter card (field-use review): no handle, the search time a short chip above «details», less padding; «route» the
+   widest and boldest, then maps and share, «edit» and «delete» (admin) quieter — touch targets stay at least 46px. */
+.sheet-handle{display:none;}
+.station-sheet .sb-inner{padding:8px 10px 8px;}
+.station-sheet .sb-top{padding-bottom:6px;}
+.station-sheet .sb-bottom{padding-top:0;}
+.sheet-head{gap:6px;}
+.sheet-badge{width:38px;height:38px;border-radius:11px;}
+.sheet-badge svg{width:21px;height:21px;}
+.sheet-line .sheet-type{font-size:12.5px;}
+.sheet-title .sheet-id{font-size:22px;}
+.sheet-side{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
+.station-sheet .sheet-side .st-search-time{display:block;margin:0;font-size:11.5px;font-weight:600;white-space:nowrap;color:var(--text-secondary);}
+.station-sheet .sheet-side .st-search-time b{font-size:11.5px;}
+.sheet-side .sheet-more{padding:3px 10px;font-size:12.5px;}
+.station-sheet .sheet-meta .sb-data-cell{padding:4px 4px;}
+.station-sheet .sheet-meta .cell-label{font-size:11.5px;margin-bottom:0;}
+.station-sheet .sheet-meta .cell-value{font-size:14px;}
+.station-sheet .sheet-actions{display:flex;gap:6px;}
+.station-table.station-sheet .sheet-actions .st-btn{flex:1 1 0;min-height:46px;padding:4px 1px;}
+.station-table.station-sheet .sheet-actions .st-btn.st-main{flex:1.7 1 0;font-size:13.5px;}
+.station-table.station-sheet .sheet-actions .st-btn.st-main .st-lbl{font-size:13.5px;}
+.station-table.station-sheet .sheet-actions .st-edit{background:var(--bg-card);border-color:var(--border-strong);color:var(--text-secondary);}
+.station-table.station-sheet .sheet-actions .st-edit .st-ico{color:var(--c-ops-fg);}
+.station-table.station-sheet .sheet-actions .st-danger{background:var(--bg-card);border-color:var(--border-strong);color:var(--text-secondary);}
+.station-table.station-sheet .sheet-actions .st-danger .st-ico{color:var(--danger);}

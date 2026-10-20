@@ -91,7 +91,7 @@
    *   onNavigate() (زر الملاحة في العمود)، onLocate() (زر «موقعي»)، onOverlayChange() (فتح/طي الأدوات)، now() للاختبار }
    * يُرجع { map، mode()، resolvedMode()، setMode(m)، showStation(s)، clearStation()، tools (مكان الأزرار)، panels،
    *   hint(text)، hideHint()، toast(text)، usingOffline()، refresh()، destroy()، setInsets(top, bottom)، centerOn(latlng, zoom, fly)،
-   *   fitPadding(pad)، insets()، showMe(pos)، setNavTarget(on)، toggleTools(open) }
+   *   fitPadding(pad)، insets()، showMe(pos)، setNavTarget(on)، toggleTools(open)، recenter()، fitSide(topMin, bottom) }
    */
   function mount(stage, opts) {
     const o = opts || {};
@@ -199,9 +199,34 @@
       const i = current_(), dy = (i.bottom - i.top) / 2;
       return dy ? map.unproject(map.project(latlng, zoom).add([0, dy]), zoom) : L.latLng(latlng);
     }
+    /* النقطة المتوسَّطة تبقى في منتصف المساحة المرئية كلما تغيّر ما يغطي الخريطة (فتح الأدوات، تغيّر البطاقة، تدوير الجوال)،
+     * إلا إذا حرّك المستخدم الخريطة بنفسه بعدها — the centered point stays mid visible area whenever what covers the map changes,
+     * unless the user moved the map since */
+    let focus = null, internal = false;
+    const FLY_MS = 1600;
+    map.on('movestart', function () { if (!internal) focus = null; });
+    function move_(fn) { internal = true; try { fn(); } finally { internal = false; } }
     function centerOn(latlng, zoom, fly) {
       const z = zoom == null ? map.getZoom() : zoom, c = visibleCenter_(latlng, z);
-      if (fly) map.flyTo(c, z, { duration: 1.4 }); else map.setView(c, z);
+      move_(function () { if (fly) map.flyTo(c, z, { duration: 1.4 }); else map.setView(c, z); });
+      focus = { ll: L.latLng(latlng), t: Date.now() };
+    }
+    function recenter() {
+      if (!focus || Date.now() - focus.t < FLY_MS) return; // أثناء الطيران لا يُقاطَع / never cuts a fly
+      const z = map.getZoom(), want = map.project(visibleCenter_(focus.ll, z), z), now = map.project(map.getCenter(), z);
+      if (want.distanceTo(now) > 3) move_(function () { map.setView(map.unproject(want, z), z, { animate: false }); });
+    }
+    /* العمود الجانبي بين ما يطفو أعلى الخريطة والبطاقة، عمود واحد دائمًا: إن ضاقت المساحة يُخفى «+ / −» أولًا (التكبير بإصبعين
+     * متاح)، ثم زر الملاحة (زر «المسار» في البطاقة) — لا زر يُغطّى ولا عمود ثانٍ فوق الأدوات.
+     * The side column between what floats on top and the card, always one column: when short, «+ / −» hide first (pinch
+     * zoom stays), then the navigation button («route» on the card) — no button covered, no second column over the tools. */
+    function fitSide(topMin, bottom) {
+      const side = q('side');
+      side.style.top = Math.round(Math.max(topMin, overlayTop_() - INSET_GAP + 8)) + 'px';
+      side.style.bottom = Math.round(bottom) + 'px';
+      stage.classList.remove('side-no-zoom', 'side-no-nav');
+      if (side.scrollHeight > side.clientHeight + 1) stage.classList.add('side-no-zoom');
+      if (side.scrollHeight > side.clientHeight + 1) stage.classList.add('side-no-nav');
     }
     /* حشوة fitBounds بما يغطي الخريطة — fitBounds padding including what covers the map */
     function fitPadding(pad) { const p = pad || 0, i = current_(); return { paddingTopLeft: [p, p + i.top], paddingBottomRight: [p, p + i.bottom] }; }
@@ -283,7 +308,7 @@
       map: map, tools: q('tools'), panels: q('panels'),
       mode: function () { return mode; }, resolvedMode: resolved, setMode: setMode, refresh: apply,
       usingOffline: function () { return offlineFlavor !== null; },
-      showStation: showStation, clearStation: clearStation, setInsets: setInsets, centerOn: centerOn, fitPadding: fitPadding,
+      showStation: showStation, clearStation: clearStation, setInsets: setInsets, centerOn: centerOn, fitPadding: fitPadding, recenter: recenter, fitSide: fitSide,
       insets: current_, hint: hint, hideHint: hideHint, toast: toast, showMe: showMe, setNavTarget: setNavTarget,
       toggleTools: toggleTools_,
       destroy: function () {

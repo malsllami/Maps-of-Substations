@@ -294,7 +294,7 @@ body:not(.nav-full) .view-map .map-mode-panel,body:not(.nav-full) .view-map .map
 /* التكبير والتنبيه فوق البطاقة دائمًا — zoom and the toast always above the card */
 body:not(.nav-full) .view-map .map-toast{bottom:calc(var(--sheet-h, 0px) + 16px);}
 /* بطاقة المحطة عائمة أسفل الخريطة بخلفية زجاجية — the station card floats at the bottom on glass */
-body:not(.nav-full) .view-map .station-sheet{position:absolute;left:8px;right:8px;bottom:8px;margin:0;z-index:20;max-height:56%;overflow-y:auto;overscroll-behavior:contain;
+body:not(.nav-full) .view-map .station-sheet{position:absolute;left:8px;right:8px;width:auto;bottom:8px;margin:0;z-index:20;max-height:56%;overflow-y:auto;overscroll-behavior:contain;
   background:var(--glass-strong);border:1px solid var(--glass-line);-webkit-backdrop-filter:blur(16px) saturate(1.25);backdrop-filter:blur(16px) saturate(1.25);} /* أوضح فوق الخريطة النهارية / clearer over the day map */
 body:not(.nav-full) .view-map .station-sheet .sheet-meta{background:var(--glass-strong);border-color:var(--glass-line);}
 body:not(.nav-full) .view-map .station-sheet .sheet-foot{border-top-color:var(--glass-line);}
@@ -312,12 +312,17 @@ body:not(.nav-full) .view-map .toolbar-btn[data-tools="more"] .tb-icon{display:i
    أسفل يمين الخريطة فوق البطاقة. أدوات الشريط (قريب، مغذي، أعطال، ⋯) مطوية خلف «الأدوات» فلا تُحذف أي ميزة.
    Home = the map: a glass button column on the right under the search (direct navigation when a station is chosen, zoom,
    layers, tools) and «my location» bottom-right above the card. The toolbar tools fold behind «tools», no feature lost. */
-body:not(.nav-full) .view-map .map-stage-slot .globe-stage.map-active{padding-right:66px;}
+/* الأدوات واللوحات بعرض الخريطة كله؛ العمود الجانبي يبدأ تحتها (map-view fitSide) — the tools and panels take the full width; the column starts below them */
+body:not(.nav-full) .view-map .map-stage-slot .globe-stage.map-active{padding-right:12px;}
 /* العمود محصور بين البحث والبطاقة (نموذج محمد 20 أكتوبر): لا يُغطّى أبدًا؛ إن ضاقت المساحة تلتف الأزرار الزائدة إلى عمود ثانٍ
    بجانبه (يسارًا) بدل أن تختفي خلف البطاقة — the column is bounded between the search and the card: never covered; when short,
    the extra buttons wrap into a second column beside it (to the left) instead of hiding behind the card */
-body:not(.nav-full) .view-map .map-side{display:flex;flex-direction:column;flex-wrap:wrap;align-content:flex-start;align-items:center;gap:6px;position:absolute;
-  top:calc(var(--search-h, 46px) + 14px);bottom:calc(var(--sheet-h, 0px) + 10px);right:12px;z-index:12;}
+body:not(.nav-full) .view-map .map-side{display:flex;flex-direction:column;flex-wrap:nowrap;align-items:center;gap:8px;position:absolute;
+  top:calc(var(--search-h, 46px) + 14px);bottom:calc(var(--sheet-h, 0px) + 10px);right:12px;z-index:12;pointer-events:none;}
+body:not(.nav-full) .view-map .map-side > *{pointer-events:auto;}
+/* المساحة ضيقة: «+ / −» ثم زر الملاحة يُخفيان (map-view fitSide) — short space: «+ / −», then the navigation button, hide */
+body:not(.nav-full) .view-map .globe-stage.side-no-zoom .map-side .zoom-controls,
+body:not(.nav-full) .view-map .globe-stage.side-no-nav .map-side .side-nav{display:none;}
 body:not(.nav-full) .view-map .side-btn{display:flex;align-items:center;justify-content:center;width:42px;height:42px;padding:0;border-radius:50%;cursor:pointer;
   background:var(--glass-strong);border:1px solid var(--glass-line);color:var(--text-primary);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);}
 body:not(.nav-full) .view-map .side-btn[hidden]{display:none;}
@@ -335,3 +340,5 @@ body:not(.nav-full) .view-map .map-side .zoom-controls{position:static;display:f
 body:not(.nav-full) .view-map .map-side .zoom-btn{width:42px;height:40px;background:var(--glass-strong);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);}
 body:not(.nav-full) .view-map .map-locate{color:#2F86F6;}
 body:not(.nav-full) .view-map .globe-stage:not(.tools-open) .map-toolbar-bar{display:none;}
+body:not(.nav-full) .view-map .globe-stage.map-active > .map-side{pointer-events:none;} /* الشريط الفارغ بين الأزرار يمرّر السحب للخريطة / the empty strip passes drags to the map */
+body:not(.nav-full) .view-map .map-side > *{flex-shrink:0;} /* لا تنضغط الأزرار؛ الضيق يُعالج بإخفاء «+ / −» ثم الملاحة / buttons never squeeze; short space hides «+ / −», then navigation */

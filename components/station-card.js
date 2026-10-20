@@ -52,10 +52,13 @@
     // أقل من 1 ملي ثانية يُكتب «أقل من 0.001 ث» بدل «0.000 ث» — under 1 ms reads «under 0.001 s», not «0.000 s»
     // الرقم وحده باتجاه اليسار، والوحدة «ث» بعده بالعربي فيُقرأ «2.56 ث» لا «ث 2.56» — the number alone is LTR, the unit follows in RTL
     const sec = (ms < 1 ? 'أقل من <b dir="ltr">0.001</b>' : '<b dir="ltr">' + (ms / 1000).toFixed(ms < 100 ? 3 : 2) + '</b>') + ' ث';
-    if (s.source === 'local') return '<div class="st-search-time local" data-role="search-time">⚡ وُجدت في ' + sec + ' — من نسخة جهازك</div>';
-    // محطة مضافة حديثًا لم تصل لنسخة الجهاز بعد ← من الخادم مباشرة (النسخة تتحدّث بالخلفية) — newly added, not yet in the copy
-    if (s.newOnServer) return '<div class="st-search-time server" data-role="search-time">⏱ وُجدت في ' + sec + ' — من الخادم (محطة مضافة حديثًا، تُضاف لنسخة جهازك تلقائيًا)</div>';
-    return '<div class="st-search-time server" data-role="search-time">⏱ وُجدت في ' + sec + ' — من الخادم · حمّل البيانات المؤقتة لبحث فوري</div>';
+    // شارة قصيرة في رأس البطاقة (المدة والمصدر)، والجملة الكاملة في title وaria-label — a short chip in the card head, the full sentence in title/aria-label
+    const full = s.source === 'local' ? 'وُجدت في ' + sec.replace(/<[^>]+>/g, '') + ' — من نسخة جهازك'
+      : s.newOnServer ? 'وُجدت في ' + sec.replace(/<[^>]+>/g, '') + ' — من الخادم (محطة مضافة حديثًا، تُضاف لنسخة جهازك تلقائيًا)'
+        : 'وُجدت في ' + sec.replace(/<[^>]+>/g, '') + ' — من الخادم · حمّل البيانات المؤقتة لبحث فوري';
+    const local = s.source === 'local';
+    return '<span class="st-search-time ' + (local ? 'local' : 'server') + '" data-role="search-time" title="' + full + '" aria-label="' + full + '">' +
+      (local ? '⚡ ' : '⏱ ') + sec + ' · ' + (local ? 'جهازك' : 'الخادم') + '</span>';
   }
 
   /* إعادة التصميم — المرحلة ج (19 أكتوبر، نموذج محمد): لوحة مدمجة تحت الخريطة بدل جزأين فوقها وتحتها، فتأخذ الخريطة
@@ -89,13 +92,13 @@
     const coords = Q.hasCoordinates(s), sub = s.type === 'تحويل', kind = sub ? 'is-sub' : 'is-dist';
     const fc = feederCount_(s, deps);
     return '<div class="sb-inner sb-top">' +
-      '<span class="sheet-handle" aria-hidden="true"></span>' +
       '<div class="sheet-head">' +
         '<div class="sheet-line">' +
           '<span class="sheet-badge ' + kind + '" aria-hidden="true">' + (TYPE_ICON[s.type] || TYPE_ICON['توزيع']) + '</span>' +
           '<div class="sheet-title"><span class="sheet-type ' + kind + '">' + (sub ? 'محطة تحويل' : 'محطة توزيع') + '</span>' +
             '<bdi class="sheet-id">' + esc(s.id) + '</bdi></div>' +
-          (deps && deps.onDetails ? '<button type="button" class="sheet-more" data-act="details">التفاصيل ‹</button>' : '') +
+          '<div class="sheet-side">' + searchTime_(s) +
+            (deps && deps.onDetails ? '<button type="button" class="sheet-more" data-act="details">التفاصيل ‹</button>' : '') + '</div>' +
         '</div>' +
         ((s.feeder || s.region || fc != null) ? '<div class="sb-data-row sheet-meta">' +
           (s.feeder ? '<div class="sb-data-cell"><div class="cell-label">المغذي</div><div class="cell-value">' + esc(s.feeder) + '</div></div>' : '') +
@@ -138,7 +141,6 @@
       '</div>' +
       // مدة البحث ومصدره تبقى في البطاقة، و«آخر تحديث» لنسخة المحطات انتقل إلى «التفاصيل» (قرار محمد 20 أكتوبر)
       // The search time/source stays on the card; the copy's «last update» moved to «details» (Mohammed, 20 Oct)
-      (searchTime_(s) ? '<div class="sheet-foot">' + searchTime_(s) + '</div>' : '') +
     '</div>';
   }
 
