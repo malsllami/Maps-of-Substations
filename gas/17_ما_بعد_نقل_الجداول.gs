@@ -18,8 +18,9 @@
  * ===================================================
  */
 
-// الجداول المنقولة من V1 (قرار محمد) — the tables moved from V1 (Mohammed's decision)
-const AFTER_COPY_TABLES = [SHEETS.MEMBERS, SHEETS.CREDENTIALS, SHEETS.STATIONS, SHEETS.SUBSTATIONS];
+// الجداول المنقولة من V1 (قرار محمد) — دالة لا ثابت، فلا تعتمد على ترتيب تحميل الملفات
+// The tables moved from V1 (Mohammed's decision) — a function, not a constant, so it never depends on file load order
+function afterCopyTables_() { return [SHEETS.MEMBERS, SHEETS.CREDENTIALS, SHEETS.STATIONS, SHEETS.SUBSTATIONS]; }
 const AFTER_COPY_LOCK_MS = 30000;
 
 /* عدد صفوف البيانات (أول عمود غير فارغ) — data rows (first column not empty) */
@@ -64,7 +65,7 @@ function ما_بعد_نقل_الجداول() {
     let headerProblems = 0;
 
     // 1 + 2) العناوين والأعداد (قراءة فقط) — headers and counts (read-only)
-    AFTER_COPY_TABLES.forEach(function (name) {
+    afterCopyTables_().forEach(function (name) {
       const rows = readAllRows_(name);
       if (!rows.length) { lines.push('❌ ' + name + ': الجدول غير موجود أو فارغ تمامًا'); headerProblems++; return; }
       const issue = afterCopyHeaderIssue_(name, rows);
