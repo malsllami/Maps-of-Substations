@@ -24,7 +24,7 @@
   const CONFIG = global.SEC2_CONFIG, H = global.SecHtml;
   if (!CONFIG || !H) throw new Error('map-view.js يحتاج الإعدادات وhtml.js قبله / needs config and html.js first');
   const TILES = CONFIG.MAP_TILES, KEY = CONFIG.STORAGE_KEYS.MAP_MODE;
-  const CENTER = [21.54, 39.19], START_ZOOM = 12, STATION_ZOOM = 18;
+  const CENTER = [21.54, 39.19], START_ZOOM = 11, STATION_ZOOM = 18;
   const INSET_GAP = 12; // هامش المساحة المرئية تحت ما يطفو فوق الخريطة / the visible area's margin under what floats over the map
   const AUTO_REFRESH_MS = 5 * 60 * 1000, TILE_ERRORS = 4, TILE_WINDOW_MS = 15000, FALLBACK_MS = 60000, TOAST_MS = 2000;
   const MODES = ['auto', 'light', 'dark', 'satellite'];
@@ -211,6 +211,8 @@
       move_(function () { if (fly) map.flyTo(c, z, { duration: 1.4 }); else map.setView(c, z); });
       focus = { ll: L.latLng(latlng), t: Date.now() };
     }
+    /* نظرة جدة كاملة (الرئيسية) — the whole-Jeddah overview (home) */
+    function overview() { centerOn(CENTER, START_ZOOM, false); }
     function recenter() {
       if (!focus || Date.now() - focus.t < FLY_MS) return; // أثناء الطيران لا يُقاطَع / never cuts a fly
       const z = map.getZoom(), want = map.project(visibleCenter_(focus.ll, z), z), now = map.project(map.getCenter(), z);
@@ -308,7 +310,7 @@
       map: map, tools: q('tools'), panels: q('panels'),
       mode: function () { return mode; }, resolvedMode: resolved, setMode: setMode, refresh: apply,
       usingOffline: function () { return offlineFlavor !== null; },
-      showStation: showStation, clearStation: clearStation, setInsets: setInsets, centerOn: centerOn, fitPadding: fitPadding, recenter: recenter, fitSide: fitSide,
+      showStation: showStation, clearStation: clearStation, setInsets: setInsets, centerOn: centerOn, fitPadding: fitPadding, recenter: recenter, fitSide: fitSide, overview: overview,
       insets: current_, hint: hint, hideHint: hideHint, toast: toast, showMe: showMe, setNavTarget: setNavTarget,
       toggleTools: toggleTools_,
       destroy: function () {

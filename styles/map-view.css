@@ -147,3 +147,9 @@
    The side column and «my location»: hidden by default with the zoom alone as before; home shows them in home.css */
 .map-side{display:contents;}
 .side-btn{display:none;}
+
+/* أسماء الأحياء (من بيانات المحطات): رقعة داكنة بنص أبيض مثل نموذج محمد، لا تستقبل اللمس — district names: a dark chip, not touchable */
+.district-label-wrap{pointer-events:none;}
+.district-label{display:inline-block;white-space:nowrap;padding:2px 8px;border-radius:8px;font-family:'IBM Plex Sans Arabic',sans-serif;font-size:12.5px;font-weight:700;line-height:20px;
+  background:rgba(8,16,26,0.78);color:#FFFFFF;border:1px solid rgba(255,255,255,0.18);}
+[data-theme="light"] .district-label{background:rgba(255,255,255,0.88);color:#13243A;border-color:rgba(19,36,58,0.18);}

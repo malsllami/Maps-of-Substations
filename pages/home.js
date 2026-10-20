@@ -155,11 +155,21 @@
       onOverlayChange: function () { global.requestAnimationFrame(layout); }
     });
     if (myPos) view.showMe(myPos);
+    // أسماء أحياء جدة الحقيقية من نسخة المحطات، وتتحدث حين يتغير عدد المحطات — the real district names from the copy
+    const districts = SecDistrictLabels.mount(view, { stations: function () { return SYNC.state().loaded ? SYNC.stations() : null; } });
+    let districtsN = -1;
+    SYNC.onChange(function () { const st = SYNC.state(), n = st.loaded ? SYNC.stations().length : 0; if (st.loaded && n !== districtsN) { districtsN = n; districts.refresh(); } });
     nearby = SecNearbyLayer.mount(view, {
       getStation: function () { return current; },
       query: function (mode) { return mode === 'nearby' ? card.nearby() : card.feeder(); },
       googleMapsUrl: SecStationCard.googleMapsUrl,
       onShare: function (s) { goToStation(s); },
+      // استكشاف القريبة/المغذي ← بطاقة مختصرة بسطر واحد (العدد والمسار وإنهاء العرض) — exploring ← a one-line compact card
+      onChange: function (mode, count) {
+        if (!card) return;
+        card.setExplore(mode ? (mode === 'feeder' ? count + ' محطة بالمغذي' : count + ' محطة قريبة') : null);
+        global.requestAnimationFrame(layout);
+      },
       onEdit: function (s) { goToStation(s); global.setTimeout(function () { SecStationForm.openEdit(s); }, MORPH_SETTLE_MS); }
     });
     const blocked = function () { return SecNavView.isActive(); };
@@ -193,7 +203,8 @@
       localStations: function () { return SYNC.stations(); },
       // «محطات المغذي» في اللوحة ← نفس زر «مغذي» في شريط الخريطة — the sheet's feeder card ← the toolbar's feeder button
       onFeeder: function () { const b = $('mapStage').querySelector('[data-nearby="feeder"]'); if (b) b.click(); },
-      onDetails: function (s) { openDetails_(s); }
+      onDetails: function (s) { openDetails_(s); },
+      onEndExplore: function () { if (nearby) nearby.reset(); }
     };
   }
   function showCard_(s) {
@@ -203,6 +214,32 @@
 
   // ===== الانتقال لمحطة والرجوع — Going to a station and back =====
   /* يُرجع وعدًا يتم حين تظهر المحطة على الخريطة — returns a promise settled once the station shows on the map */
+  // ===== وضع البحث (اقتراح محمد 20 أكتوبر): لمس مربع البحث أو فتح محطة ← يختفي الشريطان العلوي والسفلي وتتمدد الخريطة ويرتفع
+  // البحث؛ زر × (أو رجوع الجوال) يعيد الوضع العادي فورًا ويمسح المحطة المحددة. الملاحة تبقى بشاشتها الكاملة كما هي.
+  // Search mode: touching the search box or opening a station ← both bars hide, the map expands and the search rises;
+  // × (or the phone's back) restores normal mode at once and clears the chosen station. Navigation keeps its full screen.
+  function inSearchMode_() { return doc.body.classList.contains('search-mode'); }
+  function enterSearchMode_() {
+    if (inSearchMode_() || !loggedIn()) return;
+    doc.body.classList.add('search-mode');
+    try { global.history.pushState({ secView: 'search' }, ''); } catch (e) { /* بلا سجل تنقل / no history */ }
+    global.requestAnimationFrame(layout); global.setTimeout(layout, 250);
+  }
+  function leaveSearchMode_() {
+    if (!inSearchMode_()) return;
+    doc.body.classList.remove('search-mode');
+    goBackToSearch(); // تُمسح المحطة والأدوات وتعود الخريطة لموقعه — the station and tools clear, the map returns to his location
+    global.requestAnimationFrame(layout); global.setTimeout(layout, 250);
+  }
+  function closeSearchMode_() {
+    leaveSearchMode_();
+    if (global.history.state && global.history.state.secView === 'search') global.history.back(); // يُزيل خطوة السجل فقط / only drops the history step
+  }
+  global.addEventListener('popstate', function () {
+    const st = global.history.state;
+    if (inSearchMode_() && doc.body.dataset.view === 'map' && !(st && (st.secView === 'search' || st.secView === 'details'))) leaveSearchMode_();
+  });
+
   function goToStation(s) {
     if (!s) return Promise.resolve(false);
     if (SecNavView.isActive()) SecNavView.stop(); // محطة أخرى تنهي الملاحة السابقة (V1) / another station ends navigation (V1)
@@ -210,6 +247,7 @@
     SecRecentStations.add(s);
     lens.clear();
     if (doc.body.dataset.view !== 'map') setView('map');
+    enterSearchMode_(); // فتح محطة من أي مكان يدخل وضع البحث / opening a station from anywhere enters search mode
     showStation_(s);
     if (view) global.setTimeout(function () { layout(); view.map.invalidateSize(); }, MORPH_SETTLE_MS);
     return Promise.resolve(true);
@@ -232,8 +270,10 @@
     if (card) { card.destroy(); card = null; }
     $('heroSection').classList.remove('station-framed');
     bar.clear();
+    doc.body.classList.remove('search-mode'); // أي رجوع للبحث يُنهي وضع البحث / any return to search ends search mode
     setView('map'); // البحث على الخريطة (الرئيسية) / the search is on the map (home)
-    if (myPos && view) view.centerOn([myPos.lat, myPos.lng], ME_ZOOM); // الخريطة تعود لموقعه / the map returns to his location
+    // الخريطة تعود لموقعه إن طلبه، وإلا لجدة كلها — the map returns to his location if he asked for it, else to all of Jeddah
+    if (view) { if (myPos) view.centerOn([myPos.lat, myPos.lng], ME_ZOOM); else view.overview(); }
   }
   // «الصفحة الرئيسية» من القائمة والخريطة ظاهرة ← رجوع بلا إعادة تحميل (V1) / «home» from the menu while the map shows ← back, no reload (V1)
   $('appHeader').addEventListener('click', function (e) {
@@ -252,6 +292,8 @@
   // حقل ظاهر دائمًا بدل العدسة الدائرية (ملاحظة محمد 19 أكتوبر) — an always-visible field instead of the round lens
   const lens = SecStationSearchBox.mount($('lensBox'), { variant: 'bar', placeholder: 'اكتب رقم المحطة أو رمزها', isLoggedIn: loggedIn, onFound: goToStation, onAdd: function (q) { SecStationForm.openAdd(q); }, onUpdated: onUpdated_ });
   const bar = SecStationSearchBox.mount($('barBox'), { variant: 'bar', isLoggedIn: loggedIn, onFound: goToStation, onAdd: function (q) { SecStationForm.openAdd(q); }, onUpdated: onUpdated_,
+    onFocus: function () { enterSearchMode_(); }, onClose: function () { closeSearchMode_(); },
+    onStatus: function () { statusOpen = !statusOpen; paintSync_(); }, // نقطة الحالة / the status dot
     onTools: function () { return view ? view.toggleTools() : false; } }); // أدوات الخريطة من مربع البحث (النموذج) / the map tools from the search box
   // بطاقة «بحث عن حالة عطل» في صف الإجراءات تفتح لوحة الأرقام تحته (تصميم محمد، 15 أكتوبر) / the outage tile opens the panel below it
   const outage = SecOutageSearch.mountHome($('homeOutage'), {
@@ -404,8 +446,25 @@
     SYNC.sync().catch(function () { return null; }).then(function () { autoRunning = false; pendingDueAt = SYNC.state().pending ? Date.now() + AUTO_MS : 0; paintSync_(); });
   }
   let lastSyncKind = '';
+  /* الرئيسية بلا شريط علوي (قرار محمد 20 أكتوبر): حالة النسخة نقطة ملوّنة في مربع البحث، والضغط عليها يُظهر بطاقة النص وزر
+   * التحديث تحت البحث؛ وتظهر البطاقة وحدها حين لا تكون الحالة خضراء (انقطاع، توقف، نسخة جديدة) حتى لا تفوت المستخدم.
+   * Home has no top bar: the copy status is a colored dot in the search box; tapping it shows the text and the refresh
+   * button under the search; the card shows by itself whenever the status isn't green so the user never misses it. */
+  let statusOpen = false;
+  function paintMapStatus_(s) {
+    const dot = doc.querySelector('#barBox [data-act="status"]'), card = $('mapStatus');
+    if (!dot || !card) return;
+    const st = SYNC.state(), ready = s.k === 'ready';
+    dot.dataset.sync = s.k; dot.title = s.t;
+    card.dataset.sync = s.k;
+    card.querySelector('[data-role="map-status-text"]').textContent = ready ? s.t + (st.syncedAt ? ' — آخر تحديث: ' + D.relativeTime(st.syncedAt) : '') : s.t;
+    const show = statusOpen || !ready;
+    if (card.hidden === show) { card.hidden = !show; global.requestAnimationFrame(layout); }
+    dot.setAttribute('aria-expanded', show ? 'true' : 'false');
+  }
   function paintSync_() {
     const s = syncState_(), bar = header.status.bar, btn = header.refreshButton;
+    paintMapStatus_(s);
     if (bar) {
       bar.dataset.sync = s.k; bar.title = s.t;
       let line = bar.querySelector('[data-role="sync-text"]');
@@ -419,6 +478,7 @@
     lastSyncKind = s.k;
     if (s.due) autoSync_();
   }
+  if ($('mapStatus')) $('mapStatus').querySelector('[data-act="map-refresh"]').addEventListener('click', function () { if (header.refreshButton) header.refreshButton.click(); });
   if (loggedIn()) {
     SYNC.onChange(paintSync_);
     global.addEventListener('online', paintSync_); global.addEventListener('offline', paintSync_);
@@ -476,29 +536,16 @@
     onChange: function (fn) { return SYNC.onChange(fn); }
   });
 
-  // ===== تحديد الموقع قبل البحث (طلب محمد 20 أكتوبر) — Locating before search =====
-  // شاشة «تحديد موقعك الحالي» عند الدخول تُخفي البحث حتى يُحدَّد الموقع أو يختار «متابعة بدون موقع» (لا يُحرم أحد من البحث)
-  // The «locate yourself» screen on entry hides the search until located or «continue without location» (never blocks search)
-  function placeMe_(pos) {
-    myPos = pos;
-    if (!view) return;
-    view.showMe(pos);
-    if (!current) view.centerOn([pos.lat, pos.lng], ME_ZOOM, true); // لا يُزيح محطة معروضة / never moves away from a shown station
-  }
-  const locGate = SecLocationGate.mount($('locationGate'), {
-    onLocated: function (pos) { $('heroSection').classList.remove('gate-open'); placeMe_(pos); },
-    onSkip: function () { $('heroSection').classList.remove('gate-open'); }
-  });
+  // ===== موقعي عند الطلب فقط (قرار محمد 20 أكتوبر): لا يُطلب الموقع عند الدخول؛ زر «موقعي» يقرأه ويتوسطه، والقريبة والملاحة
+  // لهما قراءتهما — My location on request only: no location on entry; «my location» reads and centers it
   /* زر «موقعي»: قراءة جديدة وتوسيط عليها — «my location»: a fresh reading, centered */
   function locateMe_() {
-    SecLocationGate.read().then(function (pos) {
+    SecMyLocation.read().then(function (pos) {
       myPos = pos; view.showMe(pos); view.centerOn([pos.lat, pos.lng], Math.max(view.map.getZoom(), ME_ZOOM), true);
     }, function (e) {
       notify_(e.code === 'denied' ? 'صلاحية الموقع مرفوضة — فعّلها من إعدادات المتصفح' : e.code === 'nogeo' ? 'هذا الجهاز لا يدعم تحديد الموقع' : 'تعذّر تحديد موقعك الآن — حاول مرة أخرى');
     });
   }
-  if (loggedIn()) { $('heroSection').classList.add('gate-open'); locGate.open(); }
-
   // ===== الشريط السفلي — The bottom bar =====
   nav = SecBottomNav.mount($('bottomNav'), {
     active: 'home',
@@ -528,6 +575,6 @@
   global.SecHome = {
     goToStation: goToStation, goBackToSearch: goBackToSearch, setView: setView, openDetails: openDetails_,
     state: function () { return { view: doc.body.dataset.view, map: !!view && doc.body.dataset.view === 'map', station: current, card: !!card, sync: lastSyncKind, me: myPos }; },
-    parts: function () { return { view: view, locGate: locGate, details: details, stationsList: stationsList, more: more, lens: lens, bar: bar, stats: stats, recent: recent, gate: gate, status: status, header: header, nav: nav }; }
+    parts: function () { return { view: view, details: details, stationsList: stationsList, more: more, lens: lens, bar: bar, stats: stats, recent: recent, gate: gate, status: status, header: header, nav: nav }; }
   };
 })(typeof window !== 'undefined' ? window : globalThis);

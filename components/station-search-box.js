@@ -30,12 +30,14 @@
   const NOFILL = ' type="text" inputmode="text" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false"';
   // أيقونة الضبط في طرف الشريط تفتح أدوات الخريطة (opts.onTools) — the sliders icon at the bar's end opens the map tools
   const TOOLS_SVG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="15" cy="7" r="2.5" fill="currentColor"/><circle cx="9" cy="17" r="2.5" fill="currentColor"/></svg>';
+  const CLOSE_SVG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>';
   const PROGRESS = '<div class="search-progress-track"><div class="search-progress-fill" data-role="fill"></div></div><div class="search-progress-label"><span>جاري البحث عن المحطة...</span><span data-role="pct">0%</span></div>';
 
   /**
    * mount(container, opts) — opts: { variant: 'lens'|'bar', placeholder (للشريط، اختياري)، isLoggedIn() (افتراضيًا session.js), onFound(station),
    *   onAdd(query), onUpdated(station), closeOnOutside() → bool (للعدسة: الافتراضي true)، onTools() → bool (للشريط: زر الأدوات،
-   *   يُرجع هل صارت مفتوحة / the bar's tools button, returns whether they are now open) }
+   *   يُرجع هل صارت مفتوحة / the bar's tools button, returns whether they are now open)، onFocus() (لمس المربع / the box touched)،
+   *   onClose() (زر × للخروج من وضع البحث / the × to leave search mode)، onStatus() (نقطة حالة النسخة / the copy status dot) }
    * يُرجع { search(text)، setCompact(on)، clear()، focus()، isOpen()، isSearching()، destroy() }
    */
   function mount(container, opts) {
@@ -46,7 +48,9 @@
       ? '<div class="search-lens" data-role="box">' + LENS_SVG + '<input data-role="input" placeholder="مثال: 39070 أو ABN" aria-label="رقم المحطة"' + NOFILL + '></div>' +
         '<div class="search-hint" data-role="hint" role="status"></div><div class="search-progress" data-role="progress">' + PROGRESS + '</div>'
       : '<div class="search-and-back-row show"><div class="station-search-bar" data-role="box"><span class="ssb-icon" data-act="search" role="button" aria-label="بحث">' + BAR_SVG + '</span>' +
+        (o.onStatus ? '<button type="button" class="ssb-status" data-act="status" title="حالة نسخة المحطات" aria-label="حالة نسخة المحطات" aria-expanded="false"><span class="ssb-dot"></span></button>' : '') +
         '<input data-role="input" placeholder="ابحث عن محطة أخرى..." aria-label="رقم المحطة"' + NOFILL + '>' +
+        (o.onClose ? '<button type="button" class="ssb-close" data-act="close" title="إغلاق البحث والرجوع للوضع العادي" aria-label="إغلاق البحث">' + CLOSE_SVG + '</button>' : '') +
         (o.onTools ? '<button type="button" class="ssb-tools" data-act="tools" title="أدوات الخريطة: قريب، مغذي، أعطال، القياس" aria-label="أدوات الخريطة" aria-expanded="false">' + TOOLS_SVG + '</button>' : '') +
         '</div></div>' +
         '<div class="station-search-progress" data-role="progress">' + PROGRESS + '</div><div class="station-search-hint" data-role="hint" role="status"></div>';
@@ -124,6 +128,8 @@
       if (act === 'add') { if (o.onAdd) o.onAdd(hint.dataset.query || ''); return; }
       if (act === 'retry') { clear(); input.focus(); return; }
       if (act === 'tools') { t.setAttribute('aria-expanded', o.onTools() ? 'true' : 'false'); return; }
+      if (act === 'close') { input.blur(); o.onClose(); return; }
+      if (act === 'status') { o.onStatus(); return; }
       if (lens && !box.classList.contains('open')) { open_(); input.focus(); return; }
       if (act === 'search') search();
     }
@@ -136,6 +142,8 @@
 
     container.addEventListener('click', onClick_);
     container.addEventListener('keydown', onKey_);
+    // لمس المربع (أو التركيز عليه بلوحة المفاتيح) يُبلغ الصفحة — touching the box (or keyboard focus) tells the page
+    if (o.onFocus) ['focus', 'pointerdown', 'click'].forEach(function (t) { input.addEventListener(t, function () { o.onFocus(); }); });
     doc.addEventListener('click', onDocClick_);
 
     return {

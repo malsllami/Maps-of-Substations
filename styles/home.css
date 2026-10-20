@@ -342,3 +342,40 @@ body:not(.nav-full) .view-map .map-locate{color:#2F86F6;}
 body:not(.nav-full) .view-map .globe-stage:not(.tools-open) .map-toolbar-bar{display:none;}
 body:not(.nav-full) .view-map .globe-stage.map-active > .map-side{pointer-events:none;} /* الشريط الفارغ بين الأزرار يمرّر السحب للخريطة / the empty strip passes drags to the map */
 body:not(.nav-full) .view-map .map-side > *{flex-shrink:0;} /* لا تنضغط الأزرار؛ الضيق يُعالج بإخفاء «+ / −» ثم الملاحة / buttons never squeeze; short space hides «+ / −», then navigation */
+
+/* ===== وضع البحث (اقتراح محمد 20 أكتوبر): لمس البحث أو فتح محطة ← يختفي الشريطان العلوي والسفلي، وتتمدد الخريطة لكامل
+   الشاشة (مع المناطق الآمنة)، ويرتفع البحث للأعلى ومعه زر × يعيد الوضع العادي. يخص شاشة الخريطة وحدها (التفاصيل وغيرها كما هي).
+   Search mode: touching the search or opening a station ← both bars hide, the map takes the whole screen (with the safe
+   areas), the search rises with a × that restores normal mode. The map screen only. */
+body.search-mode[data-view="map"] > header,
+body.search-mode[data-view="map"] .bottom-nav{display:none;}
+body.search-mode[data-view="map"]:not(.nav-full) .view-map.hero{top:0;bottom:0;}
+body.search-mode[data-view="map"]:not(.nav-full) .view-map .top-content-area{top:calc(env(safe-area-inset-top, 0px) + 10px);}
+body.search-mode[data-view="map"]:not(.nav-full) .view-map .station-sheet{bottom:calc(env(safe-area-inset-bottom, 0px) + 10px);}
+.ssb-close{display:none;}
+body.search-mode:not(.nav-full) .view-map .ssb-close{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:38px;height:38px;padding:0;border-radius:50%;
+  border:1px solid var(--glass-line);background:var(--bg-elev);color:var(--text-primary);cursor:pointer;}
+
+/* ===== الرئيسية بلا شريط علوي (قرار محمد 20 أكتوبر، نموذج الصورة): البحث في أعلى الشاشة مباشرة، وحالة نسخة المحطات نقطة
+   ملوّنة في مربع البحث وبطاقة تحته عند الطلب أو حين لا تكون خضراء. الرأس يبقى في الشاشات الأخرى (البيانات، المحطات، المزيد).
+   Home has no top bar: the search at the very top, the copy status a colored dot in the search box and a card under it
+   on demand or whenever it isn't green. The header stays on the other screens. */
+body.home-page[data-view="map"] > header{display:none;}
+body.home-page[data-view="map"]:not(.nav-full) .view-map.hero{top:0;}
+body.home-page[data-view="map"]:not(.nav-full) .view-map .top-content-area{top:calc(env(safe-area-inset-top, 0px) + 10px);}
+.ssb-status{display:none;}
+body:not(.nav-full) .view-map .ssb-status{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:30px;height:38px;padding:0;border:none;background:none;cursor:pointer;}
+.ssb-dot{width:12px;height:12px;border-radius:50%;background:var(--st-gray);box-shadow:0 0 0 3px var(--st-gray-bg);}
+.ssb-status[data-sync="ready"] .ssb-dot{background:var(--st-green);box-shadow:0 0 0 3px var(--st-green-bg);}
+.ssb-status[data-sync="offline"] .ssb-dot{background:var(--st-red);box-shadow:0 0 0 3px var(--st-red-bg);}
+.ssb-status[data-sync="partial"] .ssb-dot{background:var(--st-yellow);box-shadow:0 0 0 3px var(--st-yellow-bg);}
+.ssb-status[data-sync="pending"] .ssb-dot{background:var(--st-orange);box-shadow:0 0 0 3px var(--st-orange-bg);}
+.map-status{display:flex;align-items:center;gap:8px;margin-top:6px;padding:8px 10px 8px 8px;border-radius:14px;font-size:13px;font-weight:700;line-height:1.5;
+  background:var(--glass-strong);border:1.5px solid var(--st-gray);color:var(--text-primary);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);}
+.map-status[hidden]{display:none;}
+.map-status > span{flex:1;min-width:0;}
+.map-status[data-sync="ready"]{border-color:var(--st-green);}
+.map-status[data-sync="offline"]{border-color:var(--st-red);}
+.map-status[data-sync="partial"]{border-color:var(--st-yellow);}
+.map-status[data-sync="pending"]{border-color:var(--st-orange);border-style:dashed;}
+.map-status-btn{flex-shrink:0;min-height:36px;padding:0 12px;border-radius:10px;border:1px solid var(--border-strong);background:var(--bg-card);color:var(--text-primary);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;}

@@ -96,7 +96,11 @@
         '<div class="sheet-line">' +
           '<span class="sheet-badge ' + kind + '" aria-hidden="true">' + (TYPE_ICON[s.type] || TYPE_ICON['توزيع']) + '</span>' +
           '<div class="sheet-title"><span class="sheet-type ' + kind + '">' + (sub ? 'محطة تحويل' : 'محطة توزيع') + '</span>' +
-            '<bdi class="sheet-id">' + esc(s.id) + '</bdi></div>' +
+            '<bdi class="sheet-id">' + esc(s.id) + '</bdi><span class="sheet-explore-txt" data-role="explore-txt"></span></div>' +
+          // وضع الاستكشاف (قريب/مغذي): العدد والمسار وإنهاء العرض في السطر نفسه — explore mode: the count, route and end in the same line
+          '<div class="sheet-explore">' +
+            '<button type="button" class="sheet-go" data-act="navigate"' + (coords ? '' : ' disabled') + '>' + BTN_ICON.navigate + '<span>المسار</span></button>' +
+            '<button type="button" class="sheet-end" data-act="end-explore">إنهاء العرض</button></div>' +
           '<div class="sheet-side">' + searchTime_(s) +
             (deps && deps.onDetails ? '<button type="button" class="sheet-more" data-act="details">التفاصيل ‹</button>' : '') + '</div>' +
         '</div>' +
@@ -146,7 +150,7 @@
 
   /**
    * render(container, station, deps) ← { update(station), nearby(), feeder(), station(), destroy() }
-   * deps: { onNavigate(s), onEdit(s), canEdit(), isAdmin(), onDelete(s), onFeeder(s) (عرض محطات المغذي), onDetails(s) (شاشة التفاصيل), offlineMapUI, toast(text),
+   * deps: { onNavigate(s), onEdit(s), canEdit(), isAdmin(), onDelete(s), onFeeder(s) (عرض محطات المغذي), onDetails(s) (شاشة التفاصيل), onEndExplore() (إنهاء عرض القريبة/المغذي), offlineMapUI, toast(text),
    *         localStations() → Array|null, actionsContainer } — isAdmin + onDelete يُظهران «🗑️ حذف» (نافذته في delete-station.js)؛
    *         actionsContainer: مكان الجزء السفلي تحت الخريطة (بدونه يُرسم الجزءان معًا في container)
    *         / where the bottom part goes under the map (without it both parts draw in container)
@@ -157,10 +161,16 @@
     const boxes = bottom ? [container, bottom] : [container];
     const toast = function (t) { try { if (deps.toast) deps.toast(t); } catch (e) { /* التنبيه لا يكسر البطاقة / never breaks the card */ } };
 
+    let explore = null; // نص وضع الاستكشاف أو null — the explore-mode text or null
+    function paintExplore_() {
+      boxes.forEach(function (b) { b.classList.toggle('is-explore', explore != null); });
+      const t = container.querySelector('[data-role="explore-txt"]'); if (t) t.textContent = explore || '';
+    }
     function draw_() {
       if (bottom) { container.innerHTML = topHtml_(s, deps); bottom.innerHTML = bottomHtml_(s, deps); }
       else container.innerHTML = topHtml_(s, deps) + bottomHtml_(s, deps);
       boxes.forEach(function (b) { b.classList.add('show'); });
+      paintExplore_();
       if (deps.offlineMapUI) { try { deps.offlineMapUI.renderCard(); } catch (e) { /* سطر الحالة اختياري / the status line is optional */ } }
     }
 
@@ -174,6 +184,7 @@
         else if (act === 'offline-map') deps.offlineMapUI.open();
         else if (act === 'feeder') { if (deps.onFeeder) deps.onFeeder(s); }
         else if (act === 'details') { if (deps.onDetails) deps.onDetails(s); }
+        else if (act === 'end-explore') { if (deps.onEndExplore) deps.onEndExplore(); }
         else if (act === 'share') await share_();
         else if (act === 'edit') {
           if (global.navigator.onLine === false) { toast(OFFLINE_WRITE_MSG); return; }
@@ -214,6 +225,8 @@
 
     return {
       update: function (next) { if (alive) { s = next; draw_(); } },
+      /* بطاقة مختصرة أثناء استكشاف القريبة أو المغذي (نص العدد)، وnull للبطاقة الكاملة — compact while exploring, null for the full card */
+      setExplore: function (text) { if (alive) { explore = text == null ? null : String(text); paintExplore_(); } },
       station: function () { return s; },
       nearby: function () { return run_('nearby'); },
       feeder: function () { return run_('feeder'); },

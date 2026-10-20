@@ -278,3 +278,18 @@ body.nav-full .station-sheet{display:none !important;}
 .station-table.station-sheet .sheet-actions .st-edit .st-ico{color:var(--c-ops-fg);}
 .station-table.station-sheet .sheet-actions .st-danger{background:var(--bg-card);border-color:var(--border-strong);color:var(--text-secondary);}
 .station-table.station-sheet .sheet-actions .st-danger .st-ico{color:var(--danger);}
+
+/* ===== البطاقة المختصرة أثناء استكشاف القريبة أو المغذي (اختيار محمد 20 أكتوبر): سطر واحد — الرمز، الرقم وتحته العدد،
+   «المسار» و«إنهاء العرض» — فتبقى الخريطة واسعة والمحطات واضحة. The compact card while exploring: one line. ===== */
+.sheet-explore,.sheet-explore-txt{display:none;}
+.station-sheet.is-explore .sheet-explore{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.station-sheet.is-explore .sheet-explore-txt{display:block;font-size:12.5px;font-weight:700;color:var(--c-dist-fg);white-space:nowrap;}
+.station-sheet.is-explore .sheet-type,.station-sheet.is-explore .sheet-side,.station-sheet.is-explore .sheet-meta{display:none;}
+.station-table.station-sheet.is-explore .sb-bottom,.station-sheet.is-explore .sb-bottom{display:none;}
+.station-sheet.is-explore .sb-top{padding-bottom:8px;}
+.sheet-go,.sheet-end{min-height:42px;padding:0 12px;border-radius:12px;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;}
+.sheet-go{background:var(--c-dist-fg);border:1px solid var(--c-dist-fg);color:#07261C;}
+[data-theme="light"] .sheet-go{color:#FFFFFF;}
+.sheet-go svg{width:16px;height:16px;}
+.sheet-go:disabled{opacity:.45;cursor:not-allowed;}
+.sheet-end{background:var(--bg-card);border:1px solid var(--border-strong);color:var(--text-primary);}

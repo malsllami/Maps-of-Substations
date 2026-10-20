@@ -46,7 +46,6 @@
 <link rel="stylesheet" href="styles/storage-section.css">
 <link rel="stylesheet" href="styles/profile-gate.css">
 <link rel="stylesheet" href="styles/home.css">
-<link rel="stylesheet" href="styles/location-gate.css">
 <link rel="stylesheet" href="styles/bottom-nav.css">
 <link rel="stylesheet" href="styles/station-details.css">
 <link rel="stylesheet" href="styles/stations-list.css">
@@ -114,10 +113,11 @@
 <section class="hero app-view view-map" id="heroSection">
   <div class="top-content-area" id="topContentArea">
     <div id="barBox"></div>
+    <!-- حالة نسخة المحطات في الرئيسية (بلا شريط علوي): تظهر بنقطة البحث أو وحدها حين لا تكون خضراء — the copy status on home -->
+    <div class="map-status" id="mapStatus" role="status" hidden><span data-role="map-status-text"></span><button type="button" class="map-status-btn" data-act="map-refresh" aria-label="تحديث نسخة المحطات">⟳ تحديث</button></div>
   </div>
   <div class="map-stage-slot"><div id="mapStage"></div></div>
   <div class="station-table station-sheet" id="stationTable"></div>
-  <div id="locationGate"></div>
 </section>
 
 <!-- شاشة «تفاصيل المحطة» (تُفتح من لوحة المحطة) — the station details screen (opened from the station sheet) -->
@@ -163,6 +163,7 @@
 <script src="components/globe.js"></script>
 <script src="components/offline-map-ui.js"></script>
 <script src="components/map-view.js"></script>
+<script src="components/district-labels.js"></script>
 <script src="components/station-card.js"></script>
 <script src="components/nearby-layer.js"></script>
 <script src="components/outage-search.js"></script>
@@ -178,7 +179,7 @@
 <script src="components/bottom-nav.js"></script>
 <script src="components/station-details.js"></script>
 <script src="components/stations-list.js"></script>
-<script src="components/location-gate.js"></script>
+<script src="services/my-location.js"></script>
 <script src="components/more-menu.js"></script>
 <script src="pages/home.js"></script>
 </body>
