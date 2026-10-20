@@ -349,3 +349,10 @@ body.nav-full .station-sheet{display:none !important;}
 .station-table.station-sheet .sheet-actions .st-edit .st-ico{color:inherit;}
 .station-table.station-sheet .sheet-actions .st-danger{background:var(--danger-bg);border-color:var(--danger);color:var(--danger);}
 .station-table.station-sheet .sheet-actions .st-danger .st-ico{color:inherit;}
+
+/* الترتيب الجديد (طلب محمد 20 أكتوبر): المنطقة في الصف الأول بجانب الرقم (تُختصر بـ«…» إن ضاقت)، ومدة البحث أول الصف الثاني
+   The new order: the district in row one beside the number (shortened with «…» when tight), the search time first in row two */
+.sheet-line .ss-region{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;font-weight:700;color:var(--text-primary);}
+.sheet-line .sheet-feeder{margin-inline-start:auto;}
+.sheet-row2 .sheet-time{flex:1;min-width:0;margin:0;}
+.station-sheet.is-explore .sheet-line .ss-region{display:none;}

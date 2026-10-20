@@ -94,21 +94,21 @@
     const fc = feederCount_(s, deps);
     return '<div class="sb-inner sb-top">' +
       '<div class="sheet-head">' +
-        // الصف الأول: رمز النوع | رقم المحطة | المغذي | مدة البحث — row one: type symbol | number | feeder | search time
+        // الصف الأول: رمز النوع | رقم المحطة | المنطقة | المغذي — row one: type symbol | number | district | feeder
         '<div class="sheet-line">' +
           '<span class="sheet-badge ' + kind + '" aria-hidden="true">' + (TYPE_ICON[s.type] || TYPE_ICON['توزيع']) + '</span>' +
           '<div class="sheet-title"><span class="sheet-type sr-only ' + kind + '">' + (sub ? 'محطة تحويل' : 'محطة توزيع') + '</span>' +
             '<bdi class="sheet-id">' + esc(s.id) + '</bdi><span class="sheet-explore-txt" data-role="explore-txt"></span></div>' +
+          (s.region ? '<span class="ss-region">' + esc(s.region) + '</span>' : '') +
           (s.feeder ? '<bdi class="sheet-feeder">' + esc(s.feeder) + '</bdi>' : '') +
-          '<span class="sheet-time">' + searchTime_(s) + '</span>' +
           // وضع الاستكشاف (قريب/مغذي): المسار وإنهاء العرض في السطر نفسه — explore mode: route and end in the same line
           '<div class="sheet-explore">' +
             '<button type="button" class="sheet-go" data-act="navigate"' + (coords ? '' : ' disabled') + '>' + BTN_ICON.navigate + '<span>المسار</span></button>' +
             '<button type="button" class="sheet-end" data-act="end-explore">إنهاء العرض</button></div>' +
         '</div>' +
-        // الصف الثاني: المنطقة | عدد محطات المغذي (يعرضها) | التفاصيل — row two: district | feeder count (shows them) | details
+        // الصف الثاني: مدة البحث | عدد محطات المغذي (يعرضها) | التفاصيل — row two: search time | feeder count (shows them) | details
         '<div class="sheet-row2">' +
-          (s.region ? '<span class="ss-region">' + esc(s.region) + '</span>' : '<span class="ss-region"></span>') +
+          '<span class="sheet-time">' + searchTime_(s) + '</span>' +
           (fc != null ? '<button type="button" class="ss-count st-feeder" data-act="feeder" title="عرض محطات المغذي على الخريطة"><b class="st-count">' + fc + '</b> محطة ›</button>' : '') +
           (deps && deps.onDetails ? '<button type="button" class="sheet-more" data-act="details">التفاصيل ‹</button>' : '') +
         '</div>' +

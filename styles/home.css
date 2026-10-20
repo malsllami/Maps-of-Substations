@@ -357,7 +357,8 @@ body.search-mode:not(.nav-full) .view-map .ssb-close{display:flex;align-items:ce
    ملوّنة في مربع البحث وبطاقة تحته عند الطلب أو حين لا تكون خضراء. الرأس يبقى في الشاشات الأخرى (البيانات، المحطات، المزيد).
    Home has no top bar: the search at the very top, the copy status a colored dot in the search box and a card under it
    on demand or whenever it isn't green. The header stays on the other screens. */
-body.home-page[data-view="map"] > header{display:none;}
+/* للعضو فقط: صفحة الزائر (الكرة وتسجيل الدخول) تبقى برأسها لأنها تعتمد على ارتفاعه — members only: the guest page keeps its header */
+body.home-page:not(.guest-mode)[data-view="map"] > header{display:none;}
 body.home-page[data-view="map"]:not(.nav-full) .view-map.hero{top:0;}
 body.home-page[data-view="map"]:not(.nav-full) .view-map .top-content-area{top:calc(env(safe-area-inset-top, 0px) + 10px);}
 .ssb-status{display:none;}
