@@ -142,7 +142,6 @@
       });
       if (!bounds.length) return;
       if (bounds.length > 1) line = L.polyline(bounds, { color: LINE_COLOR, weight: 2, dashArray: '5,5' }).addTo(map);
-      map.fitBounds(bounds.length > 1 ? bounds : [bounds[0], bounds[0]], { padding: [44, 44], maxZoom: 17 });
       const note = notFound && notFound.length ? ' — تعذّر إيجاد: ' + notFound.join('، ') : '';
       const order = found.length > 1 ? 'بالترتيب A→' + letter(found.length - 1) : '';
       view.hint('محطات العطل (' + found.length + ') ' + order + note + ' ');
@@ -150,6 +149,8 @@
       const a = global.document.createElement('a');
       a.className = 'outage-gmaps-link'; a.target = '_blank'; a.rel = 'noopener'; a.href = googleUrl(found); a.textContent = 'الانتقال بالترتيب على قوقل ماب';
       hint.appendChild(a);
+      // بعد ظهور التلميح: النقاط داخل المساحة المرئية تحته وفوق البطاقة — after the hint shows: the points in the visible area below it
+      map.fitBounds(bounds.length > 1 ? bounds : [bounds[0], bounds[0]], Object.assign(view.fitPadding ? view.fitPadding(44) : { padding: [44, 44] }, { maxZoom: 17 }));
     }
 
     async function search(raw) {

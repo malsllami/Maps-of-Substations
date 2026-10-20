@@ -1,70 +1,35 @@
 /* ============================================================
- * styles/home.css — الصفحة الرئيسية: الشاشة الافتتاحية، القسم العلوي (العنوان والبحث والكرة)، منطقة البطاقة والخريطة،
- *   أزرار الإجراءات، وزر الزائر، والتذييل — من V1 كما هي (index.html الأسطر 188–330 و476–504 و975–1146)
+ * styles/home.css — الصفحة الرئيسية: الشاشات الثلاث (الرئيسية، الخريطة، المحطات)، أزرار الإجراءات، زر الزائر
  * ============================================================
- * الكرة في styles/globe.css، والخريطة في map-view.css، والبطاقة في station-card.css، والإحصاءات في stats-cards.css —
- * هنا ما يخص هذه الصفحة وحدها. الفرق الوحيد عن V1: الخريطة في حاوية خاصة بها تحت البطاقة (بدل مشاركة حاوية الكرة)،
- * فلا موضع مطلق يُحسب لها؛ ارتفاعها وحده يُضبط من الصفحة كما في V1.
- * The home page only: the intro, the hero (heading, search, globe), the card and map area, the action pills, the guest
- * button, the footer — from V1 as is. The one difference: the map has its own container under the card.
+ * إعادة التصميم (19 أكتوبر): بلا كرة ولا شاشة افتتاحية؛ شاشة واحدة ظاهرة حسب body[data-view]، والمحتوى بين الرأس الثابت
+ * والشريط السفلي الثابت (مع المناطق الآمنة). الخريطة في map-view.css، والبطاقة في station-card.css، والإحصاءات في stats-cards.css.
+ * Redesign (19 Oct): no globe or intro; one screen shown by body[data-view], the content between the fixed header and the
+ * fixed bottom bar (with the safe areas). The map, card and stats keep their own files.
  * ============================================================ */
-body.home-page{min-height:100vh;}
-body.home-page > header{position:fixed;top:0;left:0;right:0;z-index:160;} /* V1 */
+body.home-page{min-height:100dvh;padding-bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 12px);}
+body.home-page.guest-mode,body.home-page.nav-full{padding-bottom:0;}
+body.home-page > header{position:fixed;top:0;left:0;right:0;z-index:160;}
+.app-views{padding-top:var(--header-h, 120px);}
 
-/* الشاشة الافتتاحية — the intro */
-#introOverlay{position:fixed;inset:0;z-index:200;background:#050a10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .45s ease;}
-#introOverlay.fade-out{opacity:0;pointer-events:none;}
-#introOverlay.hidden-done{display:none;}
-.intro-logo{width:84px;height:auto;opacity:0;filter:drop-shadow(0 0 0px rgba(77,214,181,0));animation:introLogoIn .7s ease-out .15s forwards;}
-@keyframes introLogoIn{
-  0%{opacity:0;transform:scale(.85);filter:drop-shadow(0 0 0px rgba(77,214,181,0));}
-  60%{opacity:1;transform:scale(1.03);filter:drop-shadow(0 0 22px rgba(77,214,181,.65));}
-  100%{opacity:1;transform:scale(1);filter:drop-shadow(0 0 10px rgba(77,214,181,.4));}
-}
-.intro-text{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:3px;color:#4DD6B5;opacity:0;text-align:center;animation:introTextIn .5s ease-out .85s forwards;}
-@keyframes introTextIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+/* شاشة واحدة ظاهرة — one screen shown */
+.app-view{display:none;}
+body[data-view="home"] .view-home,
+body[data-view="map"] .view-map,
+body[data-view="stations"] .view-stations,
+body[data-view="details"] .view-details,
+body[data-view="more"] .view-more,
+body[data-view="storage"] .view-storage{display:block;}
 
-/* القسم العلوي — the hero */
-.hero{
-  position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:0;
-  padding:calc(var(--header-h, 130px) + 44px) 20px 4px;
-  min-height:calc(var(--globe-size) + 288px);
-}
-@media (max-width:767px){ .hero{padding:calc(var(--header-h, 130px) + 28px) 20px 3px;min-height:calc(var(--globe-size) + 240px);} }
-/* توهج الكرة (::before بهامش −8٪) كان يمدّ الصفحة أفقيًا 27 نقطة على الجوال (خطأ موروث من V1): يُقص عند حافة الشاشة ويبقى ظاهرًا
-   The globe glow (::before at −8%) widened the page by 27 px on phones (a V1 bug): clipped at the screen edge, still visible */
-.hero{overflow-x:clip;}
-@supports not (overflow-x:clip){ body.home-page{overflow-x:hidden;} }
-.hero.map-active{padding-top:calc(var(--header-h, 130px) + 14px);min-height:0;padding-bottom:20px;}
-.hero.map-active #globeStage{display:none;}
-.top-content-area{display:none;position:relative;z-index:5;width:min(1100px, 96vw);margin:0 auto;}
-body.guest-mode .top-content-area{width:min(1300px,96vw);}
-.hero.map-active .top-content-area{display:block;}
-.map-stage-slot{display:none;width:100%;margin-top:10px;}
-.hero.map-active .map-stage-slot{display:block;}
-/* حاوية الخريطة في مكانها الطبيعي تحت البطاقة (لا الموضع المطلق لمسرح الكرة)؛ وضع الملاحة الكامل (navigation.css) يبقى أعلى أولوية
-   The map container sits in normal flow under the card (not the globe stage's absolute position); full navigation mode still wins */
-body:not(.nav-full) .map-stage-slot .globe-stage.map-active{position:relative;top:auto;left:auto;transform:none;aspect-ratio:auto;margin:0 auto;}
-/* انتقال عرض الكرة لا يخص الخريطة هنا (لا تتمدد من الكرة)؛ بدونه تملأ الملاحة الشاشة فورًا
-   The globe's width transition does not apply to the map here (it never grows out of the globe); navigation fills the screen at once */
-.map-stage-slot .globe-stage.map-active{transition:none;}
-.hero-content{position:relative;z-index:5;width:100%;display:flex;flex-direction:column;align-items:center;padding:6px 30px 0;transition:opacity .4s ease;}
-.hero-content.hidden{display:none;}
-.hero-heading{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;}
-.eyebrow{
-  font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--teal-light);text-transform:uppercase;text-align:center;
-  background:rgba(5,15,25,0.45);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border-radius:20px;padding:6px 16px;white-space:nowrap;
-  text-shadow:0 1px 4px rgba(0,0,0,0.5);
-}
-[data-theme="light"] .eyebrow{color:var(--blue-deep);background:rgba(255,255,255,0.65);text-shadow:none;}
-.hero h1{
-  width:min(700px,90%);font-size:clamp(19px,3.2vw,32px);font-weight:700;text-align:center;line-height:1.3;margin:0;
-  text-shadow:0 2px 14px rgba(0,0,0,0.55);background:linear-gradient(90deg, #ffffff, var(--teal-light));
-  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
-}
-body.guest-mode .hero h1{font-size:clamp(24px,4vw,42px);}
-[data-theme="light"] .hero h1{background:linear-gradient(90deg, var(--text-primary), var(--teal));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:none;}
-.search-wrap{width:100%;pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:10px;}
+/* شاشة الخريطة — the map screen */
+.hero{position:relative;padding:10px 12px 0;}
+.top-content-area{position:relative;z-index:5;width:100%;max-width:1100px;margin:0 auto;}
+.map-stage-slot{width:100%;margin-top:10px;}
+body:not(.nav-full) .map-stage-slot .globe-stage.map-active{position:relative;top:auto;left:auto;transform:none;aspect-ratio:auto;margin:0 auto;transition:none;}
+
+/* شاشة الرئيسية — the home screen */
+.hero-content{position:relative;z-index:5;width:100%;display:flex;flex-direction:column;align-items:center;gap:14px;padding:18px 16px 4px;}
+.hero-content h1{font-size:clamp(19px,5.2vw,24px);font-weight:700;line-height:1.35;color:var(--text-primary);text-align:start;text-wrap:balance;}
+.search-wrap{width:100%;max-width:560px;display:flex;flex-direction:column;align-items:center;gap:10px;}
 body.guest-mode .search-wrap{display:none;}
 
 /* زر الدخول للزائر — the guest login button */
@@ -82,19 +47,11 @@ body.guest-mode .search-wrap{display:none;}
 body.guest-mode .guest-login-cta{display:flex;}
 
 /* البطاقات والإجراءات — cards and actions */
-.cards-section{position:relative;z-index:5;padding:0 32px 30px;display:flex;flex-direction:column;align-items:center;gap:14px;}
+.cards-section{position:relative;z-index:5;padding:14px 16px 20px;display:flex;flex-direction:column;align-items:center;gap:14px;}
 .cards-section.hidden{display:none;}
 body.guest-mode #cardsSection{display:none;}
 /* أزرار الإجراءات (تصميم محمد، 15 أكتوبر): «إضافة محطة» بعرض الصف، ثم ثلاث بطاقات بأيقونات بنفس الحجم
    Action buttons (Mohammed's design, 15 Oct): a full-row «add station», then three equal icon tiles */
-.action-add{
-  width:100%;max-width:560px;display:flex;align-items:center;justify-content:center;position:relative;
-  padding:16px 52px;border-radius:22px;border:1.6px solid rgba(77,214,181,0.75);background:rgba(31,174,140,0.08);
-  color:var(--teal-light);font-family:inherit;font-size:18px;font-weight:700;cursor:pointer;transition:.2s;
-}
-.action-add:hover{background:rgba(31,174,140,0.18);border-color:var(--teal);}
-.action-add-label{display:inline-flex;align-items:center;gap:8px;}
-.action-add-plus{position:absolute;inset-inline-end:20px;top:50%;transform:translateY(-50%);font-size:28px;font-weight:400;line-height:1;}
 .action-tiles{width:100%;max-width:560px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
 .action-tile{
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:118px;
@@ -120,30 +77,276 @@ body.guest-mode #cardsSection{display:none;}
 .action-note[data-kind="ok"]{color:var(--teal-light);border-color:rgba(77,214,181,0.5);}
 .action-note[data-kind="fail"]{color:#E0654F;border-color:rgba(224,101,79,0.45);}
 [data-theme="light"] .action-note[data-kind="ok"]{color:var(--teal);}
-[data-theme="light"] .action-add{color:var(--teal);}
 [data-theme="light"] .tile-outage{color:#A57C12;}
 [data-theme="light"] .tile-recent{color:var(--blue-mid);}
 @media (max-width:767px){
-  .action-add{font-size:17px;padding:15px 48px;}
   .action-tiles{gap:8px;}
   .action-tile{min-height:108px;padding:12px 6px;}
   .tile-label{font-size:13.5px;}
 }
 .home-slot{width:100%;display:flex;flex-direction:column;align-items:center;}
-footer.home-footer{text-align:center;padding:12px 20px;font-size:10px;color:var(--text-secondary);opacity:.7;border-top:1px solid var(--border);}
 
 /* الجوال — phones */
 @media (max-width:767px){
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), textarea, select{font-size:16px !important;}
-  .hero{padding-left:16px;padding-right:16px;}
-  .top-content-area{width:100%;}
-}
-@media (max-width:600px){
-  .eyebrow{font-size:10px;padding:5px 12px;}
-  .hero h1{font-size:clamp(22px,6vw,32px);}
-  .cards-section{padding:0 12px 50px;}
 }
 
 /* مكتبة الخريطة تعذّرت: رسالة واضحة مكان الخريطة والبطاقة فوقها بكل بياناتها — the map library unavailable: a clear message in its place */
 .map-unavailable{margin:10px auto 0;max-width:min(1100px, 96vw);box-sizing:border-box;padding:16px 18px;border-radius:14px;
   border:1px dashed var(--border-strong);background:var(--bg-card);color:var(--text-secondary);font-size:13px;font-weight:700;text-align:center;line-height:1.7;}
+
+/* ===== إعادة التصميم — المرحلة ب: الرئيسية (19 أكتوبر) — Redesign stage B: the home screen ===== */
+.hero-content{align-items:stretch;gap:10px;padding:14px 16px 4px;max-width:592px;margin:0 auto;}
+.home-date{font-size:13px;font-weight:600;color:var(--text-muted);}
+.home-date .status-bar-item{display:block;}
+.home-title{font-size:20px;font-weight:700;color:var(--text-primary);line-height:1.3;}
+.search-wrap{max-width:none;align-items:stretch;}
+#lensBox .search-and-back-row{width:100%;}
+#lensBox .station-search-bar{height:54px;border-radius:var(--radius);}
+#lensBox .station-search-bar input{font-size:16px;}
+body.guest-mode .home-title{display:none;}
+.guest-login-cta{align-self:center;margin-top:24px;}
+
+.cards-section{gap:12px;padding:12px 16px 16px;max-width:592px;margin:0 auto;}
+.cards-section .home-slot{max-width:560px;}
+/* الإجراءات السريعة: ثلاث بطاقات مدمجة بنفس الارتفاع — quick actions: three compact tiles of equal height */
+.action-tiles{max-width:560px;gap:10px;}
+.action-tile{min-height:0;padding:12px 6px;gap:4px;border-width:1px;border-radius:var(--radius-lg);}
+.tile-label{font-size:14.5px;}
+.tile-sub{font-size:12px;margin-top:0;}
+@media (max-width:767px){ .action-tile{min-height:0;padding:12px 6px;} .tile-label{font-size:14px;} }
+/* النص الإرشادي عربي فيُعرض من اليمين ما دام الحقل فارغًا؛ الكتابة نفسها (أرقام وأحرف لاتينية) كما هي
+   The Arabic placeholder reads right-to-left while the field is empty; typing (digits/Latin) is unchanged */
+#lensBox .station-search-bar input:placeholder-shown{direction:rtl;text-align:right;}
+
+/* ===== ملاحظات محمد على المرحلة ب: نصوص ثانوية أكبر، والبيانات المؤقتة مطوية =====
+   Mohammed's notes on stage B: larger secondary text, the cached data folded */
+.home-date{font-size:14px;}
+.stats-board .sb-foot{font-size:13.5px;color:var(--text-secondary);}
+.storage-usage-top,.storage-percent{font-size:13.5px;}
+.storage-clear-btn{font-size:13.5px;padding:8px 12px;}
+
+/* ===== المرحلة ج: شاشة الخريطة بارتفاع الشاشة — stage C: the map screen fits the screen height ===== */
+.view-map.hero{padding:8px 12px 0;}
+.view-map .map-stage-slot{margin-top:8px;}
+.view-map .top-content-area .station-search-bar{height:46px;}
+.view-map .map-stage-slot .globe-stage.map-active{width:100%;}
+.view-map .tb-title{display:none;} /* التبويب نفسه اسمه «الخريطة» فيتسع الشريط للأدوات — the tab is already «map», leaving room for the tools */
+/* شريط أدوات الخريطة بلا ازدحام: كل الأدوات في سطر واحد على 390 بلا قص (ملاحظة محمد 5.6) — the map toolbar uncluttered */
+.view-map .tb-div{display:none;}
+.view-map .toolbar-scroll{justify-content:space-between;gap:2px;padding:6px 6px;}
+.view-map .toolbar-btn,.view-map .map-mode-chip{padding:7px 7px;font-size:13px;gap:4px;}
+.view-map .map-mode-chip .mm-auto-badge{font-size:11px;padding:2px 6px;}
+.view-map [data-tools="more"]{font-size:0;gap:0;padding:7px 9px;} /* «⋯» أيقونة فقط فتتسع كل الأدوات — «⋯» icon only so every tool fits */
+.view-map [data-tools="more"] .tb-icon{font-size:17px;}
+
+/* ===== نظام الألوان الوظيفي (اعتماد محمد، 19 أكتوبر) — the functional color system =====
+   اللون يدل على نوع البيانات في الوضعين (الدرجة تتغير فقط): التوزيع أخضر، التحويل أزرق، العمليات ذهبي، الأعطال نحاسي،
+   المعلومات التقنية رمادي مزرق؛ والثانوية محايدة. لا ظلال ولا إضاءة للتمييز. ثلاث حالات: عادية ← محددة (إطار أوضح) ←
+   نشطة/مفتوحة (إطار + شريط جانبي بلون البطاقة). التحديد لا يغيّر لون البطاقة إلى لون نوع آخر.
+   Color marks the data type in both themes (only the shade changes); secondary cards stay neutral. No shadows or glow.
+   Three states: normal ← selected (clearer frame) ← active/open (frame + a side bar in the card's color). */
+.k-dist,.st-tile.sb-dist{--k-bg:var(--c-dist-bg);--k-fg:var(--c-dist-fg);--k-line:var(--c-dist-line);}
+.k-sub,.st-tile.sb-sub,.tile-recent{--k-bg:var(--c-sub-bg);--k-fg:var(--c-sub-fg);--k-line:var(--c-sub-line);}
+.k-ops,.st-tile.sb-today{--k-bg:var(--c-ops-bg);--k-fg:var(--c-ops-fg);--k-line:var(--c-ops-line);}
+.tile-outage{--k-bg:var(--c-alert-bg);--k-fg:var(--c-alert-fg);--k-line:var(--c-alert-line);}
+.k-info{--k-bg:var(--c-info-bg);--k-fg:var(--c-info-fg);--k-line:var(--c-info-line);}
+
+/* البطاقات الملوّنة — the colored cards */
+.st-tile.sb-dist,.st-tile.sb-sub,.st-tile.sb-today,.tile-outage,.tile-recent{
+  background:var(--k-bg);border:1px solid var(--k-line);color:var(--k-fg);box-shadow:none;
+}
+.st-tile.sb-dist .st-num,.st-tile.sb-sub .st-num,.st-tile.sb-today .st-op b,
+.st-tile.sb-dist .st-icon,.st-tile.sb-sub .st-icon,.st-tile.sb-today .st-icon,
+.st-tile.sb-dist .st-label,.st-tile.sb-sub .st-label,.st-tile.sb-today .st-label,.st-tile.sb-today .st-ops{color:var(--k-fg);}
+/* المحايدة: الإجمالي والتحديث وجدول اليوم — the neutral ones: total, refresh, today's table */
+.st-tile.sb-all,.tile-refresh,.sb-detail{background:var(--bg-card);border:1px solid var(--border-strong);color:var(--text-primary);box-shadow:none;}
+.tile-refresh .tile-sub{color:var(--text-secondary);}
+/* المحددة (تمرير/تركيز): إطار أوضح بنفس اللون — selected: a clearer frame in the same color */
+.action-tile:hover,.action-tile:focus-visible{border-color:var(--k-fg, var(--text-secondary));outline:none;}
+.tile-outage:hover,.tile-recent:hover{background:var(--k-bg);}
+/* النشطة/المفتوحة: إطار + شريط جانبي بلون البطاقة — active/open: frame + a side bar in the card's color */
+.action-tile[aria-expanded="true"]{border-color:var(--k-fg);box-shadow:inset -4px 0 0 var(--k-fg);}
+.tile-outage[aria-expanded="true"]{background:var(--k-bg);}
+[data-theme="light"] .tile-outage,[data-theme="light"] .tile-recent{color:var(--k-fg);}
+
+/* ===== لوحة التصميم المحسّنة (19 أكتوبر): بطاقات الأرقام والإجراءات بتعبئة لونها =====
+   التوزيع أخضر، التحويل أزرق، الإجمالي بنفسجي، عمليات اليوم ذهبي، الأعطال برتقالي، آخر المحطات أزرق فاتح، التحديث محايد.
+   ممتلئة في الداكن والنص أبيض (أو داكن على الذهبي والبرتقالي)، وهادئة في الفاتح بنص بلون النوع.
+   The enhanced board: tiles filled with their color — solid in dark with white text (dark on gold/orange), calm in light. */
+.st-tile.sb-dist{--t-fill:var(--c-dist-fill);--t-ink:var(--c-dist-ink);--t-line:var(--c-dist-line);}
+.st-tile.sb-sub{--t-fill:var(--c-sub-fill);--t-ink:var(--c-sub-ink);--t-line:var(--c-sub-line);}
+.st-tile.sb-all{--t-fill:var(--c-total-fill);--t-ink:var(--c-total-ink);--t-line:var(--c-total-line);}
+.st-tile.sb-today{--t-fill:var(--c-ops-fill);--t-ink:var(--c-ops-ink);--t-line:var(--c-ops-line);}
+.tile-outage{--t-fill:var(--c-alert-fill);--t-ink:var(--c-alert-ink);--t-line:var(--c-alert-line);--k-fg:var(--c-alert-ink);}
+.tile-recent{--t-fill:var(--c-recent-fill);--t-ink:var(--c-recent-ink);--t-line:var(--c-recent-line);--k-fg:var(--c-recent-ink);}
+.st-tile.sb-dist,.st-tile.sb-sub,.st-tile.sb-all,.st-tile.sb-today,.tile-outage,.tile-recent{background:var(--t-fill);border:1px solid var(--t-line);color:var(--t-ink);}
+.st-tile.sb-dist *,.st-tile.sb-sub *,.st-tile.sb-all *,.st-tile.sb-today *{color:var(--t-ink);}
+.tile-outage,.tile-recent,[data-theme="light"] .tile-outage,[data-theme="light"] .tile-recent{color:var(--t-ink);}
+.tile-outage:hover,.tile-recent:hover,.tile-outage[aria-expanded="true"]{background:var(--t-fill);}
+/* الحالة المفتوحة على الممتلئة: إطار ونص بلون النص نفسه — the open state on a filled tile */
+.action-tile.tile-outage[aria-expanded="true"],.action-tile.tile-recent[aria-expanded="true"]{border-color:var(--t-ink);box-shadow:inset -4px 0 0 var(--t-ink);}
+/* ارتفاع موحّد لكل بطاقات الأرقام (لوحة التصميم: توحيد الارتفاع والمحاذاة) — one height for all number tiles */
+.st-tile{min-height:104px;justify-content:space-between;}
+.action-tile{min-height:96px;}
+.stats-board .st-tile[class] .st-num,.stats-board .st-tile[class] .st-label,.stats-board .st-tile[class] .st-icon,
+.stats-board .st-tile[class] .st-ops,.stats-board .st-tile[class] .st-op b{color:var(--t-ink);}
+.st-tile{min-height:92px;}
+/* الأرقام دائمًا في المنتصف (طلب محمد) — numbers always centered */
+.st-tile{align-items:center;text-align:center;}
+.st-top{justify-content:center;}
+.st-num{text-align:center;}
+.st-ops{justify-content:center;}
+
+/* ===== صفحة الزائر كما في الموقع الحي: الكرة وتحتها «تسجيل الدخول» (طلب محمد 19 أكتوبر) =====
+   The guest page as on the live site: the globe with «login» under it */
+body.guest-mode .app-views{display:none;}
+.guest-landing{position:relative;min-height:100dvh;overflow-x:clip;}
+.guest-landing[hidden]{display:none;}
+.guest-hero{position:relative;z-index:5;display:flex;flex-direction:column;align-items:center;gap:14px;padding:calc(var(--header-h, 120px) + 24px) 20px 40px;}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--teal-light);text-transform:uppercase;text-align:center;
+  background:rgba(5,15,25,0.45);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border-radius:20px;padding:6px 16px;white-space:nowrap;}
+[data-theme="light"] .eyebrow{color:var(--blue-deep);background:rgba(255,255,255,0.65);}
+.guest-title{width:min(700px,90%);font-size:clamp(24px,6vw,42px);font-weight:700;text-align:center;line-height:1.3;margin:0;
+  background:linear-gradient(90deg, #ffffff, var(--teal-light));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 2px 14px rgba(0,0,0,0.55);}
+[data-theme="light"] .guest-title{background:linear-gradient(90deg, var(--text-primary), var(--teal));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:none;}
+.guest-landing .guest-login-cta{display:flex;margin-top:0;}
+
+/* ===== الخريطة بلا فراغ فوقها وتحتها (طلب محمد 19 أكتوبر): مسافات أضيق، وبلا حد أدنى لارتفاع المسرح —
+   فالشاشات القصيرة لم تعد تترك فراغًا بين الخريطة ولوحة المحطة (كان المسرح 280 والخريطة 200).
+   The map with no gap above or below it: tighter spacing and no stage minimum height, so short screens no longer leave a
+   gap between the map and the station sheet. */
+.view-map.hero{padding-top:6px;}
+.view-map .map-stage-slot{margin-top:6px;}
+.view-map .map-stage-slot .globe-stage.map-active{min-height:0;}
+.view-map .station-sheet{margin-top:6px;}
+/* سطر رسائل البحث لا يحجز مساحة وهو فارغ (كان 22 نقطة فوق الخريطة)، ويظهر بنصه عند وجود رسالة
+   The search message line takes no space while empty (it was 22px above the map), and shows when there is a message */
+.view-map .station-search-hint:empty{min-height:0;padding:0;}
+
+/* ===== الخريطة بكامل الصفحة (طلب محمد 20 أكتوبر) =====
+   الخريطة تملأ المساحة بين الرأس والشريط السفلي؛ فوقها حقل بحث زجاجي شبه شفاف وأدوات الخريطة كأزرار عائمة، وأسفلها بطاقة
+   المحطة بخلفية زجاجية شبه شفافة وأزرار واضحة. التوسيط في المساحة المرئية بينهما (pages/home.js layout + map-view insets).
+   أثناء الملاحة تبقى قواعد navigation.css كما هي (كلها هنا مقيّدة بـ body:not(.nav-full)).
+   The full-page map: the map fills the space between the header and the bottom bar; a translucent glass search and the map
+   tools float above it, the station card floats below on translucent glass. Navigation keeps its own rules. */
+:root{--glass-bg:rgba(13,24,38,0.62);--glass-strong:rgba(13,24,38,0.80);--glass-line:rgba(255,255,255,0.14);}
+[data-theme="light"]{--glass-bg:rgba(255,255,255,0.66);--glass-strong:rgba(255,255,255,0.84);--glass-line:rgba(20,40,60,0.16);}
+body.home-page[data-view="map"]{min-height:0;}
+body:not(.nav-full) .view-map.hero{position:fixed;top:var(--header-h, 120px);left:0;right:0;
+  bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));padding:0;overflow:hidden;z-index:1;}
+/* البحث عائم أعلى الخريطة — the search floats at the top */
+body:not(.nav-full) .view-map .top-content-area{position:absolute;top:8px;left:12px;right:12px;width:auto;max-width:none;margin:0;z-index:20;}
+body:not(.nav-full) .view-map .station-search-bar{background:var(--glass-bg);border-color:var(--glass-line);box-shadow:none;
+  -webkit-backdrop-filter:blur(14px) saturate(1.2);backdrop-filter:blur(14px) saturate(1.2);}
+body:not(.nav-full) .view-map .station-search-bar input{font-family:'JetBrains Mono','IBM Plex Sans Arabic',monospace;font-weight:700;color:var(--text-primary);}
+/* المسرح بكامل المساحة: الخريطة خلفية، والأدوات واللوحات تتراص تحت البحث فوقها — the stage fills the area: the map behind, tools stacked above it */
+body:not(.nav-full) .view-map .map-stage-slot{position:absolute;inset:0;margin:0;width:auto;padding:0;}
+body:not(.nav-full) .view-map .map-stage-slot .globe-stage.map-active{position:absolute;inset:0;width:100%;height:100%;min-height:0;margin:0;
+  padding:calc(var(--search-h, 46px) + 16px) 12px 0;box-sizing:border-box;gap:6px;pointer-events:none;}
+body:not(.nav-full) .view-map .globe-stage.map-active > *{pointer-events:auto;}
+body:not(.nav-full) .view-map .globe-stage.map-active #map-container{position:absolute;inset:0;height:100% !important;border-radius:0;z-index:0;}
+body:not(.nav-full) .view-map .map-toolbar-bar,body:not(.nav-full) .view-map .map-mode-panel,body:not(.nav-full) .view-map .map-panels > *,
+body:not(.nav-full) .view-map .map-tool-hint{position:relative;z-index:10;}
+/* أدوات الخريطة أزرار زجاجية منفصلة — the map tools as separate glass pills */
+body:not(.nav-full) .view-map .map-toolbar-bar{background:none;border:none;border-radius:0;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;overflow:visible;}
+body:not(.nav-full) .view-map .toolbar-scroll{height:auto;padding:0 0 2px;gap:6px;justify-content:flex-start;}
+body:not(.nav-full) .view-map .toolbar-btn,body:not(.nav-full) .view-map .map-mode-chip{padding:8px 11px;border-radius:999px;font-size:13px;
+  background:var(--glass-bg);border:1px solid var(--glass-line);color:var(--text-primary);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);}
+body:not(.nav-full) .view-map .toolbar-btn.active{background:var(--teal);border-color:var(--teal);color:#04241c;}
+body:not(.nav-full) .view-map [data-tools="more"]{padding:8px 11px;}
+/* لوحات الأدوات والتلميح بطاقات زجاجية تحت الأزرار — the tool panels and the hint as glass cards under the pills */
+body:not(.nav-full) .view-map .map-mode-panel,body:not(.nav-full) .view-map .map-panels > *,body:not(.nav-full) .view-map .map-tool-hint{
+  border:1px solid var(--glass-line);border-radius:14px;background:var(--glass-strong);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);}
+/* التكبير والتنبيه فوق البطاقة دائمًا — zoom and the toast always above the card */
+body:not(.nav-full) .view-map .map-toast{bottom:calc(var(--sheet-h, 0px) + 16px);}
+/* بطاقة المحطة عائمة أسفل الخريطة بخلفية زجاجية — the station card floats at the bottom on glass */
+body:not(.nav-full) .view-map .station-sheet{position:absolute;left:8px;right:8px;width:auto;bottom:8px;margin:0;z-index:20;max-height:56%;overflow-y:auto;overscroll-behavior:contain;
+  background:var(--glass-strong);border:1px solid var(--glass-line);-webkit-backdrop-filter:blur(16px) saturate(1.25);backdrop-filter:blur(16px) saturate(1.25);} /* أوضح فوق الخريطة النهارية / clearer over the day map */
+/* الأدوات الخمس في سطر واحد بلا قص على 390 (الأنماط، قريب، مغذي، أعطال، ⋯) — all five tools on one line at 390 */
+body:not(.nav-full) .view-map .toolbar-scroll{gap:5px;}
+body:not(.nav-full) .view-map .toolbar-btn,body:not(.nav-full) .view-map .map-mode-chip{padding:7px 9px;gap:4px;font-size:12.5px;}
+body:not(.nav-full) .view-map [data-tools="more"]{padding:7px 10px;}
+@media (max-width:440px){ body:not(.nav-full) .view-map .map-mode-chip .mm-auto-badge{display:none;} body:not(.nav-full) .view-map .toolbar-btn .tb-icon{display:none;} }
+/* «⋯» أيقونة فقط (لا يلتبس بتبويب «المزيد» في الشريط السفلي) — «⋯» icon only (not confused with the bottom bar's «More») */
+body:not(.nav-full) .view-map .toolbar-btn[data-tools="more"] .tb-label{display:none;}
+body:not(.nav-full) .view-map .toolbar-btn[data-tools="more"] .tb-icon{display:inline;font-size:16px;}
+
+/* ===== الرئيسية = الخريطة (طلب محمد 20 أكتوبر، نموذج الصورة) =====
+   عمود أزرار زجاجية على اليمين تحت البحث: الملاحة المباشرة (عند وجود محطة)، التكبير/التصغير، الطبقات، الأدوات؛ و«موقعي»
+   أسفل يمين الخريطة فوق البطاقة. أدوات الشريط (قريب، مغذي، أعطال، ⋯) مطوية خلف «الأدوات» فلا تُحذف أي ميزة.
+   Home = the map: a glass button column on the right under the search (direct navigation when a station is chosen, zoom,
+   layers, tools) and «my location» bottom-right above the card. The toolbar tools fold behind «tools», no feature lost. */
+/* الأدوات واللوحات بعرض الخريطة كله؛ العمود الجانبي يبدأ تحتها (map-view fitSide) — the tools and panels take the full width; the column starts below them */
+body:not(.nav-full) .view-map .map-stage-slot .globe-stage.map-active{padding-right:12px;}
+/* العمود محصور بين البحث والبطاقة (نموذج محمد 20 أكتوبر): لا يُغطّى أبدًا؛ إن ضاقت المساحة تلتف الأزرار الزائدة إلى عمود ثانٍ
+   بجانبه (يسارًا) بدل أن تختفي خلف البطاقة — the column is bounded between the search and the card: never covered; when short,
+   the extra buttons wrap into a second column beside it (to the left) instead of hiding behind the card */
+body:not(.nav-full) .view-map .map-side{display:flex;flex-direction:column;flex-wrap:nowrap;align-items:center;gap:8px;position:absolute;
+  top:calc(var(--search-h, 46px) + 14px);bottom:calc(var(--sheet-h, 0px) + 10px);right:12px;z-index:12;pointer-events:none;}
+body:not(.nav-full) .view-map .map-side > *{pointer-events:auto;}
+/* المساحة ضيقة: «+ / −» ثم زر الملاحة يُخفيان (map-view fitSide) — short space: «+ / −», then the navigation button, hide */
+body:not(.nav-full) .view-map .globe-stage.side-no-zoom .map-side .zoom-controls{display:none;}
+body:not(.nav-full) .view-map .side-btn{display:flex;align-items:center;justify-content:center;width:42px;height:42px;padding:0;border-radius:50%;cursor:pointer;
+  background:var(--glass-strong);border:1px solid var(--glass-line);color:var(--text-primary);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);}
+body:not(.nav-full) .view-map .side-btn[hidden]{display:none;}
+/* أداة نشطة (قريب/مغذي) والأدوات مطوية ← نقطة على زر الأدوات — an active tool while folded ← a dot on the tools button */
+/* زر الأدوات في مربع البحث: مفتوحة أو فيها أداة نشطة وهي مطوية ← بلون التوزيع — the search box's tools button: open, or an active tool while folded */
+.ssb-tools{display:none;}
+body:not(.nav-full) .view-map .ssb-tools{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:38px;height:38px;border-radius:50%;padding:0;
+  border:1px solid transparent;background:none;color:var(--text-secondary);cursor:pointer;}
+body:not(.nav-full) .view-map .ssb-tools[aria-expanded="true"],
+body:not(.nav-full) .view-map.hero:has(.globe-stage:not(.tools-open) .toolbar-btn.active) .ssb-tools{color:var(--teal);border-color:var(--teal);background:rgba(31,174,140,0.12);}
+body:not(.nav-full) .view-map .map-side .zoom-controls{position:static;display:flex;flex-direction:column;border-radius:22px;overflow:hidden;
+  border:1px solid var(--glass-line);box-shadow:none;}
+body:not(.nav-full) .view-map .map-side .zoom-btn{width:42px;height:40px;background:var(--glass-strong);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);}
+body:not(.nav-full) .view-map .map-locate{color:#2F86F6;}
+body:not(.nav-full) .view-map .globe-stage:not(.tools-open) .map-toolbar-bar{display:none;}
+body:not(.nav-full) .view-map .globe-stage.map-active > .map-side{pointer-events:none;} /* الشريط الفارغ بين الأزرار يمرّر السحب للخريطة / the empty strip passes drags to the map */
+body:not(.nav-full) .view-map .map-side > *{flex-shrink:0;} /* لا تنضغط الأزرار؛ الضيق يُعالج بإخفاء «+ / −» ثم الملاحة / buttons never squeeze; short space hides «+ / −», then navigation */
+
+/* ===== وضع البحث (اقتراح محمد 20 أكتوبر): لمس البحث أو فتح محطة ← يختفي الشريطان العلوي والسفلي، وتتمدد الخريطة لكامل
+   الشاشة (مع المناطق الآمنة)، ويرتفع البحث للأعلى ومعه زر × يعيد الوضع العادي. يخص شاشة الخريطة وحدها (التفاصيل وغيرها كما هي).
+   Search mode: touching the search or opening a station ← both bars hide, the map takes the whole screen (with the safe
+   areas), the search rises with a × that restores normal mode. The map screen only. */
+body.search-mode[data-view="map"] > header,
+body.search-mode[data-view="map"] .bottom-nav{display:none;}
+body.search-mode[data-view="map"]:not(.nav-full) .view-map.hero{top:0;bottom:0;}
+body.search-mode[data-view="map"]:not(.nav-full) .view-map .top-content-area{top:calc(env(safe-area-inset-top, 0px) + 10px);}
+body.search-mode[data-view="map"]:not(.nav-full) .view-map .station-sheet{bottom:calc(env(safe-area-inset-bottom, 0px) + 10px);}
+.ssb-close{display:none;}
+body.search-mode:not(.nav-full) .view-map .ssb-close{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:38px;height:38px;padding:0;border-radius:50%;
+  border:1px solid var(--glass-line);background:var(--bg-elev);color:var(--text-primary);cursor:pointer;}
+
+/* ===== الرئيسية بلا شريط علوي (قرار محمد 20 أكتوبر، نموذج الصورة): البحث في أعلى الشاشة مباشرة، وحالة نسخة المحطات نقطة
+   ملوّنة في مربع البحث وبطاقة تحته عند الطلب أو حين لا تكون خضراء. الرأس يبقى في الشاشات الأخرى (البيانات، المحطات، المزيد).
+   Home has no top bar: the search at the very top, the copy status a colored dot in the search box and a card under it
+   on demand or whenever it isn't green. The header stays on the other screens. */
+/* للعضو فقط: صفحة الزائر (الكرة وتسجيل الدخول) تبقى برأسها لأنها تعتمد على ارتفاعه — members only: the guest page keeps its header */
+body.home-page:not(.guest-mode)[data-view="map"] > header{display:none;}
+body.home-page[data-view="map"]:not(.nav-full) .view-map.hero{top:0;}
+body.home-page[data-view="map"]:not(.nav-full) .view-map .top-content-area{top:calc(env(safe-area-inset-top, 0px) + 10px);}
+.ssb-status{display:none;}
+body:not(.nav-full) .view-map .ssb-status{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:30px;height:38px;padding:0;border:none;background:none;cursor:pointer;}
+.ssb-dot{width:12px;height:12px;border-radius:50%;background:var(--st-gray);box-shadow:0 0 0 3px var(--st-gray-bg);}
+.ssb-status[data-sync="ready"] .ssb-dot{background:var(--st-green);box-shadow:0 0 0 3px var(--st-green-bg);}
+.ssb-status[data-sync="offline"] .ssb-dot{background:var(--st-red);box-shadow:0 0 0 3px var(--st-red-bg);}
+.ssb-status[data-sync="partial"] .ssb-dot{background:var(--st-yellow);box-shadow:0 0 0 3px var(--st-yellow-bg);}
+.ssb-status[data-sync="pending"] .ssb-dot{background:var(--st-orange);box-shadow:0 0 0 3px var(--st-orange-bg);}
+.map-status{display:flex;align-items:center;gap:8px;margin-top:6px;padding:8px 10px 8px 8px;border-radius:14px;font-size:13px;font-weight:700;line-height:1.5;
+  background:var(--glass-strong);border:1.5px solid var(--st-gray);color:var(--text-primary);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);}
+.map-status[hidden]{display:none;}
+.map-status > span{flex:1;min-width:0;}
+.map-status[data-sync="ready"]{border-color:var(--st-green);}
+.map-status[data-sync="offline"]{border-color:var(--st-red);}
+.map-status[data-sync="partial"]{border-color:var(--st-yellow);}
+.map-status[data-sync="pending"]{border-color:var(--st-orange);border-style:dashed;}
+.map-status-btn{flex-shrink:0;min-height:36px;padding:0 12px;border-radius:10px;border:1px solid var(--border-strong);background:var(--bg-card);color:var(--text-primary);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;}
+
+/* ===== وضع البحث: صف الأدوات (الأنماط، قريب، مغذي، أعطال، ⋯) ظاهر تلقائيًا ويتمرر أفقيًا، فلا ميزة مخفية خلف أيقونة؛
+   وفي الوضع العادي يُفتح من أيقونته (نموذج محمد 20 أكتوبر). Search mode: the tools row shows by itself and scrolls sideways. */
+/* (20 أكتوبر، طلب محمد) الصف ظاهر دائمًا في الوضعين ما لم يُخفه المستخدم بأيقونته — the row shows in both modes unless hidden by its icon */
+
+/* الأزرار الجانبية أسفل الخريطة قرب الشريط السفلي (أو فوق البطاقة) — طلب محمد 20 أكتوبر
+   The side buttons at the bottom of the map, near the bottom bar (or above the card) */
+body:not(.nav-full) .view-map .map-side{justify-content:flex-end;}

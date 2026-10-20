@@ -119,3 +119,32 @@
   .logo-text{font-size:11px;}
   .login-btn{padding:6px 9px;font-size:11px;}
 }
+
+/* ===== إعادة التصميم (19 أكتوبر، ملاحظات محمد): رأس مدمج — سطر الشعار والعنوان والصورة الشخصية، وتحته سطر حالة واحد =====
+   Redesign (19 Oct, Mohammed's notes): a compact header — one row of logo, title and avatar, then one status line */
+.header-row-main{padding:10px 16px 8px;}
+.logo{gap:10px;}
+.logo-mark{height:34px;}
+.logo-text{font-size:17px;}
+.logo-sub{font-size:12px;color:var(--text-muted);}
+.mobile-menu-trigger{width:42px;height:42px;padding:0;border-radius:50%;justify-content:center;gap:0;background:var(--dist-soft);border-color:var(--border-strong);color:var(--dist);}
+.avatar-initial{font-size:17px;font-weight:700;line-height:1;}
+.mobile-menu-trigger .menu-name,.mobile-menu-trigger svg{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+.mobile-menu-link,.mobile-menu-row,.mobile-menu-logout{font-size:14px;padding:12px 10px;}
+.mobile-menu-panel{min-width:240px;border-radius:var(--radius);}
+.status-refresh-btn{width:34px;height:34px;}
+@media (max-width:767px){ .header-row-main{padding:10px 16px 8px;} }
+
+/* هوية العضو بدل القائمة المنسدلة (طلب محمد 19 أكتوبر): الاسم والجوال بجانب الصورة الرمزية — the member identity instead of the dropdown */
+.hdr-id{display:flex;align-items:center;gap:10px;padding:4px 4px 4px 10px;border-radius:24px;border:1px solid var(--border-strong);background:var(--bg-card);
+  font-family:inherit;color:var(--text-primary);cursor:pointer;max-width:52vw;min-width:0;}
+.hdr-id-av{width:38px;height:38px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  background:var(--c-dist-bg);color:var(--c-dist-fg);border:1px solid var(--c-dist-line);}
+.hdr-id-text{display:flex;flex-direction:column;align-items:flex-start;min-width:0;line-height:1.25;}
+.hdr-id-name{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+.hdr-id-phone{font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:600;color:var(--text-secondary);}
+/* صورة العضو العامة دائرية بلا خلفية — the generic member picture, round, no background */
+img.hdr-id-av{width:40px;height:40px;object-fit:contain;background:none;border:none;border-radius:50%;}
+/* مع هوية العضو: سطر الحالة واحد بلا التاريخ (الرئيسية تنقله لأعلاها، والورديات ولوحة المدير تعرضانه في سطريهما) — one status line */
+.app-header.hdr-identity [data-role="date-line"]{display:none;}
+

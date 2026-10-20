@@ -26,6 +26,7 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles/base.css">
 <link rel="stylesheet" href="styles/app-header.css">
+<link rel="stylesheet" href="styles/bottom-nav.css">
 <link rel="stylesheet" href="styles/connection-status.css">
 <link rel="stylesheet" href="styles/contact-admin.css">
 <link rel="stylesheet" href="styles/shifts.css">
@@ -33,6 +34,8 @@
 <body class="shifts-page">
 <header id="appHeader"></header>
 <main class="content" id="shiftsSlot"></main>
+<!-- الشريط السفلي (إعادة التصميم): للعضو المسجّل، وأزراره تفتح شاشات الرئيسية — the bottom bar for members -->
+<nav id="bottomNav"></nav>
 <script src="utils/dates.js"></script>
 <script src="utils/html.js"></script>
 <script src="utils/text-input.js"></script>
@@ -45,13 +48,15 @@
 <script src="components/contact-admin.js"></script>
 <script src="components/connection-status.js"></script>
 <script src="components/app-header.js"></script>
+<script src="components/bottom-nav.js"></script>
 <script src="components/shifts-calendar.js"></script>
 <script>
   (function () {
     SecTiming.recordPageOpen();
     const header = SecAppHeader.mount(document.getElementById('appHeader'), {
-      page: 'shifts', title: 'تقويم دوام الورديات', subtitle: 'الشركة السعودية للطاقة — محطات التوزيع', contact: true, refreshTitle: 'تحديث الوردية'
+      page: 'shifts', identity: true, onIdentity: function () { location.href = 'index.html#more'; }, title: 'تقويم دوام الورديات', subtitle: 'الشركة السعودية للطاقة — محطات التوزيع', contact: true, refreshTitle: 'تحديث الوردية'
     });
+    if (SecSession.isLoggedIn()) SecBottomNav.mountLinks(document.getElementById('bottomNav'), 'more'); // من «المزيد» / reached from «More»
     SecConnStatus.mount(header.status, { hasLocalData: function () { return false; }, lastUpdateAt: function () { return null; } });
     SecContactAdmin.loadInfo();
     const calendar = SecShiftsCalendar.mount(document.getElementById('shiftsSlot'));

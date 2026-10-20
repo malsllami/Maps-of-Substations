@@ -1,0 +1,73 @@
+/* ============================================================
+ * styles/station-details.css — شاشة «تفاصيل المحطة» (إعادة التصميم، 19 أكتوبر، لوحة محمد)
+ * ============================================================
+ * رأس برجوع، رقم كبير بنوعه، ثلاثة تبويبات، صفوف «عنوان | قيمة»، أزرار بنظام الألوان الوظيفي، وقائمة القريبة تتمرر
+ * داخل مساحتها فوق الشريط السفلي. بلا ظلال؛ الثيمان بالتخطيط نفسه.
+ * Station details: a back header, the large number with its type, three tabs, label/value rows, functional-color
+ * buttons, and the nearby list scrolling inside its own area above the bottom bar. No shadows; same layout in both themes.
+ * ============================================================ */
+.station-details{max-width:592px;margin:0 auto;padding:10px 16px 0;display:flex;flex-direction:column;gap:12px;}
+.sd-back{width:42px;height:42px;border-radius:12px;border:1px solid var(--border-strong);background:var(--bg-card);color:var(--text-primary);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.sd-hero{display:flex;align-items:center;gap:12px;padding:14px;border-radius:var(--radius-lg);background:var(--bg-card);border:1px solid var(--border-strong);}
+.sd-badge{width:52px;height:52px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.sd-badge.is-dist{background:var(--c-dist-bg);color:var(--c-dist-fg);border:1px solid var(--c-dist-line);}
+.sd-badge.is-sub{background:var(--c-sub-bg);color:var(--c-sub-fg);border:1px solid var(--c-sub-line);}
+.sd-hero-text{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.sd-id{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:800;color:var(--text-primary);line-height:1.1;}
+.sd-type{font-size:14px;font-weight:700;}
+.sd-type.is-dist{color:var(--c-dist-fg);}
+.sd-type.is-sub{color:var(--c-sub-fg);}
+/* التبويبات — the tabs */
+.sd-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:4px;border-radius:14px;background:var(--bg-card);border:1px solid var(--border-strong);}
+.sd-tab{min-height:42px;border-radius:10px;border:none;background:none;font-family:inherit;font-size:14px;font-weight:700;color:var(--text-secondary);cursor:pointer;white-space:nowrap;}
+.sd-tab.active{background:var(--c-dist-bg);color:var(--c-dist-fg);box-shadow:inset 0 0 0 1px var(--c-dist-line);}
+/* الصفوف — the rows */
+.sd-list{border-radius:var(--radius-lg);background:var(--bg-card);border:1px solid var(--border-strong);overflow:hidden;}
+.sd-row{display:flex;align-items:center;gap:10px;min-height:48px;padding:8px 14px;}
+.sd-row + .sd-row{border-top:1px solid var(--border);}
+.sd-k{font-size:14px;color:var(--text-secondary);flex-shrink:0;}
+.sd-v{margin-inline-start:auto;font-size:15px;font-weight:700;color:var(--text-primary);text-align:end;min-width:0;overflow-wrap:anywhere;}
+.sd-v.mono{font-family:'JetBrains Mono',monospace;direction:ltr;}
+/* الأزرار بنظام الألوان الوظيفي — buttons in the functional colors */
+.sd-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+.sd-btn{min-height:50px;border-radius:12px;font-family:inherit;font-size:14.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;text-decoration:none;padding:6px 8px;text-align:center;}
+.sd-btn:disabled{opacity:.45;cursor:not-allowed;}
+.sd-primary{background:var(--c-dist-fg);border:1px solid var(--c-dist-fg);color:#07261C;}
+[data-theme="light"] .sd-primary{color:#FFFFFF;}
+.sd-sub{background:var(--c-sub-bg);border:1px solid var(--c-sub-line);color:var(--c-sub-fg);}
+.sd-ops{background:var(--c-ops-bg);border:1px solid var(--c-ops-line);color:var(--c-ops-fg);}
+/* القريبة: قائمة تتمرر داخل مساحتها فوق الشريط السفلي — nearby: a list scrolling inside its area above the bottom bar */
+.sd-near{display:flex;flex-direction:column;border-radius:var(--radius-lg);background:var(--bg-card);border:1px solid var(--border-strong);
+  max-height:calc(100dvh - var(--header-h, 120px) - 300px - var(--tabbar-h) - env(safe-area-inset-bottom, 0px));min-height:180px;overflow-y:auto;overscroll-behavior:contain;}
+.sd-near-row{display:flex;align-items:center;gap:10px;min-height:58px;padding:8px 12px;background:none;border:none;border-bottom:1px solid var(--border);font-family:inherit;color:var(--text-primary);cursor:pointer;text-align:start;}
+.sd-near-row:last-child{border-bottom:none;}
+.sd-near-ic{width:38px;height:38px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.sd-near-ic svg{width:20px;height:20px;}
+.sd-near-ic.is-dist{background:var(--c-dist-bg);color:var(--c-dist-fg);}
+.sd-near-ic.is-sub{background:var(--c-sub-bg);color:var(--c-sub-fg);}
+.sd-near-tx{display:flex;flex-direction:column;min-width:0;flex:1;}
+.sd-near-id{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:800;}
+.sd-near-sub{font-size:12.5px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sd-near-km{font-size:13.5px;font-weight:700;color:var(--text-secondary);white-space:nowrap;}
+.sd-near-ch{display:flex;color:var(--text-muted);}
+.sd-note{font-size:13px;font-weight:600;color:var(--text-secondary);}
+.sd-state{padding:18px 14px;border-radius:var(--radius-lg);border:1px dashed var(--border-strong);color:var(--text-secondary);font-size:14px;font-weight:600;text-align:center;line-height:1.7;}
+@media (max-width:340px){ .sd-tab{font-size:12.5px;} .sd-id{font-size:22px;} }
+/* القيم المكتوبة من اليسار (أرقام ورموز) تبقى في طرف الصف الأيسر، ورقم المحطة القريبة على محاذاة سطره الثاني
+   LTR values (numbers, codes) stay at the row's far left; a nearby station's number aligns with its second line */
+.sd-v{margin-inline-start:0;margin-right:auto;}
+.sd-near-id,.sd-near-sub{align-self:flex-start;}
+
+/* ===== شاشة التفاصيل (طلب محمد 20 أكتوبر): الرجوع داخل بطاقة الرقم بلون مميز، والشاشة أعلى، وجدول القريبة أكبر ببحث =====
+   The details screen: back inside the number card in a distinct color, the screen higher, a larger nearby table with search */
+.station-details{padding-top:8px;gap:10px;}
+.sd-hero{padding:10px 12px;}
+.sd-hero-text{flex:1;}
+.station-details .sd-back{width:auto;height:44px;padding:0 14px;gap:4px;flex-shrink:0;font-family:inherit;font-size:14px;font-weight:700;
+  background:var(--accent, #F5B70A);border-color:var(--accent, #F5B70A);color:#2A1E00;}
+.sd-actions.one{grid-template-columns:minmax(0,1fr);}
+.sd-link{color:var(--c-sub-fg);font-weight:700;text-decoration:underline;text-underline-offset:3px;}
+.sd-near-search{width:100%;box-sizing:border-box;min-height:46px;padding:0 14px;border-radius:12px;border:1px solid var(--border-strong);background:var(--bg-card);
+  color:var(--text-primary);font-family:inherit;font-size:16px;}
+.sd-near{max-height:calc(100dvh - var(--header-h, 120px) - 270px - var(--tabbar-h) - env(safe-area-inset-bottom, 0px));min-height:260px;}
+.sd-near-empty{padding:18px 14px;text-align:center;font-size:14px;font-weight:600;color:var(--text-secondary);}

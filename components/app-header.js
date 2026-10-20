@@ -52,6 +52,7 @@
 
   /**
    * mount(headerEl, opts) — opts: { page: 'index'|'member'|'shifts'|'admin', title, subtitle, contact (عناصر المدير في القائمة),
+   *   identity + onIdentity() (إعادة التصميم: هوية العضو — الصورة والاسم والجوال — بدل القائمة المنسدلة؛ عناصرها في «المزيد»),
    *   refreshTitle (زر التحديث في شريط الحالة، اختياري), logoSrc, onLogout (افتراضيًا SecSession.logout) }
    * يُرجع { status: { bar, dot, label, lastLabel, dateLine }، refreshButton، openMenu()، closeMenu()، isMenuOpen()، render()، destroy() }
    */
@@ -71,7 +72,7 @@
     }
     function menu_() {
       const admin = SESSION.isAdmin();
-      return '<div class="mobile-user-menu" data-role="menu"><button type="button" class="mobile-menu-trigger" data-act="menu" aria-haspopup="true" aria-expanded="false"><span data-role="name"></span>' + ICON.chev + '</button>' +
+      return '<div class="mobile-user-menu" data-role="menu"><button type="button" class="mobile-menu-trigger" data-act="menu" aria-haspopup="true" aria-expanded="false" aria-label="القائمة"><span class="avatar-initial" data-role="initial" aria-hidden="true"></span><span class="menu-name" data-role="name"></span>' + ICON.chev + '</button>' +
         '<div class="mobile-menu-panel" role="menu">' +
           '<div class="mobile-menu-row"><span class="menu-icon" style="color:#8B6DD6">' + ICON.sun + '</span><span style="flex:1">الوضع الداكن</span>' +
             '<button type="button" class="theme-switch" data-act="theme" role="switch" aria-label="تبديل الوضع الداكن"><span class="theme-switch-knob"></span></button></div>' +
@@ -84,6 +85,12 @@
           tour_() +
           '<button type="button" class="mobile-menu-logout" data-act="logout"><span class="menu-icon" style="color:#E0654F">' + ICON.out + '</span><span data-role="logout-label">' + LOGOUT + '</span></button>' +
         '</div></div>';
+    }
+    /* هوية العضو بدل القائمة (طلب محمد 19 أكتوبر): الصورة الرمزية بالحرف الأول، والاسم، ورقم الجوال بالصيغة المحلية؛
+       الضغط يفتح «المزيد» — The member identity instead of the menu: avatar initial, name, local phone; a tap opens «More» */
+    function identity_() {
+      return '<button type="button" class="hdr-id" data-act="identity" aria-label="حسابي والمزيد"><span class="hdr-id-text"><span class="hdr-id-name" data-role="name"></span>' +
+        '<bdi class="hdr-id-phone" data-role="phone" dir="ltr"></bdi></span><img class="hdr-id-av" src="assets/member-avatar.webp" alt="" aria-hidden="true"></button>';
     }
     /* «حفظ الموقع كتطبيق» تحت «الصفحة الرئيسية» — يختفي إن كان يعمل كتطبيق مثبت (اعتماد محمد 9 أكتوبر)
        «Save the site as an app» under «home» — hidden when running as an installed app */
@@ -99,7 +106,8 @@
       return '<button type="button" class="mobile-menu-link mobile-menu-btn" data-act="tour"><span class="menu-icon" style="color:#1FB8C9">' + ICON.tour + '</span>الجولة التعريفية</button>';
     }
     function guest_() {
-      return '<a href="auth.html" class="login-btn" data-role="login">تسجيل الدخول</a>' +
+      // الرئيسية (identity) لا تكرر «تسجيل الدخول» في الشريط العلوي: زرها تحت الكرة (طلب محمد) — home doesn't repeat «login» in the top bar
+      return (o.identity && home ? '' : '<a href="auth.html" class="login-btn" data-role="login">تسجيل الدخول</a>') +
         (home ? '<a href="shifts.html" class="theme-toggle" title="تقويم دوام الورديات" aria-label="تقويم دوام الورديات">' + ICON.calSmall + '</a>' : '') +
         '<button type="button" class="theme-toggle" data-act="theme" aria-label="تبديل الوضع الداكن والفاتح">' + ICON.toggle + '</button>';
     }
@@ -121,11 +129,22 @@
     function render() {
       const loggedIn = SESSION.isLoggedIn();
       const row = headerEl.querySelector('[data-role="main"]');
-      row.innerHTML = brand_() + '<div class="header-actions' + (loggedIn ? ' logged-in' : '') + '">' + (loggedIn ? menu_() : guest_()) + '</div>';
+      row.innerHTML = brand_() + '<div class="header-actions' + (loggedIn ? ' logged-in' : '') + '">' + (loggedIn ? (o.identity ? identity_() : menu_()) : guest_()) + '</div>';
+      headerEl.classList.toggle('hdr-identity', !!(o.identity && loggedIn)); // سطر حالة واحد بلا تاريخ (التاريخ في الصفحة نفسها) / one status line, the date lives on the page
       row.querySelector('[data-role="title"]').textContent = o.title || (home ? 'الشركة السعودية للطاقة' : '');
       row.querySelector('[data-role="subtitle"]').textContent = o.subtitle || (home ? 'نظام الإحداثيات الجغرافية' : '');
       if (loggedIn) {
-        row.querySelector('[data-role="name"]').textContent = (SESSION.getName() || '').trim().split(/\s+/)[0] || 'القائمة';
+        const first = (SESSION.getName() || '').trim().split(/\s+/)[0] || 'القائمة';
+        row.querySelector('[data-role="name"]').textContent = first;
+        // بلا اسم: أيقونة شخص لا ☰ (لا تشبه قائمة منسدلة — ملاحظة محمد) — no name: a person icon, not ☰ (no dropdown look)
+        const initial = row.querySelector('[data-role="initial"]'); // القائمة القديمة فقط (الصفحات الأخرى) / the old menu only (other pages)
+        if (!initial) { /* الهوية بصورة العضو / the identity uses the member picture */ }
+        else if (first === 'القائمة') initial.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'; else initial.textContent = Array.from(first)[0].toUpperCase();
+        if (o.identity) {
+          if (first === 'القائمة') row.querySelector('[data-role="name"]').textContent = 'حسابي';
+          const ph = String(SESSION.getPhone() || '');
+          row.querySelector('[data-role="phone"]').textContent = /^\+966\d{9}$/.test(ph) ? '0' + ph.slice(4) : ph; // الصيغة المحلية / the local form
+        }
         const call = row.querySelector('[data-act="call"]');
         if (call && global.SecContactAdmin) global.SecContactAdmin.bindCallLink(call);
       }
@@ -157,6 +176,7 @@
       if (act === 'menu') { e.stopPropagation(); setMenu_(!isMenuOpen()); }
       else if (act === 'theme') THEME.toggle();
       else if (act === 'home') global.location.href = 'index.html';
+      else if (act === 'identity') { if (o.onIdentity) o.onIdentity(); }
       else if (act === 'message') { e.preventDefault(); setMenu_(false); if (global.SecContactAdmin) global.SecContactAdmin.open(); }
       else if (act === 'install') { setMenu_(false); if (global.SecInstallSheet) global.SecInstallSheet.open(); }
       else if (act === 'tour') { setMenu_(false); if (global.SecFeatureTour) global.SecFeatureTour.open(); }

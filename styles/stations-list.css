@@ -1,0 +1,70 @@
+/* ============================================================
+ * styles/stations-list.css — شاشة «المحطات»: القريبة والتصفية (إعادة التصميم — المرحلة و، لوحة محمد 5 و6)
+ * ============================================================
+ * شريط أزرار (تحديد موقعي، التصفية)، سطر ملخص التصفية، لوحة التصفية، وقائمة تتمرر داخل مساحتها فوق الشريط السفلي.
+ * نظام الألوان الوظيفي؛ بلا ظلال؛ الثيمان بالتخطيط نفسه.
+ * The stations screen: an action bar, a filter summary line, the filter panel, and a list scrolling inside its area
+ * above the bottom bar. Functional colors; no shadows; same layout in both themes.
+ * ============================================================ */
+.stations-list{max-width:592px;margin:0 auto;padding:10px 16px 0;display:flex;flex-direction:column;gap:10px;}
+.sl-title{font-size:18px;font-weight:700;color:var(--text-primary);}
+.sl-bar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+.sl-chip{min-height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;font-size:14.5px;font-weight:700;cursor:pointer;
+  background:var(--bg-card);border:1px solid var(--border-strong);color:var(--text-primary);}
+.sl-locate{background:var(--c-dist-bg);border-color:var(--c-dist-line);color:var(--c-dist-fg);}
+.sl-chip[aria-expanded="true"]{border-color:var(--c-sub-fg);box-shadow:inset -4px 0 0 var(--c-sub-fg);}
+.sl-summary{font-size:13.5px;font-weight:600;color:var(--text-secondary);}
+/* لوحة التصفية — the filter panel */
+.sl-filter{display:flex;flex-direction:column;gap:14px;padding:14px;border-radius:var(--radius-lg);background:var(--bg-card);border:1px solid var(--border-strong);}
+.sl-sec{display:flex;flex-direction:column;gap:8px;}
+.sl-sec-t{font-size:14px;font-weight:700;color:var(--text-primary);}
+.sl-seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+.sl-seg-b{min-height:42px;border-radius:10px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;background:var(--bg-elev);border:1px solid var(--border-strong);color:var(--text-secondary);}
+.sl-seg-b.active{background:var(--c-dist-bg);border-color:var(--c-dist-fg);color:var(--c-dist-fg);}
+.sl-select{min-height:46px;border-radius:12px;padding:0 12px;font-family:inherit;font-size:16px;font-weight:600;background:var(--bg-elev);border:1px solid var(--border-strong);color:var(--text-primary);}
+.sl-range{display:flex;align-items:center;gap:12px;}
+.sl-slider{flex:1;accent-color:var(--c-dist-fg);height:28px;}
+.sl-km-val{min-width:64px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:800;color:var(--text-primary);}
+.sl-check{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--text-secondary);cursor:pointer;}
+.sl-check input{width:20px;height:20px;accent-color:var(--c-dist-fg);}
+.sl-f-acts{display:grid;grid-template-columns:2fr 1fr;gap:8px;}
+.sl-apply,.sl-reset,.sl-retry,.sl-more{min-height:46px;border-radius:12px;font-family:inherit;font-size:14.5px;font-weight:700;cursor:pointer;}
+.sl-apply{background:var(--c-dist-fg);border:1px solid var(--c-dist-fg);color:#07261C;}
+[data-theme="light"] .sl-apply{color:#FFFFFF;}
+.sl-reset,.sl-retry{background:var(--bg-elev);border:1px solid var(--border-strong);color:var(--text-primary);}
+/* القائمة: تتمرر داخل مساحتها فوق الشريط السفلي — the list scrolls inside its area above the bottom bar */
+.sl-count{font-size:13.5px;font-weight:700;color:var(--text-secondary);}
+.sl-list{display:flex;flex-direction:column;border-radius:var(--radius-lg);background:var(--bg-card);border:1px solid var(--border-strong);
+  max-height:calc(100dvh - var(--header-h, 120px) - 210px - var(--tabbar-h) - env(safe-area-inset-bottom, 0px));min-height:200px;overflow-y:auto;overscroll-behavior:contain;}
+.sl-row{display:flex;align-items:center;gap:10px;min-height:60px;padding:8px 12px;background:none;border:none;border-bottom:1px solid var(--border);font-family:inherit;color:var(--text-primary);cursor:pointer;text-align:start;flex-shrink:0;}
+.sl-ic{width:40px;height:40px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.sl-ic.is-dist{background:var(--c-dist-bg);color:var(--c-dist-fg);border:1px solid var(--c-dist-line);}
+.sl-ic.is-sub{background:var(--c-sub-bg);color:var(--c-sub-fg);border:1px solid var(--c-sub-line);}
+.sl-tx{display:flex;flex-direction:column;min-width:0;flex:1;}
+.sl-id,.sl-sub{align-self:flex-start;}
+.sl-id{font-family:'JetBrains Mono',monospace;font-size:15.5px;font-weight:800;}
+.sl-sub{font-size:13px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+.sl-km{font-size:14px;font-weight:700;color:var(--text-secondary);white-space:nowrap;}
+.sl-ch{display:flex;color:var(--text-muted);}
+.sl-more{margin:8px;background:var(--c-sub-bg);border:1px solid var(--c-sub-line);color:var(--c-sub-fg);flex-shrink:0;}
+.sl-state{display:flex;flex-direction:column;align-items:center;gap:12px;padding:22px 14px;border-radius:var(--radius-lg);border:1px dashed var(--border-strong);
+  color:var(--text-secondary);font-size:14.5px;font-weight:600;text-align:center;line-height:1.7;}
+.sl-retry{padding:0 18px;}
+
+/* ===== طلب محمد (19 أكتوبر): الزران صغيران بجانب العنوان، والقائمة تملأ المساحة حتى الشريط السفلي =====
+   الشاشة عمود بارتفاع المساحة بين الرأس والشريط السفلي؛ القائمة تأخذ الباقي وتتمرر داخله، ولوحة التصفية تتمرر داخلها.
+   Mohammed's request: two small buttons beside the title, and the list fills the space down to the bottom bar. */
+.stations-list{box-sizing:border-box;gap:8px;padding-top:8px;
+  height:calc(100dvh - var(--header-h, 120px) - var(--tabbar-h) - env(safe-area-inset-bottom, 0px) - 12px);}
+.sl-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex-shrink:0;}
+.sl-title{flex:1;min-width:0;font-size:17px;white-space:nowrap;}
+.sl-bar{display:flex;gap:6px;flex-shrink:0;}
+.sl-chip{min-height:34px;padding:0 10px;gap:5px;border-radius:10px;font-size:13px;}
+.sl-chip svg{width:15px;height:15px;}
+.sl-summary{flex-shrink:0;font-size:13px;}
+.sl-filter{flex:0 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;}
+.sl-body{flex:1;min-height:0;display:flex;flex-direction:column;gap:6px;}
+.sl-count{flex-shrink:0;}
+.sl-list{flex:1;min-height:0;max-height:none;}
+.sl-body > .sl-state{flex-shrink:0;}
+@media (max-width:359px){ .sl-title{font-size:15px;} .sl-chip{padding:0 8px;} .sl-chip svg{display:none;} }

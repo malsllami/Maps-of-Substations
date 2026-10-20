@@ -97,7 +97,9 @@
       '<div class="recent-note" data-role="note" role="status" hidden></div>' +
       '<div class="recent-chips" data-role="chips"></div></div>');
     const panel = container.querySelector('[data-role="recent-panel"]'), chips = panel.querySelector('[data-role="chips"]'), note = panel.querySelector('[data-role="note"]');
-    let shown = [], noteTimer = 0;
+    // أول PREVIEW محطات ثم «عرض الكل (N)» بدل إطالة الصفحة (ملاحظة محمد 4.10) — the first PREVIEW, then «show all (N)»
+    const PREVIEW = 6;
+    let shown = [], noteTimer = 0, expanded = false;
 
     function showGone_(entry) {
       note.textContent = MSG.GONE(entry.id); note.hidden = false;
@@ -114,15 +116,23 @@
         chips.appendChild(empty); return;
       }
       shown.forEach(function (s, i) {
+        if (!expanded && i >= PREVIEW) return;
         const chip = global.document.createElement('button');
         chip.type = 'button'; chip.className = 'recent-chip'; chip.dataset.i = String(i);
         chip.textContent = s.id; chip.title = s.name || '';
         chips.appendChild(chip);
       });
+      if (!expanded && shown.length > PREVIEW) {
+        const more = global.document.createElement('button');
+        more.type = 'button'; more.className = 'recent-more'; more.dataset.act = 'more';
+        more.textContent = 'عرض الكل (' + shown.length + ')';
+        chips.appendChild(more);
+      }
     }
     function toggle(open) {
       const willOpen = open === undefined ? !panel.classList.contains('show') : !!open;
       panel.classList.toggle('show', willOpen);
+      if (!willOpen) expanded = false;
       if (willOpen) { render(); global.setTimeout(function () { if (panel.scrollIntoView) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 50); }
       return willOpen;
     }
@@ -138,6 +148,7 @@
     }
     function onClick_(e) {
       if (e.target.closest('[data-act="clear"]')) { clear(); return; }
+      if (e.target.closest('[data-act="more"]')) { expanded = true; render(); return; }
       const chip = e.target.closest('.recent-chip');
       if (chip && shown[Number(chip.dataset.i)]) open_(shown[Number(chip.dataset.i)]);
     }

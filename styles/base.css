@@ -5,34 +5,86 @@
  * الثيم يُطبَّق على <html data-theme> من services/theme.js قبل الرسم. صفحة بدرجات خاصة في V1 تعرّفها في أنماطها.
  * From V1 (index.html lines 11–47; --danger from the other pages). Every page repeated these — here once.
  * ============================================================ */
+/* إعادة التصميم (19 أكتوبر، نموذج محمد): كحلي عميق للداكن، وأبيض دافئ للفاتح؛ أخضر للتوزيع، أزرق للتحويل، كهرماني لزر الإضافة.
+   أسماء المتغيرات القديمة باقية بقيم جديدة، فتتبع كل المكوّنات الشكل الجديد تلقائيًا.
+   Redesign (19 Oct, Mohammed's mock-up): deep navy (dark) and warm white (light); green = distribution, blue = substations,
+   amber = add. The old variable names keep new values, so every component follows the new look automatically. */
 :root{
   --blue-deep:#1B4D8C;
+  /* ألوان حالة نسخة المحطات (طلب محمد 19 أكتوبر) — صريحة ومتميزة في الثيمين — the stations copy state colors, distinct in both themes */
+  --st-red:#E5484D;    --st-red-bg:rgba(229,72,77,0.22);
+  --st-gray:#8C9BAF;   --st-gray-bg:rgba(140,155,175,0.18);
+  --st-yellow:#E2B93B; --st-yellow-bg:rgba(240,200,60,0.24);
+  --st-green:#2BC48A;  --st-green-bg:rgba(43,196,138,0.18);
+  --st-orange:#F28C32; --st-orange-bg:rgba(245,140,50,0.20);
   --blue-mid:#2E7DD1;
   --teal:#1FAE8C;
   --teal-light:#4DD6B5;
+  --tabbar-h:64px;
+  --radius:14px;
+  --radius-lg:18px;
+  --accent:#F5B70A;      /* زر ＋ والتعديل — the ＋ button and edit */
+  --accent-ink:#2B1F00;
 }
 [data-theme="dark"]{
-  --bg:#060B14;
-  --bg-elev:#101D2E;
-  --bg-card:#0D1826;
-  --text-primary:#EAF1F7;
-  --text-secondary:#C9D7E4; /* أوضح (طلب محمد، 15 أكتوبر): كان #8FA3B8 رماديًا ضعيف الوضوح — clearer (Mohammed, 15 Oct) */
-  --border:rgba(255,255,255,0.08);
-  --border-strong:rgba(255,255,255,0.16);
+  --bg:#07111F;
+  --bg-elev:#112440;
+  --bg-card:#0C1B30;
+  --bar-bg:rgba(9,20,36,0.94);
+  --text-primary:#EEF4FA;
+  --text-secondary:#C3D2E2; /* واضح (طلب محمد، 15 أكتوبر) — clear (Mohammed, 15 Oct) */
+  --text-muted:#A9BCD1;   /* أوضح (قائمة محمد 3) — clearer */
+  --border:rgba(150,185,225,0.18);
+  --border-strong:rgba(150,185,225,0.32);
+  --dist:#2BC48A;        /* التوزيع — distribution */
+  --dist-soft:rgba(43,196,138,0.13);
+  --sub:#3B8BEB;         /* التحويل — substations */
+  --sub-soft:rgba(59,139,235,0.14);
+  /* نظام الألوان الوظيفي (اعتماد محمد 19 أكتوبر): لكل نوع بيانات خلفية ونص وإطار — the functional palette: bg, text, line per data type */
+  --c-dist-bg:#173D35;  --c-dist-fg:#7EE0B5;  --c-dist-line:#2E7D63;   /* التوزيع — distribution */
+  --c-sub-bg:#18365A;   --c-sub-fg:#9CC8F7;   --c-sub-line:#3A6FAE;    /* التحويل — substations */
+  --c-ops-bg:#3C3423;   --c-ops-fg:#E8C77E;   --c-ops-line:#7A6535;    /* العمليات والتعديلات — operations and edits */
+  --c-alert-bg:#3A2B1F; --c-alert-fg:#F0A56C; --c-alert-line:#8A5A35;  /* الأعطال والتنبيهات — faults and alerts */
+  --c-info-bg:#252F40;  --c-info-fg:#B4C3D6;  --c-info-line:#46566E;   /* المعلومات التقنية — technical info */
+  /* تعبئة بطاقات الأرقام والإجراءات (لوحة التصميم المحسّنة): ممتلئة في الداكن والنص فوقها (ink) — the tiles' fills, solid in dark */
+  --c-dist-fill:#17694B;   --c-dist-ink:#FFFFFF;
+  --c-sub-fill:#1C4F96;    --c-sub-ink:#FFFFFF;
+  --c-total-fill:#40298A;  --c-total-ink:#FFFFFF;   --c-total-line:#6A4FC4; /* الإجمالي — the total */
+  --c-ops-fill:#D9A93F;    --c-ops-ink:#241A00;
+  --c-alert-fill:#E39A3C;  --c-alert-ink:#241400;
+  --c-recent-fill:#1E5AA8; --c-recent-ink:#FFFFFF;  --c-recent-line:#4B86D6; /* آخر المحطات — recent */
   --globe-line:rgba(77,214,181,0.35);
   --globe-point:#4DD6B5;
-  --danger:#E0654F;
-  --danger-bg:rgba(224,101,79,0.1);
+  --danger:#EF5B5B;
+  --danger-bg:rgba(239,91,91,0.11);
   color-scheme:dark;
 }
 [data-theme="light"]{
-  --bg:#EAF1F6;
-  --bg-elev:#F4F8FB;
+  --bg:#E9EDEC;          /* أغمق قليلًا فتبرز البطاقات البيضاء (ملاحظة محمد) — a touch darker so white cards stand out */
+  --bg-elev:#E8EEEC;
   --bg-card:#FFFFFF;
-  --text-primary:#102035;
-  --text-secondary:#2C3D50; /* أوضح (طلب محمد، 15 أكتوبر): كان #52647A — clearer (Mohammed, 15 Oct) */
-  --border:rgba(16,32,53,0.12);
-  --border-strong:rgba(16,32,53,0.22);
+  --bar-bg:rgba(255,255,255,0.96);
+  --text-primary:#0F1F33;
+  --text-secondary:#2F4358; /* واضح (طلب محمد، 15 أكتوبر) — clear (Mohammed, 15 Oct) */
+  --text-muted:#4A5D73;   /* أوضح (قائمة محمد 3) — clearer */
+  --border:rgba(15,31,51,0.16);
+  --border-strong:rgba(15,31,51,0.28);
+  --card-shadow:0 1px 3px rgba(15,31,51,0.12), 0 1px 1px rgba(15,31,51,0.06);
+  --dist:#14996A;
+  --dist-soft:rgba(20,153,106,0.10);
+  --sub:#2470D0;
+  --sub-soft:rgba(36,112,208,0.10);
+  --c-dist-bg:#E2F1EA;  --c-dist-fg:#135E45;  --c-dist-line:#8CC7AE;
+  --c-sub-bg:#E4EFFB;   --c-sub-fg:#1D4F8F;   --c-sub-line:#94B9E6;
+  --c-ops-bg:#F7EED8;   --c-ops-fg:#6E5212;   --c-ops-line:#D9C08A;
+  --c-alert-bg:#F9E9D9; --c-alert-fg:#8E4518; --c-alert-line:#E3B58F;
+  --c-info-bg:#EDF1F5;  --c-info-fg:#3A4C63;  --c-info-line:#BCC8D6;
+  --c-dist-fill:#E3F3EA;   --c-dist-ink:#135E45;
+  --c-sub-fill:#E6F0FB;    --c-sub-ink:#1D4F8F;
+  --c-total-fill:#EEE7FA;  --c-total-ink:#4B2D96;   --c-total-line:#C6B4EE;
+  --c-ops-fill:#FBF0D6;    --c-ops-ink:#6E5212;
+  --c-alert-fill:#FDEBDD;  --c-alert-ink:#9A4A17;
+  --c-recent-fill:#E7F1FD; --c-recent-ink:#1F5FA8;  --c-recent-line:#A9C9EE;
   --globe-line:rgba(27,77,140,0.45);
   --globe-point:#1FAE8C;
   --danger:#C8412C;

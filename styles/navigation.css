@@ -82,3 +82,18 @@ body.nav-full .map-tool-hint{position:absolute;top:calc(env(safe-area-inset-top,
 .nav-me .nav-me-arrow{position:absolute;left:0;top:0;display:none;transition:transform .5s;filter:drop-shadow(0 1px 3px rgba(0,0,0,.4));}
 .nav-me.moving .nav-me-dot{display:none;}
 .nav-me.moving .nav-me-arrow{display:block;}
+
+/* زر إنهاء الملاحة أوضح: ✕ مع كلمة «إنهاء» في نفس الطرف (طلب محمد، 19 أكتوبر) — النص اختصر ليبقى بعيدًا عن شارة الحالة في الوسط
+   A clearer end-navigation button: ✕ with «إنهاء» in the same corner; the short word keeps clear of the centered status chip */
+.nav-x{width:auto;height:46px;padding:0 14px 0 16px;border-radius:23px;display:flex;align-items:center;gap:6px;font-size:18px;font-weight:700;
+  background:var(--danger);border-color:var(--danger);color:#FFFFFF;}
+.nav-x::after{content:'إنهاء';font-family:'IBM Plex Sans Arabic',sans-serif;font-size:15px;}
+
+/* زر الطبقات (نوع الخريطة) أسفل «+ / −» في شاشة الملاحة، وقائمة الأنواع بجانبه (طلب محمد 20 أكتوبر)
+   The layers (map style) button under «+ / −» on the navigation screen, its menu beside it */
+.globe-stage.nav-active .zoom-controls{bottom:calc(var(--nav-sheet-h, 190px) + 74px);}
+body.nav-full .globe-stage.nav-active .map-side [data-act="side-layers"]{display:flex;align-items:center;justify-content:center;position:absolute;right:14px;
+  bottom:calc(var(--nav-sheet-h, 190px) + 20px);z-index:901;width:44px;height:44px;padding:0;border-radius:50%;cursor:pointer;
+  background:var(--bg-card);border:1px solid var(--border-strong);color:var(--text-primary);box-shadow:0 4px 14px rgba(0,0,0,.25);}
+body.nav-full .globe-stage.nav-active .map-mode-panel.show{position:absolute;right:66px;bottom:calc(var(--nav-sheet-h, 190px) + 20px);z-index:902;
+  min-width:200px;border:1px solid var(--border-strong);border-radius:14px;}

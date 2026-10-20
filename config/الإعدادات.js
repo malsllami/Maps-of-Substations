@@ -32,6 +32,8 @@
       MAP_MODE: PREFIX + 'map-mode',                     // نمط الخريطة (تلقائي/نهاري/ليلي/أقمار) / map style
       NAV_GLASS: PREFIX + 'nav-glass',                   // مظهر لوحة الملاحة / navigation sheet look
       NAV_ROTATE: PREFIX + 'nav-rotate',                 // دوران الخريطة مع السير أو الشمال لأعلى / map rotation mode
+      MAP_STATUS_HIDDEN: PREFIX + 'map-status-hidden',   // أخفى المستخدم بطاقة حالة النسخة في الرئيسية ('1') / the user hid the home status card
+      MAP_TOOLS_HIDDEN: PREFIX + 'map-tools-hidden',     // أخفى المستخدم صف أدوات الخريطة ('1') / the user hid the map tools row
       LAST_BACKEND_OK: PREFIX + 'last-backend-ok',       // وقت آخر رد سليم من الخادم / the last valid server reply time
       PENDING_ERRORS: PREFIX + 'pending-errors',         // طابور أخطاء المتصفح قبل إرسالها / the browser error queue
       PERF_LOG: PREFIX + 'perf-log',                     // سجل قياس زمن الطلبات / request timing log
