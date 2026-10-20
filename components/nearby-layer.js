@@ -10,7 +10,8 @@
  * - الجلب نفسه ليس هنا: من بطاقة المحطة (nearby/feeder) — نسخة الجهاز أولًا بلا طلب، والخادم بلا نسخة فقط.
  * 20 أكتوبر (مواصفات محمد): نطاق «قريب» 5 كم ثابت حول المحطة المبحوث عنها (لا يتغير مع التكبير)؛ الأخضر حتى 3.5 كم والرمادي
  *   حتى 5 كم؛ الخريطة تُضبط لإظهار النطاق كله بحلقتين خافتتين (3.5 و5 كم)؛ كل المحطات نقاط ملوّنة في مواقعها بلا تجميع،
- *   وبطاقات الرقم والمسافة من التكبير 15 (وأقرب 10 دائمًا)؛ الزر يكتب «5كم».
+ *   وبطاقات الرقم والمسافة تظهر حيث تتسع لها المساحة بلا تداخل (الأقرب أولًا، فتزيد مع التكبير)؛ لا سطر توضيحي أعلى الخريطة
+ *   (العدد واسم المرشح في الشريط السفلي)؛ الزر يكتب «5كم».
  * V2: زر القريبة يكتب «2كم» عند تفعيله (V1 كان «3كم» خطأً — بند V1 رقم 1)؛ كل نص في العلامات والنوافذ يُهرَّب؛
  *   أزرار النافذة بتفويض لا بـ onclick وكائنات عامة؛ رسالة خطأ للمستخدم بدل «الميزة تحتاج تفعيل بالباك إند»؛ محطة بلا
  *   إحداثيات صالحة لا تُرسم؛ تغيير المحطة يعيد الطبقة (reset).
@@ -25,9 +26,8 @@
 
   const H = global.SecHtml, Q = global.SecStationQuery;
   if (!H || !Q) throw new Error('nearby-layer.js يحتاج html.js وstation-query.js قبله / needs html.js and station-query.js first');
-  const NEAREST = 10, LABEL_ZOOM = 15; // بطاقات كل المحطات من هذا التكبير / every station's card from this zoom
-  const MSG = { LOADING: 'جاري التحميل...', FAILED: 'تعذّر جلب المحطات، حاول مرة أخرى', NEAREST: ' — قرّب الخريطة لعرض أرقام كل المحطات', ALL: ' — كل المحطات بالشاشة الحالية',
-    RANGE: ' · الأخضر حتى 3.5 كم والرمادي حتى 5 كم' };
+  const MAX_CARDS = 80, CARD_GAP = 3; // أقصى بطاقات في الشاشة، والفراغ بينها / the most cards on screen, and the gap between them
+  const MSG = { LOADING: 'جاري التحميل...', FAILED: 'تعذّر جلب المحطات، حاول مرة أخرى' };
 
   /* اللون بالمسافة: قريبة حتى 3.5 كم أخضر، وبعيدة نسبيًا حتى 5 كم رمادي — color by distance: close green, farther gray */
   function tier(km) {
@@ -102,9 +102,22 @@
         dot._secStation = s;
         markers.push(dot.addTo(map));
       });
-      let show;
-      if (zoom < LABEL_ZOOM) show = data.slice().sort(function (a, b) { return a._dist - b._dist; }).slice(0, NEAREST);
-      else { const b = map.getBounds(); show = data.filter(function (s) { return b.contains([s.lat, s.lng]); }); }
+      // بطاقات الرقم والمسافة بلا تداخل (مراجعة 20 أكتوبر): الأقرب أولًا، وكل بطاقة تُوضع فقط حيث لا تغطي بطاقة أخرى ولا علامة
+      // المحطة المختارة؛ النقاط كلها تبقى في مواقعها، والمحجوبة تظهر بطاقتها مع التكبير.
+      // Number/distance cards without overlap: nearest first, each placed only where it covers no other card nor the chosen
+      // station's label; every dot stays at its place, a hidden card appears as you zoom in.
+      const size = map.getSize(), boxes = [];
+      if (center) { const c = map.latLngToContainerPoint([center.lat, center.lng]); boxes.push({ x1: c.x - 80, y1: c.y - 64, x2: c.x + 80, y2: c.y + 16 }); }
+      const show = [];
+      data.slice().sort(function (a, b) { return a._dist - b._dist; }).some(function (s) {
+        const p = map.latLngToContainerPoint([s.lat, s.lng]);
+        if (p.x < 0 || p.y < 0 || p.x > size.x || p.y > size.y) return false;
+        const w = String(s.id).length * 7.5 + (s.type === 'تحويل' ? 12 : 0) + 20, h = (mode === 'nearby' ? 36 : 22) + 6;
+        const b = { x1: p.x - w / 2 - CARD_GAP, y1: p.y - h - CARD_GAP, x2: p.x + w / 2 + CARD_GAP, y2: p.y + CARD_GAP };
+        if (boxes.some(function (o) { return b.x1 < o.x2 && b.x2 > o.x1 && b.y1 < o.y2 && b.y2 > o.y1; })) return false;
+        boxes.push(b); show.push(s);
+        return show.length >= MAX_CARDS;
+      });
       show.forEach(function (s) {
         const mk = L.marker([s.lat, s.lng], { icon: pinIcon_(s, tier(s._dist), mode === 'nearby') });
         mk.bindPopup(popup_(s, deps.googleMapsUrl ? deps.googleMapsUrl(s) : ''));
@@ -113,9 +126,6 @@
         mk.addTo(map);
         markers.push(mk);
       });
-      const st = deps.getStation();
-      const label = mode === 'feeder' ? '⚡ المغذي "' + (st && st.feeder) + '" — عدد ' + data.length + ' محطة مرتبطة' : '📍 محطات قريبة (٥ كم) — ' + data.length + ' محطة' + MSG.RANGE;
-      view.hint(label + (zoom < LABEL_ZOOM ? MSG.NEAREST : MSG.ALL));
     }
 
     function reset() { seq++; mode = null; data = []; center = null; clear_(); view.hideHint(); syncButtons_(); }
@@ -144,6 +154,7 @@
       center = hasCenter ? { lat: Number(st.lat), lng: Number(st.lng) } : null;
       data = (res.stations || []).filter(function (s) { return Q.hasCoordinates(s) && !(String(s.id) === String(st.id) && s.type === st.type); })
         .map(function (s) { const d = typeof s.distanceKm === 'number' ? s.distanceKm : (hasCenter ? Q.distanceKm(center, { lat: Number(s.lat), lng: Number(s.lng) }) : 0); return Object.assign({}, s, { lat: Number(s.lat), lng: Number(s.lng), _dist: d }); });
+      view.hideHint(); // العدد واسم المرشح في الشريط السفلي، فلا سطر يأخذ من الخريطة / the count and filter are in the bottom strip
       syncButtons_(); // العدد صار معروفًا / the count is now known
       fit_();
       render();

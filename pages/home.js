@@ -170,7 +170,8 @@
       // استكشاف القريبة/المغذي ← بطاقة مختصرة بسطر واحد (العدد والمسار وإنهاء العرض) — exploring ← a one-line compact card
       onChange: function (mode, count) {
         if (!card) return;
-        card.setExplore(mode ? (mode === 'feeder' ? count + ' محطة بالمغذي' : count + ' محطة قريبة') : null);
+        // اسم المرشح مع العدد (مراجعة 20 أكتوبر) — the filter's name with the count
+        card.setExplore(mode ? (mode === 'feeder' ? 'المغذي ' + String((current && current.feeder) || '').trim() + ' — ' + count + ' محطة' : 'قريب 5 كم — ' + count + ' محطة') : null);
         global.requestAnimationFrame(layout);
       },
       onEdit: function (s) { goToStation(s); global.setTimeout(function () { SecStationForm.openEdit(s); }, MORPH_SETTLE_MS); }

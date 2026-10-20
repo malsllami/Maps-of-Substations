@@ -306,3 +306,16 @@ body.nav-full .station-sheet{display:none !important;}
 .station-sheet .sheet-sub .st-count{font-size:13px;color:inherit;}
 .station-sheet.is-explore .sheet-sub{display:none;}
 .station-sheet .sb-top{padding-bottom:8px;}
+
+/* سطر المعلومات سطرًا واحدًا دائمًا (اعتماد محمد 20 أكتوبر): اسم الحي يُختصر بـ«…» إن ضاق، والمغذي والعدد كاملان
+   The info line always one line: the district shortens with «…» when tight, the feeder and count stay whole */
+.sheet-sub{flex-wrap:nowrap;min-width:0;font-size:12px;gap:0 5px;}
+.sheet-sub > *{flex-shrink:0;white-space:nowrap;}
+.sheet-sub .ss-region{flex-shrink:1;min-width:0;overflow:hidden;text-overflow:ellipsis;}
+.sheet-sub > * + *::before{margin-inline-end:5px;}
+.station-sheet .sheet-sub button.ss-count{min-height:26px;padding:0 7px;font-size:12px;}
+.station-sheet .sheet-explore-txt{font-size:12px;}
+/* نص شريط الاستكشاف («قريب 5 كم — 2010 محطة») يلتف تحت الرقم ولا يدخل تحت الأزرار — the explore text wraps under the number */
+.station-sheet.is-explore .sheet-explore-txt{white-space:normal;line-height:1.35;overflow-wrap:anywhere;}
+.station-sheet.is-explore .sheet-title{min-width:0;}
+.station-sheet.is-explore .sheet-go,.station-sheet.is-explore .sheet-end{padding:0 10px;}
