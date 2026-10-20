@@ -40,12 +40,11 @@
     dark: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.5A8.5 8.5 0 1 1 11.5 3 6.8 6.8 0 0 0 21 12.5z"/></svg>',
     satellite: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="6" height="6" rx="1"/><rect x="1" y="10.5" width="5" height="3" rx="0.5"/><rect x="18" y="10.5" width="5" height="3" rx="0.5"/><line x1="6" y1="12" x2="9" y2="12"/><line x1="15" y1="12" x2="18" y2="12"/><line x1="12" y1="9" x2="12" y2="4"/><circle cx="12" cy="3" r="1"/></svg>'
   };
-  // العمود الجانبي (طلب محمد 20 أكتوبر): الملاحة المباشرة، التكبير/التصغير، الطبقات، الأدوات؛ و«موقعي» أسفل الخريطة
-  // The side column (Mohammed, 20 Oct): direct navigation, zoom, layers, tools; and «my location» at the bottom of the map
+  // العمود الجانبي (نموذج محمد 20 أكتوبر): الملاحة المباشرة، التكبير/التصغير، الطبقات، «موقعي» (الأدوات في مربع البحث)
+  // The side column (Mohammed's mock-up, 20 Oct): direct navigation, zoom, layers, «my location» (the tools are in the search box)
   const SIDE = {
     nav: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M21 3 3 10.5l7.5 2.9L13.4 21z"/></svg>',
     layers: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 7.5 12 13 2 7.5 12 2"/><polyline points="2 12.5 12 18 22 12.5"/></svg>',
-    tools: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>',
     locate: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/><line x1="12" y1="1.5" x2="12" y2="4.5"/><line x1="12" y1="19.5" x2="12" y2="22.5"/><line x1="1.5" y1="12" x2="4.5" y2="12"/><line x1="19.5" y1="12" x2="22.5" y2="12"/></svg>'
   };
   const CHEV = '<svg class="mm-chev" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>';
@@ -73,9 +72,8 @@
       '<div class="zoom-controls show"><div class="zoom-btn" data-act="zoom-in" role="button" title="تكبير" aria-label="تكبير"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>' +
         '<div class="zoom-btn" data-act="zoom-out" role="button" title="تصغير" aria-label="تصغير"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg></div></div>' +
         '<button type="button" class="side-btn" data-act="side-layers" title="نوع الخريطة" aria-label="نوع الخريطة">' + SIDE.layers + '</button>' +
-        '<button type="button" class="side-btn side-tools" data-act="side-tools" title="أدوات الخريطة: قريب، مغذي، أعطال، القياس" aria-label="أدوات الخريطة" aria-expanded="false">' + SIDE.tools + '</button>' +
+        '<button type="button" class="side-btn map-locate" data-act="side-locate" title="موقعي" aria-label="موقعي">' + SIDE.locate + '</button>' +
       '</div>' +
-      '<button type="button" class="side-btn map-locate" data-act="side-locate" title="موقعي" aria-label="موقعي">' + SIDE.locate + '</button>' +
       '<div class="map-toast" data-role="toast" role="status"></div>';
   }
 
@@ -233,12 +231,13 @@
     }
     /* زر الملاحة في العمود يظهر حين توجد محطة مختارة — the column's navigation button shows when a station is chosen */
     function setNavTarget(on) { stage.querySelector('[data-act="side-nav"]').hidden = !on; }
-    /* أدوات الشريط (قريب، مغذي، أعطال، ⋯) تُطوى خلف زر «الأدوات» — the toolbar tools fold behind the «tools» button */
+    /* أدوات الشريط (قريب، مغذي، أعطال، ⋯) مطوية ويفتحها زر الأدوات في مربع البحث؛ يُرجع الحالة الجديدة
+     * The toolbar tools (nearby, feeder, outage, ⋯) are folded; the search box's tools button opens them; returns the new state */
     function toggleTools_(open) {
       const on = open == null ? !stage.classList.contains('tools-open') : open;
       stage.classList.toggle('tools-open', on);
-      stage.querySelector('[data-act="side-tools"]').setAttribute('aria-expanded', on ? 'true' : 'false');
       if (o.onOverlayChange) o.onOverlayChange();
+      return on;
     }
 
     // ===== التلميح والتنبيه — Hint and toast =====
@@ -257,7 +256,6 @@
       const act = t.dataset.act;
       if (act === 'chip') { e.stopPropagation(); togglePanel_(!q('panel').classList.contains('show')); }
       else if (act === 'side-layers') { e.stopPropagation(); togglePanel_(!q('panel').classList.contains('show')); }
-      else if (act === 'side-tools') toggleTools_();
       else if (act === 'side-nav') { if (o.onNavigate) o.onNavigate(); }
       else if (act === 'side-locate') { if (o.onLocate) o.onLocate(); }
       else if (act === 'zoom-in') map.zoomIn();

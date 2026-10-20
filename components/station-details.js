@@ -39,7 +39,7 @@
   /**
    * mount(container, deps) ← { open(station), station(), tab(), isOpen(), close() }
    * deps: { onBack(), onNavigate(s), onEdit(s), canEdit(), onShowOnMap(s), onOpenStation(s), googleMapsUrl(s), shareText(s),
-   *         localStations() → Array|null, toast(text) }
+   *         localStations() → Array|null, dataFreshness() → Date|null (آخر تحديث للنسخة / the copy's last update), toast(text) }
    */
   function mount(container, deps) {
     const d = deps || {};
@@ -84,6 +84,9 @@
       const fc = feederCount_();
       if (fc != null) list.appendChild(row_('محطات المغذي', fc + ' محطة'));
       list.appendChild(Q.hasCoordinates(s) ? row_('الإحداثيات', coordsText_(s), { mono: true, copy: true }) : row_('الإحداثيات', 'لا توجد إحداثيات صالحة'));
+      // آخر تحديث لنسخة المحطات على الجهاز (انتقل من البطاقة — قرار محمد 20 أكتوبر) — the device copy's last update (moved from the card)
+      const fresh = d.dataFreshness ? d.dataFreshness() : null;
+      if (fresh && global.SecDates) list.appendChild(row_('آخر تحديث لنسخة المحطات', global.SecDates.dualDateTime(fresh)));
       p.appendChild(list);
       const acts = el_('div', 'sd-actions');
       const coords = Q.hasCoordinates(s);

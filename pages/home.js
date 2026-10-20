@@ -186,7 +186,6 @@
       onDelete: function (s) { SecDeleteStation.open(s, { toast: notify_, onDeleted: function () { goBackToSearch(); stats.refresh(true); } }); },
       offlineMapUI: global.SecOfflineMapUI || null,
       toast: notify_,
-      dataFreshness: function () { return SYNC.state().syncedAt; },
       localStations: function () { return SYNC.stations(); },
       // «محطات المغذي» في اللوحة ← نفس زر «مغذي» في شريط الخريطة — the sheet's feeder card ← the toolbar's feeder button
       onFeeder: function () { const b = $('mapStage').querySelector('[data-nearby="feeder"]'); if (b) b.click(); },
@@ -248,7 +247,8 @@
   }
   // حقل ظاهر دائمًا بدل العدسة الدائرية (ملاحظة محمد 19 أكتوبر) — an always-visible field instead of the round lens
   const lens = SecStationSearchBox.mount($('lensBox'), { variant: 'bar', placeholder: 'اكتب رقم المحطة أو رمزها', isLoggedIn: loggedIn, onFound: goToStation, onAdd: function (q) { SecStationForm.openAdd(q); }, onUpdated: onUpdated_ });
-  const bar = SecStationSearchBox.mount($('barBox'), { variant: 'bar', isLoggedIn: loggedIn, onFound: goToStation, onAdd: function (q) { SecStationForm.openAdd(q); }, onUpdated: onUpdated_ });
+  const bar = SecStationSearchBox.mount($('barBox'), { variant: 'bar', isLoggedIn: loggedIn, onFound: goToStation, onAdd: function (q) { SecStationForm.openAdd(q); }, onUpdated: onUpdated_,
+    onTools: function () { return view ? view.toggleTools() : false; } }); // أدوات الخريطة من مربع البحث (النموذج) / the map tools from the search box
   // بطاقة «بحث عن حالة عطل» في صف الإجراءات تفتح لوحة الأرقام تحته (تصميم محمد، 15 أكتوبر) / the outage tile opens the panel below it
   const outage = SecOutageSearch.mountHome($('homeOutage'), {
     toggle: $('outageTileBtn'),
@@ -439,6 +439,7 @@
     onOpenStation: function (s) { closeDetails_(); goToStation(s); },
     googleMapsUrl: SecStationCard.googleMapsUrl, shareText: SecStationCard.shareText,
     localStations: function () { return SYNC.stations(); },
+    dataFreshness: function () { return SYNC.state().syncedAt; }, // «آخر تحديث» لنسخة المحطات / the copy's last update
     toast: notify_
   });
   function openDetails_(s) {

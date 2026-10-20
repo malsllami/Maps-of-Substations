@@ -13,7 +13,7 @@
  *   واحد على البطاقة (لا تكرار عند إعادة الرسم) يُزال بـ destroy؛ فشل أي إجراء خارجي لا يكسر البطاقة.
  *
  * The station card: display and actions only. Mohammed's design (15 Oct): one card around the map — data and the route
- * button above it, two equal button rows and the freshness line below it (drawn into deps.actionsContainer); the map stays
+ * button above it, one button row and the search time below it (drawn into deps.actionsContainer); the map stays
  * in its own container (full navigation folds the card and keeps it). Actions go to their owners (navigation view,
  * the Jeddah map sheet — managed there and from «My account» too —, the edit form); the card owns none of their logic.
  * Nearby and feeder (map-toolbar buttons as in V1): from the device copy with no server request, the server only without
@@ -24,8 +24,8 @@
 (function (global) {
   'use strict';
 
-  const Q = global.SecStationQuery, D = global.SecDates, H = global.SecHtml;
-  if (!Q || !D || !H) throw new Error('station-card.js يحتاج station-query.js وdates.js وhtml.js قبله / needs station-query.js, dates.js and html.js first');
+  const Q = global.SecStationQuery, H = global.SecHtml;
+  if (!Q || !H) throw new Error('station-card.js يحتاج station-query.js وhtml.js قبله / needs station-query.js and html.js first');
   const esc = H.esc;
   const OFFLINE_WRITE_MSG = 'هذه العملية تحتاج إلى اتصال بالإنترنت';
   const NO_COORDS_MSG = 'لا توجد إحداثيات صالحة لهذه المحطة — يمكن إضافتها بزر «تعديل»';
@@ -43,10 +43,6 @@
     return lines.join('\n');
   }
 
-  /* آخر تحديث لبيانات المحطات بالصيغة الموحدة (utils/dates) — The data freshness in the single format */
-  function freshness_(date) {
-    try { return D.dualDateTime(date); } catch (e) { return '—'; }
-  }
 
   /* مدة البحث ومصدره (طلب محمد، 16 أكتوبر): يظهر فقط حين تأتي المحطة من البحث (searchMs)، فيرى العضو فائدة نسخة الجهاز
    * The search time and its source (Mohammed, 16 Oct): only when the station came from a search, showing the device copy's value */
@@ -85,23 +81,27 @@
     return '<button class="st-btn ' + cls + '" type="button" data-act="' + act + '"' + (extra || '') + '><span class="st-ico">' + BTN_ICON[icon] + '</span><span class="st-lbl">' + label + '</span></button>';
   }
 
-  /* رأس اللوحة (طلب محمد 19 أكتوبر): سطر علوي برمز النوع الصغير والنوع و«التفاصيل»، ثم خانات «محطة | المغذي | المنطقة»
-   * The sheet head (Mohammed, 19 Oct): a top line with the small type symbol, the type and «details», then the cells
-   * «station | feeder | region» */
+  /* رأس البطاقة المختصرة (نموذج محمد 20 أكتوبر): مقبض، ثم رمز النوع ومعه «محطة توزيع» والرقم كبيرًا و«التفاصيل»، ثم خانات
+   * «المغذي | المنطقة | عدد محطات المغذي» — خانة العدد تُظهر محطات المغذي على الخريطة بالضغط عليها.
+   * The compact card head (Mohammed, 20 Oct): a handle, the type symbol with the type and a large number and «details»,
+   * then the cells «feeder | region | feeder count» — the count cell shows the feeder's stations when tapped. */
   function topHtml_(s, deps) {
     const coords = Q.hasCoordinates(s), sub = s.type === 'تحويل', kind = sub ? 'is-sub' : 'is-dist';
+    const fc = feederCount_(s, deps);
     return '<div class="sb-inner sb-top">' +
+      '<span class="sheet-handle" aria-hidden="true"></span>' +
       '<div class="sheet-head">' +
         '<div class="sheet-line">' +
           '<span class="sheet-badge ' + kind + '" aria-hidden="true">' + (TYPE_ICON[s.type] || TYPE_ICON['توزيع']) + '</span>' +
-          '<span class="sheet-type ' + kind + '">' + (sub ? 'محطة تحويل' : 'محطة توزيع') + '</span>' +
+          '<div class="sheet-title"><span class="sheet-type ' + kind + '">' + (sub ? 'محطة تحويل' : 'محطة توزيع') + '</span>' +
+            '<bdi class="sheet-id">' + esc(s.id) + '</bdi></div>' +
           (deps && deps.onDetails ? '<button type="button" class="sheet-more" data-act="details">التفاصيل ‹</button>' : '') +
         '</div>' +
-        '<div class="sb-data-row sheet-meta">' +
-          '<div class="sb-data-cell sheet-id"><div class="cell-label">محطة</div><bdi class="cell-value">' + esc(s.id) + '</bdi></div>' +
+        ((s.feeder || s.region || fc != null) ? '<div class="sb-data-row sheet-meta">' +
           (s.feeder ? '<div class="sb-data-cell"><div class="cell-label">المغذي</div><div class="cell-value">' + esc(s.feeder) + '</div></div>' : '') +
           (s.region ? '<div class="sb-data-cell"><div class="cell-label">المنطقة</div><div class="cell-value ar">' + esc(s.region) + '</div></div>' : '') +
-        '</div>' +
+          (fc != null ? '<button type="button" class="sb-data-cell st-feeder" data-act="feeder" title="عرض محطات المغذي على الخريطة"><div class="cell-label">عدد محطات المغذي</div><div class="cell-value st-count">' + fc + '</div></button>' : '') +
+        '</div>' : '') +
       '</div>' +
       (coords ? '' : '<div class="st-note-warn" data-role="no-coords">' + NO_COORDS_MSG + '</div>') +
     '</div>';
@@ -117,11 +117,10 @@
     return all.filter(function (x) { return String(x.feeder || '').trim() === feeder; }).length;
   }
 
-  /* الأزرار في صف واحد (يلتف على الشاشات الضيقة)، ثم «آخر تحديث لبيانات المحطات» — the buttons in one row, then the freshness */
+  /* الأزرار في صف واحد دائمًا (نموذج محمد 20 أكتوبر)، ثم مدة البحث — the buttons always in one row, then the search time */
   function bottomHtml_(s, deps) {
     const coords = Q.hasCoordinates(s), om = !!deps.offlineMapUI, canEdit = !!(deps.canEdit && deps.canEdit());
     const canDelete = !!(deps.isAdmin && deps.isAdmin() && deps.onDelete); // للمدير فقط (التصميم «أ») / admin only (design «A»)
-    const fresh = deps.dataFreshness ? deps.dataFreshness() : null;
     const buttons = [
       btn_('navigate', 'primary st-main', 'navigate', 'المسار', coords ? '' : ' disabled'),
       coords ? '<a class="st-btn st-google" data-act="google" href="' + esc(googleMapsUrl(s)) + '" target="_blank" rel="noopener"><span class="st-ico">' + BTN_ICON.google + '</span><span class="st-lbl">قوقل ماب</span></a>'
@@ -130,25 +129,22 @@
     ];
     if (canEdit) buttons.push(btn_('edit', 'st-edit', 'edit', 'تعديل'));
     if (canDelete) buttons.push(btn_('delete', 'st-danger', 'del', 'حذف'));
-    // بطاقة «محطات المغذي» مكان «خريطة جدة» إن وُجد مغذي (طلب محمد) — إدارة خريطة جدة باقية في «حسابي» و«المزيد»
-    // The «feeder stations» card replaces «Jeddah map» when there is a feeder — the Jeddah map stays in «My account» and «More»
-    const fc = feederCount_(s, deps);
-    if (fc != null) buttons.push('<button class="st-btn st-feeder" type="button" data-act="feeder" title="عرض محطات المغذي على الخريطة"><span class="st-count">' + fc + '</span><span class="st-lbl">محطة بالمغذي</span></button>');
-    else if (om) buttons.push('<button class="st-btn st-om" type="button" data-act="offline-map"><span class="st-ico">' + BTN_ICON.om + '</span><span class="st-lbl">خريطة جدة</span><small data-om-status></small></button>');
+    // عدد محطات المغذي صار خانة في الرأس (النموذج)؛ «خريطة جدة» زر حين لا توجد تلك الخانة — إدارتها باقية في «المزيد»
+    // The feeder count is now a head cell (the mock-up); «Jeddah map» is a button when that cell is absent — also in «More»
+    if (feederCount_(s, deps) == null && om) buttons.push('<button class="st-btn st-om" type="button" data-act="offline-map"><span class="st-ico">' + BTN_ICON.om + '</span><span class="st-lbl">خريطة جدة</span><small data-om-status></small></button>');
     return '<div class="sb-inner sb-bottom">' +
       '<div class="st-sub sheet-actions" style="--n:' + buttons.length + '">' + buttons.join('') +
         (canEdit ? '' : '<button class="st-btn" type="button" data-act="edit" hidden>✏️ تعديل</button>') +
       '</div>' +
-      // تذييل واحد: مدة البحث ومصدره ثم آخر تحديث للبيانات (طلب محمد 19 أكتوبر) — one footer: search time/source, then freshness
-      '<div class="sheet-foot">' + searchTime_(s) +
-      (fresh ? '<div class="db-freshness-note"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.5A8.5 8.5 0 1 1 3 12.5a8.38 8.38 0 0 1 .9-3.8"/><path d="M21 3v6h-6"/></svg><span>آخر تحديث: ' + freshness_(fresh) + '</span></div>' : '') +
-      '</div>' +
+      // مدة البحث ومصدره تبقى في البطاقة، و«آخر تحديث» لنسخة المحطات انتقل إلى «التفاصيل» (قرار محمد 20 أكتوبر)
+      // The search time/source stays on the card; the copy's «last update» moved to «details» (Mohammed, 20 Oct)
+      (searchTime_(s) ? '<div class="sheet-foot">' + searchTime_(s) + '</div>' : '') +
     '</div>';
   }
 
   /**
    * render(container, station, deps) ← { update(station), nearby(), feeder(), station(), destroy() }
-   * deps: { onNavigate(s), onEdit(s), canEdit(), isAdmin(), onDelete(s), onFeeder(s) (عرض محطات المغذي), onDetails(s) (شاشة التفاصيل), offlineMapUI, toast(text), dataFreshness() → Date|null,
+   * deps: { onNavigate(s), onEdit(s), canEdit(), isAdmin(), onDelete(s), onFeeder(s) (عرض محطات المغذي), onDetails(s) (شاشة التفاصيل), offlineMapUI, toast(text),
    *         localStations() → Array|null, actionsContainer } — isAdmin + onDelete يُظهران «🗑️ حذف» (نافذته في delete-station.js)؛
    *         actionsContainer: مكان الجزء السفلي تحت الخريطة (بدونه يُرسم الجزءان معًا في container)
    *         / where the bottom part goes under the map (without it both parts draw in container)
