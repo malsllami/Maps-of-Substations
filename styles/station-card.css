@@ -293,3 +293,16 @@ body.nav-full .station-sheet{display:none !important;}
 .sheet-go svg{width:16px;height:16px;}
 .sheet-go:disabled{opacity:.45;cursor:not-allowed;}
 .sheet-end{background:var(--bg-card);border:1px solid var(--border-strong);color:var(--text-primary);}
+
+/* ===== البطاقة بسطر معلومات واحد (نموذج محمد 20 أكتوبر): الرقم، وتحته الحي · المغذي · «164 محطة ›»؛ والأزرار بأسمائها كما هي.
+   The card with one info line: the number, under it district · feeder · «164 stations ›»; the buttons keep their labels. ===== */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+.sheet-sub{display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px;margin-top:2px;font-size:12.5px;font-weight:600;color:var(--text-secondary);line-height:1.4;}
+.sheet-sub > * + *::before{content:'·';margin-inline-end:6px;color:var(--text-muted);}
+.sheet-sub .ss-feeder{font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--text-primary);}
+.station-sheet .sheet-sub button.ss-count{display:inline-flex;align-items:center;gap:3px;min-height:28px;padding:0 8px;border-radius:8px;cursor:pointer;
+  font-family:inherit;font-size:12.5px;font-weight:700;background:var(--c-dist-bg);border:1px solid var(--c-dist-line);color:var(--c-dist-fg);}
+.station-sheet .sheet-sub button.ss-count::before{display:none;}
+.station-sheet .sheet-sub .st-count{font-size:13px;color:inherit;}
+.station-sheet.is-explore .sheet-sub{display:none;}
+.station-sheet .sb-top{padding-bottom:8px;}

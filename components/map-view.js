@@ -7,7 +7,8 @@
  *   نهاري 6–18 وليلي غير ذلك ويُعاد حسابه كل 5 دقائق؛ الليلي = خريطة OSM نفسها بطبقة .map-night-tiles (قرار «ب» المعدّل).
  * - خريطة جدة المحفوظة (offline-map-ui) تلقائيًا: بلا إنترنت، أو 4 صور تعذّر تحميلها خلال 15 ث ← المحفوظة دقيقة ثم
  *   تُجرَّب العادية؛ بنفس نمط النهاري/الليلي (الأقمار بلا إنترنت ← النهاري). عودة الإنترنت ← العادية فورًا.
- * - علامة المحطة المختارة (🔍 الرقم + هالة ونبض) والانتقال إليها بتكبير 18.
+ * - علامة المحطة المختارة (🔍 الرقم + هالة ونبض) والانتقال إليها بتكبير 16: الخريطة بكامل الشاشة فيظهر الحي والشوارع حولها
+ *   (كان 18 حين كانت الخريطة في حيز صغير — ملاحظة محمد 20 أكتوبر).
  * - شريط الأدوات: شريح النوع ثم مكان لأزرار المكوّنات الأخرى (القريبة والمغذي، الأعطال، المزيد) — لا منطق لها هنا.
  * - سطر التلميح أسفل الشريط (hint) وتنبيه عائم قصير (toast) للمكوّنات.
  * V2: نص رقم المحطة على العلامة يُكتب نصًا؛ القائمة تُغلق بـ Esc أيضًا؛ تغيّر الطبقة يُبلَّغ (onLayerChange) لتعديل
@@ -15,7 +16,7 @@
  *
  * The map: its four styles, the saved Jeddah map automatically, zoom, the station marker, the toolbar. V1's design and
  * behavior as is (Jeddah view, mode chip saved, auto = day 6–18, night = the same OSM tiles with the night filter, the
- * saved Jeddah map offline or after 4 failed tiles in 15 s, station marker at zoom 18, toolbar slot, hint and toast).
+ * saved Jeddah map offline or after 4 failed tiles in 15 s, station marker at zoom 16 (the full-screen map shows the streets around it), toolbar slot, hint and toast).
  * V2: the marker's number set as text; Esc closes the panel; layer changes are reported (onLayerChange); destroy cleans up.
  * ============================================================ */
 (function (global) {
@@ -24,7 +25,7 @@
   const CONFIG = global.SEC2_CONFIG, H = global.SecHtml;
   if (!CONFIG || !H) throw new Error('map-view.js يحتاج الإعدادات وhtml.js قبله / needs config and html.js first');
   const TILES = CONFIG.MAP_TILES, KEY = CONFIG.STORAGE_KEYS.MAP_MODE;
-  const CENTER = [21.54, 39.19], START_ZOOM = 11, STATION_ZOOM = 18;
+  const CENTER = [21.54, 39.19], START_ZOOM = 11, STATION_ZOOM = 16;
   const INSET_GAP = 12; // هامش المساحة المرئية تحت ما يطفو فوق الخريطة / the visible area's margin under what floats over the map
   const AUTO_REFRESH_MS = 5 * 60 * 1000, TILE_ERRORS = 4, TILE_WINDOW_MS = 15000, FALLBACK_MS = 60000, TOAST_MS = 2000;
   const MODES = ['auto', 'light', 'dark', 'satellite'];

@@ -30,12 +30,17 @@
     if (km <= 0.3) return { tier: 1, color: '#4DD6B5' };
     return { tier: 2, color: '#A8B5C2' };
   }
-  function pinIcon_(s, t) {
+  /* المسافة بصيغة قصيرة (م تحت الكيلو) — the distance, short (metres under a kilometre) */
+  function dist_(km) { return km < 1 ? Math.round(km * 1000) + ' م' : (Math.round(km * 10) / 10) + ' كم'; }
+  /* withDist: القريبة — الرقم وتحته المسافة من المحطة المبحوث عنها (نموذج محمد 20 أكتوبر)؛ المغذي: الرقم وحده
+   * withDist: nearby — the number with the distance from the searched station under it; feeder: the number alone */
+  function pinIcon_(s, t, withDist) {
     const scale = t.tier === 0 ? 1 : t.tier === 1 ? 0.92 : 0.82, opacity = t.tier === 0 ? 1 : t.tier === 1 ? 0.92 : 0.72;
-    const w = Math.round(48 * scale), h = Math.round(22 * scale);
+    const w = Math.round(52 * scale), h = Math.round((withDist ? 36 : 22) * scale);
     return global.L.divIcon({
       className: '',
-      html: '<div class="nearby-pin-wrap" style="transform:scale(' + scale + ');opacity:' + opacity + '"><div class="nearby-pin-card" style="border-color:' + t.color + '">' + (s.type === 'تحويل' ? '⚡' : '') + H.esc(s.id) + '</div>' +
+      html: '<div class="nearby-pin-wrap" style="transform:scale(' + scale + ');opacity:' + opacity + '"><div class="nearby-pin-card' + (withDist ? ' has-dist' : '') + '" style="border-color:' + t.color + '">' +
+        '<span>' + (s.type === 'تحويل' ? '⚡' : '') + H.esc(s.id) + '</span>' + (withDist ? '<small class="nearby-pin-dist" style="color:' + t.color + '">' + dist_(s._dist) + '</small>' : '') + '</div>' +
         '<div class="nearby-pin-tail" style="border-top-color:' + t.color + '"></div></div>',
       iconSize: [w, h + 6], iconAnchor: [w / 2, h + 6]
     });
@@ -83,7 +88,7 @@
       else if (zoom <= 15) show = data.slice().sort(function (a, b) { return a._dist - b._dist; }).slice(0, NEAREST);
       else { const b = map.getBounds(); show = data.filter(function (s) { return b.contains([s.lat, s.lng]); }); }
       show.forEach(function (s) {
-        const mk = L.marker([s.lat, s.lng], { icon: pinIcon_(s, tier(s._dist)) });
+        const mk = L.marker([s.lat, s.lng], { icon: pinIcon_(s, tier(s._dist), mode === 'nearby') });
         mk.bindPopup(popup_(s, deps.googleMapsUrl ? deps.googleMapsUrl(s) : ''));
         mk.bindTooltip(H.esc(s.id) + ' — ' + s._dist.toFixed(2) + ' كم', { direction: 'top', offset: [0, -16] });
         mk._secStation = s;
@@ -114,7 +119,7 @@
       data = (res.stations || []).filter(function (s) { return Q.hasCoordinates(s) && !(String(s.id) === String(st.id) && s.type === st.type); })
         .map(function (s) { const d = typeof s.distanceKm === 'number' ? s.distanceKm : (hasCenter ? Q.distanceKm(center, { lat: Number(s.lat), lng: Number(s.lng) }) : 0); return Object.assign({}, s, { lat: Number(s.lat), lng: Number(s.lng), _dist: d }); });
       syncButtons_(); // العدد صار معروفًا / the count is now known
-      if (data.length && hasCenter) { if (view.centerOn) view.centerOn([center.lat, center.lng], 17); else map.setView([center.lat, center.lng], 17); } // في المساحة المرئية / in the visible area
+      if (data.length && hasCenter) { if (view.centerOn) view.centerOn([center.lat, center.lng], 16); else map.setView([center.lat, center.lng], 16); } // في المساحة المرئية / in the visible area
       render();
       if (!toasted[m]) { view.toast(m === 'nearby' ? 'تم عرض ' + data.length + ' محطة قريبة' : 'تم عرض ' + data.length + ' محطة بالمغذي'); toasted[m] = true; }
     }

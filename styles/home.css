@@ -379,3 +379,8 @@ body:not(.nav-full) .view-map .ssb-status{display:flex;align-items:center;justif
 .map-status[data-sync="partial"]{border-color:var(--st-yellow);}
 .map-status[data-sync="pending"]{border-color:var(--st-orange);border-style:dashed;}
 .map-status-btn{flex-shrink:0;min-height:36px;padding:0 12px;border-radius:10px;border:1px solid var(--border-strong);background:var(--bg-card);color:var(--text-primary);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;}
+
+/* ===== وضع البحث: صف الأدوات (الأنماط، قريب، مغذي، أعطال، ⋯) ظاهر تلقائيًا ويتمرر أفقيًا، فلا ميزة مخفية خلف أيقونة؛
+   وفي الوضع العادي يُفتح من أيقونته (نموذج محمد 20 أكتوبر). Search mode: the tools row shows by itself and scrolls sideways. */
+body.search-mode:not(.nav-full) .view-map .globe-stage .map-toolbar-bar{display:flex;}
+body.search-mode:not(.nav-full) .view-map .ssb-tools{display:none;}

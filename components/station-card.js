@@ -95,8 +95,15 @@
       '<div class="sheet-head">' +
         '<div class="sheet-line">' +
           '<span class="sheet-badge ' + kind + '" aria-hidden="true">' + (TYPE_ICON[s.type] || TYPE_ICON['توزيع']) + '</span>' +
-          '<div class="sheet-title"><span class="sheet-type ' + kind + '">' + (sub ? 'محطة تحويل' : 'محطة توزيع') + '</span>' +
-            '<bdi class="sheet-id">' + esc(s.id) + '</bdi><span class="sheet-explore-txt" data-role="explore-txt"></span></div>' +
+          // الرقم كبيرًا، وتحته الحي والمغذي وعدد محطاته (زر يعرضها) — النوع يدل عليه لون الرمز ويُقرأ لقارئ الشاشة
+          // The number large, under it the district, the feeder and its count (a button showing them) — the type is the symbol's color, read aloud
+          '<div class="sheet-title"><span class="sheet-type sr-only ' + kind + '">' + (sub ? 'محطة تحويل' : 'محطة توزيع') + '</span>' +
+            '<bdi class="sheet-id">' + esc(s.id) + '</bdi><span class="sheet-explore-txt" data-role="explore-txt"></span>' +
+            ((s.region || s.feeder || fc != null) ? '<div class="sheet-sub">' +
+              (s.region ? '<span class="ss-region">' + esc(s.region) + '</span>' : '') +
+              (s.feeder ? '<bdi class="ss-feeder">' + esc(s.feeder) + '</bdi>' : '') +
+              (fc != null ? '<button type="button" class="ss-count st-feeder" data-act="feeder" title="عرض محطات المغذي على الخريطة"><b class="st-count">' + fc + '</b> محطة ›</button>' : '') +
+            '</div>' : '') + '</div>' +
           // وضع الاستكشاف (قريب/مغذي): العدد والمسار وإنهاء العرض في السطر نفسه — explore mode: the count, route and end in the same line
           '<div class="sheet-explore">' +
             '<button type="button" class="sheet-go" data-act="navigate"' + (coords ? '' : ' disabled') + '>' + BTN_ICON.navigate + '<span>المسار</span></button>' +
@@ -104,11 +111,6 @@
           '<div class="sheet-side">' + searchTime_(s) +
             (deps && deps.onDetails ? '<button type="button" class="sheet-more" data-act="details">التفاصيل ‹</button>' : '') + '</div>' +
         '</div>' +
-        ((s.feeder || s.region || fc != null) ? '<div class="sb-data-row sheet-meta">' +
-          (s.feeder ? '<div class="sb-data-cell"><div class="cell-label">المغذي</div><div class="cell-value">' + esc(s.feeder) + '</div></div>' : '') +
-          (s.region ? '<div class="sb-data-cell"><div class="cell-label">المنطقة</div><div class="cell-value ar">' + esc(s.region) + '</div></div>' : '') +
-          (fc != null ? '<button type="button" class="sb-data-cell st-feeder" data-act="feeder" title="عرض محطات المغذي على الخريطة"><div class="cell-label">عدد محطات المغذي</div><div class="cell-value st-count">' + fc + '</div></button>' : '') +
-        '</div>' : '') +
       '</div>' +
       (coords ? '' : '<div class="st-note-warn" data-role="no-coords">' + NO_COORDS_MSG + '</div>') +
     '</div>';
