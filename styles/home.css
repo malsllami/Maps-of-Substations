@@ -350,3 +350,20 @@ body:not(.nav-full) .view-map .ssb-status{display:flex;align-items:center;justif
 /* الأزرار الجانبية أسفل الخريطة قرب الشريط السفلي (أو فوق البطاقة) — طلب محمد 20 أكتوبر
    The side buttons at the bottom of the map, near the bottom bar (or above the card) */
 body:not(.nav-full) .view-map .map-side{justify-content:flex-end;}
+
+/* ===== شريط الساعة في التطبيق المثبّت (طلب محمد 21 أكتوبر) — الامتداد للرئيسية والملاحة فقط =====
+   الصفحة تمتد خلف الساعة والبطارية (index.html): الخريطة في الرئيسية والملاحة تظهر خلفها، والبحث والأزرار تحت منطقتها
+   (قواعدها أعلاه بـ safe-area-inset-top). بقية شاشات هذه الصفحة (البيانات، المحطات، المزيد، التفاصيل، الزائر، نموذج
+   الإضافة والتعديل) تُنزل رأسها بالمنطقة الآمنة فتبقى كما كانت. خارج التطبيق المثبّت المنطقة الآمنة العلوية 0.
+   The status bar in the installed app — extension for home and navigation only. The page extends behind the clock and
+   battery: the map shows behind them on home and in navigation, the search and buttons below that area. The page's other
+   screens push their header down by the safe area, so they stay as they were. Outside the installed app the top inset is 0. */
+body.home-page #appHeader{padding-top:env(safe-area-inset-top, 0px);background:var(--bg);}
+body.home-page .fullpage-form-header{padding-top:calc(20px + env(safe-area-inset-top, 0px));}
+
+/* الفراغ السفلي المقيس (services/standalone-viewport.js): يُنزل ما في الأسفل إلى الحافة الحقيقية؛ 0 حين لا فراغ
+   The measured bottom gap: lowers the bottom elements to the true edge; 0 when there is no gap */
+body.home-page .bottom-nav{bottom:calc(-1 * var(--ios-gap, 0px));}
+body.home-page:not(.nav-full) .view-map.hero{bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) - var(--ios-gap, 0px));}
+body.home-page.nav-full .globe-stage.map-active{bottom:calc(-1 * var(--ios-gap, 0px));height:auto;}
+body.home-page .upd-sheet,body.home-page .ins-sheet,body.home-page .om-sheet{bottom:calc(-1 * var(--ios-gap, 0px));}
