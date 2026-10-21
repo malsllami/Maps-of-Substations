@@ -25,9 +25,29 @@
   const MAX_GAP_SHARE = 0.35;
 
   /* ارتفاع الشاشة في الاتجاه الحالي — the screen height in the current orientation */
+  /* ارتفاع الشاشة بوحدات الصفحة نفسها (21 أكتوبر): screen بنقاط الجهاز، والصفحة قد تكون مكبّرة (تكبير النص/الصفحة 115% في
+   * جوال محمد: صفحة 707 تملأ 809 نقطة من 874). فيُحوَّل بنسبة التكبير الفعلية (عرض الشاشة ÷ عرض الصفحة)، ويُقارن بـ100lvh
+   * (أكبر ارتفاع للصفحة بوحداتها) ويؤخذ الأكبر.
+   * The screen height in the page's own units: screen is in device points while the page may be zoomed (115% on Mohammed's
+   * phone: a 707 page fills 809 of 874 points). Converted by the real zoom (screen width ÷ page width), compared with 100lvh,
+   * taking the larger. */
   function screenHeight_() {
     const s = global.screen, portrait = global.matchMedia ? global.matchMedia('(orientation: portrait)').matches : global.innerHeight >= global.innerWidth;
-    return portrait ? Math.max(s.width, s.height) : Math.min(s.width, s.height);
+    const pointsH = portrait ? Math.max(s.width, s.height) : Math.min(s.width, s.height);
+    const pointsW = portrait ? Math.min(s.width, s.height) : Math.max(s.width, s.height);
+    const pageW = doc.documentElement.clientWidth || global.innerWidth;
+    const zoom = pageW > 0 ? pointsW / pageW : 1;
+    return Math.max(lvh_(), zoom > 0 ? pointsH / zoom : pointsH);
+  }
+  /* 100lvh بوحدات الصفحة — 100lvh in the page's units */
+  function lvh_() {
+    const p = doc.createElement('div');
+    p.setAttribute('aria-hidden', 'true');
+    p.style.cssText = 'position:absolute;top:0;left:0;width:1px;height:100lvh;visibility:hidden;pointer-events:none;';
+    doc.documentElement.appendChild(p);
+    const h = p.getBoundingClientRect().height;
+    p.remove();
+    return h;
   }
 
   /* ارتفاع منطقة العناصر الثابتة (top:0 → bottom:0) — the fixed-elements area height */
