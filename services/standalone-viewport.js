@@ -19,7 +19,10 @@
   'use strict';
 
   const doc = global.document;
-  const MAX_GAP = 80; // أكبر من أي شريط ساعة؛ ما فوقه قياس خاطئ لا يُطبَّق / above any status bar; larger is a wrong reading
+  // الحد الأعلى نسبة من الشاشة لا رقم ثابت: آيفون محمد (21 أكتوبر) أعطى فرقًا 114 ثم 167 من شاشة 874 — كلاهما حقيقي.
+  // ما فوق 35% قياس غير منطقي فلا يُطبَّق. The cap is a share of the screen, not a fixed number: Mohammed's iPhone gave
+  // 114 then 167 of an 874 screen — both real. Above 35% is an unreasonable reading and isn't applied.
+  const MAX_GAP_SHARE = 0.35;
 
   /* ارتفاع الشاشة في الاتجاه الحالي — the screen height in the current orientation */
   function screenHeight_() {
@@ -28,6 +31,12 @@
   }
 
   /* ارتفاع منطقة العناصر الثابتة (top:0 → bottom:0) — the fixed-elements area height */
+  /* حقل كتابة مركّز ← لوحة المفاتيح مفتوحة غالبًا، والفرق حينها ليس فراغًا — a focused text field ← the keyboard, not a gap */
+  function typing_() {
+    const a = doc.activeElement;
+    return !!a && (a.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName));
+  }
+
   function fixedAreaHeight_() {
     const probe = doc.createElement('div');
     probe.setAttribute('aria-hidden', 'true');
@@ -45,8 +54,8 @@
   function measure() {
     let gap = 0;
     if (global.navigator.standalone === true) {
-      const g = Math.round(screenHeight_() - fixedAreaHeight_());
-      gap = g > 0 && g <= MAX_GAP ? g : 0;
+      const screenH = screenHeight_(), g = Math.round(screenH - fixedAreaHeight_());
+      gap = !typing_() && g > 0 && g <= screenH * MAX_GAP_SHARE ? g : 0;
     }
     doc.documentElement.style.setProperty('--ios-gap', gap + 'px');
     return gap;
@@ -57,8 +66,15 @@
 
   if (global.navigator.standalone === true) {
     measure();
+    // الفرق يتغيّر أثناء الاستخدام (760 ثم 707 في نفس الجهاز) ← إعادة القياس عند كل ما قد يغيّره
+    // The difference changes during use (760 then 707 on the same phone) ← re-measure on anything that may change it
     ['resize', 'orientationchange', 'pageshow'].forEach(function (t) { global.addEventListener(t, schedule_); });
+    // فتح لوحة المفاتيح وإغلاقها حركة تستغرق لحظة ← القياس بعد اكتمالها — the keyboard opens/closes with an animation ← measure after it
+    ['focusin', 'focusout'].forEach(function (t) { doc.addEventListener(t, function () { global.setTimeout(schedule_, 300); }); });
+    if (global.visualViewport) global.visualViewport.addEventListener('resize', schedule_);
+    doc.addEventListener('visibilitychange', function () { if (doc.visibilityState === 'visible') schedule_(); });
     if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', schedule_);
+    global.addEventListener('load', function () { global.setTimeout(schedule_, 1000); }); // بعد استقرار الصفحة / once the page settles
   }
 
   global.SecStandaloneViewport = { measure: measure };
