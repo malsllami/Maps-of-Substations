@@ -17,11 +17,10 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0D1826">
 <!-- هذه الصفحة وحدها تمتد خلف شريط الساعة في التطبيق المثبّت: الخريطة والملاحة تظهران خلفه، وبقية شاشاتها تُنزل رأسها بالمنطقة
-     الآمنة (home.css)، والفراغ السفلي يُعالَج بالقياس (standalone-viewport.js). الصفحات الأخرى بلا امتداد.
+     الآمنة، والصفحة بطول الشاشة الكاملة 100lvh حتى لا يظهر فراغ سفلي (home.css). الصفحات الأخرى بلا امتداد.
      This page alone extends behind the status bar in the installed app: the map and navigation show behind it, its other
-     screens push their header down by the safe area, and the bottom gap is handled by measurement. Other pages don't extend. -->
+     screens push their header down by the safe area, and the page is the full 100lvh so no bottom gap shows. Other pages don't extend. -->
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<script src="services/standalone-viewport.js"></script>
 <link rel="apple-touch-icon" href="assets/icon-192.png">
 <script src="services/pwa.js"></script>
 <link rel="stylesheet" href="styles/update-sheet.css">

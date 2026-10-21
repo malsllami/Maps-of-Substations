@@ -6,7 +6,10 @@
  * Redesign (19 Oct): no globe or intro; one screen shown by body[data-view], the content between the fixed header and the
  * fixed bottom bar (with the safe areas). The map, card and stats keep their own files.
  * ============================================================ */
-body.home-page{min-height:100dvh;padding-bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 12px);}
+/* 100lvh (21 أكتوبر): الصفحة بطول الشاشة الكاملة دائمًا؛ الآيفون يعطي الصفحة القصيرة غير المتمررة الارتفاع الأصغر (svh) فيرتفع
+   الشريط السفلي ويظهر تحته فراغ لا يُرسم — 100lvh: always the full screen height; the iPhone gives a short, non-scrolling page
+   the small height (svh), raising the bottom bar over an unpainted gap */
+body.home-page{min-height:100lvh;padding-bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 12px);}
 body.home-page.guest-mode,body.home-page.nav-full{padding-bottom:0;}
 body.home-page > header{position:fixed;top:0;left:0;right:0;z-index:160;}
 .app-views{padding-top:var(--header-h, 120px);}
@@ -232,7 +235,7 @@ body.guest-mode .app-views{display:none;}
    tools float above it, the station card floats below on translucent glass. Navigation keeps its own rules. */
 :root{--glass-bg:rgba(13,24,38,0.62);--glass-strong:rgba(13,24,38,0.80);--glass-line:rgba(255,255,255,0.14);}
 [data-theme="light"]{--glass-bg:rgba(255,255,255,0.66);--glass-strong:rgba(255,255,255,0.84);--glass-line:rgba(20,40,60,0.16);}
-body.home-page[data-view="map"]{min-height:0;}
+body.home-page[data-view="map"]{min-height:100lvh;} /* الخريطة لا تتمرر فتحتاج الطول الكامل صراحة — the map doesn't scroll, so it needs the full height explicitly */
 body:not(.nav-full) .view-map.hero{position:fixed;top:var(--header-h, 120px);left:0;right:0;
   bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));padding:0;overflow:hidden;z-index:1;}
 /* البحث عائم أعلى الخريطة — the search floats at the top */
@@ -361,9 +364,3 @@ body:not(.nav-full) .view-map .map-side{justify-content:flex-end;}
 body.home-page #appHeader{padding-top:env(safe-area-inset-top, 0px);background:var(--bg);}
 body.home-page .fullpage-form-header{padding-top:calc(20px + env(safe-area-inset-top, 0px));}
 
-/* الفراغ السفلي المقيس (services/standalone-viewport.js): يُنزل ما في الأسفل إلى الحافة الحقيقية؛ 0 حين لا فراغ
-   The measured bottom gap: lowers the bottom elements to the true edge; 0 when there is no gap */
-body.home-page .bottom-nav{bottom:calc(-1 * var(--ios-gap, 0px));}
-body.home-page:not(.nav-full) .view-map.hero{bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) - var(--ios-gap, 0px));}
-body.home-page.nav-full .globe-stage.map-active{height:calc(100% + var(--ios-gap, 0px));}
-body.home-page .upd-sheet,body.home-page .ins-sheet,body.home-page .om-sheet{bottom:calc(-1 * var(--ios-gap, 0px));}
