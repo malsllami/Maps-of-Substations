@@ -1,7 +1,8 @@
 /* ============================================================
  * sw.js — عامل خدمة V2: يُبقي الموقع يفتح عند انقطاع الإنترنت، بلا أي بيانات ديناميكية
  * ============================================================
- * - ملفات V2 داخل نطاقه فقط (/Maps-of-Substations-v2/): الشبكة أولًا، وتُحدَّث النسخة المحفوظة مع كل جلب ناجح؛ عند الانقطاع ← المحفوظة.
+ * - ملفات V2 داخل نطاقه فقط: من النسخة المحفوظة المكتملة أولًا (كل ملفات التحميل الواحد من نسخة واحدة)، والشبكة لملف غير
+ *   محفوظ فقط؛ التصفح لا يكتب في ذاكرة النسخة، والنسخة الجديدة تصل كاملة بالتثبيت ثم «تحديث الآن».
  * - مكتبات CDN بإصدارات ثابتة والخطوط: المحفوظة أولًا (الرابط الثابت لا يتغيّر محتواه).
  * - لا يتدخل إطلاقًا في: خادم Apps Script (وأي طلب غير GET)، OSRM، صور الخريطة والأقمار، ملف خريطة جدة (maps/ — يُدار في
  *   IndexedDB)، ولا أي ملف خارج نطاق V2 على نفس النطاق (ملفات V1). فلا تُعاد بيانات قديمة كأنها حديثة أبدًا.
@@ -12,7 +13,8 @@
  * - التحديث لا يفرض نفسه: النسخة الجديدة تنتظر حتى تطلب الصفحة التحديث (SKIP_WAITING)، ثم تتولى وتعيد الصفحة تحميل نفسها مرة واحدة.
  *
  * The V2 service worker: keeps the site opening offline, with no dynamic data.
- * - V2 files inside its scope only: network first, refreshing the stored copy on success; offline ← the stored copy.
+ * - V2 files inside its scope only: from the complete stored version first (every file of one load from one version), the
+ *   network only for a file not stored; browsing never writes to the version cache, a new version arrives whole by install.
  * - Pinned-version CDN libraries and fonts: stored copy first.
  * - Never touches: the Apps Script server (or any non-GET), OSRM, map/satellite tiles, the Jeddah map file (maps/ — managed in
  *   IndexedDB), nor any file outside the V2 scope on the same origin (V1's files). So stale data is never served as fresh.
@@ -155,20 +157,16 @@ async function stored_(request, opts) {
   } catch (e) { return null; } // الذاكرة غير متاحة / cache unavailable
 }
 
-/* الشبكة أولًا لملفات V2 — Network first for V2's own files */
-async function networkFirst_(request) {
-  try {
-    const res = await fetch(request);
-    if (res.ok && res.type !== 'opaque') {
-      const copy = res.clone();
-      caches.open(CACHE_NAME).then((cache) => cache.put(request, copy)).catch(() => {});
-    }
-    return res;
-  } catch (err) {
-    const stored = await stored_(request, { ignoreSearch: true });
-    if (stored) return stored;
-    throw err;
-  }
+/* ملفات V2 من نسخة واحدة مكتملة (21 أكتوبر): المحفوظة في ذاكرة النسخة أولًا، والشبكة فقط لملف غير محفوظ — ولا يُكتب
+   شيء في ذاكرة النسخة أثناء التصفح؛ فلا يجتمع ملف جديد وآخر قديم في تحميل واحد (كان يكسر الصفحة مع شبكة متقطعة).
+   النسخة الجديدة تصل كاملة بالتثبيت ثم «تحديث الآن».
+   V2's files from one complete version: the version cache first, the network only for a file not stored — and nothing is
+   written to the version cache while browsing; so a new file never meets an old one in one load (it broke the page on a
+   flaky network). A new version arrives whole through the install, then «update now». */
+async function versionFirst_(request) {
+  const stored = await stored_(request, { ignoreSearch: true });
+  if (stored) return stored;
+  return fetch(request);
 }
 
 /* المحفوظة أولًا للمكتبات والخطوط — Stored copy first for libraries and fonts */
@@ -192,7 +190,7 @@ self.addEventListener('fetch', (event) => {
     if (request.url.indexOf(scope) !== 0) return;             // خارج نطاق V2 (ملفات V1) / outside the V2 scope (V1's files)
     if (url.pathname.indexOf('/maps/') !== -1) return;        // ملف خريطة جدة يُدار في IndexedDB / the Jeddah map file lives in IndexedDB
     resumeOnce_(event);
-    event.respondWith(networkFirst_(request));
+    event.respondWith(versionFirst_(request));
   } else if (CACHE_FIRST_HOSTS.indexOf(url.hostname) !== -1) {
     resumeOnce_(event);
     event.respondWith(cacheFirst_(request));
