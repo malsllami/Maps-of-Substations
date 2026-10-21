@@ -21,6 +21,9 @@
   --teal:#1FAE8C;
   --teal-light:#4DD6B5;
   --tabbar-h:64px;
+  /* المسافة تحت أيقونات الشريط السفلي (محمد 21 أكتوبر: 25 بدل 34 في الآيفون) = المنطقة الآمنة السفلية − 9، ولا تقل عن 0
+     The space under the bottom bar icons (Mohammed, 21 Oct: 25 instead of 34 on the iPhone) = the bottom safe area − 9, never below 0 */
+  --bn-safe:max(0px, calc(env(safe-area-inset-bottom, 0px) - 9px));
   --radius:14px;
   --radius-lg:18px;
   --accent:#F5B70A;      /* زر ＋ والتعديل — the ＋ button and edit */

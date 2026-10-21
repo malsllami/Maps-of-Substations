@@ -9,7 +9,7 @@
 /* 100lvh (21 أكتوبر): الصفحة بطول الشاشة الكاملة دائمًا؛ الآيفون يعطي الصفحة القصيرة غير المتمررة الارتفاع الأصغر (svh) فيرتفع
    الشريط السفلي ويظهر تحته فراغ لا يُرسم — 100lvh: always the full screen height; the iPhone gives a short, non-scrolling page
    the small height (svh), raising the bottom bar over an unpainted gap */
-body.home-page{min-height:100lvh;padding-bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 12px);}
+body.home-page{min-height:100lvh;padding-bottom:calc(var(--tabbar-h) + var(--bn-safe) + 12px);}
 body.home-page.guest-mode,body.home-page.nav-full{padding-bottom:0;}
 body.home-page > header{position:fixed;top:0;left:0;right:0;z-index:160;}
 .app-views{padding-top:var(--header-h, 120px);}
@@ -237,7 +237,7 @@ body.guest-mode .app-views{display:none;}
 [data-theme="light"]{--glass-bg:rgba(255,255,255,0.66);--glass-strong:rgba(255,255,255,0.84);--glass-line:rgba(20,40,60,0.16);}
 body.home-page[data-view="map"]{min-height:100lvh;} /* الخريطة لا تتمرر فتحتاج الطول الكامل صراحة — the map doesn't scroll, so it needs the full height explicitly */
 body:not(.nav-full) .view-map.hero{position:fixed;top:var(--header-h, 120px);left:0;right:0;
-  bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));padding:0;overflow:hidden;z-index:1;}
+  bottom:calc(var(--tabbar-h) + var(--bn-safe));padding:0;overflow:hidden;z-index:1;}
 /* البحث عائم أعلى الخريطة — the search floats at the top */
 body:not(.nav-full) .view-map .top-content-area{position:absolute;top:8px;left:12px;right:12px;width:auto;max-width:none;margin:0;z-index:20;}
 body:not(.nav-full) .view-map .station-search-bar{background:var(--glass-bg);border-color:var(--glass-line);box-shadow:none;

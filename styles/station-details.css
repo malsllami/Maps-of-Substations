@@ -38,7 +38,7 @@
 .sd-ops{background:var(--c-ops-bg);border:1px solid var(--c-ops-line);color:var(--c-ops-fg);}
 /* القريبة: قائمة تتمرر داخل مساحتها فوق الشريط السفلي — nearby: a list scrolling inside its area above the bottom bar */
 .sd-near{display:flex;flex-direction:column;border-radius:var(--radius-lg);background:var(--bg-card);border:1px solid var(--border-strong);
-  max-height:calc(100dvh - var(--header-h, 120px) - 300px - var(--tabbar-h) - env(safe-area-inset-bottom, 0px));min-height:180px;overflow-y:auto;overscroll-behavior:contain;}
+  max-height:calc(100dvh - var(--header-h, 120px) - 300px - var(--tabbar-h) - var(--bn-safe));min-height:180px;overflow-y:auto;overscroll-behavior:contain;}
 .sd-near-row{display:flex;align-items:center;gap:10px;min-height:58px;padding:8px 12px;background:none;border:none;border-bottom:1px solid var(--border);font-family:inherit;color:var(--text-primary);cursor:pointer;text-align:start;}
 .sd-near-row:last-child{border-bottom:none;}
 .sd-near-ic{width:38px;height:38px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
@@ -69,5 +69,5 @@
 .sd-link{color:var(--c-sub-fg);font-weight:700;text-decoration:underline;text-underline-offset:3px;}
 .sd-near-search{width:100%;box-sizing:border-box;min-height:46px;padding:0 14px;border-radius:12px;border:1px solid var(--border-strong);background:var(--bg-card);
   color:var(--text-primary);font-family:inherit;font-size:16px;}
-.sd-near{max-height:calc(100dvh - var(--header-h, 120px) - 270px - var(--tabbar-h) - env(safe-area-inset-bottom, 0px));min-height:260px;}
+.sd-near{max-height:calc(100dvh - var(--header-h, 120px) - 270px - var(--tabbar-h) - var(--bn-safe));min-height:260px;}
 .sd-near-empty{padding:18px 14px;text-align:center;font-size:14px;font-weight:600;color:var(--text-secondary);}
