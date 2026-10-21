@@ -365,5 +365,5 @@ body.home-page .fullpage-form-header{padding-top:calc(20px + env(safe-area-inset
    The measured bottom gap: lowers the bottom elements to the true edge; 0 when there is no gap */
 body.home-page .bottom-nav{bottom:calc(-1 * var(--ios-gap, 0px));}
 body.home-page:not(.nav-full) .view-map.hero{bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) - var(--ios-gap, 0px));}
-body.home-page.nav-full .globe-stage.map-active{bottom:calc(-1 * var(--ios-gap, 0px));height:auto;}
+body.home-page.nav-full .globe-stage.map-active{height:calc(100% + var(--ios-gap, 0px));}
 body.home-page .upd-sheet,body.home-page .ins-sheet,body.home-page .om-sheet{bottom:calc(-1 * var(--ios-gap, 0px));}
