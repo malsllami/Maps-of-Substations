@@ -400,11 +400,20 @@
     if (!loggedIn()) { status.setNote('سجّل دخول أولًا لاستخدام تحديث البيانات'); global.setTimeout(function () { status.clearNote(); }, 4000); return; }
     if (SYNC.state().loading || header.refreshButton.disabled) return; // تحميل جارٍ ← لا شيء (V1) / a load is running ← nothing (V1)
     header.refreshButton.disabled = true; header.refreshButton.classList.add('spinning');
-    try {
-      try { await SecApi.call('clearSearchCache', {}, { phone: true }); } catch (e) { /* المزامنة تكمل / the sync goes on */ }
-      if (SYNC.state().loaded) await SYNC.sync(); else await SYNC.fullLoad({ onProgress: progress_ });
-    } catch (e) { /* يظهر بالحالة / shown by the state */ }
+    // (21 أكتوبر) التحميل الحقيقي يبدأ فورًا بنفس آلية الرئيسية؛ إعادة بناء فهرس الخادم بالتوازي لا قبله (كانت تؤخر البدء
+    // عشرات الثواني فيبدو الزر يدور شكليًا) — the real load starts at once; the server index rebuild runs alongside, not before
+    const loaded = SYNC.state().loaded;
+    status.setNote(loaded ? 'جاري تحديث نسخة المحطات…' : 'جاري تحميل بيانات المحطات…');
+    SecApi.call('clearSearchCache', {}, { phone: true }).catch(function () { return null; });
+    let res = null;
+    try { res = loaded ? await SYNC.sync() : await SYNC.fullLoad({ onProgress: progress_ }); } catch (e) { res = { ok: false }; }
     finally { header.refreshButton.disabled = false; header.refreshButton.classList.remove('spinning'); afterLoad_(); }
+    // فشل بلا «اضغط للمتابعة» ← السبب واضحًا — a failure without «tap to continue» ← the reason, clearly
+    const st = SYNC.state();
+    if (res && res.ok === false && !(!st.loaded && st.resumable)) {
+      status.setNote('تعذّر تحديث نسخة المحطات' + (res.reason ? ': ' + res.reason : '') + ' — حاول مرة أخرى');
+      global.setTimeout(function () { if (!SYNC.state().loading) status.clearNote(); }, 8000);
+    }
   });
 
   // ===== لون حالة النسخة (طلب محمد 19 أكتوبر) — The copy's state color =====
