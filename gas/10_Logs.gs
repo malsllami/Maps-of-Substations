@@ -30,6 +30,8 @@ const SEVERITY = ['منخفض', 'مهم', 'مهم جدًا', 'حرج جدًا'];
 /* الدرجة الابتدائية لكل تصنيف: فشل نهائي ← مهم جدًا، نجح في النهاية ← مهم، الخلفية/النوم ← منخفض
  * Each category's initial severity: a final failure ← very important, succeeded in the end ← important, background ← low */
 const CATEGORY_SEVERITY = {
+  // قواعد 21 أكتوبر: التأخير والتعطّل بدرجاتها — the 21 Oct rules: delays and outages by severity
+  'تعطّل الموقع': 'حرج جدًا', 'تأخير اتصال طويل': 'مهم جدًا', 'تأخير اتصال': 'مهم',
   'خطأ برمجي': 'مهم جدًا', 'نتيجة كتابة غير مؤكدة': 'مهم جدًا', 'خروج قسري': 'مهم جدًا', 'صفحة 404 بدل الرد': 'مهم جدًا',
   'مشاكل اتصال': 'مهم جدًا', 'فشل تحديث بيانات': 'مهم جدًا',
   'تأخر وعالجه الاحتياطي': 'مهم', 'كتابة تأكدت بإعادة الإرسال': 'مهم', 'محاولة دخول خاطئة': 'مهم', 'رفض دخول لوحة المدير': 'مهم', 'تنبيهات': 'مهم',
@@ -145,6 +147,10 @@ function classifyError_(source, message) {
   const s = String(source || '').toLowerCase(), m = String(message || '').toLowerCase();
   const has = function (text, parts) { return parts.some(function (p) { return text.indexOf(p) !== -1; }); };
   if (has(m, ['resizeobserver loop'])) return 'تحذير متصفح غير ضار';
+  // (21 أكتوبر) قبل غيرها: «slow-long» قبل «slow» — before the rest: «slow-long» before «slow»
+  if (has(s, ['client/outage'])) return 'تعطّل الموقع';
+  if (has(s, ['client/slow-long'])) return 'تأخير اتصال طويل';
+  if (has(s, ['client/slow'])) return 'تأخير اتصال';
   if (has(s, ['client/recovered'])) return 'تأخر وعالجه الاحتياطي';
   if (has(s, ['client/write-recovered'])) return 'كتابة تأكدت بإعادة الإرسال'; // حُفظت مرة واحدة بنفس opKey — ليست خطأً / saved once — not an error
   if (has(s, ['client/session-expired'])) return 'خروج قسري'; // الخادم رفض التذكرة فخرج المستخدم — السبب في التفاصيل / the server refused the ticket
@@ -192,6 +198,11 @@ function clientErrorKeys_(e) {
   };
 }
 
+/* (21 أكتوبر) ما عولج تلقائيًا أو فشل والصفحة في الخلفية لا يُسجَّل؛ الأجهزة التي لم تتحدّث بعد ما زالت ترسله بأسمائه
+   القديمة فيُتجاهَل هنا — auto-handled or background failures aren't logged; not-yet-updated devices still send them under the
+   old names, so they're dropped here */
+const CLIENT_NOT_LOGGED = ['client/recovered', 'client/write-recovered', 'client/background'];
+
 /* الإجراء: يسجّل الجديد فقط من الدفعة ويُرجع عدد ما سُجّل. فحص التكرار والكتابة وحفظ المفاتيح داخل قفل واحد،
  * فلا تُسجَّل دفعتان متطابقتان وصلتا معًا مرتين؛ وإن تعذّر القفل يُسجَّل على أي حال (الخطأ لا يضيع).
  * The action: logs only the batch's new errors and returns how many. Duplicate check, write and saving the keys
@@ -199,7 +210,8 @@ function clientErrorKeys_(e) {
 function logClientError(data) {
   if (!Array.isArray(data.errors)) return { error: 'صيغة السجل غير صحيحة' };
   const errors = data.errors.slice(0, CLIENT_ERROR_BATCH_MAX).filter(function (e) {
-    return e && typeof e === 'object' && !Array.isArray(e) && !/ResizeObserver loop/i.test(String(e.message || ''));
+    return e && typeof e === 'object' && !Array.isArray(e) && !/ResizeObserver loop/i.test(String(e.message || '')) &&
+      CLIENT_NOT_LOGGED.indexOf(String(e.source || '')) === -1;
   });
   if (!errors.length) return { success: true, logged: 0 };
   const lock = LockService.getScriptLock(), locked = lock.tryLock(5000);

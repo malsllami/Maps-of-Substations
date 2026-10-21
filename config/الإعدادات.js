@@ -67,6 +67,13 @@
       HEDGE_AFTER_MS: 8000,                    // طلب قراءة احتياطي بعد 8 ث بلا رد / a backup read after 8 s without a reply
       HEDGE_RETRY_AFTER_FAIL_MS: 1500,         // أو بعد 1.5 ث من فشل صريح / or 1.5 s after an explicit failure
       SAVE_RETRY_DELAYS_MS: [5000, 8000],      // إعادة الحفظ بنفس مفتاح العملية / save retries with the same operation key
+      // قواعد سجل الأخطاء (محمد 21 أكتوبر): ما عولج تلقائيًا في أقل من 30 ث لا يُسجَّل؛ 30–45 ث «تأخير اتصال» (مهم)؛
+      // 45–60 ث «تأخير اتصال طويل» (مهم جدًا)؛ أكثر من دقيقة والوظيفة متوقفة «تعطّل الموقع». زمن الخلفية لا يُحتسب.
+      // Error-log rules: auto-handled under 30 s isn't logged; 30–45 s a delay (important); 45–60 s a long delay (very
+      // important); over a minute with the function stopped an outage. Background time isn't counted.
+      LOG_SLOW_MS: 30000,
+      LOG_VERY_SLOW_MS: 45000,
+      LOG_OUTAGE_MS: 60000,
       BATCH_RETRY_DELAYS_MS: [2000, 5000],     // إعادة دفعة تحميل المحطات / station batch retries
       CONN_CHECK_INTERVAL_MS: 3 * 60 * 1000,   // فحص الاتصال كل 3 دقائق / connection check every 3 minutes
       CONN_CHECK_TIMEOUT_MS: 15 * 1000,

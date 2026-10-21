@@ -226,8 +226,27 @@
   const WRITE_ACTIONS = { addNewStation: 1, updateCoordinates: 1, deleteStation: 1, registerUser: 1, registerCredential: 1, updateMemberProfile: 1, clearSearchCache: 1 };
   function failureSource_(action, attempts) {
     if (WRITE_ACTIONS[action]) return 'client/write-unconfirmed';
-    if (attempts.some(function (a) { return a.hiddenDuring; })) return 'client/background';
+    if (incidentMs_(attempts) > LOG.OUTAGE) return 'client/outage';
     return 'client/connection';
+  }
+
+  /* ===== قواعد السجل (محمد 21 أكتوبر) — The logging rules =====
+   * مدة الحادثة = من بدء أول محاولة حتى انتهاء آخرها، بلا زمن الخلفية. ما عولج تلقائيًا في أقل من 30 ث لا يُسجَّل؛
+   * 30–45 ث «تأخير اتصال» (مهم)، 45–60 ث «تأخير اتصال طويل» (مهم جدًا)، أكثر من دقيقة «تعطّل الموقع». سجل واحد للحادثة
+   * بدرجتها النهائية. فشل والصفحة في الخلفية لا يُسجَّل (الوظيفة لم تكن مطلوبة لحظتها).
+   * The incident's duration = from the first attempt's start to the last one's end, without background time. Auto-handled
+   * under 30 s isn't logged; 30–45 s a delay, 45–60 s a long delay, over a minute an outage. One row per incident at its
+   * final severity. A failure while the page was in the background isn't logged. */
+  const LOG = { SLOW: CONFIG.TIMING.LOG_SLOW_MS, VERY_SLOW: CONFIG.TIMING.LOG_VERY_SLOW_MS, OUTAGE: CONFIG.TIMING.LOG_OUTAGE_MS };
+  function incidentMs_(attempts) {
+    const start = Math.min.apply(null, attempts.map(function (a) { return a.startedAt; }));
+    const end = Math.max.apply(null, attempts.map(function (a) { return a.startedAt + (a.ms || 0); }));
+    const hidden = Math.max.apply(null, attempts.map(function (a) { return a.hiddenMs || 0; }));
+    return Math.max(0, end - start - hidden);
+  }
+  /* تأخير عولج تلقائيًا: لا شيء تحت 30 ث، وإلا مصدره بدرجته — an auto-handled delay: nothing under 30 s, else its source */
+  function delaySource_(ms) {
+    return ms < LOG.SLOW ? null : ms <= LOG.VERY_SLOW ? 'client/slow' : ms <= LOG.OUTAGE ? 'client/slow-long' : 'client/outage';
   }
   function failureMessage_(action, attempts) {
     const main = attempts.filter(function (a) { return a.kind === 'http'; })[0] || attempts[attempts.length - 1];
@@ -238,33 +257,41 @@
    * الجهاز بلا إنترنت فعليًا ← متوقع ولا يُسجَّل / device truly offline ← expected, not logged */
   function reportFailure(action, attempts, note) {
     if (leavingPage || !attempts.length || attempts.every(function (a) { return a.offline; })) return;
+    // الصفحة في الخلفية: الوظيفة لم تكن مطلوبة لحظتها، فلا يُسجَّل (تُعاد عند عودة الصفحة) — in the background: not logged
+    if (attempts.some(function (a) { return a.hiddenDuring; })) return;
     const labels = attempts.length > 1 ? ['الطلب الأصلي', 'الطلب الاحتياطي'] : [''];
     const body = attempts.map(function (a, i) { return (labels[i] ? labels[i] + ': ' : '') + describeAttempt_(a); }).join(' || ');
     const source = failureSource_(action, attempts), main = attempts.filter(function (a) { return a.kind === 'http'; })[0] || attempts[attempts.length - 1];
     queueError_(source, failureMessage_(action, attempts) + (attempts.length > 1 ? ' (الأصلي والاحتياطي)' : ''),
       body + (note ? ' || ' + note : ''),
-      { action: action, failKind: failKind_(main), outcome: source === 'client/write-unconfirmed' ? 'غير مؤكدة' : source === 'client/background' ? 'فشل أثناء الخلفية' : 'فشل نهائي' });
+      { action: action, failKind: failKind_(main), outcome: source === 'client/write-unconfirmed' ? 'غير مؤكدة' : source === 'client/outage' ? 'تعطّل أكثر من دقيقة' : 'فشل نهائي' });
   }
-  /* فشل الأصلي ونجح الاحتياطي: ليس خطأً ولا يُحذف — «تأخر وعالجه الاحتياطي»
-   * The original failed and the backup succeeded: not an error, not dropped — "delayed, recovered by the backup" */
+  /* فشل الأصلي ونجح الاحتياطي: عولج تلقائيًا ← لا يُسجَّل إلا إن طالت الحادثة 30 ث فأكثر (تأخير/تعطّل بدرجته)
+   * The original failed and the backup succeeded: auto-handled ← logged only if the incident took 30 s or more */
   function reportRecovered(action, original, backup) {
-    queueError_('client/recovered', 'تأخر وعالجه الاحتياطي: ' + action + ' — ' + whatFailed_(original),
+    const ms = incidentMs_([original, backup]), source = delaySource_(ms);
+    if (!source) return; // عولج في أقل من 30 ث ← لا يُسجَّل / handled under 30 s ← not logged
+    queueError_(source, delayLabel_(source) + ': ' + action + ' — ' + sec_(ms) + ' (عالجه الطلب الاحتياطي بعد: ' + whatFailed_(original) + ')',
       'الطلب الأصلي: ' + describeAttempt_(original) + ' || الطلب الاحتياطي: requestId: ' + (backup.requestId || '—') +
       ' | الزمن: ' + sec_(backup.ms || 0) + ' | النتيجة النهائية: نجاح',
-      { action: action, failKind: failKind_(original), outcome: 'نجاح بعد الطلب الاحتياطي' });
+      { action: action, failKind: failKind_(original), outcome: 'نجاح بعد ' + sec_(ms) });
   }
+  function delayLabel_(source) { return source === 'client/outage' ? 'تعطّل أكثر من دقيقة ثم تعافى' : source === 'client/slow-long' ? 'تأخير اتصال طويل' : 'تأخير اتصال'; }
   /* كتابة انتهت إحدى محاولاتها بلا رد سليم، ثم ما انتهت إليه إعادة الإرسال بنفس opKey.
-   * تأكد الحفظ بالإعادة (confirmed) ← «كتابة تأكدت بإعادة الإرسال» (ليست خطأً، مثل «تأخر وعالجه الاحتياطي»)؛ وإلا «نتيجة كتابة غير مؤكدة».
+   * تأكد الحفظ بالإعادة ← بقواعد التأخير نفسها (لا شيء تحت 30 ث)؛ وإلا «نتيجة كتابة غير مؤكدة» (خطأ فعلي).
    * A write where an attempt had no valid reply, then what the same-opKey resend concluded. Confirmed by the resend ←
-   * "write confirmed by resend" (not an error, like a recovered read); otherwise "unconfirmed write result". */
+   * the same delay rules (nothing under 30 s); otherwise "unconfirmed write result" (a real error). */
   function reportWrite(action, attempts, outcome, confirmed) {
     const failed = attempts.filter(function (a) { return a.kind !== 'ok'; });
     if (!failed.length) return;
-    queueError_(confirmed ? 'client/write-recovered' : 'client/write-unconfirmed',
-      (confirmed ? 'كتابة تأكدت بإعادة الإرسال: ' : 'نتيجة كتابة غير مؤكدة: ') + action + ': ' + whatFailed_(failed[0]),
+    // تأكدت بالإعادة: تأخير عولج تلقائيًا بنفس قواعد القراءة — confirmed by the resend: an auto-handled delay, same rules
+    const ms = incidentMs_(attempts), source = confirmed ? delaySource_(ms) : 'client/write-unconfirmed';
+    if (!source) return;
+    queueError_(source,
+      (confirmed ? delayLabel_(source) + ' (حُفظت بإعادة الإرسال): ' : 'نتيجة كتابة غير مؤكدة: ') + action + ': ' + whatFailed_(failed[0]),
       attempts.map(function (a, i) { return 'المحاولة ' + (i + 1) + ': ' + (a.kind === 'ok' ? 'رد سليم | ' : '') + describeAttempt_(a); }).join(' || ') +
       ' || النتيجة النهائية: ' + outcome,
-      { action: action, failKind: failKind_(failed[0]), outcome: confirmed ? 'نجاح بعد إعادة الإرسال' : 'غير مؤكدة' });
+      { action: action, failKind: failKind_(failed[0]), outcome: confirmed ? 'نجاح بعد ' + sec_(ms) : 'غير مؤكدة' });
   }
 
   /* يراقب طلبات الخادم فقط دون تعديل الطلب أو الرد (سوى إضافة requestId الذي يضيفه قياس الأزمنة أصلًا): الرد السليم يثبت

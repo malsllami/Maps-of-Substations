@@ -17,7 +17,7 @@
  * ===================================================
  */
 
-const REAL_ERROR_CATEGORIES = ['خطأ برمجي', 'فشل تحديث بيانات', 'نتيجة كتابة غير مؤكدة'];
+const REAL_ERROR_CATEGORIES = ['خطأ برمجي', 'فشل تحديث بيانات', 'نتيجة كتابة غير مؤكدة', 'تعطّل الموقع']; // + التعطّل (21 أكتوبر) / + outages
 const REPORT_COLORS = {
   green: { bg: '#E8F8F0', text: '#1E8449', border: '#82E0AA' },
   yellow: { bg: '#FEF9E7', text: '#9A7D0A', border: '#F7DC6F' },
