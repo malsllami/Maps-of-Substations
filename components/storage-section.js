@@ -37,7 +37,10 @@
   const MSG = {
     TITLE: 'البيانات المؤقتة',
     CLEAR: 'مسح التخزين المؤقت',
-    USED: 'الذاكرة المستخدمة',
+    // (21 أكتوبر) ليست ذاكرة الجوال: تقدير المتصفح لكل ما يحفظه الموقع، والحد الأعلى هو ما يسمح به المتصفح للموقع
+    // Not the phone's memory: the browser's estimate of everything the site stores; the cap is what the browser allows it
+    USED: 'مساحة الموقع على هذا الجهاز',
+    USED_NOTE: 'تقدير المتصفح لكل ما يحفظه الموقع (ملفات الموقع للعمل بدون إنترنت، ونسخة المحطات، وخريطة جدة). المسح لا يحذف ملفات الموقع، وقد يتأخر المتصفح في تحديث الرقم.',
     SIZE: 'حجم بيانات المحطات',
     COUNT: 'عدد المحطات المحفوظة',
     UPDATED: 'آخر تحديث',
@@ -107,7 +110,8 @@
       '<div class="storage-head"><div class="storage-title"><span class="storage-title-icon">' + ICONS.db + '</span>' + MSG.TITLE + '</div>' +
         '<button type="button" class="storage-clear-btn" data-act="clear"><span class="storage-clear-icon">' + ICONS.trash + '</span>' + MSG.CLEAR + '</button></div>' +
       '<div class="storage-usage"><div class="storage-usage-top"><span>' + MSG.USED + '</span><bdi class="storage-usage-val" data-role="usage">—</bdi></div>' +
-        '<div class="storage-bar-wrap"><div class="storage-bar-track"><div class="storage-bar-fill" data-role="fill"></div></div><bdi class="storage-percent" data-role="percent">—</bdi></div></div>' +
+        '<div class="storage-bar-wrap"><div class="storage-bar-track"><div class="storage-bar-fill" data-role="fill"></div></div><bdi class="storage-percent" data-role="percent">—</bdi></div>' +
+        '<div class="storage-usage-note" data-role="usage-note" hidden>' + MSG.USED_NOTE + '</div></div>' +
       '<div class="storage-cells">' + CELLS.map(function (c) {
         return '<div class="storage-cell"><span class="storage-cell-icon">' + ICONS[c[1]] + '</span><span class="storage-cell-label">' + c[2] + '</span><span class="storage-cell-val" data-role="' + c[0] + '">—</span></div>';
       }).join('') + '</div>' +
@@ -173,6 +177,7 @@
       usage.textContent = mb_(u.used) + ' MB / ' + (u.real ? gb_(u.cap) : ASSUMED_CAP_MB + ' MB');
       fill.style.width = Math.round(ratio) + '%';
       percentEl.textContent = ratio.toFixed(2) + '%';
+      row.querySelector('[data-role="usage-note"]').hidden = !u.real; // التوضيح للتقدير الحقيقي فقط / the note for the real estimate only
     }
     async function clear() {
       const ask = o.confirm || function (t) { return global.confirm(t); };
