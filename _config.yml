@@ -1,0 +1,7 @@
+# إعداد نشر GitHub Pages — مسؤوليته الوحيدة: ما لا يُنشر من المستودع (محمد 23 أكتوبر)
+# GitHub Pages publish settings — its one job: what in the repository isn't published
+# gas/: كود الخادم (Google Apps Script) يبقى في المستودع لنسخه إلى المحرر، ولا يُفتح من الموقع
+# gas/: the server code (Google Apps Script) stays in the repository to copy into the editor, never served by the site
+exclude:
+  - gas
+  - tests
