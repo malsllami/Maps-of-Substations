@@ -25,6 +25,23 @@
 
   const doc = global.document, S = global.SecSession, SYNC = global.SecStationsSync;
   const $ = function (id) { return doc.getElementById(id); };
+
+  // حارس خلط النسختين (22 أكتوبر): صفحة قديمة من جهاز لم يحدّث مع هذا الملف الجديد ← لا نكمل (كان يتوقف بخطأ)، بل إعادة تحميل
+  // واحدة في الجلسة. الصفحة القديمة لا تحمل load-guard.js، فالاحتياط هنا بنفس قاعدة «مرة واحدة».
+  // The mixed-versions guard: an old page (a device that hasn't updated) with this new file ← don't go on (it used to stop with
+  // an error), one reload per session instead. The old page doesn't load load-guard.js, so the fallback keeps the same once-rule.
+  const PAGE_IDS = ['homeDate', 'mapStatus', 'bottomNav', 'moreBox', 'detailsBox', 'stationsBox'];
+  if (PAGE_IDS.some(function (id) { return !$(id); })) {
+    if (global.SecLoadGuard) global.SecLoadGuard.recover('page-mismatch');
+    else {
+      try {
+        const k = ((global.SEC2_CONFIG && global.SEC2_CONFIG.STORAGE_PREFIX) || 'sec2-') + 'load-guard';
+        if (!global.sessionStorage.getItem(k)) { global.sessionStorage.setItem(k, 'page-mismatch'); global.location.reload(); }
+      } catch (e) { /* تخزين محظور ← لا إعادة / storage blocked ← no reload */ }
+    }
+    return;
+  }
+
   const MORPH_SETTLE_MS = 200, OUTAGE_AFTER_MS = 650;
   const MAP_GAP = 12; // هامش المساحة المرئية تحت ما يعلو الخريطة وفوق البطاقة / the visible area's margin under the top items and above the card
   const ME_ZOOM = 16; // تكبير الخريطة على موقع المستخدم / the map zoom on the user's location
