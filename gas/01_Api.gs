@@ -59,6 +59,7 @@ const ROUTES = {
   getStats: { handler: function () { return getStats(); }, access: ACCESS.MEMBER },
   // السجلات (عام كما في V1: يصل الخطأ حتى قبل الدخول) — logs (public as in V1: errors arrive even before login)
   logClientError: { handler: function (d) { return logClientError(d); }, access: ACCESS.PUBLIC },
+  logUsage: { handler: function (d, a) { return logUsage(d, a); }, access: ACCESS.MEMBER }, // سجل الاستخدام اليومي (22 أكتوبر) / the daily usage log
   // لوحة المدير (بتذكرة مدير بالبصمة فقط) — admin dashboard (fingerprint admin ticket only)
   getOperationsDashboard: { handler: function (d) { return getOperationsDashboard(d); }, access: ACCESS.ADMIN, logDenied: true },
   getActiveUsersDetail: { handler: function (d) { return getActiveUsersDetail(d); }, access: ACCESS.ADMIN },

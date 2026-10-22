@@ -105,6 +105,9 @@
           onUpdated: function (st) { if (o.onUpdated) o.onUpdated(st); }
         });
         if (res.found) res.searchMs = Math.max(0, Math.round((global.performance.now() - t0) * 10) / 10);
+        // سجل الاستخدام اليومي (22 أكتوبر): البحث ونتيجته، أعداد فقط — the daily usage log: the search and its result, counts only
+        const U = global.SecUsageLog;
+        if (U) { U.count('search'); U.count(res.found ? (res.source === 'server' ? 'foundServer' : 'foundLocal') : 'notFound'); }
         if (res.found) {
           bar.finish(); setHint_('');
           if (!lens) input.value = '';

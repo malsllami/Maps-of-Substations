@@ -48,7 +48,7 @@ const APP_SHELL = [
   'utils/dates.js', 'utils/html.js', 'utils/station-query.js', 'utils/text-input.js',
   'services/api-client.js', 'services/connection.js', 'services/direction-tracker.js', 'services/fresh-start.js', 'services/nav-camera.js', 'services/navigation.js',
   'services/offline-map.js', 'services/osrm.js', 'services/pwa.js', 'services/session.js', 'services/settings-lists.js',
-  'services/shift-rotation.js', 'services/station-search.js', 'services/stations-db.js', 'services/stations-sync.js', 'services/my-location.js', 'services/theme.js', 'services/load-guard.js',
+  'services/shift-rotation.js', 'services/station-search.js', 'services/stations-db.js', 'services/stations-sync.js', 'services/my-location.js', 'services/theme.js', 'services/load-guard.js', 'services/usage-log.js',
   'services/timing.js', 'services/webauthn-client.js',
   'components/add-edit-station.js', 'components/admin-dashboard.js', 'components/admin-detail.js', 'components/app-header.js', 'components/bottom-nav.js', 'components/station-details.js', 'components/stations-list.js', 'components/district-labels.js', 'components/more-menu.js',
   'components/auth-form.js', 'components/connection-status.js', 'components/contact-admin.js', 'components/delete-station.js',

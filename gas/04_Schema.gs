@@ -18,7 +18,7 @@
  * ===================================================
  */
 
-const SCHEMA_VERSION = 'v2-2'; // v2-2 (16 أكتوبر): أعمدة سجل الأخطاء الجديدة تُضاف تلقائيًا مع أول طلب / the new error-log columns are added with the first request
+const SCHEMA_VERSION = 'v2-3'; // v2-3 (22 أكتوبر): جدول «سجل الاستخدام اليومي» يُنشأ تلقائيًا (إضافة فقط)؛ v2-2 (16 أكتوبر): أعمدة سجل الأخطاء الجديدة تُضاف تلقائيًا مع أول طلب / the new error-log columns are added with the first request
 const SCHEMA_FLAG_KEY = 'schema_version';
 const SCHEMA_CACHE_SECONDS = 21600;
 

@@ -109,6 +109,7 @@
     }
     deps.hideHint();
     build_(station);
+    if (global.SecUsageLog) global.SecUsageLog.navStart(); // سجل الاستخدام (22 أكتوبر): بدء الملاحة / the usage log: navigation start
     onState_(engine.state());
     return true;
   }
@@ -172,6 +173,7 @@
   }
 
   function teardown_() {
+    if (ui && global.SecUsageLog) global.SecUsageLog.navEnd(); // دقائق الملاحة بأي طريقة انتهت / navigation minutes however it ended
     if (!ui) return;
     const u = ui;
     ui = null;

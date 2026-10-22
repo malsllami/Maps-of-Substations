@@ -160,6 +160,7 @@
       if (ids.length < 2) { err.textContent = MSG.MAP_MIN; return null; }
       if (ids.length > MAX) { err.textContent = MSG.MAX; return null; }
       if (o.isBlocked && o.isBlocked()) return null;
+      if (global.SecUsageLog) global.SecUsageLog.count('outage'); // سجل الاستخدام (22 أكتوبر) / the usage log
       busy = true;
       clear();
       if (o.onStart) { try { o.onStart(); } catch (e) { /* لا شيء / nothing */ } }
@@ -211,6 +212,7 @@
       if (ids.length > MAX) { err.textContent = MSG.MAX; return null; }
       const loggedIn = o.isLoggedIn ? o.isLoggedIn() : !!(global.SecSession && global.SecSession.isLoggedIn());
       if (!loggedIn) { err.textContent = MSG.LOGIN; return null; }
+      if (global.SecUsageLog) global.SecUsageLog.count('outage'); // سجل الاستخدام (22 أكتوبر) / the usage log
       busy = true;
       err.textContent = MSG.HOME_SEARCHING;
       try {
