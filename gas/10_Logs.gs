@@ -148,9 +148,8 @@ function classifyError_(source, message) {
   const has = function (text, parts) { return parts.some(function (p) { return text.indexOf(p) !== -1; }); };
   if (has(m, ['resizeobserver loop'])) return 'تحذير متصفح غير ضار';
   // (21 أكتوبر) قبل غيرها: «slow-long» قبل «slow» — before the rest: «slow-long» before «slow»
-  if (has(s, ['client/outage'])) return 'تعطّل الموقع';
-  if (has(s, ['client/slow-long'])) return 'تأخير اتصال طويل';
-  if (has(s, ['client/slow'])) return 'تأخير اتصال';
+  if (has(s, ['client/server-down'])) return 'تعطّل الموقع';       // الخادم لا يرد دقيقتين فأكثر (22 أكتوبر) / the server down 2+ minutes
+  if (has(s, ['client/long-delay'])) return 'تأخير اتصال طويل';     // طلب تأخر دقيقتين فأكثر ثم نجح / a request delayed 2+ minutes
   if (has(s, ['client/recovered'])) return 'تأخر وعالجه الاحتياطي';
   if (has(s, ['client/write-recovered'])) return 'كتابة تأكدت بإعادة الإرسال'; // حُفظت مرة واحدة بنفس opKey — ليست خطأً / saved once — not an error
   if (has(s, ['client/session-expired'])) return 'خروج قسري'; // الخادم رفض التذكرة فخرج المستخدم — السبب في التفاصيل / the server refused the ticket
@@ -201,7 +200,11 @@ function clientErrorKeys_(e) {
 /* (21 أكتوبر) ما عولج تلقائيًا أو فشل والصفحة في الخلفية لا يُسجَّل؛ الأجهزة التي لم تتحدّث بعد ما زالت ترسله بأسمائه
    القديمة فيُتجاهَل هنا — auto-handled or background failures aren't logged; not-yet-updated devices still send them under the
    old names, so they're dropped here */
-const CLIENT_NOT_LOGGED = ['client/recovered', 'client/write-recovered', 'client/background'];
+// (22 أكتوبر) المشاكل الحقيقية فقط: فشل طلب منفرد وتأخير أقل من دقيقتين وإلغاء نافذة البصمة عابرة لا تُسجَّل، وما ترسله
+// الأجهزة التي لم تتحدّث بالقواعد السابقة يُتجاهل — real problems only; transient failures and old-rule sources are dropped
+const CLIENT_NOT_LOGGED = ['client/recovered', 'client/write-recovered', 'client/background', 'client/connection',
+  'client/slow', 'client/slow-long', 'client/outage'];
+const CLIENT_NOT_LOGGED_MESSAGES = /NotAllowedError|AbortError/;
 
 /* الإجراء: يسجّل الجديد فقط من الدفعة ويُرجع عدد ما سُجّل. فحص التكرار والكتابة وحفظ المفاتيح داخل قفل واحد،
  * فلا تُسجَّل دفعتان متطابقتان وصلتا معًا مرتين؛ وإن تعذّر القفل يُسجَّل على أي حال (الخطأ لا يضيع).
@@ -211,7 +214,8 @@ function logClientError(data) {
   if (!Array.isArray(data.errors)) return { error: 'صيغة السجل غير صحيحة' };
   const errors = data.errors.slice(0, CLIENT_ERROR_BATCH_MAX).filter(function (e) {
     return e && typeof e === 'object' && !Array.isArray(e) && !/ResizeObserver loop/i.test(String(e.message || '')) &&
-      CLIENT_NOT_LOGGED.indexOf(String(e.source || '')) === -1;
+      CLIENT_NOT_LOGGED.indexOf(String(e.source || '')) === -1 &&
+      !(/webauthn/.test(String(e.source || '')) && CLIENT_NOT_LOGGED_MESSAGES.test(String(e.message || '')));
   });
   if (!errors.length) return { success: true, logged: 0 };
   const lock = LockService.getScriptLock(), locked = lock.tryLock(5000);

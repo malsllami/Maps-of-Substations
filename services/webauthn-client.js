@@ -83,6 +83,7 @@
       const C = global.SecConnection;
       if (!C || !C.reportEvent) return;
       const name = (err && err.name) || 'غير معروف';
+      if (name === 'NotAllowedError' || name === 'AbortError') return; // ألغاها المستخدم أو انتهت مهلتها — عابر لا يُسجَّل (22 أكتوبر) / cancelled or timed out
       C.reportEvent(kind === 'get' ? 'client/webauthn-assertion' : 'client/webauthn-credential',
         'خطأ البصمة (' + (kind === 'get' ? 'دخول' : 'تسجيل') + '): ' + name,
         'اسم الخطأ: ' + name + ' | رسالة المتصفح: ' + String((err && err.message) || '').slice(0, 120) + ' | المدة حتى الخطأ: ' + ((Date.now() - startedAt) / 1000).toFixed(1) + ' ث');
