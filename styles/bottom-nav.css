@@ -13,7 +13,7 @@
 .bn-inner{height:var(--tabbar-h);max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);align-items:center;}
 .bn-tab{
   height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
-  background:none;border:none;color:var(--text-muted);font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;
+  background:none;border:none;color:var(--text-muted);font-family:inherit;font-size:11.5px;font-weight:700;cursor:pointer;
   -webkit-tap-highlight-color:transparent;transition:color .15s ease;
 }
 .bn-tab.active{color:var(--dist);}
@@ -28,4 +28,6 @@
 /* الملاحة بشاشة كاملة والزائر: لا شريط — full navigation and guests: no bar */
 body.nav-full .bottom-nav, body.guest-mode .bottom-nav{display:none;}
 /* الصفحات الأخرى بالشريط: مسافة سفلية حتى لا يغطي المحتوى — other pages with the bar: bottom room so it never covers content */
-body.has-bottom-nav{padding-bottom:calc(var(--tabbar-h) + var(--bn-safe) + 12px);}
+/* 100lvh (22 أكتوبر): كل صفحة فيها الشريط بطول الشاشة الكامل حتى لو كانت قصيرة، فلا يعطيها الآيفون الارتفاع الأصغر
+   — every page with the bar is the full screen height even when short, so the iPhone never gives it the small height */
+body.has-bottom-nav{min-height:100lvh;padding-bottom:calc(var(--tabbar-h) + var(--bn-safe) + 12px);}

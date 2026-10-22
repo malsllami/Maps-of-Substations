@@ -7,6 +7,10 @@
  * From V1 as is; where pages differed slightly the home page's values are used. The page decides the header position.
  * ============================================================ */
 .app-header{display:flex;flex-direction:column;background:var(--bg);border-bottom:1px solid var(--border);}
+/* الرأس ينزل بالمنطقة الآمنة العلوية في كل الصفحات (22 أكتوبر): الصفحات صارت viewport-fit=cover ليصل الشريط السفلي للحافة،
+   فلا يدخل الرأس تحت الساعة. في المتصفح العادي القيمة 0 — the header moves down by the top safe area on every page (they're
+   viewport-fit=cover now so the bottom bar reaches the edge), so it never sits under the clock. In a normal browser it's 0 */
+#appHeader{padding-top:env(safe-area-inset-top, 0px);background:var(--bg);}
 .header-row-main{
   display:flex;align-items:center;justify-content:space-between;gap:12px;
   padding:16px 28px;

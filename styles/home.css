@@ -361,6 +361,5 @@ body:not(.nav-full) .view-map .map-side{justify-content:flex-end;}
    The status bar in the installed app — extension for home and navigation only. The page extends behind the clock and
    battery: the map shows behind them on home and in navigation, the search and buttons below that area. The page's other
    screens push their header down by the safe area, so they stay as they were. Outside the installed app the top inset is 0. */
-body.home-page #appHeader{padding-top:env(safe-area-inset-top, 0px);background:var(--bg);}
 body.home-page .fullpage-form-header{padding-top:calc(20px + env(safe-area-inset-top, 0px));}
 
