@@ -106,7 +106,7 @@
           '</div>' +
           // وضع الاستكشاف (قريب/مغذي): المسار وإنهاء العرض في السطر نفسه — explore mode: route and end in the same line
           '<div class="sheet-explore">' +
-            '<button type="button" class="sheet-go" data-act="navigate"' + (coords ? '' : ' disabled') + '>' + BTN_ICON.navigate + '<span>المسار</span></button>' +
+            '<button type="button" class="sheet-go" data-act="navigate"' + (coords ? '' : ' disabled') + '>' + BTN_ICON.navigate + '<span>الملاحة</span></button>' +
             '<button type="button" class="sheet-end" data-act="end-explore">إنهاء العرض</button></div>' +
         '</div>' +
         // الصف الثاني: مدة البحث | عدد محطات المغذي (يعرضها) | التفاصيل — row two: search time | feeder count (shows them) | details
@@ -135,7 +135,7 @@
     const coords = Q.hasCoordinates(s), om = !!deps.offlineMapUI, canEdit = !!(deps.canEdit && deps.canEdit());
     const canDelete = !!(deps.isAdmin && deps.isAdmin() && deps.onDelete); // للمدير فقط (التصميم «أ») / admin only (design «A»)
     const buttons = [
-      btn_('navigate', 'primary st-main', 'navigate', 'المسار', coords ? '' : ' disabled'),
+      btn_('navigate', 'primary st-main', 'navigate', 'الملاحة', coords ? '' : ' disabled'),
       coords ? '<a class="st-btn st-google" data-act="google" href="' + esc(googleMapsUrl(s)) + '" target="_blank" rel="noopener"><span class="st-ico">' + BTN_ICON.google + '</span><span class="st-lbl">قوقل ماب</span></a>'
         : '<span class="st-btn st-google st-disabled" aria-disabled="true"><span class="st-ico">' + BTN_ICON.google + '</span><span class="st-lbl">قوقل ماب</span></span>',
       btn_('share', 'st-share', 'share', 'مشاركة')

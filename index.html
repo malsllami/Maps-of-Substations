@@ -111,6 +111,11 @@
     <div class="action-note" id="refreshNote" role="status" hidden></div>
     <div class="home-slot" id="homeOutage"></div>
     <div class="home-slot" id="recentSlot"></div>
+    <!-- البيانات المؤقتة أسفل شاشة «البيانات» (محمد 22 أكتوبر: نُقلت من «المزيد») — the cached data at the bottom of the data screen -->
+    <div class="storage-screen data-storage">
+      <div class="sync-line" id="storageSyncLine" role="status"></div>
+      <div class="home-slot" id="storageSlot"></div>
+    </div>
   </section>
 </section>
 
@@ -129,15 +134,8 @@
 <!-- شاشة «تفاصيل المحطة» (تُفتح من لوحة المحطة) — the station details screen (opened from the station sheet) -->
 <section class="app-view view-details" id="viewDetails"><div id="detailsBox"></div></section>
 
-<!-- شاشة «المزيد» (المرحلة ز) وشاشة «البيانات المؤقتة» المستقلة منها — the «More» screen and its own cached-data screen -->
+<!-- شاشة «المزيد» (المرحلة ز) — the «More» screen -->
 <section class="app-view view-more" id="viewMore"><div id="moreBox"></div></section>
-<section class="app-view view-storage" id="viewStorage">
-  <div class="storage-screen">
-    <div class="ss-head"><button type="button" class="ss-back" id="storageBack" aria-label="رجوع"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button><span class="ss-title">البيانات المؤقتة</span></div>
-    <div class="sync-line" id="storageSyncLine" role="status"></div>
-    <div class="home-slot" id="storageSlot"></div>
-  </div>
-</section>
 
 <!-- شاشة «المحطات» — the stations screen -->
 <section class="app-view view-stations" id="viewStations"><div id="stationsBox"></div></section>

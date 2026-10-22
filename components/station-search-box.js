@@ -37,7 +37,7 @@
    * mount(container, opts) — opts: { variant: 'lens'|'bar', placeholder (للشريط، اختياري)، isLoggedIn() (افتراضيًا session.js), onFound(station),
    *   onAdd(query), onUpdated(station), closeOnOutside() → bool (للعدسة: الافتراضي true)، onTools() → bool (للشريط: زر الأدوات،
    *   يُرجع هل صارت مفتوحة / the bar's tools button, returns whether they are now open)، onFocus() (لمس المربع / the box touched)،
-   *   onClose() (زر × للخروج من وضع البحث / the × to leave search mode)، onStatus() (نقطة حالة النسخة / the copy status dot) }
+   *   onClose() (زر × للخروج من وضع البحث / the × to leave search mode) }
    * يُرجع { search(text)، setCompact(on)، clear()، focus()، isOpen()، isSearching()، destroy() }
    */
   function mount(container, opts) {
@@ -48,7 +48,6 @@
       ? '<div class="search-lens" data-role="box">' + LENS_SVG + '<input data-role="input" placeholder="مثال: 39070 أو ABN" aria-label="رقم المحطة"' + NOFILL + '></div>' +
         '<div class="search-hint" data-role="hint" role="status"></div><div class="search-progress" data-role="progress">' + PROGRESS + '</div>'
       : '<div class="search-and-back-row show"><div class="station-search-bar" data-role="box"><span class="ssb-icon" data-act="search" role="button" aria-label="بحث">' + BAR_SVG + '</span>' +
-        (o.onStatus ? '<button type="button" class="ssb-status" data-act="status" title="حالة نسخة المحطات" aria-label="حالة نسخة المحطات" aria-expanded="false"><span class="ssb-dot"></span></button>' : '') +
         '<input data-role="input" placeholder="ابحث عن محطة أخرى..." aria-label="رقم المحطة"' + NOFILL + '>' +
         (o.onClose ? '<button type="button" class="ssb-close" data-act="close" title="إغلاق البحث والرجوع للوضع العادي" aria-label="إغلاق البحث">' + CLOSE_SVG + '</button>' : '') +
         (o.onTools ? '<button type="button" class="ssb-tools" data-act="tools" title="أدوات الخريطة: قريب، مغذي، أعطال، القياس" aria-label="أدوات الخريطة" aria-expanded="false">' + TOOLS_SVG + '</button>' : '') +
@@ -133,7 +132,6 @@
       if (act === 'retry') { clear(); input.focus(); return; }
       if (act === 'tools') { t.setAttribute('aria-expanded', o.onTools() ? 'true' : 'false'); return; }
       if (act === 'close') { input.blur(); o.onClose(); return; }
-      if (act === 'status') { o.onStatus(); return; }
       if (lens && !box.classList.contains('open')) { open_(); input.focus(); return; }
       if (act === 'search') search();
     }

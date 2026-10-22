@@ -20,8 +20,7 @@ body[data-view="home"] .view-home,
 body[data-view="map"] .view-map,
 body[data-view="stations"] .view-stations,
 body[data-view="details"] .view-details,
-body[data-view="more"] .view-more,
-body[data-view="storage"] .view-storage{display:block;}
+body[data-view="more"] .view-more{display:block;}
 
 /* شاشة الخريطة — the map screen */
 .hero{position:relative;padding:10px 12px 0;}
@@ -140,8 +139,6 @@ body.guest-mode .home-title{display:none;}
 .view-map .toolbar-scroll{justify-content:space-between;gap:2px;padding:6px 6px;}
 .view-map .toolbar-btn,.view-map .map-mode-chip{padding:7px 7px;font-size:13px;gap:4px;}
 .view-map .map-mode-chip .mm-auto-badge{font-size:11px;padding:2px 6px;}
-.view-map [data-tools="more"]{font-size:0;gap:0;padding:7px 9px;} /* «⋯» أيقونة فقط فتتسع كل الأدوات — «⋯» icon only so every tool fits */
-.view-map [data-tools="more"] .tb-icon{font-size:17px;}
 
 /* ===== نظام الألوان الوظيفي (اعتماد محمد، 19 أكتوبر) — the functional color system =====
    اللون يدل على نوع البيانات في الوضعين (الدرجة تتغير فقط): التوزيع أخضر، التحويل أزرق، العمليات ذهبي، الأعطال نحاسي،
@@ -257,7 +254,6 @@ body:not(.nav-full) .view-map .toolbar-scroll{height:auto;padding:0 0 2px;gap:6p
 body:not(.nav-full) .view-map .toolbar-btn,body:not(.nav-full) .view-map .map-mode-chip{padding:8px 11px;border-radius:999px;font-size:13px;
   background:var(--glass-bg);border:1px solid var(--glass-line);color:var(--text-primary);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);}
 body:not(.nav-full) .view-map .toolbar-btn.active{background:var(--teal);border-color:var(--teal);color:#04241c;}
-body:not(.nav-full) .view-map [data-tools="more"]{padding:8px 11px;}
 /* لوحات الأدوات والتلميح بطاقات زجاجية تحت الأزرار — the tool panels and the hint as glass cards under the pills */
 body:not(.nav-full) .view-map .map-mode-panel,body:not(.nav-full) .view-map .map-panels > *,body:not(.nav-full) .view-map .map-tool-hint{
   border:1px solid var(--glass-line);border-radius:14px;background:var(--glass-strong);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);}
@@ -269,11 +265,7 @@ body:not(.nav-full) .view-map .station-sheet{position:absolute;left:8px;right:8p
 /* الأدوات الخمس في سطر واحد بلا قص على 390 (الأنماط، قريب، مغذي، أعطال، ⋯) — all five tools on one line at 390 */
 body:not(.nav-full) .view-map .toolbar-scroll{gap:5px;}
 body:not(.nav-full) .view-map .toolbar-btn,body:not(.nav-full) .view-map .map-mode-chip{padding:7px 9px;gap:4px;font-size:12.5px;}
-body:not(.nav-full) .view-map [data-tools="more"]{padding:7px 10px;}
-@media (max-width:440px){ body:not(.nav-full) .view-map .map-mode-chip .mm-auto-badge{display:none;} body:not(.nav-full) .view-map .toolbar-btn .tb-icon{display:none;} }
-/* «⋯» أيقونة فقط (لا يلتبس بتبويب «المزيد» في الشريط السفلي) — «⋯» icon only (not confused with the bottom bar's «More») */
-body:not(.nav-full) .view-map .toolbar-btn[data-tools="more"] .tb-label{display:none;}
-body:not(.nav-full) .view-map .toolbar-btn[data-tools="more"] .tb-icon{display:inline;font-size:16px;}
+@media (max-width:440px){ body:not(.nav-full) .view-map .map-mode-chip .mm-auto-badge{display:none;} }
 
 /* ===== الرئيسية = الخريطة (طلب محمد 20 أكتوبر، نموذج الصورة) =====
    عمود أزرار زجاجية على اليمين تحت البحث: الملاحة المباشرة (عند وجود محطة)، التكبير/التصغير، الطبقات، الأدوات؛ و«موقعي»
@@ -312,11 +304,10 @@ body:not(.nav-full) .view-map .map-side > *{flex-shrink:0;} /* لا تنضغط �
    الشاشة (مع المناطق الآمنة)، ويرتفع البحث للأعلى ومعه زر × يعيد الوضع العادي. يخص شاشة الخريطة وحدها (التفاصيل وغيرها كما هي).
    Search mode: touching the search or opening a station ← both bars hide, the map takes the whole screen (with the safe
    areas), the search rises with a × that restores normal mode. The map screen only. */
-body.search-mode[data-view="map"] > header,
-body.search-mode[data-view="map"] .bottom-nav{display:none;}
-body.search-mode[data-view="map"]:not(.nav-full) .view-map.hero{top:0;bottom:0;}
+/* (22 أكتوبر، محمد) الشريط السفلي يبقى ظاهرًا في وضع البحث، ويختفي في الملاحة فقط — the bottom bar stays in search mode, hidden only in navigation */
+body.search-mode[data-view="map"] > header{display:none;}
+body.search-mode[data-view="map"]:not(.nav-full) .view-map.hero{top:0;}
 body.search-mode[data-view="map"]:not(.nav-full) .view-map .top-content-area{top:calc(env(safe-area-inset-top, 0px) + 10px);}
-body.search-mode[data-view="map"]:not(.nav-full) .view-map .station-sheet{bottom:calc(env(safe-area-inset-bottom, 0px) + 10px);}
 .ssb-close{display:none;}
 body.search-mode:not(.nav-full) .view-map .ssb-close{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:38px;height:38px;padding:0;border-radius:50%;
   border:1px solid var(--glass-line);background:var(--bg-elev);color:var(--text-primary);cursor:pointer;}
@@ -329,13 +320,6 @@ body.search-mode:not(.nav-full) .view-map .ssb-close{display:flex;align-items:ce
 body.home-page:not(.guest-mode)[data-view="map"] > header{display:none;}
 body.home-page[data-view="map"]:not(.nav-full) .view-map.hero{top:0;}
 body.home-page[data-view="map"]:not(.nav-full) .view-map .top-content-area{top:calc(env(safe-area-inset-top, 0px) + 10px);}
-.ssb-status{display:none;}
-body:not(.nav-full) .view-map .ssb-status{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:30px;height:38px;padding:0;border:none;background:none;cursor:pointer;}
-.ssb-dot{width:12px;height:12px;border-radius:50%;background:var(--st-gray);box-shadow:0 0 0 3px var(--st-gray-bg);}
-.ssb-status[data-sync="ready"] .ssb-dot{background:var(--st-green);box-shadow:0 0 0 3px var(--st-green-bg);}
-.ssb-status[data-sync="offline"] .ssb-dot{background:var(--st-red);box-shadow:0 0 0 3px var(--st-red-bg);}
-.ssb-status[data-sync="partial"] .ssb-dot{background:var(--st-yellow);box-shadow:0 0 0 3px var(--st-yellow-bg);}
-.ssb-status[data-sync="pending"] .ssb-dot{background:var(--st-orange);box-shadow:0 0 0 3px var(--st-orange-bg);}
 .map-status{display:flex;align-items:center;gap:8px;margin-top:6px;padding:8px 10px 8px 8px;border-radius:14px;font-size:13px;font-weight:700;line-height:1.5;
   background:var(--glass-strong);border:1.5px solid var(--st-gray);color:var(--text-primary);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);}
 .map-status[hidden]{display:none;}
@@ -363,3 +347,23 @@ body:not(.nav-full) .view-map .map-side{justify-content:flex-end;}
    screens push their header down by the safe area, so they stay as they were. Outside the installed app the top inset is 0. */
 body.home-page .fullpage-form-header{padding-top:calc(20px + env(safe-area-inset-top, 0px));}
 
+/* ===== صف أدوات الخريطة (محمد 22 أكتوبر): كل الأدوات ظاهرة بتمرير أفقي، بحجم موحّد، ولكل أداة لون يوحي بها =====
+   النمط، قريب (أخضر)، مغذي (بنفسجي)، أعطال 🚧 (أصفر)، قياس (أزرق رمادي)، مسار متعدد (أزرق). النشطة بخلفية لونها نفسه.
+   The map tools row: every tool shown with horizontal scrolling, one size, each tool in a color that suggests it. */
+:root{--tb-feeder-fg:#B9A4F5;--tb-feeder-bg:rgba(106,79,196,0.22);--tb-feeder-line:#6A4FC4;
+  --tb-outage-fg:#F2C94C;--tb-outage-bg:rgba(242,201,76,0.14);--tb-outage-line:rgba(242,201,76,0.6);}
+[data-theme="light"]{--tb-feeder-fg:#4B2D96;--tb-feeder-bg:#EEE7FA;--tb-feeder-line:#C6B4EE;
+  --tb-outage-fg:#7A5C00;--tb-outage-bg:#FFF4CC;--tb-outage-line:#E9C46A;}
+body:not(.nav-full) .view-map .toolbar-scroll{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-inline:2px;}
+body:not(.nav-full) .view-map .toolbar-scroll::-webkit-scrollbar{display:none;}
+body:not(.nav-full) .view-map .toolbar-btn,body:not(.nav-full) .view-map .map-mode-chip{flex:0 0 auto;height:38px;padding:0 13px;gap:5px;font-size:13px;white-space:nowrap;}
+body:not(.nav-full) .view-map .toolbar-btn .tb-icon{display:inline;font-size:15px;}
+body:not(.nav-full) .view-map [data-nearby="nearby"]{--tb-fg:var(--c-dist-fg);--tb-bg:var(--c-dist-bg);--tb-line:var(--c-dist-line);}
+body:not(.nav-full) .view-map [data-nearby="feeder"]{--tb-fg:var(--tb-feeder-fg);--tb-bg:var(--tb-feeder-bg);--tb-line:var(--tb-feeder-line);}
+body:not(.nav-full) .view-map [data-outage="toggle"]{--tb-fg:var(--tb-outage-fg);--tb-bg:var(--tb-outage-bg);--tb-line:var(--tb-outage-line);}
+body:not(.nav-full) .view-map [data-tool="measure"]{--tb-fg:var(--c-info-fg);--tb-bg:var(--c-info-bg);--tb-line:var(--c-info-line);}
+body:not(.nav-full) .view-map [data-tool="route"]{--tb-fg:var(--c-sub-fg);--tb-bg:var(--c-sub-bg);--tb-line:var(--c-sub-line);}
+body:not(.nav-full) .view-map .toolbar-btn[data-nearby],body:not(.nav-full) .view-map .toolbar-btn[data-outage],body:not(.nav-full) .view-map .toolbar-btn[data-tool]{
+  color:var(--tb-fg);background:var(--tb-bg);border-color:var(--tb-line);}
+body:not(.nav-full) .view-map .toolbar-btn[data-nearby].active,body:not(.nav-full) .view-map .toolbar-btn[data-outage].active,body:not(.nav-full) .view-map .toolbar-btn[data-tool].active{
+  background:var(--tb-fg);border-color:var(--tb-fg);color:var(--bg);}

@@ -101,7 +101,7 @@
   }
 
   // ===== الشاشات والشريط السفلي (إعادة التصميم) — The screens and the bottom bar (redesign) =====
-  const VIEWS = ['home', 'map', 'stations', 'details', 'more', 'storage'];
+  const VIEWS = ['home', 'map', 'stations', 'details', 'more'];
   // الخريطة تحت تبويب «الرئيسية»، وشاشة الأرقام (home) تحت «البيانات»، والشاشات الفرعية تُبقي تبويب أصلها
   // The map is under «home», the numbers screen (home) under «data», and sub-screens keep their parent's tab
   const TAB_OF = { map: 'home', details: 'home', home: 'data', storage: 'more' };
@@ -171,9 +171,10 @@
       onOverlayChange: function () { global.requestAnimationFrame(layout); }
     });
     if (myPos) view.showMe(myPos);
-    // صف الأدوات ظاهر دائمًا ما لم يُخفه المستخدم (طلب محمد 20 أكتوبر) — the tools row shown unless the user hid it
-    view.toggleTools(!pref_(KEYS.MAP_TOOLS_HIDDEN));
-    const tb = doc.querySelector('#barBox [data-act="tools"]'); if (tb) tb.setAttribute('aria-expanded', pref_(KEYS.MAP_TOOLS_HIDDEN) ? 'false' : 'true');
+    // صف الأدوات ظاهر ما لم يطوه المستخدم بأيقونة الضبط؛ مفتاح جديد (22 أكتوبر) فيظهر من جديد لمن طواه سابقًا
+    // The tools row shows unless the user folds it with the sliders icon; a new key (22 Oct) so it reappears for anyone who folded it
+    view.toggleTools(!pref_(KEYS.MAP_TOOLS_FOLDED));
+    const tb = doc.querySelector('#barBox [data-act="tools"]'); if (tb) tb.setAttribute('aria-expanded', pref_(KEYS.MAP_TOOLS_FOLDED) ? 'false' : 'true');
     // أسماء أحياء جدة الحقيقية من نسخة المحطات، وتتحدث حين يتغير عدد المحطات — the real district names from the copy
     const districts = SecDistrictLabels.mount(view, {
       stations: function () { return SYNC.state().loaded ? SYNC.stations() : null; },
@@ -315,8 +316,7 @@
   const lens = SecStationSearchBox.mount($('lensBox'), { variant: 'bar', placeholder: 'اكتب رقم المحطة أو رمزها', isLoggedIn: loggedIn, onFound: goToStation, onAdd: function (q) { SecStationForm.openAdd(q); }, onUpdated: onUpdated_ });
   const bar = SecStationSearchBox.mount($('barBox'), { variant: 'bar', isLoggedIn: loggedIn, onFound: goToStation, onAdd: function (q) { SecStationForm.openAdd(q); }, onUpdated: onUpdated_,
     onFocus: function () { enterSearchMode_(); }, onClose: function () { closeSearchMode_(); },
-    onStatus: function () { statusOpen = !statusOpen; setPref_(KEYS.MAP_STATUS_HIDDEN, !statusOpen); paintSync_(); }, // نقطة الحالة / the status dot
-    onTools: function () { if (!view) return false; const on = view.toggleTools(); setPref_(KEYS.MAP_TOOLS_HIDDEN, !on); return on; } }); // أدوات الخريطة من مربع البحث (النموذج) / the map tools from the search box
+    onTools: function () { if (!view) return false; const on = view.toggleTools(); setPref_(KEYS.MAP_TOOLS_FOLDED, !on); return on; } }); // أدوات الخريطة من مربع البحث (النموذج) / the map tools from the search box
   // بطاقة «بحث عن حالة عطل» في صف الإجراءات تفتح لوحة الأرقام تحته (تصميم محمد، 15 أكتوبر) / the outage tile opens the panel below it
   const outage = SecOutageSearch.mountHome($('homeOutage'), {
     toggle: $('outageTileBtn'),
@@ -481,21 +481,17 @@
    * التحديث تحت البحث؛ وتظهر البطاقة وحدها حين لا تكون الحالة خضراء (انقطاع، توقف، نسخة جديدة) حتى لا تفوت المستخدم.
    * Home has no top bar: the copy status is a colored dot in the search box; tapping it shows the text and the refresh
    * button under the search; the card shows by itself whenever the status isn't green so the user never misses it. */
-  // ظاهرة دائمًا ما لم يُخفها المستخدم بالنقطة، والاختيار محفوظ (طلب محمد 20 أكتوبر) — shown unless the user hid it with the dot, remembered
+  // بطاقة الحالة ظاهرة دائمًا تحت البحث (محمد 22 أكتوبر: حُذفت النقطة من مربع البحث) — the status card always shown under the search
   const KEYS = global.SEC2_CONFIG.STORAGE_KEYS;
   const pref_ = function (k) { try { return global.localStorage.getItem(k) === '1'; } catch (e) { return false; } };
   const setPref_ = function (k, on) { try { if (on) global.localStorage.setItem(k, '1'); else global.localStorage.removeItem(k); } catch (e) { /* بلا تخزين / no storage */ } };
-  let statusOpen = !pref_(KEYS.MAP_STATUS_HIDDEN);
   function paintMapStatus_(s) {
-    const dot = doc.querySelector('#barBox [data-act="status"]'), card = $('mapStatus');
-    if (!dot || !card) return;
+    const card = $('mapStatus');
+    if (!card) return;
     const st = SYNC.state(), ready = s.k === 'ready';
-    dot.dataset.sync = s.k; dot.title = s.t;
     card.dataset.sync = s.k;
     card.querySelector('[data-role="map-status-text"]').textContent = ready ? s.t + (st.syncedAt ? ' — آخر تحديث: ' + D.relativeTime(st.syncedAt) : '') : s.t;
-    const show = statusOpen || !ready;
-    if (card.hidden === show) { card.hidden = !show; global.requestAnimationFrame(layout); }
-    dot.setAttribute('aria-expanded', show ? 'true' : 'false');
+    if (card.hidden) { card.hidden = false; global.requestAnimationFrame(layout); }
   }
   function paintSync_() {
     const s = syncState_(), bar = header.status.bar, btn = header.refreshButton;
@@ -549,18 +545,10 @@
     setView('map'); // فورًا قبل أي إجراء بعدها (الملاحة تحتاج الخريطة ظاهرة) — at once, before any next action (navigation needs the map shown)
     if (global.history.state && global.history.state.secView === 'details') global.history.back(); // يُزيل خطوة السجل فقط / only drops the history step
   }
-  global.addEventListener('popstate', function () { const v = doc.body.dataset.view; if (v === 'details') setView('map'); else if (v === 'storage') setView('more'); });
+  global.addEventListener('popstate', function () { const v = doc.body.dataset.view; if (v === 'details') setView('map'); });
 
-  // ===== «المزيد» والبيانات المؤقتة (المرحلة ز) — «More» and the cached data screen =====
-  const more = SecMoreMenu.mount($('moreBox'), { onStorage: function () { openStorage_(); } });
-  function openStorage_() {
-    setView('storage');
-    try { global.history.pushState({ secView: 'storage' }, ''); } catch (e) { /* بلا سجل تنقل / no history */ }
-  }
-  $('storageBack').addEventListener('click', function () {
-    setView('more');
-    if (global.history.state && global.history.state.secView === 'storage') global.history.back();
-  });
+  // ===== «المزيد» (المرحلة ز)؛ البيانات المؤقتة صارت أسفل شاشة «البيانات» (22 أكتوبر) — «More»; the cached data moved to the data screen =====
+  const more = SecMoreMenu.mount($('moreBox'), {});
 
   // ===== شاشة «المحطات»: القريبة من موقعي والتصفية (المرحلة و) — the stations screen: nearby and filters =====
   const stationsList = SecStationsList.mount($('stationsBox'), {

@@ -34,9 +34,8 @@
 .mm-logout .mm-ic{background:none;border:none;color:inherit;width:auto;height:auto;}
 .mm-logout[data-confirm="1"]{background:var(--danger);color:#FFFFFF;}
 /* شاشة البيانات المؤقتة — the cached data screen */
-.ss-head{display:flex;align-items:center;gap:8px;}
-.ss-back{width:42px;height:42px;border-radius:12px;border:1px solid var(--border-strong);background:var(--bg-card);color:var(--text-primary);display:flex;align-items:center;justify-content:center;cursor:pointer;}
-.ss-title{font-size:17px;font-weight:700;color:var(--text-primary);}
+/* البيانات المؤقتة داخل شاشة «البيانات» (22 أكتوبر): بعرض البطاقات بلا حشو إضافي — inside the data screen, the cards' width */
+.data-storage{width:100%;max-width:560px;padding:0;}
 .storage-screen .storage-row{max-width:none;}
 .storage-screen .storage-cells{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:14px;}
 .storage-screen .storage-cell:nth-child(3){border-right:none;}

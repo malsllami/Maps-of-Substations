@@ -33,7 +33,7 @@
   /* ما يبقى بعد المسح — What survives a clear.
      علامة «البداية النظيفة» تبقى: بدونها تُعاد البداية النظيفة فتمسح الجلسة وتُخرج المستخدم (خلل اكتُشف 16 أكتوبر)
      The fresh-start marker stays: without it the fresh start reruns, clearing the session and logging the user out */
-  const KEEP = [K.SESSION, K.PHONE, K.REMEMBER_PHONE, K.THEME, K.MAP_MODE, K.NAV_GLASS, K.NAV_ROTATE, K.MAP_STATUS_HIDDEN, K.MAP_TOOLS_HIDDEN, K.PENDING_ERRORS, K.FRESH_START, K.DEVICE_ID];
+  const KEEP = [K.SESSION, K.PHONE, K.REMEMBER_PHONE, K.THEME, K.MAP_MODE, K.NAV_GLASS, K.NAV_ROTATE, K.MAP_STATUS_HIDDEN, K.MAP_TOOLS_HIDDEN, K.MAP_TOOLS_FOLDED, K.PENDING_ERRORS, K.FRESH_START, K.DEVICE_ID];
   const MSG = {
     TITLE: 'البيانات المؤقتة',
     CLEAR: 'مسح التخزين المؤقت',

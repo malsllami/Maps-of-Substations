@@ -3,13 +3,13 @@
  * ============================================================
  * تجمع ما في القائمة المنسدلة نفسها، كل عنصر بإجرائه الحالي (لا منطق جديد):
  * - الحساب: حسابي، الورديات، لوحة المدير (للمدير فقط).
- * - البيانات: خريطة جدة بدون إنترنت (offline-map-ui)، البيانات المؤقتة (شاشتها المستقلة — onStorage).
+ * - البيانات: خريطة جدة بدون إنترنت (offline-map-ui). البيانات المؤقتة صارت أسفل شاشة «البيانات» (22 أكتوبر).
  * - التطبيق: الوضع الداكن (theme.js)، حفظ الموقع كتطبيق (install-sheet؛ يختفي إن كان مثبّتًا)، الجولة التعريفية.
  * - الخروج: بتأكيد بضغطة ثانية خلال 4 ث، كالقائمة المنسدلة (session.logout).
  * كل عنصر يظهر فقط إن كان مكوّنه محمّلًا في الصفحة. النصوص ثابتة من الواجهة، والاسم من الجلسة يُكتب نصًا.
  *
  * The «More» screen: the same items as the dropdown menu, each with its current action (no new logic) — account pages,
- * the Jeddah offline map, the cached data screen, theme, install, the tour, and logout with a second-tap confirmation.
+ * the Jeddah offline map (the cached data moved to the data screen), theme, install, the tour, and logout with a second-tap confirmation.
  * Each item shows only when its component is loaded. The session name is set as text.
  * ============================================================ */
 (function (global) {
@@ -36,7 +36,7 @@
 
   /**
    * mount(container, deps) ← { render(), destroy() }
-   * deps: { onStorage() (فتح شاشة البيانات المؤقتة), onLogout (افتراضيًا SecSession.logout) }
+   * deps: { onLogout (افتراضيًا SecSession.logout) }
    */
   function mount(container, deps) {
     const d = deps || {};
@@ -61,8 +61,7 @@
           '<span class="mm-role"><bdi class="mm-phone" data-role="phone" dir="ltr"></bdi> · ' + (SESSION.isAdmin() ? 'مدير' : 'عضو') + '</span></div></div>' +
         group_('الحساب', link_('member.html', 'k-sub', 'user', 'حسابي') + link_('shifts.html', 'k-total', 'cal', 'تقويم دوام الورديات') +
           (SESSION.isAdmin() ? link_('admin.html', 'k-ops', 'shield', 'لوحة المدير') : '')) +
-        group_('البيانات', (g.SecOfflineMapUI ? item_('offline-map', 'k-dist', 'map', 'خريطة جدة بدون إنترنت') : '') +
-          (d.onStorage ? item_('storage', 'k-info', 'db', 'البيانات المؤقتة') : '')) +
+        group_('البيانات', (g.SecOfflineMapUI ? item_('offline-map', 'k-dist', 'map', 'خريطة جدة بدون إنترنت') : '')) +
         // التواصل مع المدير (كان في القائمة المنسدلة للصفحات الأخرى) — contacting the admin (was in the other pages' dropdown)
         (g.SecContactAdmin ? group_('التواصل', '<a class="mm-item k-dist" href="#" data-act="call"><span class="mm-ic">' + ICON.phone + '</span><span class="mm-lbl">اتصال بالمدير</span>' + ICON.chev + '</a>' +
           item_('message', 'k-sub', 'chat', 'مراسلة المدير')) : '') +
@@ -94,7 +93,6 @@
       const act = t.dataset.act, g = global;
       if (act === 'theme') THEME.toggle();
       else if (act === 'offline-map') { if (g.SecOfflineMapUI) g.SecOfflineMapUI.open(); }
-      else if (act === 'storage') { if (d.onStorage) d.onStorage(); }
       else if (act === 'install') { if (g.SecInstallSheet) g.SecInstallSheet.open(); }
       else if (act === 'tour') { if (g.SecFeatureTour) g.SecFeatureTour.open(); }
       else if (act === 'message') { e.preventDefault(); if (g.SecContactAdmin) g.SecContactAdmin.open(); }

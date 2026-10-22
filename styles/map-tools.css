@@ -5,18 +5,6 @@
  * أحرف الأعطال، رابط قوقل ماب).
  * From V1 as is; V1's inline styles (route point numbers, outage letters, the Google Maps link) as classes.
  * ============================================================ */
-.more-panel{
-  display:none;flex-direction:column;gap:6px;flex-shrink:0;
-  background:var(--bg-card);border-bottom:1px solid var(--border-strong);
-  padding:8px 14px;
-}
-.more-panel.show{display:flex;}
-.nearby-opt{
-  text-align:right;background:transparent;border:none;padding:9px 10px;border-radius:8px;
-  font-size:12px;color:var(--text-primary);cursor:pointer;font-family:inherit;
-}
-.nearby-opt:hover{background:var(--bg-elev);}
-.nearby-opt.active{background:var(--bg-elev);font-weight:700;color:var(--teal);}
 .route-point{
   width:22px;height:22px;border-radius:50%;border:2px solid #fff;color:#fff;
   display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;

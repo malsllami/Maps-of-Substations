@@ -38,9 +38,11 @@
     const o = opts || {};
     const map = view.map, L = global.L;
     let tool = null, points = [], layers = [], line = null, seq = 0, req = null, debounce = null, lastCall = 0;
-    view.tools.insertAdjacentHTML('beforeend', '<button type="button" class="toolbar-btn" data-tools="more" title="أدوات إضافية" aria-haspopup="true"><span class="tb-icon">⋯</span><span class="tb-label">المزيد</span></button>');
-    view.panels.insertAdjacentHTML('beforeend', '<div class="more-panel" data-role="more-panel"><button type="button" class="nearby-opt" data-tool="measure">📐 قياس المسافة</button><button type="button" class="nearby-opt" data-tool="route">🔗 رسم مسار متعدد النقاط</button></div>');
-    const panel = view.panels.querySelector('[data-role="more-panel"]'), moreBtn = view.tools.querySelector('[data-tools="more"]');
+    // زرّان في الصف مباشرة بدل «⋯» ولوحته (محمد 22 أكتوبر) — two buttons right in the row instead of «⋯» and its panel
+    view.tools.insertAdjacentHTML('beforeend',
+      '<button type="button" class="toolbar-btn" data-tool="measure" title="قياس المسافة"><span class="tb-icon">📐</span><span class="tb-label">قياس</span></button>' +
+      '<button type="button" class="toolbar-btn" data-tool="route" title="رسم مسار متعدد النقاط"><span class="tb-icon">🔗</span><span class="tb-label">مسار متعدد</span></button>');
+    const toolBtns = view.tools.querySelectorAll('[data-tool]');
 
     function clearDrawing_() {
       layers.forEach(function (l) { map.removeLayer(l); }); layers = [];
@@ -49,10 +51,9 @@
       global.clearTimeout(debounce);
       if (req) { req.abort(); req = null; }
     }
-    function syncButtons_() { panel.querySelectorAll('[data-tool]').forEach(function (b) { b.classList.toggle('active', b.dataset.tool === tool); }); }
+    function syncButtons_() { toolBtns.forEach(function (b) { b.classList.toggle('active', b.dataset.tool === tool); }); }
 
     function start(t) {
-      panel.classList.remove('show');
       if (o.isBlocked && o.isBlocked()) return false;
       const next = tool === t ? null : t; // نفس الأداة ← إنهاء (V1) / the same tool ← end (V1)
       clearDrawing_();
@@ -126,16 +127,10 @@
     }
 
     function onMapClick_(e) { if (tool === 'measure') measureClick_(e.latlng); else if (tool === 'route') routeClick_(e.latlng); }
-    function onToolsClick_(e) {
-      if (e.target.closest('[data-tools="more"]')) { e.stopPropagation(); panel.classList.toggle('show'); }
-    }
-    function onPanelClick_(e) { const b = e.target.closest('[data-tool]'); if (b) start(b.dataset.tool); }
-    function onDocClick_(e) { if (!moreBtn.contains(e.target) && !panel.contains(e.target)) panel.classList.remove('show'); }
+    function onToolsClick_(e) { const b = e.target.closest('[data-tool]'); if (b) start(b.dataset.tool); }
 
     map.on('click', onMapClick_);
     view.tools.addEventListener('click', onToolsClick_);
-    panel.addEventListener('click', onPanelClick_);
-    global.document.addEventListener('click', onDocClick_);
 
     return {
       start: start, stop: stop,
@@ -144,9 +139,8 @@
       destroy: function () {
         clearDrawing_(); tool = null;
         map.off('click', onMapClick_);
-        view.tools.removeEventListener('click', onToolsClick_); panel.removeEventListener('click', onPanelClick_);
-        global.document.removeEventListener('click', onDocClick_);
-        moreBtn.remove(); panel.remove();
+        view.tools.removeEventListener('click', onToolsClick_);
+        toolBtns.forEach(function (b) { b.remove(); });
       }
     };
   }
