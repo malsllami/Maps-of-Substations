@@ -49,6 +49,7 @@
         '<div class="search-hint" data-role="hint" role="status"></div><div class="search-progress" data-role="progress">' + PROGRESS + '</div>'
       : '<div class="search-and-back-row show"><div class="station-search-bar" data-role="box"><span class="ssb-icon" data-act="search" role="button" aria-label="بحث">' + BAR_SVG + '</span>' +
         '<input data-role="input" placeholder="ابحث عن محطة أخرى..." aria-label="رقم المحطة"' + NOFILL + '>' +
+        '<button type="button" class="ssb-kb" data-act="kb" aria-label="تبديل لوحة المفاتيح بين الأرقام والحروف"></button>' +
         (o.onClose ? '<button type="button" class="ssb-close" data-act="close" title="إغلاق البحث والرجوع للوضع العادي" aria-label="إغلاق البحث">' + CLOSE_SVG + '</button>' : '') +
         (o.onTools ? '<button type="button" class="ssb-tools" data-act="tools" title="أدوات الخريطة: قريب، مغذي، أعطال، القياس" aria-label="أدوات الخريطة" aria-expanded="false">' + TOOLS_SVG + '</button>' : '') +
         '</div></div>' +
@@ -58,6 +59,28 @@
     if (o.placeholder) input.placeholder = String(o.placeholder);
     TI.code(input, MAX_LEN);
     const hintCls = lens ? 'search-hint' : 'station-search-hint';
+
+    // ===== لوحة مفاتيح البحث: أرقام افتراضيًا، وزر «ABC / 123» يبدّل للحروف (طلب محمد 22 أكتوبر) =====
+    // صفحة الويب لا تفتح لوحة الأرقام التي فيها زر الحروف (مثل قوقل شيت)، فالتبديل بزر بجانب الحقل، ويُحفظ آخر اختيار.
+    // The search keyboard: numbers by default, an «ABC / 123» button switches to letters; a web page can't open the native
+    // numbers-with-letters pad, so a button beside the field switches, and the last choice is kept.
+    const KB_KEY = global.SEC2_CONFIG.STORAGE_KEYS.SEARCH_KEYBOARD, kbBtn = r('box').querySelector('[data-act="kb"]');
+    function kbLetters_() { try { return global.localStorage.getItem(KB_KEY) === 'abc'; } catch (e) { return false; } }
+    function applyKb_(letters) {
+      if (!kbBtn) return;
+      input.inputMode = letters ? 'text' : 'numeric';
+      kbBtn.textContent = letters ? '123' : 'ABC'; // الزر يعرض اللوحة الأخرى / the button names the other keyboard
+    }
+    function toggleKb_() {
+      const letters = !kbLetters_();
+      try { global.localStorage.setItem(KB_KEY, letters ? 'abc' : '123'); } catch (e) { /* تخزين محظور: التبديل لهذه المرة / storage blocked: this time only */ }
+      applyKb_(letters);
+      // الآيفون لا يبدّل اللوحة المفتوحة إلا بإعادة التركيز (داخل اللمسة نفسها) — the iPhone swaps an open keyboard only on refocus
+      if (doc.activeElement === input) { input.blur(); input.focus(); }
+    }
+    applyKb_(kbLetters_());
+    // الضغط على الزر لا يُخرج المؤشر من الحقل (فلا تُغلق لوحة المفاتيح) — pressing the button keeps the caret in the field
+    if (kbBtn) kbBtn.addEventListener('pointerdown', function (e) { e.preventDefault(); });
 
     function setHint_(text, err) { hint.className = hintCls + (err ? ' err' : ''); hint.textContent = text || ''; }
 
@@ -132,6 +155,7 @@
       if (act === 'retry') { clear(); input.focus(); return; }
       if (act === 'tools') { t.setAttribute('aria-expanded', o.onTools() ? 'true' : 'false'); return; }
       if (act === 'close') { input.blur(); o.onClose(); return; }
+      if (act === 'kb') { toggleKb_(); return; }
       if (lens && !box.classList.contains('open')) { open_(); input.focus(); return; }
       if (act === 'search') search();
     }

@@ -311,6 +311,9 @@ body.search-mode[data-view="map"] > header{display:none;}
 body.search-mode[data-view="map"]:not(.nav-full) .view-map.hero{top:0;}
 body.search-mode[data-view="map"]:not(.nav-full) .view-map .top-content-area{top:calc(env(safe-area-inset-top, 0px) + 10px);}
 .ssb-close{display:none;}
+/* زر تبديل لوحة المفاتيح بين الأرقام والحروف (22 أكتوبر) — the numbers/letters keyboard switch */
+.ssb-kb{display:flex;align-items:center;justify-content:center;flex-shrink:0;min-width:40px;height:30px;padding:0 8px;border-radius:15px;cursor:pointer;
+  border:1px solid var(--glass-line);background:var(--bg-elev);color:var(--text-primary);font-size:12px;font-weight:700;letter-spacing:.3px;direction:ltr;}
 body.search-mode:not(.nav-full) .view-map .ssb-close{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:38px;height:38px;padding:0;border-radius:50%;
   border:1px solid var(--glass-line);background:var(--bg-elev);color:var(--text-primary);cursor:pointer;}
 
