@@ -145,7 +145,10 @@
     container.addEventListener('click', onClick_);
     container.addEventListener('keydown', onKey_);
     // لمس المربع (أو التركيز عليه بلوحة المفاتيح) يُبلغ الصفحة — touching the box (or keyboard focus) tells the page
-    if (o.onFocus) ['focus', 'pointerdown', 'click'].forEach(function (t) { input.addEventListener(t, function () { o.onFocus(); }); });
+    // بعد التركيز فقط لا عند اللمس (22 أكتوبر): تغيّر الصفحة قبل رفع الإصبع (زر × يظهر فيضيق الحقل) جعل الآيفون لا يركّز الحقل
+    // ولا يُظهر لوحة المفاتيح إلا بلمسة ثانية — only after focus, not on touch: the layout changing before the finger lifts
+    // (the × appears and the field narrows) made the iPhone skip focusing the field, so the keyboard needed a second tap
+    if (o.onFocus) ['focus', 'click'].forEach(function (t) { input.addEventListener(t, function () { o.onFocus(); }); });
     doc.addEventListener('click', onDocClick_);
 
     return {

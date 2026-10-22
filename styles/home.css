@@ -243,7 +243,9 @@ body:not(.nav-full) .view-map .station-search-bar input{font-family:'JetBrains M
 /* المسرح بكامل المساحة: الخريطة خلفية، والأدوات واللوحات تتراص تحت البحث فوقها — the stage fills the area: the map behind, tools stacked above it */
 body:not(.nav-full) .view-map .map-stage-slot{position:absolute;inset:0;margin:0;width:auto;padding:0;}
 body:not(.nav-full) .view-map .map-stage-slot .globe-stage.map-active{position:absolute;inset:0;width:100%;height:100%;min-height:0;margin:0;
-  padding:calc(var(--search-h, 46px) + 16px) 12px 0;box-sizing:border-box;gap:6px;pointer-events:none;}
+  padding:calc(var(--search-bottom, 56px) + 6px) 12px 0;box-sizing:border-box;gap:6px;pointer-events:none;}
+/* (22 أكتوبر) الأدوات تبدأ تحت البحث المقاس فعلًا: البحث ينزل بالمنطقة الآمنة العلوية (62 في الآيفون)، فكان الصف يختفي خلفه
+   (22 Oct) the tools start under the measured search: the search drops by the top safe area (62 on iPhone), hiding the row behind it */
 body:not(.nav-full) .view-map .globe-stage.map-active > *{pointer-events:auto;}
 body:not(.nav-full) .view-map .globe-stage.map-active #map-container{position:absolute;inset:0;height:100% !important;border-radius:0;z-index:0;}
 body:not(.nav-full) .view-map .map-toolbar-bar,body:not(.nav-full) .view-map .map-mode-panel,body:not(.nav-full) .view-map .map-panels > *,
@@ -278,7 +280,7 @@ body:not(.nav-full) .view-map .map-stage-slot .globe-stage.map-active{padding-ri
    بجانبه (يسارًا) بدل أن تختفي خلف البطاقة — the column is bounded between the search and the card: never covered; when short,
    the extra buttons wrap into a second column beside it (to the left) instead of hiding behind the card */
 body:not(.nav-full) .view-map .map-side{display:flex;flex-direction:column;flex-wrap:nowrap;align-items:center;gap:8px;position:absolute;
-  top:calc(var(--search-h, 46px) + 14px);bottom:calc(var(--sheet-h, 0px) + 10px);right:12px;z-index:12;pointer-events:none;}
+  top:calc(var(--search-bottom, 56px) + 4px);bottom:calc(var(--sheet-h, 0px) + 10px);right:12px;z-index:12;pointer-events:none;}
 body:not(.nav-full) .view-map .map-side > *{pointer-events:auto;}
 /* المساحة ضيقة: «+ / −» ثم زر الملاحة يُخفيان (map-view fitSide) — short space: «+ / −», then the navigation button, hide */
 body:not(.nav-full) .view-map .globe-stage.side-no-zoom .map-side .zoom-controls{display:none;}

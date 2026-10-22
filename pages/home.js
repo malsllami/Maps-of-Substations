@@ -159,6 +159,8 @@
     hero.style.setProperty('--sheet-h', Math.round(sheet) + 'px');
     // أدوات الخريطة العائمة تقيسها الخريطة بنفسها لحظة التوسيط — the map measures its own floating tools when centering
     const searchBottom = $('topContentArea').getBoundingClientRect().bottom - hr.top;
+    // أسفل البحث الفعلي (مع المنطقة الآمنة العلوية في الآيفون): الأدوات تبدأ تحته لا تحته بـ 10 ثابتة — the real search bottom (with the iPhone's top safe area)
+    hero.style.setProperty('--search-bottom', Math.round(searchBottom) + 'px');
     view.setInsets(searchBottom + MAP_GAP, sheet ? sheet + MAP_GAP : 0);
     view.fitSide(searchBottom + 10, sheet + 10); // العمود بين البحث (أو الأدوات) والبطاقة / the column between the search (or tools) and the card
     global.requestAnimationFrame(function () { view.map.invalidateSize(); view.recenter(); }); // المحطة تبقى في المنتصف المرئي / the station stays mid visible
