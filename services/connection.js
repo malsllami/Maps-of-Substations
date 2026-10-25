@@ -224,7 +224,9 @@
   /* ===== التصنيف — Classification =====
    * إجراءات تكتب بيانات: فشلها لا يعني أن الكتابة لم تتم (قد يكون الخادم نفّذها وضاع الرد) ← «نتيجة كتابة غير مؤكدة».
    * Data-writing actions: their failure doesn't mean the write didn't happen (the server may have done it and the reply got lost) */
-  const WRITE_ACTIONS = { addNewStation: 1, updateCoordinates: 1, deleteStation: 1, registerUser: 1, registerCredential: 1, updateMemberProfile: 1, clearSearchCache: 1 };
+  // (25 أكتوبر) clearSearchCache ليس منها: يعيد بناء فهرس البحث فقط وتكراره آمن، ففشله المنفرد عابر لا يُسجَّل
+  // clearSearchCache isn't one: it only rebuilds the search index and is safe to repeat, so a single failure is transient
+  const WRITE_ACTIONS = { addNewStation: 1, updateCoordinates: 1, deleteStation: 1, registerUser: 1, registerCredential: 1, updateMemberProfile: 1 };
   // طلبات لا يُسجَّل فشلها أبدًا: سجل الأخطاء نفسه وعدّادات الاستخدام (تُعاد تلقائيًا) — never logged: the logger and the usage counters
   const QUIET_ACTIONS = { logClientError: 1, logUsage: 1 };
 
