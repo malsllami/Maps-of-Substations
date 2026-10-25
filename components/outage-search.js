@@ -150,7 +150,8 @@
       a.className = 'outage-gmaps-link'; a.target = '_blank'; a.rel = 'noopener'; a.href = googleUrl(found); a.textContent = 'الانتقال بالترتيب على قوقل ماب';
       hint.appendChild(a);
       // بعد ظهور التلميح: النقاط داخل المساحة المرئية تحته وفوق البطاقة — after the hint shows: the points in the visible area below it
-      map.fitBounds(bounds.length > 1 ? bounds : [bounds[0], bounds[0]], Object.assign(view.fitPadding ? view.fitPadding(44) : { padding: [44, 44] }, { maxZoom: 17 }));
+      const fitOpts = Object.assign(view.fitPadding ? view.fitPadding(44) : { padding: [44, 44] }, { maxZoom: 17 }), fitPts = bounds.length > 1 ? bounds : [bounds[0], bounds[0]];
+      if (view.fitSafe) view.fitSafe(fitPts, fitOpts); else map.fitBounds(fitPts, fitOpts); // بلا NaN إن ضاقت الخريطة (25 أكتوبر) / no NaN on a short map
     }
 
     async function search(raw) {

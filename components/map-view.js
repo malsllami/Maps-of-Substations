@@ -90,7 +90,7 @@
    *   onLocate() (زر «موقعي»)، onOverlayChange() (فتح/طي الأدوات)، now() للاختبار }
    * يُرجع { map، mode()، resolvedMode()، setMode(m)، showStation(s)، clearStation()، tools (مكان الأزرار)، panels،
    *   hint(text)، hideHint()، toast(text)، usingOffline()، refresh()، destroy()، setInsets(top, bottom)، centerOn(latlng, zoom, fly)،
-   *   fitPadding(pad)، insets()، showMe(pos)، toggleTools(open)، recenter()، fitSide(topMin, bottom) }
+   *   fitPadding(pad)، insets()، showMe(pos)، toggleTools(open)، recenter()، fitSide(topMin, bottom)، fitSafe(points, opts) }
    */
   function mount(stage, opts) {
     const o = opts || {};
@@ -205,17 +205,40 @@
     const FLY_MS = 1600;
     map.on('movestart', function () { if (!internal) focus = null; });
     function move_(fn) { internal = true; try { fn(); } finally { internal = false; } }
+    /* (25 أكتوبر، سجل الأخطاء) الخريطة مخفية (مقاسها صفر: نموذج التعديل أو شاشة أخرى) أو الصفحة بالخلفية: حركة الطيران تقسم
+     * على المقاس فترمي «Invalid LatLng (NaN, NaN)» في كل إطار — لا حركة حينها، بل انتقال مباشر.
+     * The map hidden (size 0: the edit form or another screen) or the page in the background: the fly animation divides
+     * by the size and throws «Invalid LatLng (NaN, NaN)» every frame — no animation then, a direct jump instead. */
+    function hidden_() { const s = map.getSize(); return !s.x || !s.y || global.document.visibilityState === 'hidden'; }
+    function finite_(ll) { return !!ll && isFinite(ll.lat) && isFinite(ll.lng); }
     function centerOn(latlng, zoom, fly) {
-      const z = zoom == null ? map.getZoom() : zoom, c = visibleCenter_(latlng, z);
-      move_(function () { if (fly) map.flyTo(c, z, { duration: 1.4 }); else map.setView(c, z); });
-      focus = { ll: L.latLng(latlng), t: Date.now() };
+      const z = zoom == null ? map.getZoom() : zoom, hidden = hidden_();
+      let c = hidden ? L.latLng(latlng) : visibleCenter_(latlng, z); // مخفية: المساحة المرئية تُحسب عند ظهورها (recenter) / hidden: recentred once shown
+      if (!finite_(c)) c = L.latLng(latlng);
+      move_(function () { if (fly && !hidden) map.flyTo(c, z, { duration: 1.4 }); else map.setView(c, z, { animate: false }); });
+      focus = { ll: L.latLng(latlng), t: hidden ? 0 : Date.now() }; // مخفية: لا طيران ينتظره recenter / hidden: no fly for recenter to wait on
     }
     /* نظرة جدة كاملة (الرئيسية) — the whole-Jeddah overview (home) */
     function overview() { centerOn(CENTER, START_ZOOM, false); }
     function recenter() {
-      if (!focus || Date.now() - focus.t < FLY_MS) return; // أثناء الطيران لا يُقاطَع / never cuts a fly
-      const z = map.getZoom(), want = map.project(visibleCenter_(focus.ll, z), z), now = map.project(map.getCenter(), z);
-      if (want.distanceTo(now) > 3) move_(function () { map.setView(map.unproject(want, z), z, { animate: false }); });
+      if (!focus || Date.now() - focus.t < FLY_MS || hidden_()) return; // أثناء الطيران لا يُقاطَع، ومخفية لا مساحة لها / never cuts a fly; hidden has no area
+      const z = map.getZoom(), c = visibleCenter_(focus.ll, z);
+      let now = null;
+      try { now = map.getCenter(); } catch (e) { now = null; } // مركز أفسدته حركة سابقة ← يُعاد ضبطه / a center spoilt earlier ← reset
+      if (!finite_(c)) return;
+      const want = map.project(c, z);
+      if (!finite_(now) || want.distanceTo(map.project(now, z)) > 3) move_(function () { map.setView(c, z, { animate: false }); });
+    }
+    /* ملاءمة محطات بهوامش ما يغطي الخريطة؛ إن لم يصلح التكبير (الهوامش أكبر من الخريطة، كلوحة المفاتيح في أندرويد، أو مخفية)
+     * تتوسط المحطات بتكبير الحد الأعلى — fits stations with the covering margins; when the zoom isn't valid (margins larger than
+     * the map, e.g. Android's keyboard, or hidden) the stations are centred at the max zoom instead */
+    function fitSafe(points, opts) {
+      const o = opts || {}, b = L.latLngBounds(points);
+      let z = NaN;
+      const both = L.point(o.padding || [0, 0]).multiplyBy(2), pad = both.add(o.paddingTopLeft || [0, 0]).add(o.paddingBottomRight || [0, 0]);
+      try { if (!hidden_()) z = map.getBoundsZoom(b, false, pad); } catch (e) { z = NaN; }
+      if (isFinite(z) && z > 0) { try { move_(function () { map.fitBounds(b, o); }); if (finite_(map.getCenter())) return; } catch (e) { /* يُكمل بالبديل / falls back */ } }
+      centerOn(b.getCenter(), o.maxZoom || STATION_ZOOM, false);
     }
     /* العمود الجانبي بين ما يطفو أعلى الخريطة والبطاقة، عمود واحد دائمًا: إن ضاقت المساحة يُخفى «+ / −» أولًا (التكبير بإصبعين
      * متاح)، ثم زر الملاحة (زر «المسار» في البطاقة) — لا زر يُغطّى ولا عمود ثانٍ فوق الأدوات.
@@ -305,7 +328,7 @@
       map: map, tools: q('tools'), panels: q('panels'),
       mode: function () { return mode; }, resolvedMode: resolved, setMode: setMode, refresh: apply,
       usingOffline: function () { return offlineFlavor !== null; },
-      showStation: showStation, clearStation: clearStation, setInsets: setInsets, centerOn: centerOn, fitPadding: fitPadding, recenter: recenter, fitSide: fitSide, overview: overview, stationZoom: STATION_ZOOM,
+      showStation: showStation, clearStation: clearStation, setInsets: setInsets, centerOn: centerOn, fitPadding: fitPadding, fitSafe: fitSafe, recenter: recenter, fitSide: fitSide, overview: overview, stationZoom: STATION_ZOOM,
       insets: current_, hint: hint, hideHint: hideHint, toast: toast, showMe: showMe,
       toggleTools: toggleTools_,
       destroy: function () {

@@ -135,7 +135,9 @@
       const pad = view.fitPadding ? view.fitPadding(16) : { padding: [16, 16] };
       if (center) { const z = view.stationZoom || 16; if (view.centerOn) view.centerOn([center.lat, center.lng], z); else map.setView([center.lat, center.lng], z); return; }
       const pts = data.map(function (s) { return [s.lat, s.lng]; }).concat(center ? [[center.lat, center.lng]] : []);
-      if (pts.length) map.fitBounds(pts.length > 1 ? pts : [pts[0], pts[0]], Object.assign(pad, { maxZoom: 16 }));
+      if (!pts.length) return;
+      const fitOpts = Object.assign(pad, { maxZoom: 16 }), fitPts = pts.length > 1 ? pts : [pts[0], pts[0]];
+      if (view.fitSafe) view.fitSafe(fitPts, fitOpts); else map.fitBounds(fitPts, fitOpts); // بلا NaN إن ضاقت الخريطة (25 أكتوبر) / no NaN on a short map
     }
 
     /* تفعيل/إخفاء نمط (V1) — Toggle a mode (V1) */

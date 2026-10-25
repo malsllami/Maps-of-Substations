@@ -361,8 +361,12 @@
     const key = msg + '|' + where;
     if (seenJsErrors[key]) return;
     seenJsErrors[key] = true;
-    const trace = String(stack || '').split('\n').slice(0, 4).map(function (l) { return l.trim().replace(/https?:\/\/[^/]+\/[^/]*\//g, ''); }).join(' ← ');
-    queueError_('client/js', 'خطأ برمجي: ' + msg, 'المكان: ' + where + (trace ? ' | تسلسل الاستدعاءات: ' + trace.slice(0, 400) : ''),
+    // أول سطرين، ثم أول سطرين من كودنا (خارج libs/): خطأ داخل مكتبة يُظهر من استدعاها (25 أكتوبر — كانت أسطر Leaflet وحدها)
+    // the first two lines, then our first two frames (outside libs/): an error inside a library shows who called it
+    const lines = String(stack || '').split('\n').map(function (l) { return l.trim().replace(/https?:\/\/[^/]+\/[^/]*\//g, ''); }).filter(Boolean);
+    const ours = lines.slice(3).filter(function (l) { return /\.js:\d/.test(l) && !/libs\//.test(l); }).slice(0, 2);
+    const trace = lines.slice(0, 3).concat(ours).join(' ← ');
+    queueError_('client/js', 'خطأ برمجي: ' + msg, 'المكان: ' + where + (trace ? ' | تسلسل الاستدعاءات: ' + trace.slice(0, 600) : ''),
       { action: where, failKind: 'خطأ برمجي', file: where, outcome: '—' }); // الملف والسطر في رمز المشكلة: كل خطأ مشكلة مستقلة / file:line in the code
   }
   global.addEventListener('error', function (ev) {
