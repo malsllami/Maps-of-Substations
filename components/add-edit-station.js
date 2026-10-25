@@ -132,6 +132,9 @@
     const e = form.r('error');
     e.textContent = text || '';
     e.classList.toggle('sf-info', !!ok);
+    // الرسالة أعلى النموذج والحفظ من أسفله: تمرير إليها حتى تُرى (25 أكتوبر — كانت تظهر خارج الشاشة فيبدو الحفظ بلا رد)
+    // the message sits above, the save below: scroll to it so it's seen (it used to show off-screen, the save looked silent)
+    if (text && e.scrollIntoView) e.scrollIntoView({ block: 'center', behavior: 'smooth' });
   }
 
   function setType_(form, type) {
