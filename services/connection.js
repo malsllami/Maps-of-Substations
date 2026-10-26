@@ -234,8 +234,10 @@
    * يُسجَّل: نتيجة كتابة غير مؤكدة؛ تأخير طلب دقيقتين فأكثر ثم نجح («تأخير اتصال طويل»)؛ والخادم لا يرد دقيقتين فأكثر والجهاز
    * متصل والصفحة ظاهرة («تعطّل الموقع» — مرة واحدة حتى يعود رد سليم). كل ما سواها عابر لا يُسجَّل: فشل طلب واحد، أو ما
    * عالجه الاحتياطي أو إعادة الإرسال في أقل من دقيقتين، أو والصفحة في الخلفية، أو والجهاز بلا إنترنت. زمن الخلفية لا يُحتسب.
+   * (26 أكتوبر) «الجهاز متصل» قبل «تعطّل الموقع» يُتحقق منه بفحص فعلي لموقعنا (deviceOnline_) لا navigator.onLine وحده.
    * Logged: an unconfirmed write; a request delayed two minutes or more then succeeded; the server not answering for two
-   * minutes or more while online and visible (once until a healthy reply). Everything else is transient and not logged. */
+   * minutes or more while online and visible (once until a healthy reply). Everything else is transient and not logged.
+   * "Online" before an outage is confirmed by a real check of our own site (deviceOnline_), not navigator.onLine alone. */
   const LOG = { DELAY: CONFIG.TIMING.LOG_DELAY_MS, DOWN: CONFIG.TIMING.LOG_DOWN_MS };
   function incidentMs_(attempts) {
     const start = Math.min.apply(null, attempts.map(function (a) { return a.startedAt; }));
@@ -253,18 +255,41 @@
   }
 
   // ===== تعطّل الموقع: الخادم لا يرد دقيقتين فأكثر — the outage: the server not answering two minutes or more =====
-  let downSince = null, downReported = false; // null = لا حادثة جارية / no outage in progress
+  let downSince = null, downReported = false, probing = false; // null = لا حادثة جارية / no outage in progress
   function noteOk_() { downSince = null; downReported = false; } // رد سليم ← انتهى التعطّل / a healthy reply ← the outage is over
+
+  /* (26 أكتوبر) هل إنترنت الجهاز يعمل فعلًا؟ navigator.onLine يبقى true في أندرويد على بيانات جوال بلا إنترنت، فيُفحص
+   * موقعنا نفسه (GitHub Pages — غير خادم Apps Script) بطلب HEAD لا يعترضه عامل الخدمة ولا ذاكرة المتصفح. لا رد خلال
+   * 8 ث ← شبكة الجهاز هي العطل لا الخادم. يُرجع زمن الرد بالملّي ثانية أو null.
+   * Is the device's internet really working? navigator.onLine stays true on Android mobile data with no internet, so our own
+   * site (GitHub Pages — not the Apps Script server) is checked with a HEAD request that neither the service worker nor the
+   * browser cache intercepts. No reply within 8 s ← the device's network is at fault, not the server. Resolves ms or null. */
+  const PROBE_TIMEOUT_MS = 8000;
+  function deviceOnline_() {
+    const ctl = new AbortController(), startedAt = Date.now();
+    const timer = global.setTimeout(function () { ctl.abort(); }, PROBE_TIMEOUT_MS);
+    return originalFetch('sw.js?probe=' + startedAt, { method: 'HEAD', cache: 'no-store', signal: ctl.signal }) // نسبي لمجلد الصفحة / relative to the page's folder
+      .then(function () { return Date.now() - startedAt; }, function () { return null; })
+      .finally(function () { global.clearTimeout(timer); });
+  }
+
   function noteDown_(action, attempts) {
     const start = Math.min.apply(null, attempts.map(function (a) { return a.startedAt; }));
     const end = Math.max.apply(null, attempts.map(function (a) { return a.startedAt + (a.ms || 0); }));
     if (downSince === null) downSince = start;
     const span = end - downSince;
-    if (span < LOG.DOWN || downReported) return;
-    downReported = true;
-    const main = attempts[attempts.length - 1];
-    queueError_('client/server-down', 'تعطّل الموقع: الخادم لا يرد منذ ' + sec_(span) + ' (آخر طلب: ' + action + ')',
-      details_(attempts), { action: action, failKind: failKind_(main), outcome: 'الخادم لا يرد ' + sec_(span) });
+    if (span < LOG.DOWN || downReported || probing) return;
+    probing = true;
+    deviceOnline_().then(function (probeMs) {
+      probing = false;
+      // شبكة الجهاز معطّلة ← عابر لا يُسجَّل، ويُعاد الفحص مع الفشل التالي / the device's network is down ← not logged, rechecked on the next failure
+      if (probeMs === null || leavingPage || downReported || downSince === null) return;
+      downReported = true;
+      const main = attempts[attempts.length - 1];
+      queueError_('client/server-down', 'تعطّل الموقع: الخادم لا يرد منذ ' + sec_(span) + ' (آخر طلب: ' + action + ')',
+        details_(attempts) + ' || فحص شبكة الجهاز: سليم (رد الموقع خلال ' + sec_(probeMs) + ')',
+        { action: action, failKind: failKind_(main), outcome: 'الخادم لا يرد ' + sec_(span) });
+    });
   }
 
   /* فشل نهائي (طلب واحد، أو الأصلي والاحتياطي معًا) — a final failure (one request, or the original and backup together) */
