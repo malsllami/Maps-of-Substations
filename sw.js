@@ -27,6 +27,11 @@
  *   reloads itself once.
  * ============================================================ */
 importScripts('config/الإعدادات.js');
+// ختم النسخة (30 أكتوبر): المتصفح لا يكتشف نسخة جديدة إلا بتغيّر هذا الملف أو ملف الإعدادات، وتغيير أي ملف موقع آخر وحده لا
+// يصل للأجهزة. لا يُعدَّل يدويًا: خطاف pre-commit يحدّثه مع كل commit فيه ملف موقع، واختبار البوابة test_sw_build.js يتحقق.
+// The build stamp: a browser detects a new version only when this file or the config changes; any other site file alone never
+// reaches devices. Not edited by hand: the pre-commit hook updates it on every commit with a site file; the gate verifies.
+const SW_BUILD = '20261031-023648-439097200';
 const CONFIG = self.SEC2_CONFIG;
 const CACHE_NAME = CONFIG.SHELL_CACHE_NAME;
 const NEXT_CACHE = CACHE_NAME + '-next'; // تثبيت نسخة جديدة دون لمس العاملة / installing a new version without touching the working one
@@ -90,6 +95,7 @@ async function install_() {
     await Promise.allSettled(CDN_ASSETS.map((url) => fetchOk_(url, { mode: 'cors' }).then((res) => next.put(url, res))));
   } catch (err) {
     await caches.delete(NEXT_CACHE).catch(() => {});
+    console.warn('فشل تثبيت النسخة ' + SW_BUILD + ' / install failed:', err);
     throw err; // التثبيت يفشل والنسخة العاملة تبقى / the install fails, the working version stays
   }
 }
