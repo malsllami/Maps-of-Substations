@@ -8,13 +8,15 @@
  * - لا تظهر فوق الجولة أو الملاحة أو الحفظ أو لوحة التحديث، فلا يقطع الخروج عملًا جاريًا.
  * - «متابعة من هذا التطبيق الآن» تكشف صفحة الدخول حتى الفتح التالي، لمن كان في مهمة. وتتوقف بعد 5 فتحات: الموقع لا يعرف
  *   هل حُذف التطبيق، فلا يُحبس عضو فيها إلى الأبد.
- * - تثبيت جديد (أو إعادة التثبيت بعد الحذف) يبدأ بـ«البداية النظيفة»: لا تظهر له أبدًا.
+ * - تثبيت جديد أو إعادة تثبيت لا تظهر له أبدًا: فتح الموقع في Safari يعلّم الجهاز منتهيًا (قد ينتقل تخزينه إلى التطبيق)،
+ *   وتطبيق يبدأ بلا جلسة يُعدّ جديدًا.
  *
  * A full-screen «reinstall the app» flow on iPhone: iOS keeps an app's icon and name from when it was added. Shows to a current
  * member opening the installed app on iPhone/iPad; never in Safari, on Android or offline. After the page updates: a message,
  * an automatic logout, then a red message, the copy-link button and steps over the login page. Never over the tour, navigation,
  * a save or the update sheet. «Continue here» reveals the login until the next open; it stops after 5 opens, since the site
- * can't tell whether the app was deleted. A new install or re-install never sees it.
+ * can't tell whether the app was deleted. A new install or re-install never sees it: opening the site in Safari marks it done
+ * (iOS may carry that storage into the app), and an app starting with no session counts as new.
  * ============================================================ */
 (function (global) {
   'use strict';
@@ -47,11 +49,11 @@
   function setSessionFlag_(key) { try { global.sessionStorage.setItem(key, '1'); } catch (e) { /* تخزين محظور / storage blocked */ } }
 
   /* التطبيق المثبّت على الآيفون أو الآيباد — the installed app on iPhone or iPad */
-  function isInstalledIos_() {
+  function isIosDevice_() {
     const nav = global.navigator, ua = nav.userAgent || '';
     // «طلب موقع سطح المكتب» يجعل الآيفون يعرّف نفسه Macintosh، واللمس يميّزه عن Mac الحقيقي (تجربة محمد 31 أكتوبر)
     // «Request desktop website» makes an iPhone report Macintosh; touch tells it apart from a real Mac
-    return nav.standalone === true && (/iPhone|iPad/.test(ua) || (/Macintosh/.test(ua) && nav.maxTouchPoints > 1));
+    return /iPhone|iPad/.test(ua) || (/Macintosh/.test(ua) && nav.maxTouchPoints > 1);
   }
 
   /* نافذة أو عملية لا تظهر الشاشة فوقها — a window or operation the screen never shows over */
@@ -118,12 +120,15 @@
   }
 
   function start_() {
-    if (!isInstalledIos_()) return;
+    if (!isIosDevice_()) return;
     const state = readState_();
     if (state && state.done) return;
-    // تثبيت جديد: أيقونته جديدة أصلًا، فلا تظهر له أبدًا — a new install already has the new icon, so it never shows
-    if (global.SecFreshStart && global.SecFreshStart.quietUpdates() && !(state && state.opens)) { writeState_({ done: true }); return; }
-    if (!hasSession_() && !(state && state.loggedOut)) return; // غير مسجّل دخوله ← تنتظر دخوله / logged out ← waits for the login
+    // في Safari: أي تطبيق يُحفظ من هنا جديد، وقد ينقل الآيفون هذا التخزين إليه فلا تتكرر الشاشة (تجربة محمد 31 أكتوبر)
+    // In Safari: any app saved from here is new, and iOS may carry this storage into it, so the screen never repeats
+    if (global.navigator.standalone !== true) { writeState_({ done: true }); return; }
+    // تطبيق بدأ بلا جلسة ولم تمر به الشاشة: تثبيت جديد أيقونته جديدة أصلًا — an app starting with no session, never shown it: a new install
+    if (!hasSession_() && !(state && (state.loggedOut || state.opens))) { writeState_({ done: true }); return; }
+    if (!hasSession_() && !state.loggedOut) return; // خرج بنفسه بعد ظهورها ← تنتظر دخوله / logged out by himself after it showed ← waits
     if (global.navigator.onLine === false) return; // إعادة التثبيت تحتاج إنترنت / reinstalling needs the internet
     global.setTimeout(tryShow_, FIRST_CHECK_MS);
   }

@@ -31,7 +31,7 @@ importScripts('config/الإعدادات.js');
 // يصل للأجهزة. لا يُعدَّل يدويًا: خطاف pre-commit يحدّثه مع كل commit فيه ملف موقع، واختبار البوابة test_sw_build.js يتحقق.
 // The build stamp: a browser detects a new version only when this file or the config changes; any other site file alone never
 // reaches devices. Not edited by hand: the pre-commit hook updates it on every commit with a site file; the gate verifies.
-const SW_BUILD = '20261031-045337-551509300';
+const SW_BUILD = '20261031-050237-971985900';
 const CONFIG = self.SEC2_CONFIG;
 const CACHE_NAME = CONFIG.SHELL_CACHE_NAME;
 const NEXT_CACHE = CACHE_NAME + '-next'; // تثبيت نسخة جديدة دون لمس العاملة / installing a new version without touching the working one
