@@ -48,6 +48,7 @@
       SW_RELOAD: PREFIX + 'sw-reload',                   // وقت آخر إعادة تحميل بعد تحديث عامل الخدمة (sessionStorage) — منع الحلقة / last reload after a SW update — loop guard
       FRESH_START: PREFIX + 'fresh-start',               // رقم «البداية النظيفة» المنفّذة على هذا الجهاز / the fresh start id already run on this device
       USAGE_LOG: PREFIX + 'usage-log',                   // عدّادات الاستخدام اليومية قبل إرسالها (22 أكتوبر) / the daily usage counters before sending
+      REINSTALL_NOTICE: PREFIX + 'reinstall-notice',     // عُرضت بطاقة إعادة التثبيت على هذا الجهاز (31 أكتوبر) / the reinstall card was shown on this device
       DEVICE_ID: PREFIX + 'device-id'                    // معرّف جهاز مجهول لعدّ المتأثرين بالأخطاء (16 أكتوبر) / an anonymous device id for counting affected people
     },
 
