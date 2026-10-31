@@ -48,7 +48,10 @@
 
   /* التطبيق المثبّت على الآيفون أو الآيباد — the installed app on iPhone or iPad */
   function isInstalledIos_() {
-    return global.navigator.standalone === true && /iPhone|iPad/.test(global.navigator.userAgent || '');
+    const nav = global.navigator, ua = nav.userAgent || '';
+    // «طلب موقع سطح المكتب» يجعل الآيفون يعرّف نفسه Macintosh، واللمس يميّزه عن Mac الحقيقي (تجربة محمد 31 أكتوبر)
+    // «Request desktop website» makes an iPhone report Macintosh; touch tells it apart from a real Mac
+    return nav.standalone === true && (/iPhone|iPad/.test(ua) || (/Macintosh/.test(ua) && nav.maxTouchPoints > 1));
   }
 
   /* نافذة أو عملية لا تظهر الشاشة فوقها — a window or operation the screen never shows over */
