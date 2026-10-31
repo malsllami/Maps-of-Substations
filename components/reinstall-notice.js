@@ -6,16 +6,16 @@
  * - شاشة كاملة لعضو حالي يفتح التطبيق المثبّت على الآيفون أو الآيباد؛ لا تظهر في Safari ولا أندرويد ولا بلا إنترنت.
  * - بعد تحديث الصفحة: رسالة «سيتم تسجيل خروجك آليًا» ثم خروج آلي، ثم فوق صفحة الدخول رسالة حمراء وزر نسخ الرابط والخطوات.
  * - لا تظهر فوق الجولة أو الملاحة أو الحفظ أو لوحة التحديث، فلا يقطع الخروج عملًا جاريًا.
- * - «متابعة من هذا التطبيق الآن» تكشف صفحة الدخول حتى الفتح التالي، لمن كان في مهمة. وتتوقف بعد 5 فتحات: الموقع لا يعرف
- *   هل حُذف التطبيق، فلا يُحبس عضو فيها إلى الأبد.
+ * - الخروج الآلي مرة واحدة فقط لكل جهاز: بمجرد الدخول بعده تنتهي الشاشة نهائيًا، لأن الموقع لا يعرف هل حُذف التطبيق.
+ * - «متابعة من هذا التطبيق الآن» تكشف صفحة الدخول لمن كان في مهمة، وتتوقف الشاشة بعد 5 فتحات بلا دخول.
  * - تثبيت جديد أو إعادة تثبيت لا تظهر له أبدًا: فتح الموقع في Safari يعلّم الجهاز منتهيًا (قد ينتقل تخزينه إلى التطبيق)،
  *   وتطبيق يبدأ بلا جلسة يُعدّ جديدًا.
  *
  * A full-screen «reinstall the app» flow on iPhone: iOS keeps an app's icon and name from when it was added. Shows to a current
  * member opening the installed app on iPhone/iPad; never in Safari, on Android or offline. After the page updates: a message,
  * an automatic logout, then a red message, the copy-link button and steps over the login page. Never over the tour, navigation,
- * a save or the update sheet. «Continue here» reveals the login until the next open; it stops after 5 opens, since the site
- * can't tell whether the app was deleted. A new install or re-install never sees it: opening the site in Safari marks it done
+ * a save or the update sheet. The automatic logout happens once per device: logging in after it ends this for good, since the
+ * site can't tell whether the app was deleted. «Continue here» reveals the login; it stops after 5 opens with no login. A new install or re-install never sees it: opening the site in Safari marks it done
  * (iOS may carry that storage into the app), and an app starting with no session counts as new.
  * ============================================================ */
 (function (global) {
@@ -106,13 +106,12 @@
   function tryShow_() {
     if (sessionFlag_(CLOSED_KEY) || doc.querySelector('[data-role="reinstall-notice"]')) return;
     if (busy_()) { global.setTimeout(tryShow_, BUSY_RECHECK_MS); return; }
-    const state = readState_() || {}, session = hasSession_();
+    const state = readState_() || {};
     if (!sessionFlag_(OPENED_KEY)) {
       if ((state.opens || 0) >= MAX_OPENS) { writeState_({ done: true }); return; }
       setSessionFlag_(OPENED_KEY);
       state.opens = (state.opens || 0) + 1;
     }
-    if (session) state.loggedOut = false; // دخل من جديد من التطبيق القديم / logged in again from the old app
     writeState_(state);
     if (state.loggedOut) { show_(outHtml_()); return; }
     show_(mainHtml_());
@@ -129,6 +128,9 @@
     // تطبيق بدأ بلا جلسة ولم تمر به الشاشة: تثبيت جديد أيقونته جديدة أصلًا — an app starting with no session, never shown it: a new install
     if (!hasSession_() && !(state && (state.loggedOut || state.opens))) { writeState_({ done: true }); return; }
     if (!hasSession_() && !state.loggedOut) return; // خرج بنفسه بعد ظهورها ← تنتظر دخوله / logged out by himself after it showed ← waits
+    // الخروج الآلي مرة واحدة لكل جهاز: دخل بعده ← انتهت. حذف التطبيق لا يمسح تخزينه دائمًا، فلا يُكرَّر أبدًا (تجربة محمد 31 أكتوبر)
+    // The automatic logout happens once per device: logging in after it ends this. Deleting the app doesn't always clear its storage
+    if (hasSession_() && state && state.loggedOut) { writeState_({ done: true }); return; }
     if (global.navigator.onLine === false) return; // إعادة التثبيت تحتاج إنترنت / reinstalling needs the internet
     global.setTimeout(tryShow_, FIRST_CHECK_MS);
   }
