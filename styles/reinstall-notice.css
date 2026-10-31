@@ -1,0 +1,23 @@
+/* ============================================================
+ * styles/reinstall-notice.css — شاشة «إعادة تثبيت التطبيق» الكاملة بألوان لوحة التحديث
+ * The full «reinstall the app» screen, in the update sheet's colours
+ * ============================================================ */
+.rn-screen{
+  position:fixed;inset:0;z-index:4000;overflow-y:auto;box-sizing:border-box;
+  padding:calc(20px + env(safe-area-inset-top, 0px)) 16px calc(20px + env(safe-area-inset-bottom, 0px));
+  background:var(--upd-bg);color:var(--text-primary);display:flex;
+}
+.rn-card{width:100%;max-width:480px;margin:auto;text-align:center;}
+.rn-title{margin:0 0 8px;font-size:21px;font-weight:800;color:var(--upd-amber);}
+.rn-text{margin:0 0 14px;font-size:14px;line-height:1.7;color:var(--text-secondary);}
+.rn-steps{list-style:none;margin:0 0 14px;padding:0;display:grid;gap:8px;}
+.rn-step{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:14px;text-align:right;font-size:14px;font-weight:600;line-height:1.6;
+  border:1px solid var(--border-strong);background:rgba(240,180,41,.07);}
+.rn-n{width:26px;height:26px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;font-weight:800;background:var(--upd-amber);color:var(--upd-on-amber);}
+.rn-alert{margin:0 0 14px;padding:13px 14px;border-radius:14px;font-size:16px;font-weight:800;line-height:1.7;color:#fff;background:#D92D32;}
+.rn-link{margin:0 0 10px;padding:10px 12px;border-radius:14px;font-size:13px;word-break:break-all;-webkit-user-select:text;user-select:text;
+  border:1px solid var(--border-strong);}
+.rn-primary{width:100%;margin-bottom:14px;border:0;border-radius:14px;padding:14px;cursor:pointer;font-family:inherit;font-size:16px;font-weight:800;
+  background:linear-gradient(135deg, var(--upd-amber), var(--upd-amber-deep));color:var(--upd-on-amber);}
+.rn-primary:disabled{opacity:.7;cursor:default;}
+.rn-secondary{background:none;border:0;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:14px;color:var(--text-secondary);}

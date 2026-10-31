@@ -31,7 +31,7 @@ importScripts('config/الإعدادات.js');
 // يصل للأجهزة. لا يُعدَّل يدويًا: خطاف pre-commit يحدّثه مع كل commit فيه ملف موقع، واختبار البوابة test_sw_build.js يتحقق.
 // The build stamp: a browser detects a new version only when this file or the config changes; any other site file alone never
 // reaches devices. Not edited by hand: the pre-commit hook updates it on every commit with a site file; the gate verifies.
-const SW_BUILD = '20261031-035432-213686900';
+const SW_BUILD = '20261031-043411-347991200';
 const CONFIG = self.SEC2_CONFIG;
 const CACHE_NAME = CONFIG.SHELL_CACHE_NAME;
 const NEXT_CACHE = CACHE_NAME + '-next'; // تثبيت نسخة جديدة دون لمس العاملة / installing a new version without touching the working one
@@ -67,7 +67,7 @@ const APP_SHELL = [
   'styles/connection-status.css', 'styles/contact-admin.css', 'styles/delete-station.css', 'styles/globe.css', 'styles/home.css',
   'styles/map-tools.css', 'styles/map-view.css', 'styles/map.css', 'styles/member.css', 'styles/navigation.css', 'styles/offline-map.css',
   'styles/perf-viewer.css', 'styles/profile-gate.css', 'styles/recent-stations.css', 'styles/shifts.css', 'styles/station-card.css',
-  'styles/station-search.css', 'styles/stats-cards.css', 'styles/storage-section.css', 'styles/tables.css', 'styles/update-sheet.css', 'styles/install-sheet.css', 'styles/feature-tour.css'
+  'styles/station-search.css', 'styles/stats-cards.css', 'styles/storage-section.css', 'styles/tables.css', 'styles/update-sheet.css', 'styles/reinstall-notice.css', 'styles/install-sheet.css', 'styles/feature-tour.css'
 ];
 const CDN_ASSETS = Object.keys(CONFIG.LIBRARIES).map((k) => CONFIG.LIBRARIES[k]);
 const CACHE_FIRST_HOSTS = ['cdnjs.cloudflare.com', 'cdn.jsdelivr.net', 'fonts.googleapis.com', 'fonts.gstatic.com'];
