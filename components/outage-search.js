@@ -32,7 +32,7 @@
     MAP_NONE: 'المحطات غير موجودة', HOME_NONE: 'ما لقيت أي محطة صالحة بالأرقام المدخلة',
     // (6 نوفمبر) الترتيب والملاحة وبطاقة غير الموجودة — order, navigation and the not-found card
     ORDER_NEAR: '↕ حسب الأقرب', ORDER_INPUT: '↕ نفس الترتيب', NAVIGATE: '🧭 ملاحة بالترتيب',
-    GOOGLE: 'قوقل ماب بالترتيب', GOOGLE_FIRST: '(أول 9 محطات)', MISSING_TITLE: 'محطات غير موجودة'
+    GOOGLE: 'قوقل ماب بالترتيب', GOOGLE_PART: 'قوقل ماب', MISSING_TITLE: 'محطات غير موجودة'
   };
 
   /* الأرقام بالترتيب (قرار محمد، 8 أكتوبر): بحث الأعطال قائمة محطات — الفواصل: «,» «،» «/» «&» والسطر الجديد، وكل شرطة
@@ -90,12 +90,24 @@
    * A Google Maps directions link without an origin ← Google starts from «my location» and shows the navigation button,
    * then the stations in order (Mohammed's decision: even a single station — V1 opened it view-only) */
   // (6 نوفمبر) صيغة المسار «dir//أ/ب/…» بدل waypoints: تطبيق قوقل ماب على الجوال كان يُسقط بعض النقاط (ظهرت A وC فقط)،
-  // والخانة الأولى الفارغة = «موقعي». قوقل يقبل 10 نقاط بموقعي، فالرابط بأول 9 محطات
-  // The «dir//a/b/…» path form instead of waypoints: the mobile Google Maps app dropped some points (only A and C showed);
-  // the empty first slot = «my location». Google takes 10 points with my location, so the link carries the first 9 stations
-  const GOOGLE_MAX_STOPS = 9;
-  function googleUrl(found) {
-    return 'https://www.google.com/maps/dir//' + found.slice(0, GOOGLE_MAX_STOPS).map(function (s) { return s.lat + ',' + s.lng; }).join('/') + '/data=!4m2!4m1!3e0';
+  // والخانة الأولى الفارغة = «موقعي». وتطبيق الجوال يقبل 5 محطات فقط في الرابط (تجربة محمد)، فالأكثر يُقسَّم روابط متصلة
+  // The «dir//a/b/…» path form instead of waypoints: the mobile app dropped some points; the empty first slot = «my location».
+  // The mobile app takes only 5 stations per link (Mohammed's trial), so more are split into connected links
+  const GOOGLE_MAX_STOPS = 5;
+  const pt_ = function (s) { return s.lat + ',' + s.lng; };
+  /* origin اختياري: بدونه يبدأ قوقل من «موقعي» — optional origin: without it Google starts from «my location» */
+  function googleUrl(found, origin) {
+    return 'https://www.google.com/maps/dir/' + (origin ? pt_(origin) : '') + '/' + found.slice(0, GOOGLE_MAX_STOPS).map(pt_).join('/') + '/data=!4m2!4m1!3e0';
+  }
+  /* روابط كل 5 محطات؛ كل رابط بعد الأول يبدأ من آخر محطة قبله — a link per 5 stations; each after the first starts at the stop before it
+   * ← [{ from, to, url }] بأرقام المحطات من 1 / with 1-based stop numbers */
+  function googleLinks(stops) {
+    const out = [];
+    for (let i = 0; i < stops.length; i += GOOGLE_MAX_STOPS) {
+      const part = stops.slice(i, i + GOOGLE_MAX_STOPS);
+      out.push({ from: i + 1, to: i + part.length, url: googleUrl(part, i ? stops[i - 1] : null) });
+    }
+    return out;
   }
 
   /* المسافة بالأمتار بين نقطتين — the distance in metres between two points */
@@ -177,10 +189,13 @@
       const btn_ = function (text, cls, onClick) { const b = doc.createElement('button'); b.type = 'button'; b.className = 'outage-act ' + cls; b.textContent = text; b.addEventListener('click', onClick); return b; };
       if (last.found.length > 2) row.appendChild(btn_(nearest ? MSG.ORDER_INPUT : MSG.ORDER_NEAR, 'outage-order', function () { nearest = !nearest; render(last.found, last.notFound); }));
       if (o.onNavigate) row.appendChild(btn_(MSG.NAVIGATE, 'outage-nav', function () { o.onNavigate(stops.slice()); }));
-      const a = doc.createElement('a');
-      a.className = 'outage-gmaps-link'; a.target = '_blank'; a.rel = 'noopener'; a.href = googleUrl(stops);
-      a.textContent = MSG.GOOGLE + (stops.length > GOOGLE_MAX_STOPS ? ' ' + MSG.GOOGLE_FIRST : '');
-      row.appendChild(a);
+      const links = googleLinks(stops);
+      links.forEach(function (l) {
+        const a = doc.createElement('a');
+        a.className = 'outage-gmaps-link'; a.target = '_blank'; a.rel = 'noopener'; a.href = l.url;
+        a.textContent = links.length > 1 ? MSG.GOOGLE_PART + ' ' + letter(l.from - 1) + '–' + letter(l.to - 1) : MSG.GOOGLE;
+        row.appendChild(a);
+      });
       hint.appendChild(row);
     }
 
@@ -302,5 +317,5 @@
     };
   }
 
-  global.SecOutageSearch = { mountMap: mountMap, mountHome: mountHome, parseIds: parseIds, letter: letter, googleUrl: googleUrl, orderNearest: orderNearest, resolve: resolve, MSG: MSG };
+  global.SecOutageSearch = { mountMap: mountMap, mountHome: mountHome, parseIds: parseIds, letter: letter, googleUrl: googleUrl, googleLinks: googleLinks, orderNearest: orderNearest, resolve: resolve, MSG: MSG };
 })(typeof window !== 'undefined' ? window : globalThis);
