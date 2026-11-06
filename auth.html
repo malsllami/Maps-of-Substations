@@ -17,6 +17,7 @@
 <link rel="apple-touch-icon" href="assets/icon-192.png">
 <meta name="apple-mobile-web-app-title" content="D.S.Maps">
 <script src="services/pwa.js"></script>
+<script src="services/load-guard.js"></script>
 <link rel="stylesheet" href="styles/update-sheet.css">
 <script src="components/update-sheet.js"></script>
 <link rel="stylesheet" href="styles/feature-tour.css">
@@ -44,7 +45,9 @@
 <script src="components/phone-input.js"></script>
 <script src="components/auth-form.js"></script>
 <script>
-  SecTiming.recordPageOpen();
+  // القياس اختياري: timing.js قديم من نسخة سابقة لا يمنع ظهور نموذج الدخول (سجل 2 نوفمبر)
+  // Measuring is optional: an old timing.js from an earlier version never blocks the login form
+  if (window.SecTiming && SecTiming.recordPageOpen) SecTiming.recordPageOpen();
   window.authForm = SecAuthForm.mount(document.getElementById('authCard'));
   SecContactAdmin.openFromQuery();
   SecContactAdmin.loadInfo();

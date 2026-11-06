@@ -35,10 +35,13 @@
   }
 
   // الرئيسية: home.js لم يبدأ بعد اكتمال التحميل ← ملف قديم أو معطوب — home: home.js didn't start after the load
+  // صفحة الدخول (سجل 2 نوفمبر): نموذج الدخول لم يُركَّب ← ملف قديم أوقفه — the login page: the form wasn't mounted ← an old file stopped it
   global.addEventListener('load', function () {
     global.setTimeout(function () {
-      const d = global.document;
-      if (d.body && d.body.classList.contains('home-page') && !global.SecHome) recover('home-not-started');
+      const d = global.document, body = d.body;
+      if (!body) return;
+      if (body.classList.contains('home-page') && !global.SecHome) recover('home-not-started');
+      else if (body.classList.contains('auth-page') && !global.authForm) recover('auth-not-started');
     }, START_WAIT_MS);
   });
 
