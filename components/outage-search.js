@@ -29,7 +29,10 @@
   const MSG = {
     MAP_MIN: 'أدخل محطتين على الأقل', HOME_MIN: 'أدخل رقم محطة واحدة على الأقل', MAX: 'الحد الأقصى 15 محطة بالمرة الواحدة',
     LOGIN: 'سجّل دخول للاستخدام', SEARCHING: 'جاري البحث عن المحطات...', HOME_SEARCHING: 'جاري البحث...',
-    MAP_NONE: 'ما لقيت محطتين صالحتين على الأقل بالأرقام المدخلة', HOME_NONE: 'ما لقيت أي محطة صالحة بالأرقام المدخلة'
+    MAP_NONE: 'المحطات غير موجودة', HOME_NONE: 'ما لقيت أي محطة صالحة بالأرقام المدخلة',
+    // (6 نوفمبر) الترتيب والملاحة وبطاقة غير الموجودة — order, navigation and the not-found card
+    ORDER_NEAR: '↕ حسب الأقرب', ORDER_INPUT: '↕ نفس الترتيب', NAVIGATE: '🧭 ملاحة بالترتيب',
+    GOOGLE: 'قوقل ماب بالترتيب', GOOGLE_FIRST: '(أول 9 محطات)', MISSING_TITLE: 'محطات غير موجودة'
   };
 
   /* الأرقام بالترتيب (قرار محمد، 8 أكتوبر): بحث الأعطال قائمة محطات — الفواصل: «,» «،» «/» «&» والسطر الجديد، وكل شرطة
@@ -86,10 +89,33 @@
    * حتى المحطة الواحدة — V1 كان يفتحها عرضًا فقط بلا زر ملاحة)
    * A Google Maps directions link without an origin ← Google starts from «my location» and shows the navigation button,
    * then the stations in order (Mohammed's decision: even a single station — V1 opened it view-only) */
+  // (6 نوفمبر) صيغة المسار «dir//أ/ب/…» بدل waypoints: تطبيق قوقل ماب على الجوال كان يُسقط بعض النقاط (ظهرت A وC فقط)،
+  // والخانة الأولى الفارغة = «موقعي». قوقل يقبل 10 نقاط بموقعي، فالرابط بأول 9 محطات
+  // The «dir//a/b/…» path form instead of waypoints: the mobile Google Maps app dropped some points (only A and C showed);
+  // the empty first slot = «my location». Google takes 10 points with my location, so the link carries the first 9 stations
+  const GOOGLE_MAX_STOPS = 9;
   function googleUrl(found) {
-    const dest = found[found.length - 1];
-    const wps = found.slice(0, -1).map(function (s) { return s.lat + ',' + s.lng; }).join('|');
-    return 'https://www.google.com/maps/dir/?api=1&destination=' + dest.lat + ',' + dest.lng + (wps ? '&waypoints=' + encodeURIComponent(wps) : '') + '&travelmode=driving';
+    return 'https://www.google.com/maps/dir//' + found.slice(0, GOOGLE_MAX_STOPS).map(function (s) { return s.lat + ',' + s.lng; }).join('/') + '/data=!4m2!4m1!3e0';
+  }
+
+  /* المسافة بالأمتار بين نقطتين — the distance in metres between two points */
+  function distM_(a, b) {
+    const R = 6371000, rad = Math.PI / 180, dLat = (b.lat - a.lat) * rad, dLng = (b.lng - a.lng) * rad;
+    const h = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+  }
+  /* الترتيب حسب الأقرب (محمد 6 نوفمبر): أول محطة مُدخلة تبقى A، ثم الأقرب لآخر محطة في كل خطوة حتى الأبعد
+   * Nearest-first order: the first entered station stays A, then the nearest to the last one each step, to the farthest */
+  function orderNearest(found) {
+    if (found.length < 3) return found.slice();
+    const out = [found[0]], rest = found.slice(1);
+    while (rest.length) {
+      const last = out[out.length - 1];
+      let best = 0;
+      for (let i = 1; i < rest.length; i++) if (distM_(last, rest[i]) < distM_(last, rest[best])) best = i;
+      out.push(rest.splice(best, 1)[0]);
+    }
+    return out;
   }
 
   /* تأكيد واحد ثم البحث عن كل رقم ← { found، notFound } — One check, then each number */
@@ -111,7 +137,7 @@
   }
 
   /**
-   * mountMap(view, opts) — على الخريطة. opts: { onStart() (تمسح الصفحة أدوات أخرى)، isBlocked() }
+   * mountMap(view, opts) — على الخريطة. opts: { onStart() (تمسح الصفحة أدوات أخرى)، isBlocked()، onNavigate(stops) (ملاحة بالترتيب) }
    * يُرجع { render(found, notFound)، clear()، search(raw)، destroy() }
    */
   function mountMap(view, opts) {
@@ -124,7 +150,39 @@
     const input = panel.querySelector('[data-role="input"]'), err = panel.querySelector('[data-role="error"]');
     TI.digits(input);
 
-    function clear() { markers.forEach(function (m) { map.removeLayer(m); }); markers = []; if (line) { map.removeLayer(line); line = null; } }
+    // آخر نتيجة وترتيبها، لزر الترتيب والملاحة — the last result and its order, for the order button and navigation
+    let last = null, nearest = true, shownStops = [];
+    function clear() {
+      markers.forEach(function (m) { map.removeLayer(m); }); markers = []; if (line) { map.removeLayer(line); line = null; }
+      const card = view.panels.querySelector('[data-role="outage-missing"]'); if (card) card.remove();
+    }
+
+    /* بطاقة المحطات غير الموجودة (محمد 6 نوفمبر) — the card of stations not found */
+    function missingCard_(notFound) {
+      if (!notFound || !notFound.length) return;
+      const doc = global.document, card = doc.createElement('div');
+      card.className = 'outage-missing'; card.dataset.role = 'outage-missing'; card.setAttribute('role', 'alert');
+      const x = doc.createElement('button'); x.type = 'button'; x.className = 'outage-missing-x'; x.setAttribute('aria-label', 'إغلاق'); x.textContent = '✕';
+      x.addEventListener('click', function () { card.remove(); });
+      const t = doc.createElement('b'); t.textContent = MSG.MISSING_TITLE + ' (' + notFound.length + ')';
+      const list = doc.createElement('div'); list.className = 'outage-missing-list'; list.textContent = notFound.join('، ');
+      card.append(x, t, list);
+      view.panels.appendChild(card);
+    }
+
+    /* أزرار تحت سطر النتيجة: الترتيب، والملاحة، وقوقل ماب — buttons under the result line: order, navigation, Google Maps */
+    function actions_(stops) {
+      const doc = global.document, hint = view.panels.parentNode.querySelector('[data-role="hint"]');
+      const row = doc.createElement('div'); row.className = 'outage-actions';
+      const btn_ = function (text, cls, onClick) { const b = doc.createElement('button'); b.type = 'button'; b.className = 'outage-act ' + cls; b.textContent = text; b.addEventListener('click', onClick); return b; };
+      if (last.found.length > 2) row.appendChild(btn_(nearest ? MSG.ORDER_INPUT : MSG.ORDER_NEAR, 'outage-order', function () { nearest = !nearest; render(last.found, last.notFound); }));
+      if (o.onNavigate) row.appendChild(btn_(MSG.NAVIGATE, 'outage-nav', function () { o.onNavigate(stops.slice()); }));
+      const a = doc.createElement('a');
+      a.className = 'outage-gmaps-link'; a.target = '_blank'; a.rel = 'noopener'; a.href = googleUrl(stops);
+      a.textContent = MSG.GOOGLE + (stops.length > GOOGLE_MAX_STOPS ? ' ' + MSG.GOOGLE_FIRST : '');
+      row.appendChild(a);
+      hint.appendChild(row);
+    }
 
     function icon_(l, color) {
       return L.divIcon({ className: '', iconSize: [26, 26], iconAnchor: [13, 13], html: '<div class="outage-letter" style="background:' + color + '">' + l + '</div>' });
@@ -132,9 +190,12 @@
     function render(found, notFound) {
       clear();
       panel.classList.remove('show');
+      if (!last || last.found !== found) { last = { found: found, notFound: notFound }; nearest = true; } // نتيجة جديدة ← حسب الأقرب / a new result ← nearest first
+      const stops = nearest ? orderNearest(found) : found.slice();
+      shownStops = stops;
       const teal = global.SecTheme && global.SecTheme.get() === 'light' ? '#1FAE8C' : '#4DD6B5';
       const bounds = [];
-      found.forEach(function (s, i) {
+      stops.forEach(function (s, i) {
         const l = letter(i);
         const m = L.marker([s.lat, s.lng], { icon: icon_(l, s.type === 'تحويل' ? SUB_COLOR : teal) });
         m.bindPopup('<div class="outage-popup"><b>' + l + ') ' + H.esc(s.name || s.id) + '</b><br>رقم: ' + H.esc(s.id) + '</div>');
@@ -142,13 +203,10 @@
       });
       if (!bounds.length) return;
       if (bounds.length > 1) line = L.polyline(bounds, { color: LINE_COLOR, weight: 2, dashArray: '5,5' }).addTo(map);
-      const note = notFound && notFound.length ? ' — تعذّر إيجاد: ' + notFound.join('، ') : '';
-      const order = found.length > 1 ? 'بالترتيب A→' + letter(found.length - 1) : '';
-      view.hint('محطات العطل (' + found.length + ') ' + order + note + ' ');
-      const hint = view.panels.parentNode.querySelector('[data-role="hint"]');
-      const a = global.document.createElement('a');
-      a.className = 'outage-gmaps-link'; a.target = '_blank'; a.rel = 'noopener'; a.href = googleUrl(found); a.textContent = 'الانتقال بالترتيب على قوقل ماب';
-      hint.appendChild(a);
+      const order = stops.length > 1 ? (nearest && stops.length > 2 ? 'حسب الأقرب A→' : 'بالترتيب A→') + letter(stops.length - 1) : '';
+      view.hint('محطات العطل (' + stops.length + ') ' + order + ' ');
+      actions_(stops);
+      missingCard_(notFound);
       // بعد ظهور التلميح: النقاط داخل المساحة المرئية تحته وفوق البطاقة — after the hint shows: the points in the visible area below it
       const fitOpts = Object.assign(view.fitPadding ? view.fitPadding(44) : { padding: [44, 44] }, { maxZoom: 17 }), fitPts = bounds.length > 1 ? bounds : [bounds[0], bounds[0]];
       if (view.fitSafe) view.fitSafe(fitPts, fitOpts); else map.fitBounds(fitPts, fitOpts); // بلا NaN إن ضاقت الخريطة (25 أكتوبر) / no NaN on a short map
@@ -168,7 +226,8 @@
       view.hint(MSG.SEARCHING);
       try {
         const r = await resolve(ids);
-        if (r.found.length < 2) { err.textContent = MSG.MAP_NONE; view.hideHint(); return r; }
+        // (6 نوفمبر) محطة واحدة موجودة تكفي، والباقي في بطاقة «غير موجودة» — one found station is enough, the rest in the card
+        if (r.found.length < 1) { err.textContent = MSG.MAP_NONE + ': ' + r.notFound.join('، '); view.hideHint(); return r; }
         render(r.found, r.notFound);
         return r;
       } finally { busy = false; }
@@ -183,6 +242,7 @@
 
     return {
       render: render, clear: clear, search: search,
+      stops: function () { return shownStops.slice(); }, // المحطات بترتيبها المعروض / the stations in their shown order
       destroy: function () {
         clear();
         view.tools.removeEventListener('click', onToolsClick_); panel.removeEventListener('click', onPanelClick_);
@@ -242,5 +302,5 @@
     };
   }
 
-  global.SecOutageSearch = { mountMap: mountMap, mountHome: mountHome, parseIds: parseIds, letter: letter, googleUrl: googleUrl, resolve: resolve, MSG: MSG };
+  global.SecOutageSearch = { mountMap: mountMap, mountHome: mountHome, parseIds: parseIds, letter: letter, googleUrl: googleUrl, orderNearest: orderNearest, resolve: resolve, MSG: MSG };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -97,3 +97,7 @@ body.nav-full .globe-stage.nav-active .map-side [data-act="side-layers"]{display
   background:var(--bg-card);border:1px solid var(--border-strong);color:var(--text-primary);box-shadow:0 4px 14px rgba(0,0,0,.25);}
 body.nav-full .globe-stage.nav-active .map-mode-panel.show{position:absolute;right:66px;bottom:calc(var(--nav-sheet-h, 190px) + 20px);z-index:902;
   min-width:200px;border:1px solid var(--border-strong);border-radius:14px;}
+/* (6 نوفمبر) ملاحة الأعطال: المحطة الحالية من كم — outage navigation: the current stop of how many */
+.nav-stop{margin:0 0 6px;padding:6px 10px;border-radius:10px;text-align:center;font-size:13px;font-weight:800;
+  background:rgba(229,181,58,0.16);color:#E8C155;border:1px solid rgba(229,181,58,0.55);}
+[data-theme="light"] .nav-stop{color:#A57C12;}

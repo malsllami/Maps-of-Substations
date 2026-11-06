@@ -94,7 +94,9 @@
   // ===== البدء والإيقاف — Start and stop =====
   /* الترتيب كما في V1: الصلاحية ← أول موقع دقيق ← ثم فقط شاشة الملاحة. الرفض أو عدم الدقة ← رسالة واضحة وبطاقة المحطة كما هي.
    * As in V1: permission ← first precise fix ← only then the navigation screen. Refusal or imprecision ← a clear message, card untouched. */
-  async function start(station) {
+  /* opts.stops (الأعطال — محمد 6 نوفمبر): محطات بالترتيب تبدأ بـ station؛ عند الوصول لكل محطة تنتقل الملاحة للتالية
+   * opts.stops (outages): stations in order starting with station; on arriving at each, navigation moves to the next */
+  async function start(station, opts) {
     if (!deps || !station || starting) return false;
     if (ui) stop();
     starting = true;
@@ -109,6 +111,9 @@
     }
     deps.hideHint();
     build_(station);
+    const stops = opts && opts.stops && opts.stops.length > 1 ? opts.stops.slice() : null;
+    ui.stops = stops; ui.stopIdx = 0; ui.advanceTimer = 0;
+    ui.sheet.querySelector('.nav-stop').hidden = !stops;
     if (global.SecUsageLog) global.SecUsageLog.navStart(); // سجل الاستخدام (22 أكتوبر): بدء الملاحة / the usage log: navigation start
     onState_(engine.state());
     return true;
@@ -126,6 +131,8 @@
   function updateTarget(station) {
     if (!ui || !station || !engine.updateTarget({ lat: station.lat, lng: station.lng })) return false;
     ui.station = station;
+    const sid = ui.sheet.querySelector('.nav-sid');
+    if (sid) sid.textContent = station.id;
     const gm = ui.sheet.querySelector('.nav-gm');
     if (gm) gm.href = deps.googleMapsUrl(station);
     moveCamera_(true);
@@ -147,6 +154,23 @@
     drawLines_();
     render_();
     moveCamera_(first);
+    // وصل لمحطة ليست الأخيرة ← بعد مهلة قصيرة تبدأ الملاحة للتالية — arrived at a stop that isn't the last ← the next one shortly
+    if (s.arrived && ui.stops && ui.stopIdx < ui.stops.length - 1 && !ui.advanceTimer) {
+      const owner = ui;
+      ui.advanceTimer = global.setTimeout(function () {
+        if (ui !== owner) return; // انتهت الملاحة أو بدأت أخرى / navigation ended or another began
+        ui.advanceTimer = 0;
+        ui.stopIdx++;
+        updateTarget(ui.stops[ui.stopIdx]);
+      }, NEXT_STOP_MS);
+    }
+  }
+  const NEXT_STOP_MS = 3000; // مدة رسالة «وصلت» قبل الانتقال للتالية / how long «arrived» shows before the next stop
+  /* حرف المحطة كما في الأعطال: A…Z ثم AA… — the stop letter as in outages: A…Z then AA… */
+  function stopLetter_(i) {
+    let s = ''; i++;
+    while (i > 0) { i--; s = String.fromCharCode(65 + (i % 26)) + s; i = Math.floor(i / 26); }
+    return s;
   }
 
   // ===== البناء والتفكيك — Building and teardown =====
@@ -412,6 +436,7 @@
     sheet.className = 'nav-sheet';
     sheet.innerHTML =
       '<div class="nav-grab"></div>' +
+      '<div class="nav-stop" hidden></div>' +
       '<div class="nav-head"><div class="nav-big"><div class="nav-d"><span class="nav-dv">—</span><small class="nav-du"></small></div></div>' +
       '<div class="nav-dirbox"><div class="nav-dir"></div><div class="nav-dial"><b>N</b><svg class="nav-arrow" width="26" height="26" viewBox="0 0 24 24"><path d="M12 2l6.5 18L12 16l-6.5 4z" fill="' + ME_COLOR + '"/></svg></div></div></div>' +
       '<div class="nav-line2"><div class="nav-stt"></div><div class="nav-kind"></div></div>' +
@@ -421,7 +446,7 @@
       '<div class="nav-details" hidden><div class="nav-rows">' +
       '<div class="nav-row"><span class="k">حالة الاتصال</span><span class="v nav-conn">—</span></div>' +
       '<div class="nav-row"><span class="k">نوع الملاحة</span><span class="v nav-type">—</span></div>' +
-      '<div class="nav-row"><span class="k">رقم المحطة</span><span class="v num">' + esc_(s.id) + '</span></div>' +
+      '<div class="nav-row"><span class="k">رقم المحطة</span><span class="v num nav-sid">' + esc_(s.id) + '</span></div>' +
       '<div class="nav-row"><span class="k">' + (s.region ? 'المنطقة' : 'النوع') + '</span><span class="v">' + esc_(s.region || s.type) + '</span></div>' +
       '<div class="nav-row"><span class="k">دقة الموقع</span><span class="v num nav-acc">—</span></div></div>' +
       '<div class="nav-lbl2">🌓 مظهر اللوحة</div>' +
@@ -512,8 +537,12 @@
     if (dev != null) marker.style.left = (50 + dev / 180 * 50).toFixed(1) + '%';
     q('.nav-arrow path').setAttribute('fill', smart && TONE_COLOR[status[1]] ? TONE_COLOR[status[1]] : ME_COLOR);
     const side = smart && s.dir && s.dir.state === 'adjust' && dev != null ? (dev > 0 ? ' يمينًا' : ' يسارًا') : '';
+    // الأعطال: المحطة الحالية من كم، و«وصلت» لمحطة وسطى تذكر التالية — outages: the current stop of how many, and the next on arrival
+    const multi = ui.stops, lastStop = !multi || ui.stopIdx >= multi.length - 1;
+    if (multi) q('.nav-stop').textContent = '🧭 المحطة ' + stopLetter_(ui.stopIdx) + ' من ' + multi.length + ' — ' + ui.station.id;
     const stt = q('.nav-stt');
-    stt.textContent = status[0] + side;
+    stt.textContent = s.status === 'arrived' && !lastStop
+      ? 'وصلت إلى ' + stopLetter_(ui.stopIdx) + ' ✓ — الانتقال إلى ' + stopLetter_(ui.stopIdx + 1) + '…' : status[0] + side;
     stt.className = 'nav-stt ' + status[1];
     q('.nav-conn').textContent = online ? '🟢 متصل' : '🟠 بدون اتصال';
     q('.nav-type').textContent = hasRoute ? '🛣 مسار طرق' : '📍 اتجاه مباشر';

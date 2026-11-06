@@ -59,3 +59,18 @@
 }
 .homepage-outage-panel textarea:focus{outline:none;border-color:var(--teal);}
 @media (max-width:767px){ .outage-panel textarea, .homepage-outage-panel textarea{font-size:16px;} }
+/* (6 نوفمبر) أزرار نتيجة الأعطال وبطاقة المحطات غير الموجودة — the outage result buttons and the not-found card */
+.outage-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+.outage-actions .outage-gmaps-link{margin-top:0;}
+.outage-act{padding:6px 12px;border-radius:6px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;
+  background:rgba(31,174,140,0.16);color:var(--teal-light);border:1px solid rgba(77,214,181,0.5);}
+.outage-nav{background:var(--teal);color:#fff;border-color:var(--teal);}
+[data-theme="light"] .outage-act{color:var(--teal);}
+[data-theme="light"] .outage-nav{color:#fff;}
+.outage-missing{position:relative;margin-top:8px;padding:10px 36px 10px 12px;border-radius:12px;font-size:12.5px;line-height:1.7;
+  background:rgba(224,101,79,0.14);border:1px solid rgba(224,101,79,0.6);color:var(--text-primary);}
+.outage-missing b{display:block;color:#E0654F;}
+.outage-missing-list{font-family:'JetBrains Mono',monospace;font-weight:700;word-break:break-word;}
+.outage-missing-x{position:absolute;top:6px;right:8px;width:24px;height:24px;border-radius:50%;border:0;background:transparent;color:var(--text-secondary);cursor:pointer;}
+.map-tool-hint button{pointer-events:auto;}
+body:not(.nav-full) .view-map .map-panels > .outage-missing{border-color:rgba(224,101,79,0.6);}

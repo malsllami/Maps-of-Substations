@@ -199,7 +199,9 @@
       onEdit: function (s) { goToStation(s); global.setTimeout(function () { SecStationForm.openEdit(s); }, MORPH_SETTLE_MS); }
     });
     const blocked = function () { return SecNavView.isActive(); };
-    outageMap = SecOutageSearch.mountMap(view, { onStart: function () { tools.stop(); nearby.reset(); }, isBlocked: blocked });
+    outageMap = SecOutageSearch.mountMap(view, { onStart: function () { tools.stop(); nearby.reset(); }, isBlocked: blocked,
+      // (6 نوفمبر) ملاحة الأعطال بالترتيب: محطة بمحطة داخل الموقع — outage navigation in order, stop by stop in the site
+      onNavigate: function (stops) { return SecNavView.start(stops[0], { stops: stops }); } });
     tools = SecMapTools.mount(view, { onStart: function () { outageMap.clear(); nearby.reset(); }, isBlocked: blocked });
     SecNavView.init({
       getMap: function () { return view.map; }, stage: $('mapStage'), topArea: $('topContentArea'),
