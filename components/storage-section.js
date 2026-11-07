@@ -32,8 +32,10 @@
   const GREGORY_NUMERIC = 'ar-SA-u-ca-gregory-nu-latn';
   /* ما يبقى بعد المسح — What survives a clear.
      علامة «البداية النظيفة» تبقى: بدونها تُعاد البداية النظيفة فتمسح الجلسة وتُخرج المستخدم (خلل اكتُشف 16 أكتوبر)
-     The fresh-start marker stays: without it the fresh start reruns, clearing the session and logging the user out */
-  const KEEP = [K.SESSION, K.PHONE, K.REMEMBER_PHONE, K.THEME, K.MAP_MODE, K.NAV_GLASS, K.NAV_ROTATE, K.MAP_STATUS_HIDDEN, K.MAP_TOOLS_HIDDEN, K.MAP_TOOLS_FOLDED, K.SEARCH_KEYBOARD, K.PENDING_ERRORS, K.FRESH_START, K.DEVICE_ID];
+     The fresh-start marker stays: without it the fresh start reruns, clearing the session and logging the user out
+     وعلامة شاشة إعادة التثبيت تبقى (7 نوفمبر): بدونها يتكرر الخروج الآلي على تطبيق الآيفون بعد كل مسح ودخول
+     The reinstall-screen marker stays too: without it the iPhone app's automatic logout repeats after every clear and login */
+  const KEEP = [K.SESSION, K.PHONE, K.REMEMBER_PHONE, K.THEME, K.MAP_MODE, K.NAV_GLASS, K.NAV_ROTATE, K.MAP_STATUS_HIDDEN, K.MAP_TOOLS_HIDDEN, K.MAP_TOOLS_FOLDED, K.SEARCH_KEYBOARD, K.PENDING_ERRORS, K.FRESH_START, K.DEVICE_ID, K.REINSTALL_NOTICE];
   const MSG = {
     TITLE: 'البيانات المؤقتة',
     CLEAR: 'مسح التخزين المؤقت',
