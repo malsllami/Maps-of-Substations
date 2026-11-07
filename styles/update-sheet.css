@@ -25,6 +25,7 @@
 .upd-ver.is-new b{border-color:#4DD6B5;background:rgba(77,214,181,.16);}
 .upd-ver small{display:block;margin-top:3px;font-size:11.5px;color:#C3D2E2;}
 .upd-arrow{font-size:18px;color:#4DD6B5;}
+.upd-ver .upd-num{font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:700;color:#EEF4FA;letter-spacing:.3px;}
 
 /* ما الجديد — what's new */
 .upd-notes{list-style:none;margin:0 0 14px;padding:0;width:100%;display:grid;gap:9px;text-align:right;}

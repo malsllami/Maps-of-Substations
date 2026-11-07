@@ -50,6 +50,11 @@
     const m = /^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})/.exec(String(build || ''));
     return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), Number(m[4]), Number(m[5])) : null;
   }
+  /* رقم النسخة المختصر «YYYYMMDD-HHMM» — the short version number */
+  function shortBuild(build) {
+    const m = /^(\d{8})-(\d{4})/.exec(String(build || ''));
+    return m ? m[1] + '-' + m[2] : '—';
+  }
   function dateText_(build) {
     const d = buildDate(build), D = global.SecDates;
     if (!d) return '—';
@@ -107,8 +112,9 @@
             '<img class="upd-hero" src="assets/icon-192.png" alt="D.S.Maps">' +
             '<h2 class="upd-title" id="updTitle">' + MSG.TITLE + '</h2>' +
             '<div class="upd-path">' +
-              '<div class="upd-ver">' + MSG.YOURS + '<b>' + esc_(dateText_(page)) + '</b></div><span class="upd-arrow" aria-hidden="true">←</span>' +
-              '<div class="upd-ver is-new">' + MSG.NEW + '<b>' + esc_(dateText_(waiting)) + '</b><small>' + esc_(hijriText_(waiting)) + '</small></div>' +
+              // رقم النسخة تحت تاريخها: نسختان من اليوم نفسه يظهر فرقهما (ملاحظة محمد 8 نوفمبر) — the version number under its date
+              '<div class="upd-ver">' + MSG.YOURS + '<b>' + esc_(dateText_(page)) + '</b><small class="upd-num" dir="ltr">' + esc_(shortBuild(page)) + '</small></div><span class="upd-arrow" aria-hidden="true">←</span>' +
+              '<div class="upd-ver is-new">' + MSG.NEW + '<b>' + esc_(dateText_(waiting)) + '</b><small class="upd-num" dir="ltr">' + esc_(shortBuild(waiting)) + '</small><small>' + esc_(hijriText_(waiting)) + '</small></div>' +
             '</div>' +
             '<ul class="upd-notes">' + notes.map(function (n) { return '<li><i aria-hidden="true">✓</i><span>' + esc_(n) + '</span></li>'; }).join('') + '</ul>' +
             (logoutBuild ? '<p class="upd-logout" role="alert">' + MSG.LOGOUT + '</p>' : '') +
@@ -169,5 +175,5 @@
   function start_() { if (!instance) instance = mount(); }
   if (doc) { if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', start_); else start_(); }
 
-  global.SecUpdateSheet = { mount: mount, instance: function () { return instance; }, defaultBusy: defaultBusy, buildDate: buildDate, MSG: MSG };
+  global.SecUpdateSheet = { mount: mount, instance: function () { return instance; }, defaultBusy: defaultBusy, buildDate: buildDate, shortBuild: shortBuild, MSG: MSG };
 })(typeof window !== 'undefined' ? window : globalThis);
