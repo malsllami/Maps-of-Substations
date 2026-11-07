@@ -31,7 +31,7 @@ importScripts('config/الإعدادات.js');
 // يصل للأجهزة. لا يُعدَّل يدويًا: خطاف pre-commit يحدّثه مع كل commit فيه ملف موقع، واختبار البوابة test_sw_build.js يتحقق.
 // The build stamp: a browser detects a new version only when this file or the config changes; any other site file alone never
 // reaches devices. Not edited by hand: the pre-commit hook updates it on every commit with a site file; the gate verifies.
-const SW_BUILD = '20261107-215553-754081200';
+const SW_BUILD = '20261108-022610-704805500';
 const CONFIG = self.SEC2_CONFIG;
 const CACHE_NAME = CONFIG.SHELL_CACHE_NAME;
 const NEXT_CACHE = CACHE_NAME + '-next'; // تثبيت نسخة جديدة دون لمس العاملة / installing a new version without touching the working one
@@ -43,7 +43,7 @@ const PREFIX = CONFIG.STORAGE_PREFIX;
 // folder's real files, so a new file not added here fails the gate.
 const APP_SHELL = [
   './', 'index.html', 'auth.html', 'member.html', 'shifts.html', 'admin.html', 'perf.html', 'manifest.json',
-  'config/الإعدادات.js',
+  'config/الإعدادات.js', 'config/النسخة.js',
   'assets/icon-192.png', 'assets/icon-512.png', 'assets/icon-maskable-512.png', 'assets/logo-icon.png', 'assets/logo-light.png', 'assets/member-avatar.webp', 'assets/auth-bg.webp',
   'assets/tour/01-home-map.webp', 'assets/tour/02-state-ready.webp', 'assets/tour/03-state-none.webp', 'assets/tour/04-state-partial.webp', 'assets/tour/05-state-pending.webp',
   'assets/tour/06-state-offline.webp', 'assets/tour/07-search-mode.webp', 'assets/tour/08-search-server.webp', 'assets/tour/09-search-local.webp', 'assets/tour/10-station-sheet.webp',
@@ -107,6 +107,9 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
+  // (8 نوفمبر) نسخة هذا العامل: لإثبات تطابقه مع نسخة الصفحة، ولعرض تاريخ النسخة الجديدة في بطاقة التحديث
+  // (8 Nov) this worker's version: to prove it matches the page's, and to show the new version's date on the update card
+  if (event.data && event.data.type === 'GET_SW_BUILD' && event.ports && event.ports[0]) event.ports[0].postMessage(SW_BUILD);
 });
 
 /* التفعيل المتين: في كل لحظة توجد نسخة مكتملة صالحة حتى لو توقف المتصفح في المنتصف

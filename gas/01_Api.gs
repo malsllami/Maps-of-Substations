@@ -27,7 +27,8 @@ const ACCESS = { PUBLIC: 'public', MEMBER: 'member', TOKEN: 'token', ADMIN: 'adm
  * Routing table. Handlers are called by name at request time because Apps Script loads files in order and
  * later files' functions are not defined yet when this file loads. */
 const ROUTES = {
-  ping: { handler: function () { return { success: true, t: Date.now() }; }, access: ACCESS.PUBLIC },
+  ping: { handler: function () { return { success: true, t: Date.now(), serverBuild: SERVER_BUILD }; }, access: ACCESS.PUBLIC }, // (8 نوفمبر) رقم نسخة الخادم لكشف لصق ناقص / the server version, to catch an incomplete paste
+  getUpdateInfo: { handler: function () { return getUpdateInfo(); }, access: ACCESS.PUBLIC }, // «ما الجديد» ونسخة الخروج الإجباري لبطاقة التحديث / for the update card
   getDataVersion: { handler: function () { return getDataVersion(); }, access: ACCESS.PUBLIC },
   getAdminContactInfo: { handler: function () { return getAdminContactInfo(); }, access: ACCESS.PUBLIC },
   // المصادقة — authentication
@@ -110,6 +111,9 @@ function dispatch_(action, data) {
   if (!route) return { error: 'إجراء غير معروف: ' + action };
   const access = perfMeasure_('التحقق (' + route.access + ')', function () { return checkAccess_(route, data); });
   if (access.deny) return access.deny;
+  // (8 نوفمبر) بعد مهلة التحديث: الكتابة والإدارة ممنوعة على النسخ القديمة — after the grace period old versions can't write
+  const outdated = perfMeasure_('فحص النسخة', function () { return versionRefusal_(action, data); });
+  if (outdated) return outdated;
   const run = function () { return route.handler(data, access.auth); };
   return route.opResult ? withOpResult_(data, run) : run();
 }

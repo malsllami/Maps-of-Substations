@@ -13,6 +13,12 @@
  * ===================================================
  */
 
+/* رقم نسخة الخادم (8 نوفمبر): يحدّثه خطاف pre-commit مع كل تغيير في gas/، ويرجعه ping — بعد لصق الملفات في محرر Apps Script
+ * يُقارن بالقيمة هنا، فعدم التطابق يعني ملفًا لم يُلصق أو نسخة قديمة. لا يُعدَّل يدويًا.
+ * The server version: updated by the pre-commit hook on every gas/ change and returned by ping — after pasting into the
+ * Apps Script editor it is compared with this value; a mismatch means a file wasn't pasted. Never edited by hand. */
+const SERVER_BUILD = '20261108-022610-704805500';
+
 /* أسماء الجداول — Table names */
 const SHEETS = {
   MEMBERS: 'الأعضاء',
@@ -45,7 +51,10 @@ const HEADERS = {
   // (22 أكتوبر) أعداد فقط — لا إحداثيات ولا أرقام محطات / counts only — no coordinates, no station numbers
   'سجل الاستخدام اليومي': ['التاريخ', 'الجوال', 'اسم العضو', 'مفتاح اليوم', 'مرات الفتح', 'دقائق الاستخدام', 'الجهاز', 'المتصفح',
     'تطبيق مثبت', 'استخدام بدون إنترنت', 'عمليات البحث', 'وجدت من الجهاز', 'وجدت من الخادم', 'غير موجودة', 'بحث الأعطال',
-    'الملاحة', 'دقائق الملاحة', 'قوقل ماب', 'مشاركة', 'البيانات', 'المحطات', 'المزيد', 'التفاصيل', 'قريب', 'مغذي', 'القياس', 'آخر تحديث']
+    'الملاحة', 'دقائق الملاحة', 'قوقل ماب', 'مشاركة', 'البيانات', 'المحطات', 'المزيد', 'التفاصيل', 'قريب', 'مغذي', 'القياس', 'آخر تحديث',
+    // (8 نوفمبر) نسخة الموقع على الجهاز — تُسجَّل فقط بعد إثبات أنها تعمل فعلًا — إضافة فقط في آخر الجدول
+    // (8 Nov) the site version on the device — recorded only once proven to really run — appended only
+    'رقم النسخة', 'تاريخ النسخة', 'تاريخ تفعيل النسخة']
 };
 
 /* ترتيب أعمدة الجداول (يبدأ من 0) — Column order (0-based) */
@@ -65,7 +74,15 @@ const SETTING_KEYS = {
   SHIFTS: 'قائمة الورديات',
   DEPARTMENTS: 'قائمة الأقسام',
   COUNTRIES: 'قائمة الدول',
-  MEMBER_TYPES: 'أنواع العضوية'
+  MEMBER_TYPES: 'أنواع العضوية',
+  // (8 نوفمبر) التحديثات وإدارة النسخ — updates and version management
+  WHATS_NEW: 'ما الجديد في التحديث',              // كل سطر نقطة في بطاقة التحديث / each line a point on the update card
+  LOGOUT_WITH_BUILD: 'خروج إجباري مع تحديث',      // رقم النسخة التي تتطلب خروجًا مرة واحدة / the version that needs a one-time logout
+  UPDATE_TARGET_PCT: 'نسبة التحديث المطلوبة',      // نسبة الأعضاء النشطين المحدَّثين لبدء المهلة / the share of updated active members that starts the grace period
+  UPDATE_MAX_DAYS: 'أقصى انتظار بالأيام',         // بعدها تبدأ المهلة ولو لم تُبلغ النسبة / after it the grace period starts anyway
+  UPDATE_GRACE_HOURS: 'مهلة التحديث بالساعات',    // بعدها تُمنع الكتابة من النسخ القديمة / after it old versions can't write
+  MIN_ALLOWED_BUILD: 'أقل نسخة مسموحة',            // طوارئ: تمنع الأقدم فورًا / emergency: blocks older ones at once
+  UNVERSIONED_CUTOFF: 'إيقاف النسخ بلا رقم بعد'    // تاريخ (yyyy-mm-dd) تُمنع بعده كتابة الأجهزة التي لا ترسل رقم نسخة / a date after which devices sending no version can't write
 };
 
 /* القيم الابتدائية للقوائم — تُكتب في «الإعدادات» مرة واحدة إن لم يوجد المفتاح، وبعدها تُعدَّل من الشيت فقط
@@ -74,8 +91,20 @@ const SETTING_DEFAULTS = {
   'قائمة الورديات': 'أ، ب، ج، د، دوام ثابت',
   'قائمة الأقسام': 'التشغيل، الصيانة، اللحام، الفحص، الإنشاءات، التخطيط، السلامة، أخرى',
   'قائمة الدول': 'السعودية:+966، الإمارات:+971، البحرين:+973، الكويت:+965، قطر:+974، عُمان:+968، مصر:+20، الأردن:+962',
-  'أنواع العضوية': 'موظف، مقاول'
+  'أنواع العضوية': 'موظف، مقاول',
+  // (8 نوفمبر) قيم ابتدائية تُعدَّل من الشيت — initial values, edited in the sheet
+  'ما الجديد في التحديث': '',
+  'خروج إجباري مع تحديث': '',
+  'نسبة التحديث المطلوبة': '90',
+  'أقصى انتظار بالأيام': '7',
+  'مهلة التحديث بالساعات': '24',
+  'أقل نسخة مسموحة': '',
+  'إيقاف النسخ بلا رقم بعد': ''
 };
+
+/* (8 نوفمبر) ملف عامل الخدمة المنشور: منه يقرأ الخادم أحدث نسخة (لا مما يرسله الجوال حتى لا تُزوَّر)
+ * The published service worker file: the server reads the latest version from it (not from what phones send) */
+const SITE_SW_URL = 'https://malsllami.github.io/Maps-of-Substations/sw.js';
 
 /* حالات العضو — Member status values */
 const MEMBER_STATUS = { ACTIVE: 'نشط', DISABLED: 'معطل' };

@@ -243,7 +243,9 @@
     if (!copy) return fullLoad();
     if (offline_()) return { ok: false, reason: MSG.NO_DATA_OFFLINE };
     let res = null;
-    try { res = await global.SecApi.call('getUpdatedStationsSince', { since: copy.lastSync || null }); } catch (e) { res = null; }
+    // (8 نوفمبر) مع رقم العضو: الخادم سيقصر المزامنة على الأعضاء بعد أن تحدّث الأجهزة — with the member's phone: the server will
+    // limit sync to members once devices have updated
+    try { res = await global.SecApi.call('getUpdatedStationsSince', { since: copy.lastSync || null }, { phone: true }); } catch (e) { res = null; }
     if (!res) { logIssue_('sync', 'انقطع الاتصال بالخادم أثناء المزامنة'); return { ok: false, reason: 'تعذّر الاتصال بالخادم' }; }
     const outcome = await serial_(async function () {
       if (!copy) return { needsFullLoad: true };

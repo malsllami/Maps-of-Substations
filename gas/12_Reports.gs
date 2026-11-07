@@ -79,7 +79,8 @@ function dailyReportData_(now) {
     errors: errors,
     categories: Object.keys(errors.byCategory).sort(function (a, b) { return errors.byCategory[b] - errors.byCategory[a]; })
       .map(function (c) { return { label: c, count: errors.byCategory[c], real: REAL_ERROR_CATEGORIES.indexOf(c) !== -1 }; }),
-    status: systemStatus_(errors.real, quotaPct)
+    status: systemStatus_(errors.real, quotaPct),
+    versions: versionReportLine_() // (8 نوفمبر) نسبة المحدَّثين والمهلة / the updated share and the grace period
   };
 }
 
@@ -112,7 +113,8 @@ function dailyReportMessage_(d) {
     : '<span style="font-size:12.5px;color:#1E8449;">لا شيء</span>';
   const rows = lines.map(function (l) { return reportRow_(l[0], reportBadge_(l[1], l[2])); }).join('') +
     reportRow_('ش) تفصيل سجل الأخطاء حسب التصنيف', categoryHtml) +
-    reportRow_('ر) حالة النظام (من الأخطاء الفعلية والحصة)', reportBadge_(d.status.label, d.status.color));
+    reportRow_('ر) حالة النظام (من الأخطاء الفعلية والحصة)', reportBadge_(d.status.label, d.status.color)) +
+    (d.versions ? reportRow_('ط) تحديث الموقع', '<span style="font-size:12.5px;color:#333;">' + d.versions + '</span>') : '');
   const html = '<div dir="rtl" style="font-family:Tahoma,Arial,sans-serif;max-width:480px;margin:0 auto;background:#fff;padding:20px;">' +
     '<h2 style="text-align:center;color:#1B4D8C;margin:0 0 4px;">التقرير اليومي</h2>' +
     '<div style="text-align:center;color:#888;font-size:12.5px;margin-bottom:18px;">نظام محطات التوزيع — ' + d.dateLabel + '</div>' +
@@ -122,7 +124,7 @@ function dailyReportMessage_(d) {
     lines.map(function (l) { return l[0] + ': ' + l[1]; }).join('\n') + '\n' +
     'ش) تفصيل سجل الأخطاء حسب التصنيف:\n' +
     (d.categories.length ? d.categories.map(function (l) { return '   ' + (l.real ? '● ' : '○ ') + l.label + ': ' + l.count; }).join('\n') : '   لا شيء') + '\n' +
-    'ر) حالة النظام (من الأخطاء الفعلية والحصة): ' + d.status.label + '\n\n— تقرير آلي، لا حاجة للرد عليه.';
+    'ر) حالة النظام (من الأخطاء الفعلية والحصة): ' + d.status.label + '\n' + (d.versions ? 'ط) تحديث الموقع: ' + d.versions + '\n' : '') + '\n— تقرير آلي، لا حاجة للرد عليه.';
   return { subject: 'التقرير اليومي — نظام محطات التوزيع (' + d.dateLabel + ')', plain: plain, html: html };
 }
 

@@ -18,7 +18,7 @@
  * ===================================================
  */
 
-const SCHEMA_VERSION = 'v2-3'; // v2-3 (22 أكتوبر): جدول «سجل الاستخدام اليومي» يُنشأ تلقائيًا (إضافة فقط)؛ v2-2 (16 أكتوبر): أعمدة سجل الأخطاء الجديدة تُضاف تلقائيًا مع أول طلب / the new error-log columns are added with the first request
+const SCHEMA_VERSION = 'v2-4'; // v2-4 (8 نوفمبر): أعمدة النسخة في «سجل الاستخدام اليومي» وخانات التحديث في «الإعدادات» (إضافة فقط)؛ // v2-3 (22 أكتوبر): جدول «سجل الاستخدام اليومي» يُنشأ تلقائيًا (إضافة فقط)؛ v2-2 (16 أكتوبر): أعمدة سجل الأخطاء الجديدة تُضاف تلقائيًا مع أول طلب / the new error-log columns are added with the first request
 const SCHEMA_FLAG_KEY = 'schema_version';
 const SCHEMA_CACHE_SECONDS = 21600;
 
@@ -59,6 +59,16 @@ function إضافة_أعمدة_سجل_الأخطاء() {
   scriptProps_().setProperty(SCHEMA_FLAG_KEY, SCHEMA_VERSION);
   CacheService.getScriptCache().put(SCHEMA_FLAG_KEY, SCHEMA_VERSION, SCHEMA_CACHE_SECONDS);
   console.log(report.length ? report.join('\n') : 'أعمدة «سجل الأخطاء» موجودة كلها — لا تغيير');
+}
+
+/* (8 نوفمبر) إضافة أعمدة النسخة وخانات التحديث يدويًا من المحرر — إضافة فقط، لا تمس عمودًا أو صفًا أو قيمة قائمة.
+ * (تُضاف أيضًا تلقائيًا مع أول طلب بعد النشر؛ هذه الدالة للتشغيل والتحقق اليدوي.)
+ * Adds the version columns and update settings manually from the editor — appended only, never touching existing data. */
+function إضافة_أعمدة_النسخ_وخانات_التحديث() {
+  const report = applySchema_().filter(function (line) { return line.indexOf(SHEETS.USAGE) === 0 || line.indexOf(SHEETS.SETTINGS) === 0; });
+  scriptProps_().setProperty(SCHEMA_FLAG_KEY, SCHEMA_VERSION);
+  CacheService.getScriptCache().put(SCHEMA_FLAG_KEY, SCHEMA_VERSION, SCHEMA_CACHE_SECONDS);
+  console.log(report.length ? report.join('\n') : 'أعمدة النسخة وخانات التحديث موجودة كلها — لا تغيير');
 }
 
 /* التهيئة الفعلية — يُرجع قائمة بما تغيّر — The actual setup — returns a list of what changed */

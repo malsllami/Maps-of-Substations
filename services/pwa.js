@@ -92,6 +92,37 @@
     return true;
   }
 
+  /* رقم نسخة عامل خدمة (يسأله برسالة) أو null خلال ثانيتين — a worker's version (asked by message), or null within 2 s
+   * (8 نوفمبر) لإثبات أن الصفحة تعمل بنسخة العامل النشط، ولعرض تاريخ النسخة المنتظرة في بطاقة التحديث */
+  const BUILD_ASK_MS = 2000;
+  function buildOf_(worker) {
+    if (!worker || typeof global.MessageChannel !== 'function') return Promise.resolve(null);
+    return new Promise(function (resolve) {
+      const ch = new global.MessageChannel(), timer = global.setTimeout(function () { resolve(null); }, BUILD_ASK_MS);
+      ch.port1.onmessage = function (ev) { global.clearTimeout(timer); resolve(typeof ev.data === 'string' ? ev.data : null); };
+      try { worker.postMessage({ type: 'GET_SW_BUILD' }, [ch.port2]); } catch (e) { global.clearTimeout(timer); resolve(null); }
+    });
+  }
+  function activeBuild() { return buildOf_(sw && sw.controller); }
+  function waitingBuild() { return buildOf_(registration && registration.waiting); }
+
+  /* الفحص الدوري (8 نوفمبر): كل ساعة، وعند رجوع العضو للتطبيق (مرة كل 5 دقائق على الأكثر). يقرأ sw.js من GitHub Pages فقط
+   * ولا يمس حصة Apps Script. The periodic check: hourly, and when the member returns to the app (at most every 5 minutes).
+   * It reads sw.js from GitHub Pages only and never touches the Apps Script quota. */
+  const UPDATE_CHECK_EVERY_MS = 60 * 60 * 1000, UPDATE_CHECK_MIN_GAP_MS = 5 * 60 * 1000;
+  let lastCheckAt = Date.now();
+  function periodicCheck_() {
+    if (!registration || Date.now() - lastCheckAt < UPDATE_CHECK_MIN_GAP_MS) return;
+    lastCheckAt = Date.now();
+    checkForUpdate();
+  }
+  if (sw && typeof global.setInterval === 'function') {
+    global.setInterval(periodicCheck_, UPDATE_CHECK_EVERY_MS);
+    if (global.document && typeof global.document.addEventListener === 'function') {
+      global.document.addEventListener('visibilitychange', function () { if (global.document.visibilityState === 'visible') periodicCheck_(); });
+    }
+  }
+
   function recentlyReloaded_() {
     try { return Date.now() - Number(global.sessionStorage.getItem(RELOAD_KEY) || 0) < RELOAD_GUARD_MS; } catch (e) { return false; }
   }
@@ -150,6 +181,7 @@
 
   global.SecPWA = {
     register: register, checkForUpdate: checkForUpdate, applyUpdate: applyUpdate, onChange: onChange,
+    activeBuild: activeBuild, waitingBuild: waitingBuild, pageBuild: function () { return global.SEC2_BUILD || null; },
     state: function () { return state; },
     installMode: installMode, promptInstall: promptInstall, isStandalone: isStandalone, isIOS: isIOS
   };

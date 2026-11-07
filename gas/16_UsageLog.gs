@@ -73,6 +73,11 @@ function logUsage(data, auth) {
     Object.keys(USAGE_TEXTS).forEach(function (k) {
       if (meta[k] != null && String(meta[k]).trim()) values[col(USAGE_TEXTS[k])] = sanitizeSheetText_(String(meta[k]).slice(0, 60));
     });
+    // (8 نوفمبر) النسخة المُثبتة على الجهاز: تتغير ← رقمها وتاريخها ووقت تفعيلها — the proven version on the device
+    const ver = buildOrEmpty_(meta.version);
+    if (ver && String(values[col('رقم النسخة')] || '') !== ver) {
+      values[col('رقم النسخة')] = ver; values[col('تاريخ النسخة')] = buildDateText_(ver); values[col('تاريخ تفعيل النسخة')] = new Date();
+    }
     values[col('آخر تحديث')] = new Date();
     if (row) {
       withSheetRetry_(function () { sheet.getRange(row, 1, 1, headers.length).setValues([values]); });

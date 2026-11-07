@@ -78,8 +78,18 @@
     const os = (/OS (\d+)[_.](\d+)/.exec(ua) || /Android (\d+)/.exec(ua) || []).slice(1).filter(Boolean).join('.');
     const browser = /CriOS|Chrome/.test(ua) ? 'Chrome' : /FxiOS|Firefox/.test(ua) ? 'Firefox' : /Safari/.test(ua) ? 'Safari' : 'آخر';
     const standalone = global.navigator.standalone === true || (global.matchMedia && global.matchMedia('(display-mode: standalone)').matches);
-    return { device: device + (os ? ' ' + os : ''), browser: browser, standalone: standalone ? 'نعم' : 'لا' };
+    return { device: device + (os ? ' ' + os : ''), browser: browser, standalone: standalone ? 'نعم' : 'لا', version: verifiedBuild };
   }
+
+  /* (8 نوفمبر) النسخة تُرسل فقط بعد إثبات أنها تعمل فعلًا: نسخة عامل الخدمة النشط = نسخة ملفات الصفحة
+   * The version is sent only once proven to really run: the active service worker's version = the page files' version */
+  let verifiedBuild = '';
+  function verifyBuild_() {
+    const P = global.SecPWA, page = global.SEC2_BUILD;
+    if (!P || !P.activeBuild || !page) return;
+    P.activeBuild().then(function (active) { verifiedBuild = active && active === page ? page : ''; });
+  }
+  if (global.document && global.document.readyState === 'complete') verifyBuild_(); else global.addEventListener('load', verifyBuild_);
 
   // ===== الإرسال — sending =====
   let sending = false;

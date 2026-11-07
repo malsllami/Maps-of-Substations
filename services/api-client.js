@@ -35,7 +35,7 @@
   const REQUEST_TIMEOUT_MS = 75000; // قيس في V1: بعض ردود جوجل تصل حتى 65 ث (تشغيل بارد) / measured in V1: some Google replies take up to 65 s (cold start)
 
   // القراءات التي يُرسل لها طلب احتياطي (تكرارها آمن) — reads that get a backup request (safe to repeat)
-  const HEDGED = new Set(['ping', 'getDataVersion', 'getSettingsLists', 'getAdminContactInfo', 'getStats', 'getMemberProfileLite',
+  const HEDGED = new Set(['ping', 'getUpdateInfo', 'getDataVersion', 'getSettingsLists', 'getAdminContactInfo', 'getStats', 'getMemberProfileLite',
     'getAllStations', 'getUpdatedStationsSince', 'searchStation', 'getNearbyStations', 'getFeederStations',
     'loginByPhone', 'generateLoginChallenge', 'generateRegisterChallenge']);
   // الكتابات بمفتاح عملية — تُعاد بنفس المفتاح (والحذف منها: إعادته لا تحذف الصف المكرر التالي بنفس الرقم)
@@ -169,6 +169,8 @@
   async function call(action, payload, options) {
     const o = options || {};
     const body = Object.assign({ action: action }, payload || {});
+    // (8 نوفمبر) رقم نسخة الصفحة مع كل طلب: الخادم يمنع الكتابة من نسخة قديمة بعد مهلة التحديث — the page version with every request
+    if (global.SEC2_BUILD && body.appVersion === undefined) body.appVersion = global.SEC2_BUILD;
     const S = global.SecSession;
     if (o.token && body.identityToken === undefined && S) body.identityToken = S.getToken();
     if (o.phone && body.phone === undefined && S) body.phone = S.getPhone();
@@ -183,6 +185,9 @@
       json = await once_(body, controller);
     }
     if (S && S.touch) S.touch(); // كل نشاط فعلي يجدد وقت آخر نشاط / every real activity renews the last-activity time
+    // نسخة قديمة بعد المهلة ← فحص التحديث فورًا فتظهر بطاقة التحديث (الرد نفسه يصل للصفحة كرسالة عادية)
+    // an outdated version after the grace period ← check for the update now so the update card shows (the reply still reaches the page)
+    if (json && json.code === 'OUTDATED' && global.SecPWA && global.SecPWA.checkForUpdate) global.SecPWA.checkForUpdate();
     return json;
   }
 
