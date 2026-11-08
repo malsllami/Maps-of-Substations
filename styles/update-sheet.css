@@ -2,7 +2,7 @@
  * styles/update-sheet.css — بطاقة التحديث الإجبارية: تصميم «4» المعتمد بتحسينات محمد (8 نوفمبر 2026)
  * The mandatory update card: approved design «4» with Mohammed's refinements (8 Nov 2026)
  * ============================================================ */
-/* ألوان التنبيه الكهرماني (تستخدمها أيضًا شاشة إعادة التثبيت) — the amber alert colours (also used by the reinstall screen) */
+/* ألوان التنبيه الكهرماني (تستخدمها أيضًا بطاقة الترحيب في الجولة) — the amber alert colours (also used by the tour's welcome card) */
 :root{ --upd-amber:#F0B429; --upd-amber-deep:#C98A06; --upd-on-amber:#231700; --upd-bg:#14202F; }
 [data-theme="light"]{ --upd-amber:#E09A00; --upd-amber-deep:#B57A00; --upd-on-amber:#1E1400; --upd-bg:#FFFFFF; }
 

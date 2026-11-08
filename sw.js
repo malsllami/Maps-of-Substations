@@ -31,7 +31,7 @@ importScripts('config/الإعدادات.js');
 // يصل للأجهزة. لا يُعدَّل يدويًا: خطاف pre-commit يحدّثه مع كل commit فيه ملف موقع، واختبار البوابة test_sw_build.js يتحقق.
 // The build stamp: a browser detects a new version only when this file or the config changes; any other site file alone never
 // reaches devices. Not edited by hand: the pre-commit hook updates it on every commit with a site file; the gate verifies.
-const SW_BUILD = '20261108-041922-153710000';
+const SW_BUILD = '20261108-163017';
 const CONFIG = self.SEC2_CONFIG;
 const CACHE_NAME = CONFIG.SHELL_CACHE_NAME;
 const NEXT_CACHE = CACHE_NAME + '-next'; // تثبيت نسخة جديدة دون لمس العاملة / installing a new version without touching the working one
@@ -61,13 +61,13 @@ const APP_SHELL = [
   'components/navigation-view.js', 'components/nearby-layer.js', 'components/offline-map-ui.js', 'components/outage-search.js',
   'components/perf-viewer.js', 'components/phone-input.js', 'components/profile-gate.js', 'components/recent-stations.js',
   'components/shifts-calendar.js', 'components/station-card.js', 'components/station-search-box.js', 'components/stats-cards.js',
-  'components/install-sheet.js', 'components/storage-section.js', 'components/update-sheet.js', 'components/reinstall-notice.js', 'components/feature-tour.js', 'config/جولة_تعريفية.js',
+  'components/install-sheet.js', 'components/storage-section.js', 'components/update-sheet.js', 'components/feature-tour.js', 'config/جولة_تعريفية.js',
   'pages/home.js',
   'styles/add-edit-station.css', 'styles/admin.css', 'styles/app-header.css', 'styles/auth.css', 'styles/base.css', 'styles/bottom-nav.css', 'styles/station-details.css', 'styles/stations-list.css', 'styles/more-menu.css',
   'styles/connection-status.css', 'styles/contact-admin.css', 'styles/delete-station.css', 'styles/globe.css', 'styles/home.css',
   'styles/map-tools.css', 'styles/map-view.css', 'styles/map.css', 'styles/member.css', 'styles/navigation.css', 'styles/offline-map.css',
   'styles/perf-viewer.css', 'styles/profile-gate.css', 'styles/recent-stations.css', 'styles/shifts.css', 'styles/station-card.css',
-  'styles/station-search.css', 'styles/stats-cards.css', 'styles/storage-section.css', 'styles/tables.css', 'styles/update-sheet.css', 'styles/reinstall-notice.css', 'styles/install-sheet.css', 'styles/feature-tour.css'
+  'styles/station-search.css', 'styles/stats-cards.css', 'styles/storage-section.css', 'styles/tables.css', 'styles/update-sheet.css', 'styles/install-sheet.css', 'styles/feature-tour.css'
 ];
 const CDN_ASSETS = Object.keys(CONFIG.LIBRARIES).map((k) => CONFIG.LIBRARIES[k]);
 const CACHE_FIRST_HOSTS = ['cdnjs.cloudflare.com', 'cdn.jsdelivr.net', 'fonts.googleapis.com', 'fonts.gstatic.com'];
