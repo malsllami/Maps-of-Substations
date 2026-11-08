@@ -112,7 +112,7 @@
       LEAFLET_JS: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js',
       LEAFLET_CSS: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css',
       CHART_JS: 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js',
-      THREE_JS: 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js', // قديمة — قرار التحديث في مرحلة المكتبات / old — update decision in the libraries step
+      THREE_JS: 'libs/three/three-globe.min.js', // three.js 0.187.0 (9 نوفمبر): جزء الكرة فقط من الحزمة الرسمية، داخل الموقع (tests/_build_three.js) / the globe subset, in the site
       PMTILES: 'https://cdn.jsdelivr.net/npm/pmtiles@4.5.0/dist/pmtiles.js',
       PROTOMAPS_LEAFLET: 'https://cdn.jsdelivr.net/npm/protomaps-leaflet@5.1.0/dist/protomaps-leaflet.js'
     },
@@ -124,7 +124,7 @@
       LEAFLET_JS: 'sha512-puJW3E/qXDqYp9IfhAI54BJEaWIfloJ7JWs7OeD5i6ruC9JZL1gERT1wjtwXFlh7CjE7ZJ+/vcRZRkIYIb6p4g==',
       LEAFLET_CSS: 'sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw==',
       CHART_JS: 'sha512-CQBWl4fJHWbryGE+Pc7UAxWMUMNMWzWxF4SQo9CgkJIN1kx6djDQZjh3Y8SZ1d+6I+1zze6Z7kHXO7q3UyZAWw==',
-      THREE_JS: 'sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ==',
+      THREE_JS: 'sha384-eOobwsfbSR23mE4InstNcnGICGyuc91sR3XuvAOH4Q1wf/3LQS8rUXJmKMulxspM', // تتغير مع كل إعادة بناء (تطبعها الأداة) / changes with each rebuild
       PMTILES: 'sha384-pbKNZbDshUsLnZMIVsn/t+j3xEY9PGfuX5Z22l5rcy/obXz3EwaMx1F5d9sRsJMn',
       PROTOMAPS_LEAFLET: 'sha384-pAKrddYWxjFAIJwatOtmmtq9ebz3ZwluHCEg3pqOMpOporUofLqz/l5hs+0LAWaH'
     }

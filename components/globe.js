@@ -1,5 +1,5 @@
 /* ============================================================
- * components/globe.js — الكرة ثلاثية الأبعاد في الرئيسية (three.js r128 كما في V1، بقرار محمد)
+ * components/globe.js — الكرة ثلاثية الأبعاد في الرئيسية (three.js 0.187.0 منذ 9 نوفمبر، بشكل V1 نفسه — كان r128)
  * ============================================================
  * سلوك V1 وشكله كما هما: كرة سلكية (Icosahedron) وكرة شبكية زرقاء ونقاط زخرفية، تدور ببطء (0.0016 لكل إطار، ميل 0.15)،
  * ألوانها حسب الثيم، الكاميرا حسب عرض المسرح (4.9 / 4.5 / 3.9)، ولقطة البحث: تلتفّ نحو المحطة (550 م ث، أقصر اتجاه)
@@ -11,7 +11,7 @@
  * V2: الرسم يتوقف وقت ظهور الخريطة وعند إخفاء الصفحة (لا رسم خلف الخريطة يستهلك البطارية) ويعود بعدها؛ الشفافية بعد
  *   الرجوع من الخريطة = ألوان الثيم نفسها (V1 كان يرجع بقيم مختلفة عن قيم الثيم)؛ الثيم من services/theme.js.
  *
- * The home page 3D globe (three.js r128, as in V1). V1's behavior and look; independent of the map engine. Fallback when
+ * The home page 3D globe (three.js 0.187.0 since 9 Nov, V1's exact look — was r128). V1's behavior and look; independent of the map engine. Fallback when
  * the library or WebGL is missing: the globe hides and every call is a no-op. V2: rendering pauses while the map shows
  * or the page is hidden; after returning, the opacities are the theme's own.
  * ============================================================ */
@@ -66,7 +66,12 @@
 
     // ===== الحالة البديلة — The fallback =====
     let renderer = null;
+    // (9 نوفمبر) إدارة الألوان القديمة كما في r128: الألوان والشفافية تُرسم بنفس درجاتها السابقة تمامًا (الإصدارات الحديثة تمزجها بطريقة أخرى)
+    // The legacy color handling as in r128: colors and transparency drawn exactly as before (newer releases blend differently)
+    if (THREE && THREE.ColorManagement) THREE.ColorManagement.enabled = false;
+    // بلا WebGL2 (أجهزة قديمة جدًا) ← يرمي الإنشاء ← الحالة البديلة / without WebGL2 (very old devices) ← the fallback
     if (THREE) { try { renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true }); } catch (e) { renderer = null; } }
+    if (renderer && THREE.LinearSRGBColorSpace) renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
     if (!renderer) {
       canvas.style.display = 'none';
       stage.classList.add('globe-off');
