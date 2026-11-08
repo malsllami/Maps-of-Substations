@@ -156,5 +156,9 @@
     });
   };
 
+  // وعند تحميل أي صفحة فيها هذا الملف، ومنها صفحة القياس نفسها (لا تسجّل «فتح الصفحة») — قبل أي طلب منها
+  // And on loading any page with this file, the perf page included (it records no page open) — before any of its requests
+  relabelCutByNavigation_();
+
   global.SecTiming = { readLog: readLog, clearLog: clearLog, recordPageOpen: recordPageOpen, logKey: LOG_KEY };
 })(typeof window !== 'undefined' ? window : globalThis);

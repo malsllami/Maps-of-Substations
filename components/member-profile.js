@@ -154,12 +154,16 @@
      * Release 3: the device copy first, then the server in the background. With the copy shown, a server failure shows
      * no error banner (offline, say); a ticket refusal is handled as always. */
     const PC = global.SecProfileCache;
+    let shownFromDevice = false;
+    /* نسخة الجهاز فورًا عند فتح الصفحة، قبل تجديد التذكرة وأي طلب — the device copy at once, before the ticket renewal and any request */
+    function showSaved() {
+      if (!PC || profile) return shownFromDevice;
+      const saved = PC.view();
+      if (saved) { render_(saved); shownFromDevice = true; }
+      return shownFromDevice;
+    }
     async function load() {
-      let shownFromDevice = false;
-      if (PC && !profile) {
-        const saved = PC.view();
-        if (saved) { render_(saved); shownFromDevice = true; }
-      }
+      showSaved();
       const startedAt = Date.now();
       let res;
       try { res = await API.call('getMemberProfile', {}, { token: true }); }
@@ -253,7 +257,7 @@
     loadLists_();
 
     return {
-      load: load, save: save,
+      load: load, save: save, showSaved: showSaved,
       destroy: function () { alive = false; slots.form.removeEventListener('change', onChange_); slots.form.removeEventListener('input', onInput_); slots.form.removeEventListener('click', onClick_); }
     };
   }

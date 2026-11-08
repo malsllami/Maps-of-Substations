@@ -89,6 +89,7 @@
     const profile = SecMemberProfile.mount({
       profile: document.getElementById('profileSlot'), contributions: document.getElementById('contributionsSlot'), form: document.getElementById('formSlot')
     }, { onNameChange: function () { header.render(); } });
+    profile.showSaved(); // (الإصدار 3) «حسابي» من الجهاز فورًا، ثم الخادم بعد تجديد التذكرة / the device copy at once, then the server
 
     // خريطة جدة: نفس المحرك ونفس النافذة (V1) — the Jeddah map: the same engine and sheet (V1)
     const omCard = document.getElementById('offlineMapCard');
