@@ -119,10 +119,13 @@
     else if (s.state === 'rejected') btns = '<button type="button" class="om-btn pri" data-act="download" style="grid-column:1/-1">إعادة التحميل</button>';
     else btns = '<button type="button" class="om-btn pri" data-act="download" style="grid-column:1/-1">تنزيل الخريطة</button>';
 
-    sheet.innerHTML = '<div class="om-grab"></div><h3 class="om-h">🗺 خريطة جدة بدون إنترنت</h3>' +
+    const html = '<div class="om-grab"></div><h3 class="om-h">🗺 خريطة جدة بدون إنترنت</h3>' +
       rows.map(function (r) { return '<div class="om-row"><span>' + r[0] + '</span><b>' + r[1] + '</b></div>'; }).join('') + prog + storage +
       '<p class="om-sub">تظهر تلقائيًا عند انقطاع الإنترنت · حدود محافظة جدة الرسمية · © OpenStreetMap</p>' +
       '<div class="om-btns">' + btns + '</div><div class="om-msg" hidden></div>' + await historyHtml_();
+    // (8 نوفمبر) أُغلقت اللوحة أثناء انتظار السجل ← لا كتابة (كان يُسقط خطأً متقطعًا) — closed while waiting ← no write (was an intermittent error)
+    if (!sheet) return;
+    sheet.innerHTML = html;
     sheet.querySelectorAll('[data-act]').forEach(function (b) { b.addEventListener('click', function () { act_(b.dataset.act); }); });
     const wifi = sheet.querySelector('.om-wifi input');
     if (wifi) wifi.addEventListener('change', function () { consent.wifiOnly = wifi.checked; });
