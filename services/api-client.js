@@ -171,6 +171,7 @@
     const body = Object.assign({ action: action }, payload || {});
     // (8 نوفمبر) رقم نسخة الصفحة مع كل طلب: الخادم يمنع الكتابة من نسخة قديمة بعد مهلة التحديث — the page version with every request
     if (global.SEC2_BUILD && body.appVersion === undefined) body.appVersion = global.SEC2_BUILD;
+    if (global.SEC2_RELEASE && body.appRelease === undefined) body.appRelease = global.SEC2_RELEASE; // (8 نوفمبر) رقم الإصدار / the release number
     const S = global.SecSession;
     if (o.token && body.identityToken === undefined && S) body.identityToken = S.getToken();
     if (o.phone && body.phone === undefined && S) body.phone = S.getPhone();

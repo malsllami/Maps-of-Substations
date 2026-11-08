@@ -34,7 +34,8 @@
     ACTIVATING: 'جارٍ تفعيل النسخة الجديدة…',
     OPENING: 'اكتمل التفعيل، جارٍ الفتح…',
     RETRY: 'لم يكتمل التفعيل، أعد المحاولة',
-    READY: 'معتمدة'
+    READY: 'معتمدة',
+    RELEASE: 'الإصدار'
   };
   const ACTIVATE_WAIT_MS = 20000; // مهلة تفعيل النسخة الجديدة قبل عرض إعادة المحاولة / activation limit before offering a retry
 
@@ -70,7 +71,6 @@
   const ICON = {
     layers: SVG('<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>'),
     check: SVG('<circle cx="12" cy="12" r="10"/><polyline points="8 12 11 15 16 9"/>'),
-    calendar: SVG('<rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>'),
     sparkle: SVG('<path d="M12 3l1.8 4.6L18 9.4l-4.2 1.8L12 16l-1.8-4.8L6 9.4l4.2-1.8z"/><path d="M19 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>'),
     tick: SVG('<polyline points="6 12 10 16 18 8"/>'),
     download: SVG('<path d="M12 4v11"/><polyline points="7 10 12 15 17 10"/><path d="M5 19h14"/>')
@@ -86,6 +86,15 @@
   function hijriText_(build) {
     const d = buildDate(build), D = global.SecDates;
     return d && D ? noComma_(D.hijri(d)) : '';
+  }
+  /* «8 نوفمبر 2026 · 4:19 م» — التاريخ والوقت تحت رقم الإصدار مرة واحدة — the date and time under the release number, once */
+  function whenText_(build) {
+    const d = buildDate(build), D = global.SecDates;
+    return d ? dateText_(build) + (D && D.time ? ' · ' + D.time(d) : '') : '—';
+  }
+  /* (8 نوفمبر، قرار محمد) «الإصدار N» برقم متسلسل؛ نسخة بلا رقم ← الختم كما كان — «release N»; a version without one ← its stamp */
+  function releaseText_(release, build) {
+    return release ? MSG.RELEASE + ' ' + release : pillBuild(build);
   }
   const esc_ = function (s) { return global.SecHtml ? global.SecHtml.esc(s) : String(s).replace(/[&<>"']/g, ''); };
 
@@ -118,6 +127,7 @@
       if (el || building) return el;
       building = true;
       const waiting = pwa.waitingBuild ? await pwa.waitingBuild() : null;
+      const waitingRelease = pwa.waitingRelease ? await pwa.waitingRelease() : null;
       const info = await info_();
       building = false;
       if (!alive || el) return el;
@@ -125,8 +135,17 @@
       const loggedIn = !!(K && readKey_(K.SESSION));
       // خروج مرة واحدة لهذه النسخة فقط: النسخة المطلوبة = المنتظرة، ولم يُسجَّل معها خروج على هذا الجهاز، والعضو داخل
       // logout once for this version only: the required version = the waiting one, not done on this device, and logged in
-      logoutBuild = waiting && info.logoutBuild && info.logoutBuild === waiting && done !== waiting && loggedIn ? waiting : '';
+      // الخانة تقبل رقم الإصدار (2) أو الختم (8 نوفمبر) — the cell accepts the release number (2) or the stamp
+      const logoutMatch = !!info.logoutBuild && (info.logoutBuild === waiting || (!!waitingRelease && info.logoutBuild === String(waitingRelease)));
+      logoutBuild = waiting && logoutMatch && done !== waiting && loggedIn ? waiting : '';
       const page = pwa.pageBuild ? pwa.pageBuild() : null;
+      const pageRelease = pwa.pageRelease ? pwa.pageRelease() : null;
+      // عمود كل نسخة: «الإصدار N» ثم تاريخه ووقته، ثم الهجري — each version's column: «release N», its date and time, the Hijri date
+      const col_ = function (release, build, isNew) {
+        const pill = '<b class="upd-pill upd-num' + (isNew ? ' is-new' : '') + '">' + esc_(releaseText_(release, build)) + '</b>';
+        return '<div class="upd-ver-col">' + (isNew ? '<span class="upd-pill-box">' + pill + '<i class="upd-tag">' + MSG.READY + '</i></span>' : pill) +
+          '<small class="upd-when">' + esc_(whenText_(build)) + '</small><small class="upd-when-h">' + esc_(hijriText_(build)) + '</small></div>';
+      };
       // كل سطر في خانة «ما الجديد» نقطة مستقلة — each line in the «what's new» cell is its own point
       const notes = String(info.whatsNew || MSG.WHATS_NEW_DEFAULT).split(/\r?\n/).map(function (s) { return s.trim(); }).filter(Boolean).slice(0, 6);
       doc.body.insertAdjacentHTML('beforeend',
@@ -134,14 +153,11 @@
           '<div class="upd-body">' +
             '<div class="upd-hero-ring"><img class="upd-hero" src="assets/icon-192.png" alt="D.S.Maps"></div>' +
             '<h2 class="upd-title" id="updTitle">' + MSG.TITLE + '</h2><div class="upd-glow-line" aria-hidden="true"></div>' +
-            // مقارنة النسختين في بطاقة واحدة: رقم كل نسخة، ثم تاريخ الجديدة بالميلادي والهجري (تحسين محمد 8 نوفمبر)
-            // both versions compared in one card: each version number, then the new one's date in both calendars
+            // مقارنة النسختين في بطاقة واحدة: «الإصدار N» وتحته تاريخه ووقته مرة واحدة (قرار محمد 8 نوفمبر)، وشارة «معتمدة» على الجديدة
+            // both versions in one card: «release N» with its date and time once beneath, and the «approved» badge on the new one
             '<div class="upd-vers">' +
               '<div class="upd-vers-head"><span class="upd-vh">' + ICON.layers + MSG.YOURS + '</span><span class="upd-vh is-new">' + ICON.check + MSG.NEW + '</span></div>' +
-              '<div class="upd-vers-row"><b class="upd-pill upd-num" dir="ltr">' + esc_(pillBuild(page)) + '</b><span class="upd-arrow" aria-hidden="true">←</span>' +
-                // شارة «معتمدة» على النسخة التي سيُحدَّث إليها — the «approved» badge on the version being installed
-                '<span class="upd-pill-box"><b class="upd-pill upd-num is-new" dir="ltr">' + esc_(pillBuild(waiting)) + '</b><i class="upd-tag">' + MSG.READY + '</i></span></div>' +
-              '<div class="upd-vers-date">' + ICON.calendar + '<span>' + esc_(dateText_(waiting)) + '</span><span class="upd-sep" aria-hidden="true">|</span><span>' + esc_(hijriText_(waiting)) + '</span></div>' +
+              '<div class="upd-vers-row">' + col_(pageRelease, page, false) + '<span class="upd-arrow" aria-hidden="true">←</span>' + col_(waitingRelease, waiting, true) + '</div>' +
             '</div>' +
             '<section class="upd-new"><div class="upd-new-tab">' + ICON.sparkle + MSG.WHATS_NEW + '</div>' +
               '<ul class="upd-notes">' + notes.map(function (n) { return '<li><i aria-hidden="true">' + ICON.tick + '</i><span>' + esc_(n) + '</span></li>'; }).join('') + '</ul></section>' +

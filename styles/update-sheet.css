@@ -34,7 +34,7 @@
 .upd-vers-head,.upd-vers-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
 .upd-vh{display:inline-flex;align-items:center;gap:6px;font-size:14.5px;font-weight:700;color:#C3D2E2;}
 .upd-vh.is-new{color:var(--upd-teal);}
-.upd-vers-row{margin:18px 0 12px;}
+.upd-vers-row{margin:18px 0 4px;align-items:flex-start;}
 /* خط الموقع بأرقام متساوية العرض (خط آيفون الأحادي أعرض فكان يخرج عن الإطار) — the site font with equal-width digits */
 .upd-pill-box{position:relative;flex:1 1 0;min-width:0;display:flex;}
 .upd-pill{flex:1 1 0;min-width:0;box-sizing:border-box;padding:10px 4px;border-radius:14px;font-family:inherit;font-variant-numeric:tabular-nums;
@@ -43,20 +43,22 @@
 .upd-pill.is-new{border:1.5px solid var(--upd-teal);background:rgba(77,214,181,.14);box-shadow:0 0 14px rgba(77,214,181,.2);}
 .upd-tag{position:absolute;top:-9px;left:50%;transform:translateX(-50%);padding:1px 9px;border-radius:999px;font-style:normal;font-size:11px;font-weight:800;
   line-height:16px;white-space:nowrap;color:#06231C;background:var(--upd-teal);box-shadow:0 0 10px rgba(77,214,181,.45);}
-.upd-arrow{flex:none;font-size:18px;color:var(--upd-teal);}
-.upd-vers-date{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;padding-top:10px;border-top:1px solid rgba(77,214,181,.22);
-  font-size:13.5px;font-weight:600;color:#C3D2E2;}
-.upd-sep{color:rgba(195,210,226,.5);}
+.upd-arrow{flex:none;font-size:18px;color:var(--upd-teal);align-self:flex-start;margin-top:10px;}
+/* (8 نوفمبر) عمود كل نسخة: «الإصدار N» ثم تاريخه ووقته مرة واحدة، ثم الهجري — each version: «release N», its date and time once, the Hijri date */
+.upd-ver-col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:stretch;gap:5px;text-align:center;}
+.upd-ver-col .upd-pill-box{flex:none;}
+.upd-ver-col .upd-pill{flex:none;width:100%;}
+.upd-when{font-size:12.5px;font-weight:700;color:#C3D2E2;line-height:1.5;}
+.upd-when-h{font-size:11.5px;font-weight:600;color:#9FB2C6;line-height:1.4;}
 .upd-vh{white-space:nowrap;}
-/* الشاشات الضيقة (آيفون SE): عناوين أصغر، والتاريخان سطرين بلا فاصل معلّق — narrow screens: smaller labels, the two dates on two lines */
+/* الشاشات الضيقة (آيفون SE): عناوين وتواريخ أصغر — narrow screens: smaller labels and dates */
 @media (max-width:359px){
   .upd-screen{padding-left:14px;padding-right:14px;}
   .upd-vers{padding-left:10px;padding-right:10px;}
   .upd-vh{font-size:12.5px;gap:4px;}
   .upd-vh svg{width:16px;height:16px;}
-  .upd-sep{display:none;}
-  .upd-vers-date{flex-direction:column;gap:4px;}
-  .upd-vers-date svg{display:none;}
+  .upd-when{font-size:10.5px;white-space:nowrap;letter-spacing:-.2px;}
+  .upd-when-h{font-size:10.5px;}
 }
 
 /* ما الجديد في هذا الإصدار؟ — what's new in this release */

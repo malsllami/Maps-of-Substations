@@ -78,7 +78,8 @@
     const os = (/OS (\d+)[_.](\d+)/.exec(ua) || /Android (\d+)/.exec(ua) || []).slice(1).filter(Boolean).join('.');
     const browser = /CriOS|Chrome/.test(ua) ? 'Chrome' : /FxiOS|Firefox/.test(ua) ? 'Firefox' : /Safari/.test(ua) ? 'Safari' : 'آخر';
     const standalone = global.navigator.standalone === true || (global.matchMedia && global.matchMedia('(display-mode: standalone)').matches);
-    return { device: device + (os ? ' ' + os : ''), browser: browser, standalone: standalone ? 'نعم' : 'لا', version: verifiedBuild };
+    return { device: device + (os ? ' ' + os : ''), browser: browser, standalone: standalone ? 'نعم' : 'لا', version: verifiedBuild,
+      release: verifiedBuild && global.SEC2_RELEASE ? global.SEC2_RELEASE : '' }; // (8 نوفمبر) رقم الإصدار مع النسخة المُثبتة فقط / with the proven version only
   }
 
   /* (8 نوفمبر) النسخة تُرسل فقط بعد إثبات أنها تعمل فعلًا: نسخة عامل الخدمة النشط = نسخة ملفات الصفحة

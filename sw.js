@@ -31,7 +31,8 @@ importScripts('config/الإعدادات.js');
 // يصل للأجهزة. لا يُعدَّل يدويًا: خطاف pre-commit يحدّثه مع كل commit فيه ملف موقع، واختبار البوابة test_sw_build.js يتحقق.
 // The build stamp: a browser detects a new version only when this file or the config changes; any other site file alone never
 // reaches devices. Not edited by hand: the pre-commit hook updates it on every commit with a site file; the gate verifies.
-const SW_BUILD = '20261108-164156';
+const SW_RELEASE = 2; // (8 نوفمبر) رقم الإصدار المتسلسل = SEC2_RELEASE في config/النسخة.js، ويقرؤه الخادم من هنا / the release number, read by the server from here
+const SW_BUILD = '20261108-164927';
 const CONFIG = self.SEC2_CONFIG;
 const CACHE_NAME = CONFIG.SHELL_CACHE_NAME;
 const NEXT_CACHE = CACHE_NAME + '-next'; // تثبيت نسخة جديدة دون لمس العاملة / installing a new version without touching the working one
@@ -110,6 +111,8 @@ self.addEventListener('message', (event) => {
   // (8 نوفمبر) نسخة هذا العامل: لإثبات تطابقه مع نسخة الصفحة، ولعرض تاريخ النسخة الجديدة في بطاقة التحديث
   // (8 Nov) this worker's version: to prove it matches the page's, and to show the new version's date on the update card
   if (event.data && event.data.type === 'GET_SW_BUILD' && event.ports && event.ports[0]) event.ports[0].postMessage(SW_BUILD);
+  // (8 نوفمبر) رقم إصدار هذا العامل لبطاقة التحديث — this worker's release number for the update card
+  if (event.data && event.data.type === 'GET_SW_RELEASE' && event.ports && event.ports[0]) event.ports[0].postMessage(SW_RELEASE);
 });
 
 /* التفعيل المتين: في كل لحظة توجد نسخة مكتملة صالحة حتى لو توقف المتصفح في المنتصف

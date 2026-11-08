@@ -105,6 +105,16 @@
   }
   function activeBuild() { return buildOf_(sw && sw.controller); }
   function waitingBuild() { return buildOf_(registration && registration.waiting); }
+  /* (8 نوفمبر) رقم إصدار العامل المنتظر، أو null لعامل قديم لا يعرفه — the waiting worker's release number, or null for an old one */
+  function waitingRelease() {
+    const worker = registration && registration.waiting;
+    if (!worker || typeof global.MessageChannel !== 'function') return Promise.resolve(null);
+    return new Promise(function (resolve) {
+      const ch = new global.MessageChannel(), timer = global.setTimeout(function () { resolve(null); }, BUILD_ASK_MS);
+      ch.port1.onmessage = function (ev) { global.clearTimeout(timer); resolve(typeof ev.data === 'number' && ev.data > 0 ? ev.data : null); };
+      try { worker.postMessage({ type: 'GET_SW_RELEASE' }, [ch.port2]); } catch (e) { global.clearTimeout(timer); resolve(null); }
+    });
+  }
 
   /* الفحص الدوري (8 نوفمبر): كل ساعة، وعند رجوع العضو للتطبيق (مرة كل 5 دقائق على الأكثر). يقرأ sw.js من GitHub Pages فقط
    * ولا يمس حصة Apps Script. The periodic check: hourly, and when the member returns to the app (at most every 5 minutes).
@@ -182,6 +192,7 @@
   global.SecPWA = {
     register: register, checkForUpdate: checkForUpdate, applyUpdate: applyUpdate, onChange: onChange,
     activeBuild: activeBuild, waitingBuild: waitingBuild, pageBuild: function () { return global.SEC2_BUILD || null; },
+    waitingRelease: waitingRelease, pageRelease: function () { return global.SEC2_RELEASE || null; },
     state: function () { return state; },
     installMode: installMode, promptInstall: promptInstall, isStandalone: isStandalone, isIOS: isIOS
   };
