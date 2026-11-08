@@ -420,6 +420,7 @@
       return new Promise(function (resolve) {
         const s = doc.createElement('script');
         s.src = CONFIG.LIBRARIES.CHART_JS; s.async = true;
+        s.integrity = CONFIG.LIBRARIES_SRI.CHART_JS; s.crossOrigin = 'anonymous'; // بصمة التحقق (8 نوفمبر) / the integrity hash
         s.onload = function () { resolve(global.Chart || null); };
         s.onerror = function () { resolve(null); };
         doc.head.appendChild(s);

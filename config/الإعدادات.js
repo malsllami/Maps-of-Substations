@@ -114,6 +114,18 @@
       THREE_JS: 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js', // قديمة — قرار التحديث في مرحلة المكتبات / old — update decision in the libraries step
       PMTILES: 'https://cdn.jsdelivr.net/npm/pmtiles@4.5.0/dist/pmtiles.js',
       PROTOMAPS_LEAFLET: 'https://cdn.jsdelivr.net/npm/protomaps-leaflet@5.1.0/dist/protomaps-leaflet.js'
+    },
+    /* بصمة التحقق لكل مكتبة (8 نوفمبر): المتصفح يرفض الملف إن تغيّر حرف واحد فيه على الخادم الخارجي. طوبقت مع المصادر الرسمية
+     * (بصمات cdnjs المنشورة، وحزم npm الأصلية لـpmtiles وprotomaps). تغيير إصدار مكتبة ← تُحدَّث بصمتها هنا معه.
+     * Each library's integrity hash: the browser refuses the file if a single byte changed on the CDN. Matched against the official
+     * sources (cdnjs's published hashes, the original npm packages). Changing a library version ← update its hash here too. */
+    LIBRARIES_SRI: {
+      LEAFLET_JS: 'sha512-puJW3E/qXDqYp9IfhAI54BJEaWIfloJ7JWs7OeD5i6ruC9JZL1gERT1wjtwXFlh7CjE7ZJ+/vcRZRkIYIb6p4g==',
+      LEAFLET_CSS: 'sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw==',
+      CHART_JS: 'sha512-CQBWl4fJHWbryGE+Pc7UAxWMUMNMWzWxF4SQo9CgkJIN1kx6djDQZjh3Y8SZ1d+6I+1zze6Z7kHXO7q3UyZAWw==',
+      THREE_JS: 'sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ==',
+      PMTILES: 'sha384-pbKNZbDshUsLnZMIVsn/t+j3xEY9PGfuX5Z22l5rcy/obXz3EwaMx1F5d9sRsJMn',
+      PROTOMAPS_LEAFLET: 'sha384-pAKrddYWxjFAIJwatOtmmtq9ebz3ZwluHCEg3pqOMpOporUofLqz/l5hs+0LAWaH'
     }
   };
 

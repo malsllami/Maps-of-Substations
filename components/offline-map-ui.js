@@ -237,9 +237,11 @@
   function loadLibs() {
     if (global.pmtiles && global.protomapsL) return Promise.resolve();
     if (!libsPromise) {
-      libsPromise = [CONFIG.LIBRARIES.PMTILES, CONFIG.LIBRARIES.PROTOMAPS_LEAFLET].reduce(function (p, src) {
+      // بصمة التحقق مع كل مكتبة (8 نوفمبر): fetch يرفض الملف إن لم يطابقها — each library with its integrity hash; fetch refuses a mismatch
+      libsPromise = [['PMTILES', CONFIG.LIBRARIES.PMTILES], ['PROTOMAPS_LEAFLET', CONFIG.LIBRARIES.PROTOMAPS_LEAFLET]].reduce(function (p, lib) {
+        const src = lib[1];
         return p.then(function () {
-          return global.fetch(src, { mode: 'cors' }).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+          return global.fetch(src, { mode: 'cors', integrity: CONFIG.LIBRARIES_SRI[lib[0]] }).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
             .then(function (code) {
               return new Promise(function (resolve, reject) {
                 const s = doc.createElement('script'), url = global.URL.createObjectURL(new global.Blob([code], { type: 'text/javascript' }));

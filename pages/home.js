@@ -79,6 +79,7 @@
       if (global.THREE) { resolve(); return; }
       const s = doc.createElement('script');
       s.src = global.SEC2_CONFIG.LIBRARIES.THREE_JS; s.onload = s.onerror = function () { resolve(); };
+      s.integrity = global.SEC2_CONFIG.LIBRARIES_SRI.THREE_JS; s.crossOrigin = 'anonymous'; // بصمة التحقق (8 نوفمبر) / the integrity hash
       doc.head.appendChild(s);
     });
   }
