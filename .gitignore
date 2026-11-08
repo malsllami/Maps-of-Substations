@@ -1,2 +1,5 @@
 # أدوات الاختبار والأرشيف تبقى محلية ولا تُنشر على GitHub Pages — test tools and archives stay local, never published
 tests/
+
+# (8 نوفمبر، الجولة 3) كود الخادم في مستودع خاص مستقل Maps-of-Substations-server ولا يُنشر هنا — the server code lives in its own private repo
+gas/
