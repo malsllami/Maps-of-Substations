@@ -48,6 +48,7 @@
   /* بعد دخول ناجح (بالجوال أو بالبصمة أو بعد التسجيل) — After a successful login (phone, fingerprint, or registration) */
   function save(data) {
     const session = { phone: data.phone, name: data.name || '', role: data.role === 'admin' ? 'admin' : 'member', identityToken: data.identityToken, ts: Date.now() };
+    if (data.adminSetup && session.role !== 'admin') session.adminSetup = true; // (8 نوفمبر) مدير لم يكتمل جهازه / an admin whose device isn't complete
     write_(session);
     try { global.localStorage.setItem(PHONE_KEY, data.phone); } catch (e) { /* تخزين محظور / storage blocked */ }
     return session;
@@ -70,6 +71,9 @@
 
   function isLoggedIn() { const s = read(); return !!(s && s.identityToken); }
   function isAdmin() { const s = read(); return !!(s && s.identityToken && s.role === 'admin'); }
+  /* (8 نوفمبر) يفتح لوحة المدير: مدير، أو مدير يكمل حماية جهازه (كلمة المرور و✓) — الصلاحية نفسها يقررها الخادم مع كل طلب
+   * May open the admin panel: an admin, or an admin completing the device protection — the server decides real rights per request */
+  function canOpenAdmin() { const s = read(); return !!(s && s.identityToken && (s.role === 'admin' || s.adminSetup === true)); }
   function getToken() { const s = read(); return (s && s.identityToken) || ''; }
   function getPhone() { const s = read(); return (s && s.phone) || ''; }
   function getName() { const s = read(); return (s && s.name) || ''; }
@@ -159,6 +163,7 @@
         const latest = read() || session; // قد تكون صفحة أخرى حدّثت الجلسة أثناء الطلب / another page may have updated it meanwhile
         latest.identityToken = json.identityToken;
         if (json.role) latest.role = json.role === 'admin' ? 'admin' : 'member';
+        if (json.adminSetup && latest.role !== 'admin') latest.adminSetup = true; else delete latest.adminSetup; // (8 نوفمبر)
         write_(latest);
         return true;
       }
@@ -174,7 +179,7 @@
   }
 
   global.SecSession = {
-    read: read, save: save, update: update, touch: touch, isLoggedIn: isLoggedIn, isAdmin: isAdmin,
+    read: read, save: save, update: update, touch: touch, isLoggedIn: isLoggedIn, isAdmin: isAdmin, canOpenAdmin: canOpenAdmin,
     getToken: getToken, getPhone: getPhone, getName: getName, getSavedPhone: getSavedPhone, forgetSavedPhone: forgetSavedPhone,
     logout: logout, handleExpired: handleExpired, isTokenInvalid: isTokenInvalid, ensureFresh: ensureFresh
   };

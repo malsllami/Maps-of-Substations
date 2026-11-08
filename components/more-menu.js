@@ -60,7 +60,7 @@
         '<div class="mm-head"><img class="mm-avatar" src="assets/member-avatar.webp" alt="" aria-hidden="true"><div class="mm-who"><span class="mm-name" data-role="name"></span>' +
           '<span class="mm-role"><bdi class="mm-phone" data-role="phone" dir="ltr"></bdi> · ' + (SESSION.isAdmin() ? 'مدير' : 'عضو') + '</span></div></div>' +
         group_('الحساب', link_('member.html', 'k-sub', 'user', 'حسابي') + link_('shifts.html', 'k-total', 'cal', 'تقويم دوام الورديات') +
-          (SESSION.isAdmin() ? link_('admin.html', 'k-ops', 'shield', 'لوحة المدير') : '')) +
+          (SESSION.isAdmin() || (SESSION.canOpenAdmin && SESSION.canOpenAdmin()) ? link_('admin.html', 'k-ops', 'shield', 'لوحة المدير') : '')) + // (8 نوفمبر) ومدير يكمل حماية جهازه / and an admin completing protection
         group_('البيانات', (g.SecOfflineMapUI ? item_('offline-map', 'k-dist', 'map', 'خريطة جدة بدون إنترنت') : '')) +
         // التواصل مع المدير (كان في القائمة المنسدلة للصفحات الأخرى) — contacting the admin (was in the other pages' dropdown)
         (g.SecContactAdmin ? group_('التواصل', '<a class="mm-item k-dist" href="#" data-act="call"><span class="mm-ic">' + ICON.phone + '</span><span class="mm-lbl">اتصال بالمدير</span>' + ICON.chev + '</a>' +

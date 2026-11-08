@@ -31,7 +31,7 @@
     try {
       const s = JSON.parse(localStorage.getItem(SEC2_CONFIG.STORAGE_KEYS.SESSION) || 'null');
       if (!s || !s.identityToken) location.replace('auth.html');
-      else if (s.role !== 'admin') location.replace('index.html');
+      else if (s.role !== 'admin' && s.adminSetup !== true) location.replace('index.html'); // (8 نوفمبر) ومدير يكمل حماية جهازه / or an admin completing protection
     } catch (e) { location.replace('auth.html'); }
   })();
 </script>
@@ -43,6 +43,7 @@
 <link rel="stylesheet" href="styles/contact-admin.css">
 <link rel="stylesheet" href="styles/tables.css">
 <link rel="stylesheet" href="styles/admin.css">
+<link rel="stylesheet" href="styles/admin-guard.css">
 </head>
 <body class="admin-page">
 <header id="appHeader"></header>
@@ -65,11 +66,12 @@
 <script src="components/connection-status.js"></script>
 <script src="components/app-header.js"></script>
 <script src="components/bottom-nav.js"></script>
+<script src="components/admin-guard.js"></script>
 <script src="components/admin-dashboard.js"></script>
 <script src="components/admin-detail.js"></script>
 <script>
   (function () {
-    if (!SecSession.isAdmin()) return; // التحويل جارٍ / redirect in progress
+    if (!SecSession.canOpenAdmin()) return; // التحويل جارٍ / redirect in progress
     SecTiming.recordPageOpen();
     const STALE_MS = 3 * 60 * 1000; // إعادة التحميل عند الرجوع للتبويب بعد 3 دقائق (V1) / reload on return after 3 minutes (V1)
     const header = SecAppHeader.mount(document.getElementById('appHeader'), {

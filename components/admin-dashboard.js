@@ -136,6 +136,8 @@
       const res = await API.call(action, payload || {}, { token: true });
       if (S.isTokenInvalid(res)) { const e = new Error('expired'); e.expired = true; throw e; }
       if (res && res.code === 'NOT_ADMIN') { const e = new Error(MSG.NOT_ADMIN); e.denied = true; throw e; }
+      // (8 نوفمبر) جهاز مدير لم يكتمل: كلمة المرور أو ✓ من الشيت (النموذج 2) — an incomplete admin device: password or the sheet ✓
+      if (global.SecAdminGuard && global.SecAdminGuard.isGuardReply(res)) { const e = new Error(res.error || ''); e.guard = res; throw e; }
       if (!res || !res.success) { const e = new Error((res && res.error) || 'خطأ غير معروف'); e.refused = true; throw e; }
       return res;
     }
@@ -143,6 +145,15 @@
     function denied_() {
       main.innerHTML = '<div class="err-msg" data-role="denied"><b>' + MSG.NOT_ADMIN + '</b><div class="err-hint">' + MSG.NOT_ADMIN_HINT + '</div>' +
         '<a class="detail-btn primary err-btn" href="auth.html">الدخول بالبصمة</a></div>';
+    }
+    /* شاشة حماية المدير مكان اللوحة — the admin-protection screen in place of the board */
+    let guardView = null;
+    function guard_(reply) {
+      if (guardView) guardView.destroy();
+      guardView = global.SecAdminGuard.render(main, reply, {
+        onRetry: function () { load(true); },
+        onApproved: function () { S.update({ role: 'admin', adminSetup: false }); load(true); }
+      });
     }
     function failed_(message) {
       main.innerHTML = '<div class="err-msg" data-role="failed"><div>' + MSG.FAILED + esc(message) + '</div>' +
@@ -160,17 +171,20 @@
           let d;
           try { d = await call_('getOperationsDashboard', { fresh: fresh === true }); }
           catch (first) {
-            if (first.expired || first.denied || first.refused) throw first;
+            if (first.expired || first.denied || first.refused || first.guard) throw first;
             await new Promise(function (r) { global.setTimeout(r, RETRY_MS); }); // إعادة واحدة لفشل الاتصال (V1) / one retry for connection failures (V1)
             d = await call_('getOperationsDashboard', { fresh: fresh === true });
           }
           if (!alive) return 'ok';
+          if (guardView) { guardView.destroy(); guardView = null; }
+          if (!S.isAdmin()) S.update({ role: 'admin', adminSetup: false }); // اكتمل الاعتماد ← مدير في الواجهة / approval complete ← admin in the UI
           data = d; render_(d);
           return 'ok';
         } catch (err) {
           if (!alive) return 'failed';
           if (err.expired) { S.handleExpired({ action: 'admin-dashboard', message: err.message }); return 'expired'; }
           if (err.denied) { denied_(); return 'denied'; }
+          if (err.guard) { guard_(err.guard); return 'guard'; }
           failed_(err && err.message ? err.message : MSG.LOAD_FAIL);
           return 'failed';
         } finally { global.clearTimeout(slow); busy = null; }
@@ -275,6 +289,7 @@
         delete loaded[name];
         if (err.expired) { S.handleExpired({ action: 'admin-dashboard', message: err.message }); return; }
         if (err.denied) { denied_(); return; }
+        if (err.guard) { guard_(err.guard); return; }
         if (box.isConnected) box.innerHTML = '<div class="coming-soon">' + MSG.LOAD_FAIL + ' <button type="button" class="link-btn" data-act="section-retry" data-name="' + name + '">' + MSG.RETRY + '</button></div>';
       }
     }
@@ -474,6 +489,7 @@
           delete loaded[name];
           if (err.expired) { S.handleExpired({ action: 'admin-dashboard', message: err.message }); return true; }
           if (err.denied) { denied_(); return true; }
+          if (err.guard) { guard_(err.guard); return true; }
           box.innerHTML = '<div class="coming-soon">' + MSG.LOAD_FAIL + ' <button type="button" class="link-btn" data-act="section-retry" data-name="' + name + '">' + MSG.RETRY + '</button></div>';
         }
       }
@@ -517,6 +533,7 @@
       } catch (err) {
         if (err.expired) { S.handleExpired({ action: 'admin-dashboard', message: err.message }); return; }
         if (err.denied) { denied_(); return; }
+        if (err.guard) { guard_(err.guard); return; }
         body.innerHTML = '<div class="coming-soon">' + MSG.LOAD_FAIL + '</div>';
       }
     }

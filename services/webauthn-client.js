@@ -145,7 +145,7 @@
       deviceName: o.deviceName || deviceName()
     }, MSG.REGISTER_SAVE);
     if (!res.success) throw fail_(res.error || MSG.REGISTER_SAVE);
-    SESSION.save({ phone: phone, name: res.name || o.displayName || '', role: res.role, identityToken: res.identityToken });
+    SESSION.save({ phone: phone, name: res.name || o.displayName || '', role: res.role, adminSetup: res.adminSetup, identityToken: res.identityToken });
     return { success: true, role: res.role === 'admin' ? 'admin' : 'member', name: res.name || '' };
   }
 
@@ -178,7 +178,7 @@
       signatureB64: bufferToB64url(cred.response.signature)
     }, MSG.LOGIN_VERIFY);
     if (!res.success) throw fail_(res.error || MSG.LOGIN_VERIFY);
-    SESSION.save({ phone: phone, name: res.name || '', role: res.role, identityToken: res.identityToken });
+    SESSION.save({ phone: phone, name: res.name || '', role: res.role, adminSetup: res.adminSetup, identityToken: res.identityToken });
     return { success: true, role: res.role === 'admin' ? 'admin' : 'member', name: res.name || '' };
   }
 

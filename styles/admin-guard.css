@@ -1,0 +1,26 @@
+/* ============================================================
+ * styles/admin-guard.css — شاشة «حماية لوحة المدير» (النموذج 2 المعتمد — 8 نوفمبر 2026)
+ * The «admin panel protection» screen (approved model 2): two steps, a gold shield, the device line, one field
+ * ============================================================ */
+.ag-screen{max-width:420px;margin:24px auto;padding:28px 20px;display:grid;gap:16px;text-align:center;color:var(--text-primary);}
+.ag-steps{display:flex;align-items:center;justify-content:center;gap:8px;font-size:12.5px;font-weight:700;}
+.ag-step{padding:5px 12px;border-radius:999px;border:1px solid var(--border);color:var(--text-muted);white-space:nowrap;}
+.ag-step.on{background:var(--teal);border-color:var(--teal);color:#052018;}
+.ag-step.ok{border-color:var(--teal);color:var(--teal-light);}
+.ag-arrow{color:var(--text-muted);}
+.ag-shield{width:92px;height:104px;margin:6px auto 0;color:var(--accent);}
+.ag-shield.ok{color:var(--teal-light);}
+.ag-shield svg{width:100%;height:100%;}
+.ag-title{margin:0;font-size:20px;font-weight:800;}
+.ag-text{margin:0;font-size:14px;line-height:1.7;color:var(--text-secondary);}
+.ag-device{display:block;font-size:14px;color:var(--text-primary);}
+.ag-form{display:grid;gap:12px;}
+.ag-input{width:100%;box-sizing:border-box;height:50px;border-radius:14px;border:1px solid var(--border-strong);background:var(--bg-card);color:var(--text-primary);
+  font-family:inherit;font-size:17px;padding:0 14px;text-align:center;letter-spacing:2px;}
+.ag-input:focus{outline:2px solid var(--teal);outline-offset:1px;}
+.ag-input:disabled{opacity:.55;}
+.ag-btn{display:block;width:100%;box-sizing:border-box;height:50px;border:0;border-radius:14px;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;
+  background:var(--teal);color:#052018;text-decoration:none;line-height:50px;}
+.ag-btn.gold{background:var(--accent);color:var(--accent-ink);}
+.ag-btn:disabled{opacity:.6;cursor:default;}
+.ag-msg{margin:0;min-height:20px;font-size:13.5px;font-weight:600;line-height:1.6;color:var(--st-red);}
