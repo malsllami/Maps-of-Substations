@@ -46,16 +46,27 @@ function readVersionPolicy_() {
   try { return JSON.parse(scriptProps_().getProperty(VERSION_POLICY_KEY) || '{}') || {}; } catch (err) { return {}; }
 }
 
-/* أحدث نسخة منشورة من sw.js على GitHub، أو '' إن تعذّر — the latest published version from sw.js, or '' */
+/* أحدث نسخة منشورة من sw.js على GitHub، أو '' إن تعذّر — وسبب التعذّر يُسجَّل في «سجل الأخطاء» ويُحفظ لعرضه (9 نوفمبر)
+ * The latest published version from sw.js, or '' — the failure reason is logged to «سجل الأخطاء» and kept for display */
+let lastFetchFailure_ = '';
 function fetchPublishedBuild_() {
+  let reason = '';
   try {
     const res = UrlFetchApp.fetch(SITE_SW_URL + '?v=' + Date.now(), { muteHttpExceptions: true, followRedirects: true });
-    if (res.getResponseCode() !== 200) return '';
-    const m = /const SW_BUILD = '([^']*)'/.exec(res.getContentText());
-    return m ? buildOrEmpty_(m[1]) : '';
+    const code = res.getResponseCode();
+    if (code !== 200) reason = 'رد GitHub برمز ' + code;
+    else {
+      const m = /const SW_BUILD = '([^']*)'/.exec(res.getContentText());
+      const build = m ? buildOrEmpty_(m[1]) : '';
+      if (build) return build;
+      reason = m ? 'رقم النسخة بصيغة غير متوقعة: ' + String(m[1]).slice(0, 40) : 'لم يوجد سطر SW_BUILD في الملف';
+    }
   } catch (err) {
-    return '';
+    reason = 'تعذّر الاتصال: ' + String(err && err.message || err).slice(0, 300);
   }
+  lastFetchFailure_ = reason;
+  logError_('fetchPublishedBuild', 'تعذّر قراءة أحدث نسخة من GitHub: ' + reason, SITE_SW_URL);
+  return '';
 }
 
 /* نسبة الأعضاء النشطين على أحدث نسخة بالضبط — the share of active members on exactly the latest version
@@ -155,5 +166,6 @@ function تثبيت_مشغل_متابعة_النسخ() {
   ScriptApp.getProjectTriggers().forEach(function (t) { if (t.getHandlerFunction() === 'refreshVersionPolicy') ScriptApp.deleteTrigger(t); });
   ScriptApp.newTrigger('refreshVersionPolicy').timeBased().everyHours(1).create();
   refreshVersionPolicy();
-  console.log('ثُبّت مشغّل متابعة النسخ (كل ساعة): ' + JSON.stringify(readVersionPolicy_()));
+  console.log('ثُبّت مشغّل متابعة النسخ (كل ساعة): ' + JSON.stringify(readVersionPolicy_()) +
+    (lastFetchFailure_ ? ' — لم تُقرأ أحدث نسخة: ' + lastFetchFailure_ : ''));
 }

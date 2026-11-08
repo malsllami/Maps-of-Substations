@@ -17,7 +17,7 @@
  * يُقارن بالقيمة هنا، فعدم التطابق يعني ملفًا لم يُلصق أو نسخة قديمة. لا يُعدَّل يدويًا.
  * The server version: updated by the pre-commit hook on every gas/ change and returned by ping — after pasting into the
  * Apps Script editor it is compared with this value; a mismatch means a file wasn't pasted. Never edited by hand. */
-const SERVER_BUILD = '20261108-022610-704805500';
+const SERVER_BUILD = '20261108-040817-638200800';
 
 /* أسماء الجداول — Table names */
 const SHEETS = {
