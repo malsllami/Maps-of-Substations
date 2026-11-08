@@ -30,8 +30,13 @@
     WHATS_NEW_DEFAULT: 'تحسينات وإصلاحات تجعل التطبيق أسرع وأكثر استقرارًا',
     LOGOUT: 'هذا التحديث يتطلب تسجيل خروجك مرة واحدة، ثم سجّل دخولك من جديد.',
     NOW: 'تحديث الآن',
-    UPDATING: 'جارٍ التحديث…'
+    PREPARING: 'جارٍ تجهيز النسخة الجديدة…',
+    ACTIVATING: 'جارٍ تفعيل النسخة الجديدة…',
+    OPENING: 'اكتمل التفعيل، جارٍ الفتح…',
+    RETRY: 'لم يكتمل التفعيل، أعد المحاولة',
+    READY: 'معتمدة'
   };
+  const ACTIVATE_WAIT_MS = 20000; // مهلة تفعيل النسخة الجديدة قبل عرض إعادة المحاولة / activation limit before offering a retry
 
   /* عملية لا يجوز قطعها: ملاحة، أو نموذج إضافة/تعديل مفتوح، أو نافذة حذف — an operation that must not be interrupted */
   function defaultBusy() {
@@ -70,14 +75,17 @@
     tick: SVG('<polyline points="6 12 10 16 18 8"/>'),
     download: SVG('<path d="M12 4v11"/><polyline points="7 10 12 15 17 10"/><path d="M5 19h14"/>')
   };
+  /* آيفون يضيف فاصلة («8 نوفمبر، 2026») ولا يضيفها Chrome — تُحذف ليتطابق الشكل على كل الأجهزة
+   * iPhone adds a comma that Chrome doesn't — removed so it looks the same on every device */
+  const noComma_ = function (s) { return String(s).replace(/\s*[،,]\s*/g, ' '); };
   function dateText_(build) {
     const d = buildDate(build), D = global.SecDates;
     if (!d) return '—';
-    return D ? D.gregorian(d) : d.toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', { day: 'numeric', month: 'long', year: 'numeric' });
+    return noComma_(D ? D.gregorian(d) : d.toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', { day: 'numeric', month: 'long', year: 'numeric' }));
   }
   function hijriText_(build) {
     const d = buildDate(build), D = global.SecDates;
-    return d && D ? D.hijri(d) : '';
+    return d && D ? noComma_(D.hijri(d)) : '';
   }
   const esc_ = function (s) { return global.SecHtml ? global.SecHtml.esc(s) : String(s).replace(/[&<>"']/g, ''); };
 
@@ -131,7 +139,8 @@
             '<div class="upd-vers">' +
               '<div class="upd-vers-head"><span class="upd-vh">' + ICON.layers + MSG.YOURS + '</span><span class="upd-vh is-new">' + ICON.check + MSG.NEW + '</span></div>' +
               '<div class="upd-vers-row"><b class="upd-pill upd-num" dir="ltr">' + esc_(pillBuild(page)) + '</b><span class="upd-arrow" aria-hidden="true">←</span>' +
-                '<b class="upd-pill upd-num is-new" dir="ltr">' + esc_(pillBuild(waiting)) + '</b></div>' +
+                // شارة «معتمدة» على النسخة التي سيُحدَّث إليها — the «approved» badge on the version being installed
+                '<span class="upd-pill-box"><b class="upd-pill upd-num is-new" dir="ltr">' + esc_(pillBuild(waiting)) + '</b><i class="upd-tag">' + MSG.READY + '</i></span></div>' +
               '<div class="upd-vers-date">' + ICON.calendar + '<span>' + esc_(dateText_(waiting)) + '</span><span class="upd-sep" aria-hidden="true">|</span><span>' + esc_(hijriText_(waiting)) + '</span></div>' +
             '</div>' +
             '<section class="upd-new"><div class="upd-new-tab">' + ICON.sparkle + MSG.WHATS_NEW + '</div>' +
@@ -145,12 +154,30 @@
       return el;
     }
 
-    function onClick_(e) {
+    /* حالة الزر: نص حقيقي لكل مرحلة، ولا «نجاح» قبل اكتمال التفعيل — the button state: real text per phase, no success before activation */
+    function phase_(b, name, text, enabled) {
+      b.dataset.phase = name; b.disabled = !enabled;
+      b.querySelector('span').textContent = text;
+    }
+
+    let applying = false;
+    async function onClick_(e) {
       const b = e.target.closest('[data-act="now"]');
-      if (!b) return;
-      b.disabled = true; b.querySelector('span').textContent = MSG.UPDATING;
+      if (!b || b.disabled) return;
+      if (b.dataset.phase === 'retry') { global.location.reload(); return; } // إعادة المحاولة ← تحميل كامل / retry ← a full reload
+      if (applying) return;
+      applying = true;
+      // 1) تجهيز: سؤال النسخة المنتظرة نفسها أنها جاهزة (نزلت كاملة قبل ظهور البطاقة) — preparing: ask the waiting version itself
+      phase_(b, 'preparing', MSG.PREPARING, false);
+      const ready = pwa.waitingBuild ? await pwa.waitingBuild() : null;
       if (logoutBuild && K) { writeKey_(K.UPDATE_LOGOUT_DONE, logoutBuild); removeKey_(K.SESSION); } // الخروج مرة واحدة / the one-time logout
-      if (!pwa.applyUpdate()) global.location.reload(); // لا نسخة تنتظر فعلًا ← إعادة تحميل عادية / nothing waiting ← a normal reload
+      // 2) تفعيل: حتى يتسلّم العامل الجديد الصفحة — activating: until the new worker takes over the page
+      if (!ready || !pwa.applyUpdate()) { phase_(b, 'opening', MSG.OPENING, false); global.location.reload(); return; } // لا نسخة تنتظر ← تحميل عادي
+      phase_(b, 'activating', MSG.ACTIVATING, false);
+      // 3) اكتمل التفعيل (controllerchange ← «reloading») ← فتح النسخة الجديدة؛ وبلا اكتمال خلال المهلة ← إعادة المحاولة
+      // activation done ← opening the new version; not done within the limit ← retry
+      const stop = pwa.onChange(function (s) { if (s && s.status === 'reloading') { stop(); global.clearTimeout(t); phase_(b, 'opening', MSG.OPENING, false); } });
+      const t = global.setTimeout(function () { stop(); applying = false; phase_(b, 'retry', MSG.RETRY, true); }, ACTIVATE_WAIT_MS);
     }
 
     let showSeq = 0; // كل إخفاء يلغي أي ظهور معلّق / every hide cancels a pending show

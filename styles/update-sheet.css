@@ -23,10 +23,10 @@
 .upd-body{position:relative;z-index:1;width:100%;max-width:440px;margin:0 auto;flex:1;display:flex;flex-direction:column;align-items:center;}
 
 /* الشعار بإطار متوهج — the logo in a glowing ring */
-.upd-hero-ring{padding:6px;border-radius:34px;background:linear-gradient(145deg, rgba(77,214,181,.55), rgba(31,174,140,.15));
+.upd-hero-ring{padding:4px;border-radius:26px;background:linear-gradient(145deg, rgba(77,214,181,.55), rgba(31,174,140,.15));
   box-shadow:0 0 0 2px rgba(77,214,181,.45),0 0 36px rgba(77,214,181,.45),0 16px 40px rgba(0,0,0,.5);}
-.upd-hero{display:block;width:132px;height:132px;border-radius:28px;}
-.upd-title{margin:22px 0 8px;font-size:28px;font-weight:800;text-shadow:0 4px 18px rgba(0,0,0,.45);}
+.upd-hero{display:block;width:92px;height:92px;border-radius:22px;}
+.upd-title{margin:12px 0 8px;font-size:26px;font-weight:800;text-shadow:0 4px 18px rgba(0,0,0,.45);}
 .upd-glow-line{width:62%;height:2px;margin:0 auto 18px;background:linear-gradient(90deg, transparent, var(--upd-teal), transparent);box-shadow:0 0 12px var(--upd-teal);}
 
 /* بطاقة مقارنة النسختين — the version comparison card */
@@ -34,14 +34,30 @@
 .upd-vers-head,.upd-vers-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
 .upd-vh{display:inline-flex;align-items:center;gap:6px;font-size:14.5px;font-weight:700;color:#C3D2E2;}
 .upd-vh.is-new{color:var(--upd-teal);}
-.upd-vers-row{margin:10px 0 12px;}
-.upd-pill{flex:1 1 0;min-width:0;padding:9px 4px;border-radius:14px;font-family:'JetBrains Mono',monospace;font-size:clamp(11.5px, 3.3vw, 14px);letter-spacing:-.2px;font-weight:700;color:#EEF4FA;
+.upd-vers-row{margin:18px 0 12px;}
+/* خط الموقع بأرقام متساوية العرض (خط آيفون الأحادي أعرض فكان يخرج عن الإطار) — the site font with equal-width digits */
+.upd-pill-box{position:relative;flex:1 1 0;min-width:0;display:flex;}
+.upd-pill{flex:1 1 0;min-width:0;box-sizing:border-box;padding:10px 4px;border-radius:14px;font-family:inherit;font-variant-numeric:tabular-nums;
+  font-size:clamp(12px, 3.6vw, 15px);overflow:hidden;text-overflow:clip;font-weight:700;color:#EEF4FA;
   background:rgba(255,255,255,.05);border:1px solid rgba(150,185,225,.4);white-space:nowrap;}
 .upd-pill.is-new{border:1.5px solid var(--upd-teal);background:rgba(77,214,181,.14);box-shadow:0 0 14px rgba(77,214,181,.2);}
-.upd-arrow{flex:none;font-size:20px;color:var(--upd-teal);}
+.upd-tag{position:absolute;top:-9px;left:50%;transform:translateX(-50%);padding:1px 9px;border-radius:999px;font-style:normal;font-size:11px;font-weight:800;
+  line-height:16px;white-space:nowrap;color:#06231C;background:var(--upd-teal);box-shadow:0 0 10px rgba(77,214,181,.45);}
+.upd-arrow{flex:none;font-size:18px;color:var(--upd-teal);}
 .upd-vers-date{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;padding-top:10px;border-top:1px solid rgba(77,214,181,.22);
   font-size:13.5px;font-weight:600;color:#C3D2E2;}
 .upd-sep{color:rgba(195,210,226,.5);}
+.upd-vh{white-space:nowrap;}
+/* الشاشات الضيقة (آيفون SE): عناوين أصغر، والتاريخان سطرين بلا فاصل معلّق — narrow screens: smaller labels, the two dates on two lines */
+@media (max-width:359px){
+  .upd-screen{padding-left:14px;padding-right:14px;}
+  .upd-vers{padding-left:10px;padding-right:10px;}
+  .upd-vh{font-size:12.5px;gap:4px;}
+  .upd-vh svg{width:16px;height:16px;}
+  .upd-sep{display:none;}
+  .upd-vers-date{flex-direction:column;gap:4px;}
+  .upd-vers-date svg{display:none;}
+}
 
 /* ما الجديد في هذا الإصدار؟ — what's new in this release */
 .upd-new{width:100%;box-sizing:border-box;margin-bottom:14px;border-radius:20px;background:var(--upd-card);border:1px solid var(--upd-line);overflow:hidden;text-align:right;}
@@ -62,5 +78,12 @@
   background:linear-gradient(135deg, #F7C948, var(--upd-amber) 45%, var(--upd-amber-deep));color:var(--upd-on-amber);
   box-shadow:0 10px 28px rgba(240,180,41,.45),0 0 0 1px rgba(255,220,120,.4) inset;}
 .upd-now svg{width:24px;height:24px;}
-.upd-now:disabled{opacity:.75;cursor:default;}
+.upd-now:disabled{cursor:default;}
+/* مراحل التحديث: دوّارة مكان أيقونة التنزيل أثناء التجهيز والتفعيل — update phases: a spinner replaces the icon */
+.upd-now[data-phase="preparing"] svg,.upd-now[data-phase="activating"] svg,.upd-now[data-phase="opening"] svg{display:none;}
+.upd-now[data-phase="preparing"]::before,.upd-now[data-phase="activating"]::before,.upd-now[data-phase="opening"]::before{
+  content:'';width:20px;height:20px;border-radius:50%;border:3px solid rgba(35,23,0,.25);border-top-color:var(--upd-on-amber);animation:upd-spin .8s linear infinite;}
+.upd-now[data-phase="preparing"],.upd-now[data-phase="activating"],.upd-now[data-phase="opening"]{font-size:17px;}
+.upd-now[data-phase="retry"]{font-size:17px;background:#C2372F;color:#fff;box-shadow:0 10px 28px rgba(194,55,47,.4);}
+@keyframes upd-spin{to{transform:rotate(360deg);}}
 @media (prefers-reduced-motion:reduce){ .upd-screen{transition:none;} }
