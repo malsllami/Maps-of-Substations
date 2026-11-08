@@ -1,0 +1,3 @@
+
+# مكتبات مبنية ببصمة تحقق (9 نوفمبر): تُحفظ كما هي بلا تحويل نهايات الأسطر، وإلا اختلفت البصمة / built libraries with an integrity hash: stored byte-for-byte
+libs/** -text
