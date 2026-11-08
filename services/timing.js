@@ -72,7 +72,26 @@
     try { const nav = global.performance.getEntriesByType('navigation')[0]; if (nav) navType = nav.type; } catch (e) { /* غير مدعوم / unsupported */ }
     let state = 'زائر (غير مسجّل)';
     try { if (global.localStorage.getItem(CONFIG.STORAGE_KEYS.SESSION)) state = 'مسجّل دخول'; } catch (e) { /* تخزين محظور / storage blocked */ }
+    relabelCutByNavigation_();
     append_({ at: clock_(), page: pageName_(), tab: tabId_(), kind: 'open', action: 'فتح الصفحة (' + navType + ') — ' + state });
+  }
+
+  /* (الإصدار 3، قياس 8 نوفمبر) على الآيفون يقطع الانتقال لصفحة أخرى الطلبات الجارية قبل أن تعلن الصفحة مغادرتها، فكانت تُكتب
+   * «فشل شبكة». عند فتح الصفحة التالية في نفس التبويب: كل «فشل شبكة» انتهى قبلها بثانيتين أو أقل ← «أُلغي بالانتقال».
+   * On the iPhone, moving to another page cuts running requests before the page announces it is leaving, so they were written
+   * as a network failure. When the next page opens in the same tab: each one that ended up to two seconds earlier ← cut by navigation. */
+  const NAV_CUT_WINDOW_MS = 2000;
+  function relabelCutByNavigation_() {
+    try {
+      const log = readLog(), tab = tabId_(), now = Date.now();
+      let changed = false;
+      log.forEach(function (e) {
+        if (e && e.tab === tab && e.status === 'فشل شبكة' && typeof e.endTs === 'number' && now - e.endTs >= 0 && now - e.endTs <= NAV_CUT_WINDOW_MS) {
+          e.status = 'أُلغي بالانتقال'; changed = true;
+        }
+      });
+      if (changed) global.localStorage.setItem(LOG_KEY, JSON.stringify(log));
+    } catch (e) { /* القياس لا يمس الصفحة / the measurement never touches the page */ }
   }
 
   function isApiPost_(input, init) {
@@ -116,7 +135,7 @@
         const totalMs = Math.round(now_() - m.start);
         if (backgroundCount !== m.background) status += ' — الصفحة ذهبت للخلفية أثناء الطلب';
         append_({ at: m.at, endAt: clock_(), page: pageName_(), tab: tabId_(), action: action, rid: requestId, serverMs: serverMs, totalMs: totalMs,
-          outsideMs: serverMs == null ? null : totalMs - serverMs, concurrent: m.concurrent, status: status, stages: stages || null });
+          outsideMs: serverMs == null ? null : totalMs - serverMs, concurrent: m.concurrent, status: status, stages: stages || null, endTs: Date.now() });
       } catch (e) { /* القياس لا يُفشل الطلب / the measurement never fails the request */ }
     }
 

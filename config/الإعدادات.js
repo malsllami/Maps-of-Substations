@@ -49,6 +49,7 @@
       FRESH_START: PREFIX + 'fresh-start',               // رقم «البداية النظيفة» المنفّذة على هذا الجهاز / the fresh start id already run on this device
       USAGE_LOG: PREFIX + 'usage-log',                   // عدّادات الاستخدام اليومية قبل إرسالها (22 أكتوبر) / the daily usage counters before sending
       UPDATE_LOGOUT_DONE: PREFIX + 'update-logout-done', // آخر نسخة سُجّل معها خروج إجباري على هذا الجهاز (8 نوفمبر) / the last version that forced a logout here
+      PROFILE_CACHE: PREFIX + 'profile-',                // «حسابي» من ذاكرة الجهاز لكل عضو + جواله (الإصدار 3) / «My account» kept on the device per member
       DEVICE_ID: PREFIX + 'device-id'                    // معرّف جهاز مجهول لعدّ المتأثرين بالأخطاء (16 أكتوبر) / an anonymous device id for counting affected people
     },
 

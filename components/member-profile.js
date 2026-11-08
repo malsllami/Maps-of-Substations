@@ -126,6 +126,7 @@
     function hideMsgs_() { errEl.classList.remove('show'); okEl.classList.remove('show'); }
 
     let lists = null, profile = null, saving = false, alive = true;
+    let dirty = false; // (الإصدار 3) بدأ العضو الكتابة في النموذج ← رد الخادم لا يمحو ما كتبه / the member started typing ← the reply never wipes it
     function fillSelect_(sel, items, keep) {
       const first = sel.options[0];
       sel.textContent = ''; sel.appendChild(first);
@@ -137,7 +138,7 @@
       if (!lists) { showError_(MSG.LISTS); return; }
       fillSelect_(f('shift'), lists.shifts);
       fillSelect_(f('department'), lists.departments.filter(function (d) { return d !== OTHER_DEPT; }).concat([OTHER_DEPT]));
-      if (profile) applyForm_(profile);
+      if (profile && !dirty) applyForm_(profile);
     }
     function applyForm_(res) {
       f('name').value = res.name || ''; f('phone').value = res.phone || ''; f('email').value = res.email || '';
@@ -148,13 +149,36 @@
       } else { f('department').value = res.department || ''; f('departmentOther').hidden = true; }
     }
 
+    /* (الإصدار 3) «حسابي» من ذاكرة الجهاز أولًا ثم الخادم في الخلفية (profile-cache.js). إن ظهرت النسخة المحفوظة
+     * لا تظهر رسالة فشل الخادم (بلا إنترنت مثلًا)؛ ورفض التذكرة يُعامل كما كان دائمًا.
+     * Release 3: the device copy first, then the server in the background. With the copy shown, a server failure shows
+     * no error banner (offline, say); a ticket refusal is handled as always. */
+    const PC = global.SecProfileCache;
     async function load() {
+      let shownFromDevice = false;
+      if (PC && !profile) {
+        const saved = PC.view();
+        if (saved) { render_(saved); shownFromDevice = true; }
+      }
+      const startedAt = Date.now();
       let res;
       try { res = await API.call('getMemberProfile', {}, { token: true }); }
-      catch (e) { if (alive) showError_(e && e.message ? e.message : MSG.LOAD_FAIL); return null; }
+      catch (e) { if (alive && !shownFromDevice) showError_(e && e.message ? e.message : MSG.LOAD_FAIL); return null; }
       if (!alive) return null;
       if (S.isTokenInvalid(res)) { S.handleExpired({ action: 'getMemberProfile', message: res.error }); return null; }
-      if (!res || !res.success) { showError_((res && res.error) || MSG.LOAD_FAIL); return null; }
+      if (!res || !res.success) { if (!shownFromDevice) showError_((res && res.error) || MSG.LOAD_FAIL); return null; }
+      if (PC) {
+        PC.saveServer(res, startedAt);
+        const merged = PC.view(); // رد الخادم + أي حفظ وقع أثناء الطلب / the reply + any save made during the request
+        if (merged) res = Object.assign({}, res, { additionsList: merged.additionsList, editsList: merged.editsList, stats: merged.stats });
+      }
+      render_(res);
+      if (o.onLoaded) { try { o.onLoaded(res); } catch (e) { /* لا شيء / nothing */ } }
+      return res;
+    }
+
+    /* رسم البطاقة والمساهمات والنموذج من رد (من الخادم أو من الجهاز) — Draw the card, contributions and form from a reply */
+    function render_(res) {
       profile = res;
       q(slots.profile, 'name').textContent = res.name || '';
       q(slots.profile, 'phone').textContent = res.phone || '';
@@ -168,9 +192,7 @@
       }
       fillTable_('adds-card', res.additionsList, MSG.NO_ADDS);
       fillTable_('edits-card', res.editsList, MSG.NO_EDITS);
-      applyForm_(res);
-      if (o.onLoaded) { try { o.onLoaded(res); } catch (e) { /* لا شيء / nothing */ } }
-      return res;
+      if (!dirty) applyForm_(res);
     }
 
     function validate_() {
@@ -205,6 +227,8 @@
         S.update({ name: v.name }); // دمج بالجلسة الأحدث (session.js) / merged into the latest session
         q(slots.profile, 'name').textContent = v.name;
         if (profile) Object.assign(profile, v);
+        dirty = false;
+        if (PC) PC.updateFields(v); // نسخة الجهاز تحمل البيانات الجديدة / the device copy carries the new details
         if (o.onNameChange) { try { o.onNameChange(v.name); } catch (e) { /* لا شيء / nothing */ } }
         ok = true;
       } catch (err) {
@@ -220,15 +244,17 @@
       return ok;
     }
 
-    function onChange_(e) { if (e.target === f('department')) f('departmentOther').hidden = f('department').value !== OTHER_DEPT; }
+    function onChange_(e) { dirty = true; if (e.target === f('department')) f('departmentOther').hidden = f('department').value !== OTHER_DEPT; }
+    function onInput_() { dirty = true; }
     function onClick_(e) { if (e.target.closest('[data-act="save"]')) save(); }
     slots.form.addEventListener('change', onChange_);
+    slots.form.addEventListener('input', onInput_);
     slots.form.addEventListener('click', onClick_);
     loadLists_();
 
     return {
       load: load, save: save,
-      destroy: function () { alive = false; slots.form.removeEventListener('change', onChange_); slots.form.removeEventListener('click', onClick_); }
+      destroy: function () { alive = false; slots.form.removeEventListener('change', onChange_); slots.form.removeEventListener('input', onInput_); slots.form.removeEventListener('click', onClick_); }
     };
   }
 

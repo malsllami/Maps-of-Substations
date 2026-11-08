@@ -87,6 +87,18 @@
     if (global.location.pathname.indexOf(LOGIN_PAGE) === -1) global.location.href = url;
   }
 
+  /* (الإصدار 3) مسح نسخ «حسابي» من الجهاز لكل الأعضاء — هنا لا في profile-cache.js حتى يعمل من أي صفحة
+   * Wipe the device copies of «My account» for every member — here, so it works from any page */
+  function clearProfileCopies_() {
+    const prefix = CONFIG.STORAGE_KEYS.PROFILE_CACHE;
+    if (!prefix) return;
+    try {
+      const drop = [];
+      for (let i = 0; i < global.localStorage.length; i++) { const k = global.localStorage.key(i); if (k && k.indexOf(prefix) === 0) drop.push(k); }
+      drop.forEach(function (k) { global.localStorage.removeItem(k); });
+    } catch (e) { /* تخزين محظور / storage blocked */ }
+  }
+
   /* خروج يدوي موحّد لكل الصفحات: الجلسة والجوال، ثم صفحة الدخول — Unified manual logout: session and phone, then the login page */
   function logout() {
     try {
@@ -95,6 +107,7 @@
       // «remember me» on (default) ← the phone stays suggested in the login field (Mohammed, 15 Oct); off ← removed
       if (global.localStorage.getItem(CONFIG.STORAGE_KEYS.REMEMBER_PHONE) === '0') global.localStorage.removeItem(PHONE_KEY);
     } catch (e) { /* تخزين محظور / storage blocked */ }
+    clearProfileCopies_(); // «حسابي» المحفوظ في الجهاز (الإصدار 3) / the device copy of «My account»
     go_(LOGIN_PAGE);
   }
 

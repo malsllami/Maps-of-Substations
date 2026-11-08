@@ -284,6 +284,8 @@
       if (!res || !res.success) throw new Error((res && res.error) || MSG.FAILED);
       bar.done();
       try { if (deps.onSaved) deps.onSaved(v.station, form.mode); } catch (e) { /* الحفظ تم؛ خطأ الصفحة لا يُظهره فاشلًا / saved; a page error doesn't make it look failed */ }
+      // (الإصدار 3) يظهر في «حسابي» فورًا من ذاكرة الجهاز / shows in «My account» at once from the device
+      try { if (global.SecProfileCache) global.SecProfileCache.recordSave(v.station, form.mode); } catch (e) { /* لا يمس الحفظ / never touches the save */ }
       await new Promise(function (r) { global.setTimeout(r, 300); });
       bar.stop();
       form.r('form').hidden = true;

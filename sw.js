@@ -31,8 +31,8 @@ importScripts('config/الإعدادات.js');
 // يصل للأجهزة. لا يُعدَّل يدويًا: خطاف pre-commit يحدّثه مع كل commit فيه ملف موقع، واختبار البوابة test_sw_build.js يتحقق.
 // The build stamp: a browser detects a new version only when this file or the config changes; any other site file alone never
 // reaches devices. Not edited by hand: the pre-commit hook updates it on every commit with a site file; the gate verifies.
-const SW_RELEASE = 2; // (8 نوفمبر) رقم الإصدار المتسلسل = SEC2_RELEASE في config/النسخة.js، ويقرؤه الخادم من هنا / the release number, read by the server from here
-const SW_BUILD = '20261108-173944';
+const SW_RELEASE = 3; // (8 نوفمبر) رقم الإصدار المتسلسل = SEC2_RELEASE في config/النسخة.js، ويقرؤه الخادم من هنا / the release number, read by the server from here
+const SW_BUILD = '20261108-225021';
 const CONFIG = self.SEC2_CONFIG;
 const CACHE_NAME = CONFIG.SHELL_CACHE_NAME;
 const NEXT_CACHE = CACHE_NAME + '-next'; // تثبيت نسخة جديدة دون لمس العاملة / installing a new version without touching the working one
@@ -53,7 +53,7 @@ const APP_SHELL = [
   'assets/tour/21-nav-offline.webp', 'assets/tour/22-more-offline-map.webp', 'assets/tour/23-shifts.webp', 'assets/tour/24-dashboard.webp', 'assets/tour/25-bottom-nav.webp',
   'utils/dates.js', 'utils/html.js', 'utils/station-query.js', 'utils/text-input.js',
   'services/api-client.js', 'services/connection.js', 'services/direction-tracker.js', 'services/fresh-start.js', 'services/nav-camera.js', 'services/navigation.js',
-  'services/offline-map.js', 'services/osrm.js', 'services/pwa.js', 'services/session.js', 'services/settings-lists.js',
+  'services/offline-map.js', 'services/osrm.js', 'services/pwa.js', 'services/session.js', 'services/profile-cache.js', 'services/settings-lists.js',
   'services/shift-rotation.js', 'services/station-search.js', 'services/stations-db.js', 'services/stations-sync.js', 'services/my-location.js', 'services/theme.js', 'services/load-guard.js', 'services/usage-log.js',
   'services/timing.js', 'services/webauthn-client.js',
   'components/add-edit-station.js', 'components/admin-dashboard.js', 'components/admin-detail.js', 'components/app-header.js', 'components/bottom-nav.js', 'components/station-details.js', 'components/stations-list.js', 'components/district-labels.js', 'components/more-menu.js',
