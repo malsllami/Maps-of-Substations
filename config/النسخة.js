@@ -10,5 +10,5 @@
  * ============================================================ */
 (function (global) {
   'use strict';
-  global.SEC2_BUILD = '20261108-024142-810885400';
+  global.SEC2_BUILD = '20261108-030834-988818800';
 })(typeof window !== 'undefined' ? window : globalThis);

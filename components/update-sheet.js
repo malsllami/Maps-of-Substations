@@ -24,8 +24,9 @@
   const BUSY_RECHECK_MS = 3000, INFO_WAIT_MS = 4000;
   const MSG = {
     TITLE: 'تحديث جديد متاح',
-    YOURS: 'نسختك',
-    NEW: 'الجديدة',
+    YOURS: 'نسختك الحالية',
+    NEW: 'النسخة الجديدة',
+    WHATS_NEW: 'ما الجديد في هذا الإصدار؟',
     WHATS_NEW_DEFAULT: 'تحسينات وإصلاحات تجعل التطبيق أسرع وأكثر استقرارًا',
     LOGOUT: 'هذا التحديث يتطلب تسجيل خروجك مرة واحدة، ثم سجّل دخولك من جديد.',
     NOW: 'تحديث الآن',
@@ -55,6 +56,20 @@
     const m = /^(\d{8})-(\d{4})/.exec(String(build || ''));
     return m ? m[1] + '-' + m[2] : '—';
   }
+  /* رقم النسخة للعرض «2026.11.08 – 0241» — the version number for display */
+  function pillBuild(build) {
+    const m = /^(\d{4})(\d{2})(\d{2})-(\d{4})/.exec(String(build || ''));
+    return m ? m[1] + '.' + m[2] + '.' + m[3] + ' – ' + m[4] : '—';
+  }
+  const SVG = function (body) { return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + body + '</svg>'; };
+  const ICON = {
+    layers: SVG('<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>'),
+    check: SVG('<circle cx="12" cy="12" r="10"/><polyline points="8 12 11 15 16 9"/>'),
+    calendar: SVG('<rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>'),
+    sparkle: SVG('<path d="M12 3l1.8 4.6L18 9.4l-4.2 1.8L12 16l-1.8-4.8L6 9.4l4.2-1.8z"/><path d="M19 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>'),
+    tick: SVG('<polyline points="6 12 10 16 18 8"/>'),
+    download: SVG('<path d="M12 4v11"/><polyline points="7 10 12 15 17 10"/><path d="M5 19h14"/>')
+  };
   function dateText_(build) {
     const d = buildDate(build), D = global.SecDates;
     if (!d) return '—';
@@ -109,17 +124,21 @@
       doc.body.insertAdjacentHTML('beforeend',
         '<div class="upd-screen" data-role="upd-sheet" role="dialog" aria-modal="true" aria-labelledby="updTitle" hidden>' +
           '<div class="upd-body">' +
-            '<img class="upd-hero" src="assets/icon-192.png" alt="D.S.Maps">' +
-            '<h2 class="upd-title" id="updTitle">' + MSG.TITLE + '</h2>' +
-            '<div class="upd-path">' +
-              // رقم النسخة تحت تاريخها: نسختان من اليوم نفسه يظهر فرقهما (ملاحظة محمد 8 نوفمبر) — the version number under its date
-              '<div class="upd-ver">' + MSG.YOURS + '<b>' + esc_(dateText_(page)) + '</b><small class="upd-num" dir="ltr">' + esc_(shortBuild(page)) + '</small></div><span class="upd-arrow" aria-hidden="true">←</span>' +
-              '<div class="upd-ver is-new">' + MSG.NEW + '<b>' + esc_(dateText_(waiting)) + '</b><small class="upd-num" dir="ltr">' + esc_(shortBuild(waiting)) + '</small><small>' + esc_(hijriText_(waiting)) + '</small></div>' +
+            '<div class="upd-hero-ring"><img class="upd-hero" src="assets/icon-192.png" alt="D.S.Maps"></div>' +
+            '<h2 class="upd-title" id="updTitle">' + MSG.TITLE + '</h2><div class="upd-glow-line" aria-hidden="true"></div>' +
+            // مقارنة النسختين في بطاقة واحدة: رقم كل نسخة، ثم تاريخ الجديدة بالميلادي والهجري (تحسين محمد 8 نوفمبر)
+            // both versions compared in one card: each version number, then the new one's date in both calendars
+            '<div class="upd-vers">' +
+              '<div class="upd-vers-head"><span class="upd-vh">' + ICON.layers + MSG.YOURS + '</span><span class="upd-vh is-new">' + ICON.check + MSG.NEW + '</span></div>' +
+              '<div class="upd-vers-row"><b class="upd-pill upd-num" dir="ltr">' + esc_(pillBuild(page)) + '</b><span class="upd-arrow" aria-hidden="true">←</span>' +
+                '<b class="upd-pill upd-num is-new" dir="ltr">' + esc_(pillBuild(waiting)) + '</b></div>' +
+              '<div class="upd-vers-date">' + ICON.calendar + '<span>' + esc_(dateText_(waiting)) + '</span><span class="upd-sep" aria-hidden="true">|</span><span>' + esc_(hijriText_(waiting)) + '</span></div>' +
             '</div>' +
-            '<ul class="upd-notes">' + notes.map(function (n) { return '<li><i aria-hidden="true">✓</i><span>' + esc_(n) + '</span></li>'; }).join('') + '</ul>' +
+            '<section class="upd-new"><div class="upd-new-tab">' + ICON.sparkle + MSG.WHATS_NEW + '</div>' +
+              '<ul class="upd-notes">' + notes.map(function (n) { return '<li><i aria-hidden="true">' + ICON.tick + '</i><span>' + esc_(n) + '</span></li>'; }).join('') + '</ul></section>' +
             (logoutBuild ? '<p class="upd-logout" role="alert">' + MSG.LOGOUT + '</p>' : '') +
           '</div>' +
-          '<button type="button" class="upd-now" data-act="now">' + MSG.NOW + '</button>' +
+          '<button type="button" class="upd-now" data-act="now">' + ICON.download + '<span>' + MSG.NOW + '</span></button>' +
         '</div>');
       el = doc.querySelector('[data-role="upd-sheet"]');
       el.addEventListener('click', onClick_);
@@ -129,7 +148,7 @@
     function onClick_(e) {
       const b = e.target.closest('[data-act="now"]');
       if (!b) return;
-      b.disabled = true; b.textContent = MSG.UPDATING;
+      b.disabled = true; b.querySelector('span').textContent = MSG.UPDATING;
       if (logoutBuild && K) { writeKey_(K.UPDATE_LOGOUT_DONE, logoutBuild); removeKey_(K.SESSION); } // الخروج مرة واحدة / the one-time logout
       if (!pwa.applyUpdate()) global.location.reload(); // لا نسخة تنتظر فعلًا ← إعادة تحميل عادية / nothing waiting ← a normal reload
     }

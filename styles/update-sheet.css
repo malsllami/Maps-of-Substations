@@ -1,41 +1,66 @@
 /* ============================================================
- * styles/update-sheet.css — بطاقة التحديث الإجبارية: تصميم «4» المعتمد (8 نوفمبر 2026)
- * The mandatory update card: approved design «4» (8 Nov 2026)
+ * styles/update-sheet.css — بطاقة التحديث الإجبارية: تصميم «4» المعتمد بتحسينات محمد (8 نوفمبر 2026)
+ * The mandatory update card: approved design «4» with Mohammed's refinements (8 Nov 2026)
  * ============================================================ */
 /* ألوان التنبيه الكهرماني (تستخدمها أيضًا شاشة إعادة التثبيت) — the amber alert colours (also used by the reinstall screen) */
 :root{ --upd-amber:#F0B429; --upd-amber-deep:#C98A06; --upd-on-amber:#231700; --upd-bg:#14202F; }
 [data-theme="light"]{ --upd-amber:#E09A00; --upd-amber-deep:#B57A00; --upd-on-amber:#1E1400; --upd-bg:#FFFFFF; }
 
 .upd-screen{
-  position:fixed;inset:0;z-index:4500;box-sizing:border-box;overflow-y:auto;
+  --upd-teal:#4DD6B5; --upd-line:rgba(77,214,181,.38); --upd-card:rgba(10,32,40,.62);
+  position:fixed;inset:0;z-index:4500;box-sizing:border-box;overflow-y:auto;overflow-x:hidden;
   display:flex;flex-direction:column;align-items:center;text-align:center;color:#EEF4FA;
-  padding:calc(env(safe-area-inset-top, 0px) + 56px) 22px calc(env(safe-area-inset-bottom, 0px) + 26px);
-  background:radial-gradient(circle at 50% 28%, rgba(31,174,140,.38), rgba(5,12,22,.9) 62%);
+  padding:calc(env(safe-area-inset-top, 0px) + 40px) 18px calc(env(safe-area-inset-bottom, 0px) + 28px);
+  background:radial-gradient(circle at 50% 22%, rgba(31,174,140,.42), rgba(6,22,30,.94) 58%), #061620;
   -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
   opacity:0;transition:opacity .25s ease;
 }
+/* موجة تركوازية وذهبية خفيفة أسفل الشاشة — a light teal and gold wave at the bottom */
+.upd-screen::after{content:'';position:fixed;left:0;right:0;bottom:0;height:120px;pointer-events:none;
+  background:radial-gradient(120% 100% at 50% 100%, rgba(77,214,181,.16), transparent 70%);
+  border-top:2px solid rgba(240,180,41,.4);border-radius:60% 60% 0 0 / 100% 100% 0 0;opacity:.75;}
 .upd-screen.show{opacity:1;}
-.upd-body{width:100%;max-width:440px;margin:0 auto;flex:1;display:flex;flex-direction:column;align-items:center;}
-.upd-hero{width:112px;height:112px;border-radius:26px;box-shadow:0 0 0 6px rgba(77,214,181,.25),0 14px 40px rgba(0,0,0,.5);}
-.upd-title{margin:20px 0 4px;font-size:25px;font-weight:800;}
+.upd-body{position:relative;z-index:1;width:100%;max-width:440px;margin:0 auto;flex:1;display:flex;flex-direction:column;align-items:center;}
 
-/* مسار النسخة: نسختك ← الجديدة — the version path: yours ← the new one */
-.upd-path{display:flex;align-items:center;justify-content:center;gap:10px;margin:14px 0 18px;font-size:13px;font-weight:600;color:#C3D2E2;}
-.upd-ver b{display:block;margin-top:3px;padding:8px 12px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid rgba(150,185,225,.32);color:#EEF4FA;font-size:14px;font-weight:700;}
-.upd-ver.is-new b{border-color:#4DD6B5;background:rgba(77,214,181,.16);}
-.upd-ver small{display:block;margin-top:3px;font-size:11.5px;color:#C3D2E2;}
-.upd-arrow{font-size:18px;color:#4DD6B5;}
-.upd-ver .upd-num{font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:700;color:#EEF4FA;letter-spacing:.3px;}
+/* الشعار بإطار متوهج — the logo in a glowing ring */
+.upd-hero-ring{padding:6px;border-radius:34px;background:linear-gradient(145deg, rgba(77,214,181,.55), rgba(31,174,140,.15));
+  box-shadow:0 0 0 2px rgba(77,214,181,.45),0 0 36px rgba(77,214,181,.45),0 16px 40px rgba(0,0,0,.5);}
+.upd-hero{display:block;width:132px;height:132px;border-radius:28px;}
+.upd-title{margin:22px 0 8px;font-size:28px;font-weight:800;text-shadow:0 4px 18px rgba(0,0,0,.45);}
+.upd-glow-line{width:62%;height:2px;margin:0 auto 18px;background:linear-gradient(90deg, transparent, var(--upd-teal), transparent);box-shadow:0 0 12px var(--upd-teal);}
 
-/* ما الجديد — what's new */
-.upd-notes{list-style:none;margin:0 0 14px;padding:0;width:100%;display:grid;gap:9px;text-align:right;}
-.upd-notes li{display:flex;gap:10px;align-items:flex-start;font-size:15px;font-weight:600;line-height:1.6;}
-.upd-notes i{flex:none;width:22px;height:22px;margin-top:2px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:13px;background:rgba(77,214,181,.18);color:#4DD6B5;}
+/* بطاقة مقارنة النسختين — the version comparison card */
+.upd-vers{width:100%;box-sizing:border-box;padding:14px 14px 12px;border-radius:20px;background:var(--upd-card);border:1px solid var(--upd-line);margin-bottom:16px;}
+.upd-vers-head,.upd-vers-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.upd-vh{display:inline-flex;align-items:center;gap:6px;font-size:14.5px;font-weight:700;color:#C3D2E2;}
+.upd-vh.is-new{color:var(--upd-teal);}
+.upd-vers-row{margin:10px 0 12px;}
+.upd-pill{flex:1 1 0;min-width:0;padding:9px 4px;border-radius:14px;font-family:'JetBrains Mono',monospace;font-size:clamp(11.5px, 3.3vw, 14px);letter-spacing:-.2px;font-weight:700;color:#EEF4FA;
+  background:rgba(255,255,255,.05);border:1px solid rgba(150,185,225,.4);white-space:nowrap;}
+.upd-pill.is-new{border:1.5px solid var(--upd-teal);background:rgba(77,214,181,.14);box-shadow:0 0 14px rgba(77,214,181,.2);}
+.upd-arrow{flex:none;font-size:20px;color:var(--upd-teal);}
+.upd-vers-date{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;padding-top:10px;border-top:1px solid rgba(77,214,181,.22);
+  font-size:13.5px;font-weight:600;color:#C3D2E2;}
+.upd-sep{color:rgba(195,210,226,.5);}
+
+/* ما الجديد في هذا الإصدار؟ — what's new in this release */
+.upd-new{width:100%;box-sizing:border-box;margin-bottom:14px;border-radius:20px;background:var(--upd-card);border:1px solid var(--upd-line);overflow:hidden;text-align:right;}
+.upd-new-tab{display:flex;align-items:center;gap:8px;padding:11px 14px;font-size:16px;font-weight:800;border-bottom:1px solid rgba(77,214,181,.25);
+  background:rgba(77,214,181,.08);color:#EEF4FA;}
+.upd-new-tab svg{color:var(--upd-amber);}
+.upd-notes{list-style:none;margin:0;padding:12px 14px;display:grid;gap:10px;}
+.upd-notes li{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:600;line-height:1.65;}
+.upd-notes i{flex:none;width:26px;height:26px;margin-top:1px;border-radius:50%;display:grid;place-items:center;background:rgba(77,214,181,.16);
+  border:1px solid rgba(77,214,181,.5);color:var(--upd-teal);}
+.upd-notes i svg{width:15px;height:15px;}
 
 /* تحديث يتطلب خروجًا — an update that needs a logout */
-.upd-logout{width:100%;margin:0 0 14px;padding:11px 13px;border-radius:14px;font-size:14px;font-weight:700;line-height:1.6;color:#fff;background:#C2372F;}
+.upd-logout{width:100%;box-sizing:border-box;margin:0 0 14px;padding:11px 13px;border-radius:14px;font-size:14px;font-weight:700;line-height:1.6;color:#fff;background:#C2372F;}
 
-.upd-now{width:100%;max-width:440px;flex:none;border:0;border-radius:999px;padding:16px;cursor:pointer;font-family:inherit;font-size:18px;font-weight:800;
-  background:linear-gradient(135deg, var(--upd-amber), var(--upd-amber-deep));color:var(--upd-on-amber);box-shadow:0 8px 22px rgba(240,180,41,.4);}
+.upd-now{position:relative;z-index:1;width:100%;max-width:440px;flex:none;display:flex;align-items:center;justify-content:center;gap:10px;
+  border:0;border-radius:999px;padding:17px;cursor:pointer;font-family:inherit;font-size:20px;font-weight:800;
+  background:linear-gradient(135deg, #F7C948, var(--upd-amber) 45%, var(--upd-amber-deep));color:var(--upd-on-amber);
+  box-shadow:0 10px 28px rgba(240,180,41,.45),0 0 0 1px rgba(255,220,120,.4) inset;}
+.upd-now svg{width:24px;height:24px;}
 .upd-now:disabled{opacity:.75;cursor:default;}
 @media (prefers-reduced-motion:reduce){ .upd-screen{transition:none;} }
