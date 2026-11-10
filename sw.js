@@ -32,7 +32,7 @@ importScripts('config/الإعدادات.js');
 // The build stamp: a browser detects a new version only when this file or the config changes; any other site file alone never
 // reaches devices. Not edited by hand: the pre-commit hook updates it on every commit with a site file; the gate verifies.
 const SW_RELEASE = 4; // (8 نوفمبر) رقم الإصدار المتسلسل = SEC2_RELEASE في config/النسخة.js، ويقرؤه الخادم من هنا / the release number, read by the server from here
-const SW_BUILD = '20261110-212602';
+const SW_BUILD = '20261110-224155';
 const CONFIG = self.SEC2_CONFIG;
 const CACHE_NAME = CONFIG.SHELL_CACHE_NAME;
 const NEXT_CACHE = CACHE_NAME + '-next'; // تثبيت نسخة جديدة دون لمس العاملة / installing a new version without touching the working one
@@ -178,14 +178,7 @@ async function stored_(request, opts) {
 async function versionFirst_(request) {
   const stored = await stored_(request, { ignoreSearch: true });
   if (stored) return stored;
-  const res = await fetch(request);
-  // (9 نوفمبر) مكتبات الموقع (libs/، مثل مكتبة الكرة للزائر) لا تُنزَّل مع التثبيت لكل الأعضاء، وتُحفظ عند أول طلب
-  // كما كانت من cdnjs؛ وتُمسح مع ذاكرة النسخة عند كل إصدار / site libraries aren't installed for every member; kept on first use
-  if (res.ok && new URL(request.url).pathname.indexOf('/libs/') !== -1) {
-    const copy = res.clone();
-    caches.open(CACHE_NAME).then((cache) => cache.put(request, copy)).catch(() => {});
-  }
-  return res;
+  return fetch(request);
 }
 
 /* المحفوظة أولًا للمكتبات والخطوط — Stored copy first for libraries and fonts */
