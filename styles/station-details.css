@@ -71,3 +71,8 @@
   color:var(--text-primary);font-family:inherit;font-size:16px;}
 .sd-near{max-height:calc(100dvh - var(--header-h, 120px) - 270px - var(--tabbar-h) - var(--bn-safe));min-height:260px;}
 .sd-near-empty{padding:18px 14px;text-align:center;font-size:14px;font-weight:600;color:var(--text-secondary);}
+
+/* السكينة الهوائية (11 نوفمبر) — the air-break switch */
+.sd-badge.is-switch{background:var(--c-sw-bg);color:var(--c-sw-fg);border:1px solid var(--c-sw-line);}
+.sd-type.is-switch{color:var(--c-sw-fg);}
+.sd-near-ic.is-switch{background:var(--c-sw-bg);color:var(--c-sw-fg);}

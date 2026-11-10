@@ -24,7 +24,7 @@
   const SEARCH = global.SecStationSearch, SYNC = global.SecStationsSync, Q = global.SecStationQuery, TI = global.SecTextInput, H = global.SecHtml;
   if (!SEARCH || !SYNC || !Q || !TI || !H) throw new Error('outage-search.js يحتاج station-search وstations-sync وstation-query وtext-input وhtml قبله / missing dependencies');
   const MAX = 15;
-  const LINE_COLOR = '#C8A24E', SUB_COLOR = '#8B6DD6';
+  const LINE_COLOR = '#C8A24E', SUB_COLOR = '#8B6DD6', SWITCH_COLOR = '#E8833A'; // السكينة برتقالي (11 نوفمبر) / switches orange
   const PLACEHOLDER = 'افصل بينها بمسافة أو فاصلة أو / أو & أو - أو سطر جديد';
   const MSG = {
     MAP_MIN: 'أدخل محطتين على الأقل', HOME_MIN: 'أدخل رقم محطة واحدة على الأقل', MAX: 'الحد الأقصى 15 محطة بالمرة الواحدة',
@@ -212,7 +212,7 @@
       const bounds = [];
       stops.forEach(function (s, i) {
         const l = letter(i);
-        const m = L.marker([s.lat, s.lng], { icon: icon_(l, s.type === 'تحويل' ? SUB_COLOR : teal) });
+        const m = L.marker([s.lat, s.lng], { icon: icon_(l, s.type === 'تحويل' ? SUB_COLOR : Q.isSwitch(s) ? SWITCH_COLOR : teal) });
         m.bindPopup('<div class="outage-popup"><b>' + l + ') ' + H.esc(s.name || s.id) + '</b><br>رقم: ' + H.esc(s.id) + '</div>');
         m.addTo(map); markers.push(m); bounds.push([s.lat, s.lng]);
       });

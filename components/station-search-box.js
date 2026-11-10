@@ -10,6 +10,8 @@
  * - غير موجودة ← البطاقة: «المحطة غير موجودة» (أو الصياغة غير القاطعة عند تعذّر التأكد)، رقم المحطة، «هل تريد إضافتها؟»،
  *   «+ إضافة محطة» (onAdd بالرقم) و«🔍 بحث آخر» (يمسح الحقل ويركّز عليه).
  * - التحقق بالخلفية غيّر الإحداثيات ← onUpdated (الصفحة تنقل العلامة/الوجهة).
+ * - (11 نوفمبر) شرائح فوق المربع: «محطة» (افتراضي) أو رمز سكينة (DB / LBS) — مع الرمز يكتب العضو الرقم فقط ويُبحث عن
+ *   «DB-150» بصيغته الموحّدة، فلا تختلف النتيجة باختلاف طريقة الكتابة. تظهر الشرائح أثناء البحث فقط.
  * لا منطق تحميل ولا مزامنة هنا: البحث كله في services/station-search.js.
  * V2: كل نص من الاستعلام أو الخادم يُكتب نصًا؛ بحث واحد في أي لحظة لكل مربع؛ مستمعات تُزال بـ destroy.
  *
@@ -20,8 +22,8 @@
 (function (global) {
   'use strict';
 
-  const SEARCH = global.SecStationSearch, TI = global.SecTextInput, H = global.SecHtml;
-  if (!SEARCH || !TI || !H) throw new Error('station-search-box.js يحتاج station-search.js وtext-input.js وhtml.js قبله / missing dependencies');
+  const SEARCH = global.SecStationSearch, TI = global.SecTextInput, H = global.SecHtml, Q = global.SecStationQuery;
+  if (!SEARCH || !TI || !H || !Q) throw new Error('station-search-box.js يحتاج station-search.js وtext-input.js وhtml.js وstation-query.js قبله / missing dependencies');
   const doc = global.document;
   const MAX_LEN = 24;
   const LENS_SVG = '<svg data-act="search" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>';
@@ -43,8 +45,12 @@
   function mount(container, opts) {
     const o = Object.assign({ variant: 'lens' }, opts || {});
     const lens = o.variant === 'lens';
-    let busy = false, progressTimer = null;
-    container.innerHTML = lens
+    let busy = false, progressTimer = null, prefix = ''; // '' = محطة، أو رمز السكينة / '' = a station, or the switch prefix
+    const CHIPS = '<div class="ssb-kinds" data-role="kinds" role="radiogroup" aria-label="نوع البحث">' +
+      [''].concat(Q.SWITCH_PREFIXES).map(function (p) {
+        return '<button type="button" class="ssb-kind' + (p ? '' : ' active') + '" data-kind="' + p + '" role="radio" aria-checked="' + (p ? 'false' : 'true') + '">' + (p || 'محطة') + '</button>';
+      }).join('') + '</div>';
+    container.innerHTML = CHIPS + (lens
       ? '<div class="search-lens" data-role="box">' + LENS_SVG + '<input data-role="input" placeholder="مثال: 39070 أو ABN" aria-label="رقم المحطة"' + NOFILL + '></div>' +
         '<div class="search-hint" data-role="hint" role="status"></div><div class="search-progress" data-role="progress">' + PROGRESS + '</div>'
       : '<div class="search-and-back-row show"><div class="station-search-bar" data-role="box"><span class="ssb-icon" data-act="search" role="button" aria-label="بحث">' + BAR_SVG + '</span>' +
@@ -53,7 +59,7 @@
         (o.onClose ? '<button type="button" class="ssb-close" data-act="close" title="إغلاق البحث والرجوع للوضع العادي" aria-label="إغلاق البحث">' + CLOSE_SVG + '</button>' : '') +
         (o.onTools ? '<button type="button" class="ssb-tools" data-act="tools" title="أدوات الخريطة: قريب، مغذي، أعطال، القياس" aria-label="أدوات الخريطة" aria-expanded="false">' + TOOLS_SVG + '</button>' : '') +
         '</div></div>' +
-        '<div class="station-search-progress" data-role="progress">' + PROGRESS + '</div><div class="station-search-hint" data-role="hint" role="status"></div>';
+        '<div class="station-search-progress" data-role="progress">' + PROGRESS + '</div><div class="station-search-hint" data-role="hint" role="status"></div>');
     const r = function (n) { return container.querySelector('[data-role="' + n + '"]'); };
     const input = r('input'), box = r('box'), hint = r('hint');
     if (o.placeholder) input.placeholder = String(o.placeholder);
@@ -79,6 +85,25 @@
       if (doc.activeElement === input) { input.blur(); input.focus(); }
     }
     applyKb_(kbLetters_());
+    const kinds = r('kinds'), basePlaceholder = input.placeholder;
+
+    /* الشرائح تظهر أثناء البحث فقط (التركيز، أو نص مكتوب، أو رمز مختار) — the chips show while searching only */
+    function showKinds_() { kinds.classList.toggle('show', doc.activeElement === input || input.value !== '' || prefix !== ''); }
+    function setKind_(p) {
+      prefix = p;
+      kinds.querySelectorAll('.ssb-kind').forEach(function (b) { const on = b.dataset.kind === p; b.classList.toggle('active', on); b.setAttribute('aria-checked', on ? 'true' : 'false'); });
+      // مع الرمز: الرقم فقط بلوحة الأرقام، وزر الحروف يختفي — with a prefix: digits only on the number pad, no letters button
+      input.placeholder = p ? 'رقم السكينة فقط — مثال: 150' : basePlaceholder;
+      if (p) { input.value = input.value.replace(/[^0-9]/g, ''); input.inputMode = 'numeric'; } else applyKb_(kbLetters_());
+      if (kbBtn) kbBtn.hidden = !!p;
+      setHint_('');
+      if (doc.activeElement === input) { input.blur(); input.focus(); } // الآيفون يبدّل اللوحة بإعادة التركيز / the iPhone swaps the pad on refocus
+      showKinds_();
+    }
+    kinds.addEventListener('pointerdown', function (e) { e.preventDefault(); }); // لا يُغلق لوحة المفاتيح / keeps the keyboard open
+    input.addEventListener('focus', showKinds_);
+    input.addEventListener('blur', function () { global.setTimeout(showKinds_, 0); });
+    input.addEventListener('input', function () { if (prefix) { const d = input.value.replace(/[^0-9]/g, ''); if (d !== input.value) input.value = d; } });
     // الضغط على الزر لا يُخرج المؤشر من الحقل (فلا تُغلق لوحة المفاتيح) — pressing the button keeps the caret in the field
     if (kbBtn) kbBtn.addEventListener('pointerdown', function (e) { e.preventDefault(); });
 
@@ -101,16 +126,20 @@
 
     // ===== بطاقة «غير موجودة» (V1) — The «not found» card (V1) =====
     function notFound_(query, unverified) {
+      const sw = !!Q.switchParts(query), what = sw ? 'السكينة' : 'المحطة';
       hint.className = hintCls;
-      hint.innerHTML = '<div class="not-found-card"><div class="nfc-head">' + WARN_SVG + '<span>' + H.esc(unverified ? SEARCH.unverifiedNote() : 'المحطة غير موجودة') + '</span></div>' +
-        '<div class="nfc-id">رقم المحطة: <b>' + H.esc(query) + '</b></div><div class="nfc-question">هل تريد إضافتها؟</div>' +
-        '<div class="nfc-actions"><button type="button" class="nfc-btn primary" data-act="add">+ إضافة محطة</button><button type="button" class="nfc-btn" data-act="retry">🔍 بحث آخر</button></div></div>';
+      hint.innerHTML = '<div class="not-found-card"><div class="nfc-head">' + WARN_SVG + '<span>' + H.esc(unverified ? SEARCH.unverifiedNote() : what + ' غير موجودة') + '</span></div>' +
+        '<div class="nfc-id">رقم ' + what + ': <b>' + H.esc(query) + '</b></div><div class="nfc-question">هل تريد إضافتها؟</div>' +
+        '<div class="nfc-actions"><button type="button" class="nfc-btn primary" data-act="add">+ إضافة ' + (sw ? 'سكينة' : 'محطة') + '</button><button type="button" class="nfc-btn" data-act="retry">🔍 بحث آخر</button></div></div>';
       hint.dataset.query = query;
     }
 
     async function search(text) {
       if (busy) return null;
-      const raw = TI.normalizeCode(TI.stripInvisible(text !== undefined ? String(text) : input.value).trim());
+      const typed = TI.normalizeCode(TI.stripInvisible(text !== undefined ? String(text) : input.value).trim());
+      // رمز مختار ← «الرمز-الرقم» بالأرقام فقط؛ وإلا ما كُتب (والسكينة المكتوبة يدويًا تُوحَّد) — a chosen prefix ← «prefix-number»
+      const digits = prefix && text === undefined ? typed.replace(/[^0-9]/g, '') : '';
+      const raw = prefix && text === undefined ? (digits ? Q.switchId(prefix, digits) : '') : Q.canonicalId(typed);
       if (!raw) return null;
       const loggedIn = o.isLoggedIn ? o.isLoggedIn() : !!(global.SecSession && global.SecSession.isLoggedIn());
       if (!loggedIn) {
@@ -142,20 +171,22 @@
       } finally { busy = false; box.classList.remove('busy'); }
     }
 
-    function clear() { input.value = ''; setHint_(''); delete hint.dataset.query; }
+    function clear() { input.value = ''; setHint_(''); delete hint.dataset.query; showKinds_(); }
     function focus() { if (lens) open_(); input.focus(); }
     function open_() { if (!lens || box.classList.contains('open')) return; box.classList.add('open'); global.setTimeout(function () { box.classList.add('blur-ready'); }, 460); }
     function closeLens_() { box.classList.remove('open', 'blur-ready'); }
 
     function onClick_(e) {
-      const t = e.target.closest('[data-act], [data-role="box"]');
+      const t = e.target.closest('[data-act], [data-role="box"], .ssb-kind');
       if (!t || !container.contains(t)) return;
       const act = t.dataset.act;
       if (act === 'add') { if (o.onAdd) o.onAdd(hint.dataset.query || ''); return; }
       if (act === 'retry') { clear(); input.focus(); return; }
       if (act === 'tools') { t.setAttribute('aria-expanded', o.onTools() ? 'true' : 'false'); return; }
-      if (act === 'close') { input.blur(); o.onClose(); return; }
+      if (act === 'close') { input.blur(); setKind_(''); o.onClose(); return; }
       if (act === 'kb') { toggleKb_(); return; }
+      const kind = e.target.closest('.ssb-kind');
+      if (kind && kinds.contains(kind)) { setKind_(kind.dataset.kind); input.focus(); return; }
       if (lens && !box.classList.contains('open')) { open_(); input.focus(); return; }
       if (act === 'search') search();
     }

@@ -23,11 +23,14 @@
   const doc = global.document;
   const PAGE = 50, KM_MIN = 0.5, KM_MAX = 10, KM_STEP = 0.5;
   const GEO_OPTS = { enableHighAccuracy: true, timeout: 20000, maximumAge: 30000 };
-  const TYPES = [{ v: '', t: 'الكل' }, { v: 'توزيع', t: 'توزيع' }, { v: 'تحويل', t: 'تحويل' }];
+  // (11 نوفمبر) «سكاكين»: صفوف التوزيع برقم سكينة (DB-150)؛ و«توزيع» بلا السكاكين — «switches»: distribution rows with a switch id
+  const TYPES = [{ v: '', t: 'الكل' }, { v: 'توزيع', t: 'توزيع' }, { v: 'تحويل', t: 'تحويل' }, { v: 'سكينة', t: 'سكاكين' }];
   const TYPE_ICON = { // الرمزان المعتمدان — the approved symbols
     'توزيع': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M12 7.5v4M12 11.5l-5.5 5.2M12 11.5l5.5 5.2"/></svg>',
-    'تحويل': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"/></svg>'
+    'تحويل': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"/></svg>',
+    'سكينة': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 17h3M19 17h3"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/><path d="M8.5 15.5 17 7"/></svg>' // (11 نوفمبر) السكينة الهوائية / the air-break switch
   };
+  const KIND_OF_FILTER = { 'توزيع': 'dist', 'تحويل': 'sub', 'سكينة': 'switch' };
   const ICON = {
     locate: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5"/><line x1="12" y1="1" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="23"/><line x1="1" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="23" y2="12"/></svg>',
     filter: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.5 10 19 14 21 14 12.5 22 3"/></svg>',
@@ -80,7 +83,7 @@
     function compute_() {
       const all = stations_(); if (!all) return null;
       let list = all.filter(function (s) {
-        return (!f.type || s.type === f.type) && (!f.region || String(s.region || '').trim() === f.region);
+        return (!f.type || Q.kindOf(s) === KIND_OF_FILTER[f.type]) && (!f.region || String(s.region || '').trim() === f.region);
       });
       if (me) {
         list = list.filter(Q.hasCoordinates).map(function (s) {
@@ -119,11 +122,10 @@
       const ul = el_('div', 'sl-list');
       last.slice(0, shown).forEach(function (x, i) {
         const b = el_('button', 'sl-row'); b.type = 'button'; b.dataset.act = 'open'; b.dataset.i = String(i);
-        const sub = x.s.type === 'تحويل';
-        const ic = el_('span', 'sl-ic ' + (sub ? 'is-sub' : 'is-dist')); ic.innerHTML = TYPE_ICON[x.s.type] || TYPE_ICON['توزيع'];
+        const ic = el_('span', 'sl-ic is-' + Q.kindOf(x.s)); ic.innerHTML = TYPE_ICON[Q.isSwitch(x.s) ? 'سكينة' : x.s.type] || TYPE_ICON['توزيع'];
         const tx = el_('span', 'sl-tx');
         tx.appendChild(el_('bdi', 'sl-id', String(x.s.id)));
-        tx.appendChild(el_('span', 'sl-sub', (sub ? 'محطة تحويل' : 'محطة توزيع') + (x.s.region ? ' · ' + x.s.region : '') + (x.s.feeder ? ' · ' + x.s.feeder : '')));
+        tx.appendChild(el_('span', 'sl-sub', Q.kindLabel(x.s) + (x.s.region ? ' · ' + x.s.region : '') + (x.s.feeder ? ' · ' + x.s.feeder : '')));
         b.appendChild(ic); b.appendChild(tx);
         if (x.dist != null) b.appendChild(el_('span', 'sl-km', km_(x.dist)));
         const ch = el_('span', 'sl-ch'); ch.innerHTML = ICON.chev; b.appendChild(ch);

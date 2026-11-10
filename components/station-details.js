@@ -24,8 +24,10 @@
   const TABS = [{ k: 'info', t: 'المعلومات' }, { k: 'loc', t: 'الموقع' }, { k: 'near', t: 'المحطات القريبة' }];
   const TYPE_ICON = { // الرمزان المعتمدان — the approved symbols
     'توزيع': '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M12 7.5v4M12 11.5l-5.5 5.2M12 11.5l5.5 5.2"/></svg>',
-    'تحويل': '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"/></svg>'
+    'تحويل': '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"/></svg>',
+    'سكينة': '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 17h3M19 17h3"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/><path d="M8.5 15.5 17 7"/></svg>' // (11 نوفمبر) السكينة الهوائية / the air-break switch
   };
+  function icon_(s) { return TYPE_ICON[Q.isSwitch(s) ? 'سكينة' : s.type] || TYPE_ICON['توزيع']; }
   const ICON = {
     back: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
     chev: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>'
@@ -74,8 +76,8 @@
     /* المعلومات: الصفوف، وزرّان فقط: مشاركة وتعديل (طلب محمد 20 أكتوبر) — info: the rows and only two buttons, share and edit */
     function drawInfo_(p) {
       const list = el_('div', 'sd-list');
-      list.appendChild(row_('رقم المحطة', String(s.id), { mono: true }));
-      list.appendChild(row_('النوع', s.type === 'تحويل' ? 'محطة تحويل' : 'محطة توزيع'));
+      list.appendChild(row_(Q.isSwitch(s) ? 'رقم السكينة' : 'رقم المحطة', String(s.id), { mono: true }));
+      list.appendChild(row_('النوع', Q.kindLabel(s)));
       if (s.feeder) list.appendChild(row_('المغذي', String(s.feeder), { mono: true }));
       if (s.region) list.appendChild(row_('المنطقة', String(s.region)));
       const fc = feederCount_();
@@ -122,10 +124,10 @@
       if (!list.length) { ul.appendChild(el_('div', 'sd-near-empty', 'لا توجد محطة قريبة تطابق «' + nearQuery.trim() + '»')); }
       list.slice(0, NEARBY_MAX).forEach(function (x) {
         const b = el_('button', 'sd-near-row'); b.type = 'button'; b.dataset.act = 'open'; b.dataset.i = String(near.indexOf(x));
-        const ic = el_('span', 'sd-near-ic ' + (x.type === 'تحويل' ? 'is-sub' : 'is-dist')); ic.innerHTML = TYPE_ICON[x.type] || TYPE_ICON['توزيع'];
+        const ic = el_('span', 'sd-near-ic is-' + Q.kindOf(x)); ic.innerHTML = icon_(x);
         const tx = el_('span', 'sd-near-tx');
         tx.appendChild(el_('bdi', 'sd-near-id', String(x.id)));
-        tx.appendChild(el_('span', 'sd-near-sub', (x.type === 'تحويل' ? 'محطة تحويل' : 'محطة توزيع') + (x.region ? ' · ' + x.region : '') + (x.feeder ? ' · ' + x.feeder : '')));
+        tx.appendChild(el_('span', 'sd-near-sub', Q.kindLabel(x) + (x.region ? ' · ' + x.region : '') + (x.feeder ? ' · ' + x.feeder : '')));
         b.appendChild(ic); b.appendChild(tx);
         b.appendChild(el_('span', 'sd-near-km', km_(x.distanceKm)));
         const ch = el_('span', 'sd-near-ch'); ch.innerHTML = ICON.chev; b.appendChild(ch);
@@ -153,10 +155,10 @@
 
     function draw_() {
       if (!s) return;
-      const sub = s.type === 'تحويل';
-      const badge = q('badge'); badge.className = 'sd-badge ' + (sub ? 'is-sub' : 'is-dist'); badge.innerHTML = TYPE_ICON[s.type] || TYPE_ICON['توزيع'];
+      const kind = 'is-' + Q.kindOf(s);
+      const badge = q('badge'); badge.className = 'sd-badge ' + kind; badge.innerHTML = icon_(s);
       q('id').textContent = String(s.id);
-      const t = q('type'); t.textContent = sub ? 'محطة تحويل' : 'محطة توزيع'; t.className = 'sd-type ' + (sub ? 'is-sub' : 'is-dist');
+      const t = q('type'); t.textContent = Q.kindLabel(s); t.className = 'sd-type ' + kind;
       container.querySelectorAll('.sd-tab').forEach(function (b) { const on = b.dataset.tab === tab; b.classList.toggle('active', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
       const p = q('panel'); p.textContent = '';
       if (tab === 'info') drawInfo_(p); else if (tab === 'loc') drawLoc_(p); else drawNear_(p);

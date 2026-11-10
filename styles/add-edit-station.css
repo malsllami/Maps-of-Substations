@@ -115,3 +115,9 @@
 .add-station-error{color:#E0654F;font-size:13px;font-weight:600;}
 .add-station-error:empty{display:none;}
 .add-station-error.sf-info{color:var(--text-secondary);}
+
+/* (11 نوفمبر) ثلاثة أنواع في صف واحد، وزرّا رمز السكينة — three types in one row, and the switch prefix buttons */
+.add-station-type .type-btn{padding:14px 6px;}
+.sw-btn{min-width:88px;padding:11px 16px;border-radius:11px;border:1.5px solid var(--border-strong);background:var(--bg);
+  color:var(--text-secondary);font-size:15px;font-weight:700;letter-spacing:.5px;cursor:pointer;font-family:inherit;transition:.2s;}
+.sw-btn.active{background:var(--sw);border-color:var(--sw);color:#fff;}

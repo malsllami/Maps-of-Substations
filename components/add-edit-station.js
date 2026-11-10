@@ -5,6 +5,8 @@
  * - الإضافة: النوع (توزيع/تحويل — المغذي والمنطقة للتوزيع فقط)، رقم المحطة، المغذي (اختياري)، المنطقة (إلزامية للتوزيع)،
  *   الإحداثيتان، «📍 استخدام موقعي الحالي»، لصق «عرض,طول» + «تطبيق»، معاينة بدبوس قابل للسحب وزر الأقمار، سبب الإضافة،
  *   «حفظ المحطة» بشريط تقدّم، ثم «✓ تمت إضافة المحطة بنجاح» + «حسنًا».
+ * - (11 نوفمبر) نوع ثالث «سكينة هوائية»: زرّا الرمز (DB / LBS) والرقم أرقام فقط ← «DB-150»، ثم المغذي (اختياري) والمنطقة
+ *   (إلزامية) والموقع؛ تُحفظ صفًا في جدول التوزيع (النوع «توزيع») فتُعدَّل وتُحذف وتُزامَن مثل المحطات.
  * - التعديل: المغذي والمنطقة (للتوزيع)، الإحداثيتان، الموقع الحالي، اللصق، المعاينة، السبب، «حفظ التعديل» و«إلغاء».
  * - الحقول تقبل الأرقام العربية والإنجليزية (text-input). لا كتابة والجهاز بلا إنترنت — النموذج يبقى بما فيه.
  * - أثناء الحفظ: منع مغادرة الصفحة وإبلاغ الصفحة (onSavingChange) لتعطيل التنقل، وإعادة الإرسال بنفس مفتاح العملية
@@ -31,6 +33,7 @@
     LOGIN_ADD: 'سجّل دخول أولاً لإضافة محطة',
     LOGIN_EDIT: 'سجّل دخول أولاً لتعديل المحطة',
     ID_REQUIRED: 'رقم المحطة مطلوب',
+    SWITCH_ID_REQUIRED: 'رقم السكينة مطلوب (أرقام فقط)',
     REGION_REQUIRED: 'المنطقة مطلوبة',
     ADD_COORDS: 'الإحداثية إجبارية — حدّد موقعك أو أدخلها يدوياً قبل الحفظ',
     BAD_COORDS: 'الرجاء إدخال إحداثية صحيحة',
@@ -42,6 +45,7 @@
     RETRY: 'الخادم لم يرد بشكل سليم، جارٍ التحقق من الحفظ…',
     FAILED: 'فشل الحفظ',
     ADDED: '✓ تمت إضافة المحطة بنجاح — يمكنك البحث عنها مباشرة',
+    ADDED_SWITCH: '✓ تمت إضافة السكينة بنجاح — يمكنك البحث عنها مباشرة',
     EDITED: '✓ تم حفظ التعديل بنجاح',
     // متى يراها الآخرون (اختيار محمد 16 أكتوبر: الثقة بالنسخة المحلية دقيقتان) — when others see it (local trust window: 2 minutes)
     SHARED_ADD: 'تظهر الإضافة عند جميع المستخدمين خلال دقيقتين كحد أقصى',
@@ -52,6 +56,7 @@
   const CLOSE_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
 
   let deps = null, add = null, edit = null, saving = false;
+  const SWITCH = 'سكينة'; // نوع النموذج فقط؛ تُحفظ في جدول التوزيع (النوع «توزيع») / the form's type only; saved as a distribution row
 
   function input_(role, placeholder, extra) { return '<input class="edit-input" data-f="' + role + '" placeholder="' + placeholder + '"' + NOFILL + (extra || '') + '>'; }
 
@@ -84,17 +89,21 @@
   function addHtml_() {
     return '<div class="add-station-panel"><div class="sf-form" data-role="form">' +
         '<div><label class="form-field-label">نوع المحطة</label><div class="add-station-type">' +
-          '<button class="type-btn active" type="button" data-type="توزيع">توزيع</button><button class="type-btn" type="button" data-type="تحويل">تحويل</button></div></div>' +
-        '<div><label class="form-field-label">رقم المحطة</label>' + input_('id', 'مثال: 39070') + '</div>' +
+          '<button class="type-btn active" type="button" data-type="توزيع">توزيع</button><button class="type-btn" type="button" data-type="تحويل">تحويل</button>' +
+          '<button class="type-btn" type="button" data-type="' + SWITCH + '">سكينة هوائية</button></div></div>' +
+        // (11 نوفمبر) رمز السكينة: زرّان ثابتان، والعضو يكتب الرقم فقط — the switch prefix: two fixed buttons, the member types the number only
+        '<div data-role="sw" hidden><label class="form-field-label">الرمز</label><div class="add-station-type sw-prefix">' +
+          Q.SWITCH_PREFIXES.map(function (p, i) { return '<button class="sw-btn' + (i ? '' : ' active') + '" type="button" data-prefix="' + p + '">' + p + '</button>'; }).join('') + '</div></div>' +
+        '<div><label class="form-field-label" data-role="idlabel">رقم المحطة</label>' + input_('id', 'مثال: 39070') + '</div>' +
         '<div class="sf-row sf-dist" data-role="dist">' +
           '<div class="sf-col"><label class="form-field-label">المغذي (اختياري)</label>' + input_('feeder', 'مثال: SNB38') + '</div>' +
           '<div class="sf-col"><label class="form-field-label">المنطقة</label>' + input_('region', 'مثال: القرينية') + '</div></div>' +
         coordsBlock_() +
         '<div><label class="form-field-label">سبب الإضافة</label>' + input_('reason', 'مثال: محطة جديدة بحي القرينية لتغذية المنطقة الصناعية') + '</div>' +
         '<div class="add-station-error" data-role="error" role="alert"></div>' +
-        '<button class="add-station-submit" type="button" data-act="save">حفظ المحطة</button>' +
+        '<button class="add-station-submit" type="button" data-act="save" data-role="submit">حفظ المحطة</button>' +
       '</div>' + progressBlock_() +
-      '<div class="sf-success" data-role="success" hidden><div class="sf-success-text">' + MSG.ADDED + '</div><div class="sf-success-note">⏱ ' + MSG.SHARED_ADD + '</div><button class="add-station-submit" type="button" data-act="done">حسنًا</button></div>' +
+      '<div class="sf-success" data-role="success" hidden><div class="sf-success-text" data-role="okText">' + MSG.ADDED + '</div><div class="sf-success-note">⏱ ' + MSG.SHARED_ADD + '</div><button class="add-station-submit" type="button" data-act="done">حسنًا</button></div>' +
     '</div>';
   }
   function editHtml_() {
@@ -117,9 +126,13 @@
     const el = overlay_(mode === 'add' ? '+ إضافة محطة جديدة' : 'تعديل المحطة', mode === 'add' ? addHtml_() : editHtml_());
     const f = function (name) { return el.querySelector('[data-f="' + name + '"]'); };
     const r = function (name) { return el.querySelector('[data-role="' + name + '"]'); };
-    const form = { mode: mode, el: el, f: f, r: r, type: 'توزيع', station: null, map: null, marker: null, tiles: null, sat: false };
+    const form = { mode: mode, el: el, f: f, r: r, type: 'توزيع', prefix: Q.SWITCH_PREFIXES[0], station: null, map: null, marker: null, tiles: null, sat: false };
 
-    if (mode === 'add') TI.code(f('id'), 24);
+    if (mode === 'add') {
+      TI.code(f('id'), 24);
+      // السكينة: أرقام فقط (الرمز من الزرّين) — the switch: digits only (the prefix comes from the buttons)
+      f('id').addEventListener('input', function () { if (form.type !== SWITCH) return; const d = f('id').value.replace(/[^0-9]/g, ''); if (d !== f('id').value) f('id').value = d; });
+    }
     TI.upper(f('feeder')); TI.digits(f('region')); TI.digits(f('reason'));
     TI.coord(f('lat')); TI.coord(f('lng')); TI.coordPair(f('paste'));
     f('lat').addEventListener('input', function () { syncPreview_(form); });
@@ -140,7 +153,21 @@
   function setType_(form, type) {
     form.type = type;
     form.el.querySelectorAll('.type-btn').forEach(function (b) { b.classList.toggle('active', b.dataset.type === type); });
-    form.r('dist').hidden = type !== 'توزيع';
+    form.r('dist').hidden = type === 'تحويل';
+    if (form.mode !== 'add') return;
+    // السكينة: صف الرمز، والرقم أرقام فقط بلوحة الأرقام — the switch: the prefix row, the number digits only on the number pad
+    const sw = type === SWITCH, id = form.f('id');
+    form.r('sw').hidden = !sw;
+    form.r('idlabel').textContent = sw ? 'رقم السكينة' : 'رقم المحطة';
+    id.placeholder = sw ? 'مثال: 150' : 'مثال: 39070';
+    id.inputMode = sw ? 'numeric' : 'text';
+    if (sw) id.value = id.value.replace(/[^0-9]/g, '');
+    form.r('submit').textContent = sw ? 'حفظ السكينة' : 'حفظ المحطة';
+    form.r('title').textContent = sw ? '+ إضافة سكينة هوائية' : '+ إضافة محطة جديدة';
+  }
+  function setPrefix_(form, prefix) {
+    form.prefix = prefix;
+    form.el.querySelectorAll('.sw-btn').forEach(function (b) { b.classList.toggle('active', b.dataset.prefix === prefix); });
   }
 
   const MAP_MISSING = 'تعذّر تحميل الخريطة — أدخل الإحداثيات يدويًا أو باللصق أو من «موقعي الحالي»';
@@ -188,9 +215,10 @@
   }
 
   function onClick_(form, e) {
-    const t = e.target.closest('[data-act], .type-btn');
+    const t = e.target.closest('[data-act], .type-btn, .sw-btn');
     if (!t || !form.el.contains(t)) return;
     if (t.classList.contains('type-btn')) { if (!saving) setType_(form, t.dataset.type); return; }
+    if (t.classList.contains('sw-btn')) { if (!saving) setPrefix_(form, t.dataset.prefix); return; }
     const act = t.dataset.act;
     if (act === 'close' || act === 'done') { if (!saving) close(); }
     else if (act === 'gps') gps_(form);
@@ -224,18 +252,24 @@
   function validate_(form) {
     const loggedIn = !deps.isLoggedIn || deps.isLoggedIn();
     if (!loggedIn) return form.mode === 'add' ? MSG.LOGIN_ADD : MSG.LOGIN_EDIT;
-    const dist = (form.mode === 'add' ? form.type : form.station.type) === 'توزيع';
+    const sw = form.mode === 'add' && form.type === SWITCH;
+    const dist = sw || (form.mode === 'add' ? form.type : form.station.type) === 'توزيع';
     const feeder = dist ? TI.normalizeCode(form.f('feeder').value.trim()) : '';
     const region = dist ? TI.stripInvisible(form.f('region').value.trim()) : '';
     const reason = TI.stripInvisible(form.f('reason').value.trim());
     const at = readCoords_(form);
     if (form.mode === 'add') {
-      const id = TI.normalizeCode(form.f('id').value.trim());
+      // السكينة: الرمز المختار + الأرقام فقط ← «DB-150»، وتُحفظ صفًا في جدول التوزيع — the switch: prefix + digits ← «DB-150», a distribution row
+      const typed = TI.normalizeCode(form.f('id').value.trim());
+      const num = sw ? typed.replace(/[^0-9]/g, '') : '';
+      if (sw && !num) return MSG.SWITCH_ID_REQUIRED;
+      const id = sw ? Q.switchId(form.prefix, num) : typed;
       if (!id) return MSG.ID_REQUIRED;
       if (dist && !region) return MSG.REGION_REQUIRED;
       if (!at) return MSG.ADD_COORDS;
-      return { action: 'addNewStation', station: { id: id, type: form.type, feeder: feeder, region: region, lat: at.lat, lng: at.lng },
-        payload: { stationId: id, type: form.type, lat: at.lat, lng: at.lng, feeder: dist ? feeder : undefined, region: dist ? region : undefined, reason: reason } };
+      const type = sw ? 'توزيع' : form.type;
+      return { action: 'addNewStation', station: { id: id, type: type, feeder: feeder, region: region, lat: at.lat, lng: at.lng },
+        payload: { stationId: id, type: type, lat: at.lat, lng: at.lng, feeder: dist ? feeder : undefined, region: dist ? region : undefined, reason: reason } };
     }
     if (!at) return MSG.BAD_COORDS;
     const s = form.station;
@@ -288,6 +322,7 @@
       try { if (global.SecProfileCache) global.SecProfileCache.recordSave(v.station, form.mode); } catch (e) { /* لا يمس الحفظ / never touches the save */ }
       await new Promise(function (r) { global.setTimeout(r, 300); });
       bar.stop();
+      if (form.mode === 'add') form.r('okText').textContent = Q.isSwitch(v.station) ? MSG.ADDED_SWITCH : MSG.ADDED;
       form.r('form').hidden = true;
       form.r('success').hidden = false;
     } catch (err) {
@@ -323,7 +358,12 @@
     if (saving) return;
     close();
     if (add.r('success').hidden === false) { clearFields_(add); setType_(add, 'توزيع'); resetPreview_(add, null); }
-    if (prefillId !== undefined && prefillId !== null) add.f('id').value = TI.normalizeCode(prefillId);
+    if (prefillId !== undefined && prefillId !== null) {
+      // «+ إضافة سكينة» من بحث «DB-150» ← النوع والرمز والرقم جاهزة — from a «DB-150» search ← type, prefix and number ready
+      const p = Q.switchParts(prefillId);
+      if (p) { setType_(add, SWITCH); setPrefix_(add, p.prefix); add.f('id').value = p.num; }
+      else { if (add.type === SWITCH) setType_(add, 'توزيع'); add.f('id').value = TI.normalizeCode(prefillId); }
+    }
     add.el.classList.add('show');
     ensureMap_(add);
   }

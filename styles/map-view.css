@@ -156,3 +156,6 @@
 /* دبوس القريبة: الرقم وتحته المسافة من المحطة المبحوث عنها (نموذج محمد 20 أكتوبر) — the nearby pin: number, distance under it */
 .nearby-pin-card.has-dist{height:auto;flex-direction:column;gap:0;padding:2px 8px;line-height:1.2;}
 .nearby-pin-dist{font-family:'IBM Plex Sans Arabic',sans-serif;font-size:10.5px;font-weight:700;}
+
+/* علامة السكينة قبل رقمها على الخريطة (11 نوفمبر) — the switch mark before its id on the map */
+.pin-sw{color:var(--sw);font-weight:900;margin-inline-end:2px;}

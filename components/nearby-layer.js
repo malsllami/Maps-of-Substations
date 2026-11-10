@@ -37,20 +37,22 @@
   function dist_(km) { return km < 1 ? Math.round(km * 1000) + ' م' : (Math.round(km * 10) / 10) + ' كم'; }
   /* withDist: القريبة — الرقم وتحته المسافة من المحطة المبحوث عنها (نموذج محمد 20 أكتوبر)؛ المغذي: الرقم وحده
    * withDist: nearby — the number with the distance from the searched station under it; feeder: the number alone */
+  /* رمز قبل الرقم: ⚡ تحويل، ◆ برتقالي للسكينة (11 نوفمبر، النموذج 1) — the mark before the id: ⚡ substation, an orange ◆ switch */
+  function glyph_(s) { return s.type === 'تحويل' ? '⚡' : Q.isSwitch(s) ? '<b class="pin-sw">◆</b>' : ''; }
   function pinIcon_(s, t, withDist) {
     const scale = t.tier === 0 ? 1 : t.tier === 1 ? 0.92 : 0.82, opacity = t.tier === 0 ? 1 : t.tier === 1 ? 0.92 : 0.72;
     const w = Math.round(52 * scale), h = Math.round((withDist ? 36 : 22) * scale);
     return global.L.divIcon({
       className: '',
       html: '<div class="nearby-pin-wrap" style="transform:scale(' + scale + ');opacity:' + opacity + '"><div class="nearby-pin-card' + (withDist ? ' has-dist' : '') + '" style="border-color:' + t.color + '">' +
-        '<span>' + (s.type === 'تحويل' ? '⚡' : '') + H.esc(s.id) + '</span>' + (withDist ? '<small class="nearby-pin-dist" style="color:' + t.color + '">' + dist_(s._dist) + '</small>' : '') + '</div>' +
+        '<span>' + glyph_(s) + H.esc(s.id) + '</span>' + (withDist ? '<small class="nearby-pin-dist" style="color:' + t.color + '">' + dist_(s._dist) + '</small>' : '') + '</div>' +
         '<div class="nearby-pin-tail" style="border-top-color:' + t.color + '"></div></div>',
       iconSize: [w, h + 6], iconAnchor: [w / 2, h + 6]
     });
   }
   function popup_(s, mapsUrl) {
     return '<div class="sb-inner nearby-popup"><div class="sb-data-row">' +
-      '<div class="sb-data-cell"><div class="cell-label">' + (s.type === 'تحويل' ? '⚡' : '🏭') + ' رقم المحطة</div><div class="cell-value">' + H.esc(s.id) + '</div></div>' +
+      '<div class="sb-data-cell"><div class="cell-label">' + (s.type === 'تحويل' ? '⚡ رقم المحطة' : Q.isSwitch(s) ? '◆ رقم السكينة' : '🏭 رقم المحطة') + '</div><div class="cell-value">' + H.esc(s.id) + '</div></div>' +
       (s.feeder ? '<div class="sb-data-cell"><div class="cell-label">🔌 المغذي</div><div class="cell-value">' + H.esc(s.feeder) + '</div></div>' : '') +
       '<div class="sb-data-cell"><div class="cell-label">📏 المسافة</div><div class="cell-value">' + s._dist.toFixed(2) + ' كم</div></div></div>' +
       '<div class="st-actions"><a href="' + H.esc(mapsUrl) + '" target="_blank" rel="noopener" class="st-btn primary">قوقل ماب 🧭</a>' +
@@ -112,7 +114,7 @@
       data.slice().sort(function (a, b) { return a._dist - b._dist; }).some(function (s) {
         const p = map.latLngToContainerPoint([s.lat, s.lng]);
         if (p.x < 0 || p.y < 0 || p.x > size.x || p.y > size.y) return false;
-        const w = String(s.id).length * 7.5 + (s.type === 'تحويل' ? 12 : 0) + 20, h = (mode === 'nearby' ? 36 : 22) + 6;
+        const w = String(s.id).length * 7.5 + (s.type === 'تحويل' || Q.isSwitch(s) ? 12 : 0) + 20, h = (mode === 'nearby' ? 36 : 22) + 6;
         const b = { x1: p.x - w / 2 - CARD_GAP, y1: p.y - h - CARD_GAP, x2: p.x + w / 2 + CARD_GAP, y2: p.y + CARD_GAP };
         if (boxes.some(function (o) { return b.x1 < o.x2 && b.x2 > o.x1 && b.y1 < o.y2 && b.y2 > o.y1; })) return false;
         boxes.push(b); show.push(s);

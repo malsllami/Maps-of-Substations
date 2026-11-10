@@ -372,3 +372,12 @@ body:not(.nav-full) .view-map .toolbar-btn[data-nearby],body:not(.nav-full) .vie
   color:var(--tb-fg);background:var(--tb-bg);border-color:var(--tb-line);}
 body:not(.nav-full) .view-map .toolbar-btn[data-nearby].active,body:not(.nav-full) .view-map .toolbar-btn[data-outage].active,body:not(.nav-full) .view-map .toolbar-btn[data-tool].active{
   background:var(--tb-fg);border-color:var(--tb-fg);color:var(--bg);}
+
+/* شرائح نوع البحث (11 نوفمبر، النموذج 1): «محطة» أو رمز السكينة، تظهر أثناء البحث فقط — the search kind chips, while searching only */
+.ssb-kinds{display:none;gap:6px;margin:0 0 6px;flex-wrap:wrap;}
+.ssb-kinds.show{display:flex;}
+.ssb-kind{height:30px;min-width:56px;padding:0 12px;border-radius:15px;border:1px solid var(--glass-line);background:var(--bg-elev);
+  color:var(--text-primary);font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;}
+.ssb-kind[data-kind=""].active{background:var(--teal);border-color:var(--teal);color:#fff;}
+.ssb-kind[data-kind]:not([data-kind=""]).active{background:var(--sw);border-color:var(--sw);color:#fff;}
+.ssb-kb[hidden]{display:none;}

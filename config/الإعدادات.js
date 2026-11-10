@@ -23,6 +23,12 @@
     /* بادئة كل التخزين المحلي — The prefix of all local storage */
     STORAGE_PREFIX: PREFIX,
 
+    /* رمزا السكاكين الهوائية (قرار محمد 11 نوفمبر: رمزان ثابتان، والعضو يكتب الرقم فقط) — صيغة الرقم الموحّدة «DB-150»،
+     * وتُحفظ في جدول محطات التوزيع؛ الرمز نفسه يميّزها عن المحطات (صيغة بيانات، لا قائمة أعمال متغيرة).
+     * The air-break switch prefixes (two fixed prefixes, the member types the number only); the unified id is «DB-150»,
+     * kept in the distribution sheet; the prefix itself tells it from a station (a data format, not a changing list). */
+    SWITCH_PREFIXES: ['DB', 'LBS'],
+
     /* مفاتيح localStorage — localStorage keys */
     STORAGE_KEYS: {
       SESSION: PREFIX + 'session',                       // الجلسة (التذكرة والدور والاسم) / the session

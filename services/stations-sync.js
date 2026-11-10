@@ -300,11 +300,18 @@
 
   // ===== البحث المحلي — Local search =====
   function norm_(v) { return TI.normalizeDigits(String(v == null ? '' : v).trim()).toUpperCase(); }
+  function SQ_() { return global.SecStationQuery; }
+  /* اسم العرض: النوع ثم الرقم ثم الحي — The display name: kind, id, district */
+  function displayName_(st) {
+    const kind = SQ_() ? SQ_().kindLabel(st) : st.type === 'تحويل' ? 'محطة تحويل' : 'محطة توزيع';
+    return kind + ' ' + st.id + (st.region ? ' — ' + st.region : '');
+  }
   /* ← { found:false } أو المحطة بشكل V1 (مع الاسم) — مطابقة تامة، ثم بالأحرف والأرقام فقط (لصق ملتصق بنص)، ثم بمفتاح
    * المطابقة TI.stationKey (المسافات والشرطة الطرفية لا تؤثر) */
   function search(query) {
     if (!copy) return { found: false };
-    const q = norm_(query);
+    // السكينة بأي صيغة مكتوبة («db 150») ← «DB-150» (11 نوفمبر) / a switch in any typed form ← its unified id
+    const q = norm_(SQ_() ? SQ_().canonicalId(query) : query);
     if (!q) return { found: false };
     const list = copy.stations;
     let st = null;
@@ -318,10 +325,14 @@
       const key = TI.stationKey(q);
       if (key) for (let i = 0; i < list.length && !st; i++) if (TI.stationKey(list[i].id) === key) st = list[i];
     }
+    if (!st && SQ_() && SQ_().switchParts(q)) {
+      // سكينة مسجّلة قبل التوحيد بصيغة أخرى («DB150») — a switch saved before unifying in another form
+      for (let i = 0; i < list.length && !st; i++) if (list[i].type !== 'تحويل' && SQ_().canonicalId(list[i].id) === q) st = list[i];
+    }
     if (!st) return { found: false };
     return {
       found: true, id: st.id, type: st.type, lat: st.lat, lng: st.lng, region: st.region || '', feeder: st.feeder || '',
-      name: (st.type === 'تحويل' ? 'محطة تحويل ' : 'محطة توزيع ') + st.id + (st.region ? ' — ' + st.region : '')
+      name: displayName_(st)
     };
   }
   function stations() { return copy ? copy.stations : null; }

@@ -72,5 +72,34 @@
     return { source: 'server', stations: res.stations.filter(function (s) { return !sameStation_(s, station); }).map(function (s) { return shape_(s, center); }) };
   }
 
-  global.SecStationQuery = { NEARBY_KM: NEARBY_KM, MAP_NEARBY_KM: MAP_NEARBY_KM, MAP_CLOSE_KM: MAP_CLOSE_KM, hasCoordinates: hasCoordinates, distanceKm: distanceKm, nearbyLocal: nearbyLocal, feederLocal: feederLocal, query: query };
+  // ===== السكاكين الهوائية (11 نوفمبر) — Air-break switches =====
+  // سكينة = صف في جدول التوزيع رقمه «رمز-رقم» (DB-150 / LBS-45). الصيغ المكتوبة يدويًا («db150»، «DB 150»، «DB - 150»،
+  // بأرقام عربية) تُوحَّد إلى «DB-150» في الإضافة والبحث، فلا تتعدد صيغ السكينة الواحدة.
+  // A switch = a distribution row whose id is «prefix-number»; hand-typed forms are unified to «DB-150» on add and search.
+  const SWITCH_PREFIXES = (global.SEC2_CONFIG && global.SEC2_CONFIG.SWITCH_PREFIXES) || [];
+  const SWITCH_RE = new RegExp('^(' + SWITCH_PREFIXES.join('|') + ')\\s*[-‐-―−]?\\s*([0-9]+)$');
+  function latinUpper_(v) {
+    return String(v == null ? '' : v).trim().toUpperCase()
+      .replace(/[٠-٩]/g, function (d) { return String(d.charCodeAt(0) - 1632); })
+      .replace(/[۰-۹]/g, function (d) { return String(d.charCodeAt(0) - 1776); });
+  }
+  /* ← { prefix, num } أو null — the prefix and number, or null */
+  function switchParts(id) {
+    if (!SWITCH_PREFIXES.length) return null;
+    const m = SWITCH_RE.exec(latinUpper_(id));
+    return m ? { prefix: m[1], num: m[2] } : null;
+  }
+  /* الرقم الموحّد من رمز ورقم — The unified id from a prefix and a number */
+  function switchId(prefix, num) { return prefix + '-' + latinUpper_(num).replace(/[^0-9]/g, ''); }
+  /* رقم السكينة بصيغته الموحّدة، وأي رقم آخر كما هو — A switch id unified, any other id as is */
+  function canonicalId(id) { const p = switchParts(id); return p ? switchId(p.prefix, p.num) : id; }
+  function isSwitch(s) { return !!s && s.type !== 'تحويل' && !!switchParts(s.id); }
+  /* النوع للعرض: 'switch' | 'sub' | 'dist' — The kind for display */
+  function kindOf(s) { return s && s.type === 'تحويل' ? 'sub' : isSwitch(s) ? 'switch' : 'dist'; }
+  function kindLabel(s) { const k = kindOf(s); return k === 'sub' ? 'محطة تحويل' : k === 'switch' ? 'سكينة هوائية' : 'محطة توزيع'; }
+
+  global.SecStationQuery = {
+    NEARBY_KM: NEARBY_KM, MAP_NEARBY_KM: MAP_NEARBY_KM, MAP_CLOSE_KM: MAP_CLOSE_KM, hasCoordinates: hasCoordinates, distanceKm: distanceKm, nearbyLocal: nearbyLocal, feederLocal: feederLocal, query: query,
+    SWITCH_PREFIXES: SWITCH_PREFIXES, switchParts: switchParts, switchId: switchId, canonicalId: canonicalId, isSwitch: isSwitch, kindOf: kindOf, kindLabel: kindLabel
+  };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -79,7 +79,7 @@
     const s = inCopy_(entry);
     if (!s) return entry;
     return Object.assign({}, entry, { lat: s.lat, lng: s.lng, region: s.region || '', feeder: s.feeder || '',
-      name: (s.type === 'تحويل' ? 'محطة تحويل ' : 'محطة توزيع ') + s.id + (s.region ? ' — ' + s.region : '') });
+      name: (global.SecStationQuery ? global.SecStationQuery.kindLabel(s) + ' ' : s.type === 'تحويل' ? 'محطة تحويل ' : 'محطة توزيع ') + s.id + (s.region ? ' — ' + s.region : '') });
   }
 
   const listeners = [];

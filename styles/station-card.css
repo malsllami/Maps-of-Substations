@@ -300,3 +300,7 @@ body.nav-full .station-sheet{display:none !important;}
 .station-sheet.is-explore .sheet-grid{display:flex;border:none;background:none;flex:0 1 auto;}
 .station-sheet.is-explore .sheet-grid .sg-region,.station-sheet.is-explore .sheet-grid .sg-feeder,.station-sheet.is-explore .sheet-grid .sg-k{display:none;}
 .station-sheet.is-explore .sheet-grid .sheet-title{align-items:flex-start;padding:0;}
+
+/* السكينة الهوائية (11 نوفمبر): برتقالي — the air-break switch: orange */
+.sheet-badge.is-switch{background:var(--c-sw-bg);color:var(--c-sw-fg);border:1px solid var(--c-sw-line);}
+.sheet-type.is-switch{color:var(--c-sw-fg);}

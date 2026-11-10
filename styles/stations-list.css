@@ -68,3 +68,6 @@
 .sl-list{flex:1;min-height:0;max-height:none;}
 .sl-body > .sl-state{flex-shrink:0;}
 @media (max-width:359px){ .sl-title{font-size:15px;} .sl-chip{padding:0 8px;} .sl-chip svg{display:none;} }
+
+/* السكينة الهوائية (11 نوفمبر) — the air-break switch */
+.sl-ic.is-switch{background:var(--c-sw-bg);color:var(--c-sw-fg);border:1px solid var(--c-sw-line);}

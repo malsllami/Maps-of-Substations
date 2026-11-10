@@ -32,7 +32,7 @@ importScripts('config/الإعدادات.js');
 // The build stamp: a browser detects a new version only when this file or the config changes; any other site file alone never
 // reaches devices. Not edited by hand: the pre-commit hook updates it on every commit with a site file; the gate verifies.
 const SW_RELEASE = 4; // (8 نوفمبر) رقم الإصدار المتسلسل = SEC2_RELEASE في config/النسخة.js، ويقرؤه الخادم من هنا / the release number, read by the server from here
-const SW_BUILD = '20261110-224155';
+const SW_BUILD = '20261111-005216';
 const CONFIG = self.SEC2_CONFIG;
 const CACHE_NAME = CONFIG.SHELL_CACHE_NAME;
 const NEXT_CACHE = CACHE_NAME + '-next'; // تثبيت نسخة جديدة دون لمس العاملة / installing a new version without touching the working one
