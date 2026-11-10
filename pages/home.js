@@ -42,6 +42,30 @@
     return;
   }
 
+  // (10 نوفمبر، خطة محمد) مكوّنات الرئيسية وملفاتها تُفحص قبل تركيب أي شيء (سجل 9 نوفمبر: «SecMoreMenu is not defined» على
+  // Android بشبكة 3g بعد 555 سطرًا). أي ناقص ← لا يُشغَّل شيء، ويُسجَّل الملف وحاله، ثم إعادة واحدة أو رسالة (load-guard.js).
+  // المشروطة في الكود (SecOfflineMapUI، SecOfflineMap، SecContactAdmin، SecLoadGuard) ليست هنا: الصفحة تعمل بدونها.
+  // The home page's components and their files are checked before mounting anything; a missing one ← nothing runs, the file
+  // and its state are logged, then one reload or a message. The optional ones (guarded in the code) aren't listed.
+  const REQUIRED_MODULES = [
+    ['SecSession', 'services/session.js'], ['SecStationsSync', 'services/stations-sync.js'], ['SecTiming', 'services/timing.js'],
+    ['SecApi', 'services/api-client.js'], ['SecDates', 'utils/dates.js'], ['SecStationQuery', 'utils/station-query.js'],
+    ['SecMyLocation', 'services/my-location.js'], ['SecAppHeader', 'components/app-header.js'], ['SecConnStatus', 'components/connection-status.js'],
+    ['SecGlobe', 'components/globe.js'], ['SecMapView', 'components/map-view.js'], ['SecDistrictLabels', 'components/district-labels.js'],
+    ['SecStationCard', 'components/station-card.js'], ['SecNearbyLayer', 'components/nearby-layer.js'], ['SecOutageSearch', 'components/outage-search.js'],
+    ['SecMapTools', 'components/map-tools.js'], ['SecNavView', 'components/navigation-view.js'], ['SecStationSearchBox', 'components/station-search-box.js'],
+    ['SecStationForm', 'components/add-edit-station.js'], ['SecDeleteStation', 'components/delete-station.js'], ['SecRecentStations', 'components/recent-stations.js'],
+    ['SecStatsCards', 'components/stats-cards.js'], ['SecStorageSection', 'components/storage-section.js'], ['SecProfileGate', 'components/profile-gate.js'],
+    ['SecBottomNav', 'components/bottom-nav.js'], ['SecStationDetails', 'components/station-details.js'], ['SecStationsList', 'components/stations-list.js'],
+    ['SecMoreMenu', 'components/more-menu.js']
+  ];
+  const missingModules = global.SecLoadGuard ? global.SecLoadGuard.missingModules(REQUIRED_MODULES)
+    : REQUIRED_MODULES.filter(function (r) { return !global[r[0]]; }); // صفحة قديمة بلا الحارس الجديد / an old page without the new guard
+  if (missingModules.length) {
+    if (global.SecLoadGuard && global.SecLoadGuard.handleMissing) global.SecLoadGuard.handleMissing(missingModules);
+    return;
+  }
+
   const MORPH_SETTLE_MS = 200, OUTAGE_AFTER_MS = 650;
   const MAP_GAP = 12; // هامش المساحة المرئية تحت ما يعلو الخريطة وفوق البطاقة / the visible area's margin under the top items and above the card
   const ME_ZOOM = 16; // تكبير الخريطة على موقع المستخدم / the map zoom on the user's location

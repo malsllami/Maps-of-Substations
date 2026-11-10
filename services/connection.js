@@ -147,6 +147,11 @@
       body: JSON.stringify({ action: 'logClientError', errors: batch })
     }).then(function (res) {
       if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json().catch(function () { return null; });
+    }).then(function (json) {
+      // (10 نوفمبر) الخادم لا يكتب بلا قفل: «مشغول» ← تعود للطابور بنفس أرقامها وتُرسل لاحقًا بلا تكرار
+      // The server never writes without its lock: «busy» ← back to the queue with the same ids, sent later without duplicates
+      if (json && json.busy) throw new Error('busy');
     }).catch(function () {
       writeQueue_(batch.concat(readQueue_())); // فشل الإرسال — تعود للطابور بنفس أرقامها / send failed — back to the queue with the same ids
     }).finally(function () { flushing = false; });
