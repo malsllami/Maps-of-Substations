@@ -149,6 +149,26 @@
     });
   }
 
+  // ===== (11 نوفمبر) نسخة هذا الجهاز لـ«حسابي» — this device's version for «My account» =====
+  // «حدّثت في» = أول مرة تعمل الصفحة بنسخة يتحكم بها عامل خدمة بنفس الرقم (إثبات أن التحديث اشتغل فعلًا، كسجل الاستخدام).
+  // «updated on» = the first time the page runs a version whose controlling worker has the same stamp (proof the update runs).
+  function sinceKey_() { return global.SEC2_CONFIG && global.SEC2_CONFIG.STORAGE_KEYS.VERSION_SINCE; }
+  function readSince_() { try { return JSON.parse(global.localStorage.getItem(sinceKey_()) || 'null'); } catch (e) { return null; } }
+  /* ← Promise<{ release, build, since }> — since: ميلي ثانية أو null / ms or null */
+  function versionInfo() {
+    const page = global.SEC2_BUILD || null, release = global.SEC2_RELEASE || null;
+    return activeBuild().then(function (active) {
+      let s = readSince_();
+      if (page && active === page && !(s && s.build === page)) {
+        s = { build: page, at: Date.now() };
+        try { global.localStorage.setItem(sinceKey_(), JSON.stringify(s)); } catch (e) { /* محظور ← لا تاريخ / blocked ← no date */ }
+      }
+      return { release: release, build: page, since: s && s.build === page ? s.at : null };
+    }, function () { return { release: release, build: page, since: null }; });
+  }
+  // يُسجَّل عند كل فتح بعد اكتمال الصفحة (أي صفحة) — recorded on every open once the page loads (any page)
+  if (sw && typeof global.addEventListener === 'function') global.addEventListener('load', function () { global.setTimeout(function () { versionInfo(); }, 1500); });
+
   // تسجيل تلقائي بعد اكتمال الصفحة حتى لا ينافس تحميلها (V1) — auto-register after the page loads so it never competes with it (V1)
   if (sw && global.document && typeof global.addEventListener === 'function') {
     if (global.document.readyState === 'complete') register(); else global.addEventListener('load', function () { register(); });
@@ -192,7 +212,7 @@
   global.SecPWA = {
     register: register, checkForUpdate: checkForUpdate, applyUpdate: applyUpdate, onChange: onChange,
     activeBuild: activeBuild, waitingBuild: waitingBuild, pageBuild: function () { return global.SEC2_BUILD || null; },
-    waitingRelease: waitingRelease, pageRelease: function () { return global.SEC2_RELEASE || null; },
+    waitingRelease: waitingRelease, pageRelease: function () { return global.SEC2_RELEASE || null; }, versionInfo: versionInfo,
     state: function () { return state; },
     installMode: installMode, promptInstall: promptInstall, isStandalone: isStandalone, isIOS: isIOS
   };

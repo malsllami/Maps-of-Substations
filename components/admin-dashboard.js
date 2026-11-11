@@ -69,6 +69,25 @@
 
   // ===== أدوات العرض — Display helpers =====
   function num_(v) { return typeof v === 'number' && isFinite(v) ? v : null; }
+  /* (11 نوفمبر، تصميم محمد 1) تقدّم التحديث: شريط حتى النسبة مع علامة الهدف، وثلاث خانات (حدّث، الباقي للهدف، الإجبار)
+   * The update progress (Mohammed's design 1): a bar to the share with the target mark, and three cells */
+  function updateCard_(u) {
+    if (!u || !u.build) return '';
+    const pct = Math.max(0, Math.min(100, num_(u.pct) || 0)), target = num_(u.target) || 90, reached = pct >= target;
+    const daysLeft = u.forceAt ? Math.max(0, Math.ceil((u.forceAt - Date.now()) / 86400000)) : null;
+    const force = u.forced ? 'تم الإجبار' : daysLeft === null ? '—' : daysLeft === 0 ? 'اليوم' : 'بعد ' + daysLeft + (daysLeft === 1 ? ' يوم' : ' أيام');
+    const m = /^(\d{4})(\d{2})(\d{2})/.exec(u.build), built = m ? m[1] + '-' + m[2] + '-' + m[3] : '';
+    return '<div class="ops-card upd-card' + (reached || u.forced ? ' is-done' : '') + '" data-role="update-progress"><div class="ops-card-title">🔄 تقدّم التحديث — ' +
+        (u.release ? 'الإصدار ' + esc(String(u.release)) : 'آخر نسخة') + (built ? ' <small>(' + esc(built) + ')</small>' : '') + '</div>' +
+      '<div class="upd-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '"><div class="upd-fill" style="width:' + pct + '%"></div>' +
+        '<div class="upd-target" style="inset-inline-start:' + target + '%"><span>' + target + '%</span></div><b class="upd-pct">' + pct + '%</b></div>' +
+      '<div class="upd-cells"><div><span>حدّث</span><b dir="ltr">' + show_(u.updated) + ' / ' + show_(u.active) + '</b></div>' +
+        '<div><span>باقي لبلوغ <bdi>' + target + '%</bdi></span><b>' + (reached ? 'تم ✓' : show_(u.needed) + ' عضو') + '</b></div>' +
+        '<div><span>الإجبار</span><b>' + esc(force) + '</b></div></div>' +
+      '<div class="upd-note">' + (u.forceAt ? 'الإجبار ' + (u.forced ? 'منذ ' : 'في ') + esc(D.dualDateTime(new Date(u.forceAt))) + ' أو عند بلوغ ' + target + '% — أيهما أسبق' : '') +
+        (u.graceStartAt ? ' — بدأت مهلة منع الكتابة من النسخ الأقدم' : '') + '. الأعضاء النشطون = من استخدم الموقع خلال آخر 7 أيام' +
+        (u.checkedAt ? '، آخر حساب ' + esc(D.relativeTime(u.checkedAt)) : '') + '.</div></div>';
+  }
   function show_(v) { const n = num_(v); return n === null ? '—' : String(n); }
   function pct_(part, whole) { const a = num_(part), b = num_(whole); return a === null || !b ? null : Math.min(100, Math.round(a / b * 100)); }
   /* لون المؤشر: quota (الأعلى أسوأ) أو quality (الأعلى أفضل) — V1 */
@@ -217,6 +236,7 @@
             '<div class="ops-pill ops-pill-adds"><span class="ops-pill-icon">' + ICONS.plus + '</span><b>' + show_(d.additionsToday) + '</b><span>إضافات اليوم</span></div>' +
             '<div class="ops-pill ops-pill-edits"><span class="ops-pill-icon">' + ICONS.pencil + '</span><b>' + show_(d.editsToday) + '</b><span>تعديلات اليوم</span></div>' +
           '</div></div>' +
+        updateCard_(d.updateProgress) +
         // طلبات اليوم وعمليات الخصائص وأكثر 5 كما هي (قرار محمد) — today's requests, property operations and top 5 as they were
         '<div class="ops-status-card" data-role="quota"><div class="ops-status-ring">' + ring_(quota, 'quota', 84) + '</div><div class="ops-status-info">' +
           '<div class="ops-status-title">⚡ طلبات اليوم على السكربت</div><div class="ops-status-count-line"><b class="ops-status-count">' + show_(d.dailyRequests) + '</b> من <b class="ops-status-count">' + show_(d.dailyRequestLimit) + '</b> طلب</div>' +

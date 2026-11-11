@@ -117,3 +117,14 @@ select.input-base{cursor:pointer;}
 }
 /* صورة العضو بإطارها الذهبي والخوذة خارجه (15 أكتوبر): بلا قص دائري ولا إطار إضافي — the avatar has its own frame, the helmet pops out: no circular crop */
 .mp-id .avatar{border:none;background:transparent;border-radius:0;overflow:visible;}
+
+/* (11 نوفمبر) «نسختك من التطبيق» — your app version */
+.mp-version[hidden]{display:none;}
+.mp-ver-row{font-size:12px;color:var(--text-secondary);line-height:1.7;}
+.mp-ver-row b{color:var(--text-primary);font-weight:700;}
+/* أخضر على أحدث إصدار، وبرتقالي إذا وُجد أحدث ولم يحدّث (طلب محمد) — green on the latest, orange while a newer one waits */
+.mp-version.is-latest{border-color:var(--c-dist-line);background:var(--c-dist-bg);}
+.mp-version.is-latest .mp-ic,.mp-version.is-latest .mp-ver-note{color:var(--c-dist-fg);}
+.mp-version.is-old{border-color:var(--c-sw-line);background:var(--c-sw-bg);}
+.mp-version.is-old .mp-ic,.mp-version.is-old .mp-ver-note{color:var(--c-sw-fg);}
+.mp-ver-note{font-size:12px;font-weight:700;}

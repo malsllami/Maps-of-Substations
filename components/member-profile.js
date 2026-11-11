@@ -60,6 +60,43 @@
    *   onLoaded(res)، avatarSrc }
    * يُرجع { load() → Promise<res|null>، save() → Promise<bool>، destroy() }
    */
+  /* «نسختك من التطبيق» من الجهاز نفسه بلا طلب للخادم — «your app version» from the device itself, no server request */
+  function buildDate_(build) {
+    const m = /^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})/.exec(build || '');
+    return m ? new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4] - 3, +m[5], +m[6])) : null; // الختم بتوقيت الرياض / the stamp is Riyadh time
+  }
+  // (11 نوفمبر، طلب محمد) أخضر على أحدث إصدار، وبرتقالي إذا وُجد أحدث ولم يحدّث الجهاز بعد (من الخادم أو تحديث نزل وينتظر)،
+  // ويعود أخضر بعد التحديث — green on the latest release, orange while a newer one exists (server or a waiting update)
+  const ver = { release: 0, latest: 0, waiting: 0 };
+  function paintVersion_(root, q) {
+    const box = q(root, 'version'), P = global.SecPWA;
+    if (!box || !ver.release) return;
+    const newest = Math.max(ver.latest || 0, ver.waiting || 0), old = newest > ver.release;
+    box.classList.toggle('is-old', old); box.classList.toggle('is-latest', !old);
+    q(root, 'ver-note').textContent = old ? 'يوجد إصدار أحدث (الإصدار ' + newest + ') — أغلق التطبيق وافتحه ليتحدث' : 'أحدث إصدار';
+  }
+  /* تحديث نزل وينتظر: يُحسب فقط إذا كان رقم إصداره أعلى (لا التثبيت الأول) — a waiting update counts only with a higher release */
+  function checkWaiting_(root, q) {
+    const P = global.SecPWA;
+    if (!P || !P.waitingRelease) return;
+    P.waitingRelease().then(function (r) { ver.waiting = Number(r) || 0; paintVersion_(root, q); }, function () { /* لا شيء / nothing */ });
+  }
+  function showVersion_(root, q) {
+    const P = global.SecPWA, box = q(root, 'version');
+    if (!P || !P.versionInfo || !box) return;
+    if (P.onChange) P.onChange(function (st) { if (st && st.status === 'update-ready') checkWaiting_(root, q); });
+    P.versionInfo().then(function (v) {
+      if (!v || !v.release) return;
+      ver.release = Number(v.release) || 0;
+      paintVersion_(root, q); checkWaiting_(root, q);
+      q(root, 'ver-release').textContent = 'الإصدار ' + v.release;
+      const built = buildDate_(v.build);
+      q(root, 'ver-built').textContent = built ? D.dualDateTime(built) : '—';
+      q(root, 'ver-since').textContent = v.since ? D.dualDateTime(new Date(v.since)) : 'بعد إعادة فتح التطبيق';
+      box.hidden = false;
+    }).catch(function () { /* لا يمس «حسابي» / never touches the page */ });
+  }
+
   function mount(slots, opts) {
     const o = Object.assign({ avatarSrc: 'assets/member-avatar.webp' }, opts || {});
 
@@ -70,8 +107,13 @@
       '<div class="mp-id"><div class="avatar"><img src="' + o.avatarSrc + '" alt="أيقونة العضو"></div>' +
         '<div class="mp-id-text"><h2 data-role="name">...</h2><div class="mp-phone"><span class="mp-ic">' + ICONS.phone + '</span><span data-role="phone">-</span></div>' +
         '<span class="role-badge"><span class="mp-ic">' + ICONS.badge + '</span><span data-role="type"></span></span></div></div>' +
-      '<div class="mp-login"><span class="mp-ic">' + ICONS.clock + '</span><div><div class="mp-login-label">آخر تسجيل دخول</div><div class="mp-login-value" data-role="last-login">—</div></div></div>';
+      '<div class="mp-login"><span class="mp-ic">' + ICONS.clock + '</span><div><div class="mp-login-label">آخر تسجيل دخول</div><div class="mp-login-value" data-role="last-login">—</div></div></div>' +
+      // (11 نوفمبر، طلب محمد) نسخة هذا الجهاز: رقم الإصدار، وتاريخ صدوره، ومتى حدّث العضو — this device's release, its date, when the member updated
+      '<div class="mp-login mp-version" data-role="version" hidden><span class="mp-ic">' + ICONS.badge + '</span><div><div class="mp-login-label">نسختك من التطبيق</div>' +
+        '<div class="mp-login-value"><span data-role="ver-release"></span> <span class="mp-ver-note" data-role="ver-note"></span></div><div class="mp-ver-row"><span>صدر التحديث:</span> <b data-role="ver-built">—</b></div>' +
+        '<div class="mp-ver-row"><span>حدّثت هذا الجهاز:</span> <b data-role="ver-since">—</b></div></div></div>';
     const q = function (root, r) { return root.querySelector('[data-role="' + r + '"]'); };
+    showVersion_(slots.profile, q);
 
     // ===== المساهمات — Contributions =====
     slots.contributions.innerHTML =
@@ -188,6 +230,7 @@
       q(slots.profile, 'phone').textContent = res.phone || '';
       q(slots.profile, 'type').textContent = res.memberType || 'عضو';
       q(slots.profile, 'last-login').textContent = res.lastLogin ? D.dualDateTime(new Date(res.lastLogin)) : MSG.FIRST_LOGIN;
+      if (res.latestRelease) { ver.latest = Number(res.latestRelease) || 0; paintVersion_(slots.profile, q); } // (11 نوفمبر) لون النسخة / the version color
       if (res.stats) {
         q(slots.contributions, 'total').textContent = String(res.stats.total);
         q(slots.contributions, 'adds').textContent = String(res.stats.additions);
