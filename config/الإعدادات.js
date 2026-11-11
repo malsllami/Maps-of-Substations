@@ -40,7 +40,7 @@
       NAV_ROTATE: PREFIX + 'nav-rotate',                 // دوران الخريطة مع السير أو الشمال لأعلى / map rotation mode
       MAP_STATUS_HIDDEN: PREFIX + 'map-status-hidden',   // أخفى المستخدم بطاقة حالة النسخة في الرئيسية ('1') / the user hid the home status card
       MAP_TOOLS_FOLDED: PREFIX + 'map-tools-folded',     // طوى المستخدم صف الأدوات بأيقونة الضبط ('1') — مفتاح 22 أكتوبر / the user folded the tools row
-      SEARCH_KEYBOARD: PREFIX + 'search-keyboard',       // لوحة مفاتيح البحث: 'abc' للحروف، والافتراضي الأرقام — 22 أكتوبر / the search keyboard: 'abc' letters, numbers by default
+      SEARCH_KEYBOARD: PREFIX + 'search-keyboard',       // (قديم) لوحة البحث المحفوظة — لم تعد تُستخدم منذ 11 نوفمبر (الافتراضي دائمًا الأرقام)، ويُبقى المفتاح لأن «مسح البيانات المؤقتة» يعرفه / (legacy) no longer used; kept as the clear button knows it
       MAP_TOOLS_HIDDEN: PREFIX + 'map-tools-hidden',     // أخفى المستخدم صف أدوات الخريطة ('1') / the user hid the map tools row
       LAST_BACKEND_OK: PREFIX + 'last-backend-ok',       // وقت آخر رد سليم من الخادم / the last valid server reply time
       PENDING_ERRORS: PREFIX + 'pending-errors',         // طابور أخطاء المتصفح قبل إرسالها / the browser error queue

@@ -7,6 +7,8 @@
  *   «حفظ المحطة» بشريط تقدّم، ثم «✓ تمت إضافة المحطة بنجاح» + «حسنًا».
  * - (11 نوفمبر) نوع ثالث «سكينة هوائية»: زرّا الرمز (DB / LBS) والرقم أرقام فقط ← «DB-150»، ثم المغذي (اختياري) والمنطقة
  *   (إلزامية) والموقع؛ تُحفظ صفًا في جدول التوزيع (النوع «توزيع») فتُعدَّل وتُحذف وتُزامَن مثل المحطات.
+ * - (11 نوفمبر، قرار محمد) تعديل السكينة كامل للجميع: الرمز (DB / LBS) والرقم والمنطقة والمغذي والموقع؛ تغيّر الرقم يُرسل
+ *   newStationId ويبلغ الصفحة بالرقم القديم (onSaved(station, 'edit', { oldId })). المحطات لا يتغير رقمها.
  * - التعديل: المغذي والمنطقة (للتوزيع)، الإحداثيتان، الموقع الحالي، اللصق، المعاينة، السبب، «حفظ التعديل» و«إلغاء».
  * - الحقول تقبل الأرقام العربية والإنجليزية (text-input). لا كتابة والجهاز بلا إنترنت — النموذج يبقى بما فيه.
  * - أثناء الحفظ: منع مغادرة الصفحة وإبلاغ الصفحة (onSavingChange) لتعطيل التنقل، وإعادة الإرسال بنفس مفتاح العملية
@@ -109,6 +111,10 @@
   function editHtml_() {
     return '<div class="sb-inner"><div class="sf-form" data-role="form">' +
         '<div class="add-station-error" data-role="error" role="alert"></div>' +
+        // (11 نوفمبر) السكينة فقط: الرمز والرقم قابلان للتعديل — switches only: the prefix and number are editable
+        '<div class="sf-sw-edit" data-role="sw" hidden><div><label class="form-field-label">الرمز</label><div class="add-station-type sw-prefix">' +
+          Q.SWITCH_PREFIXES.map(function (p, i) { return '<button class="sw-btn' + (i ? '' : ' active') + '" type="button" data-prefix="' + p + '">' + p + '</button>'; }).join('') + '</div></div>' +
+          '<div><label class="form-field-label">رقم السكينة</label>' + input_('swnum', 'مثال: 150', ' inputmode="numeric"') + '</div></div>' +
         '<div class="sf-dist-edit" data-role="dist">' +
           '<div><label class="form-field-label">المغذي</label>' + input_('feeder', 'مثال: SNB38') + '</div>' +
           '<div><label class="form-field-label">المنطقة</label>' + input_('region', 'مثال: القرينية') + '</div></div>' +
@@ -132,6 +138,10 @@
       TI.code(f('id'), 24);
       // السكينة: أرقام فقط (الرمز من الزرّين) — the switch: digits only (the prefix comes from the buttons)
       f('id').addEventListener('input', function () { if (form.type !== SWITCH) return; const d = f('id').value.replace(/[^0-9]/g, ''); if (d !== f('id').value) f('id').value = d; });
+    }
+    if (mode === 'edit') { // رقم السكينة: أرقام فقط / the switch number: digits only
+      TI.digits(f('swnum'));
+      f('swnum').addEventListener('input', function () { const d = f('swnum').value.replace(/[^0-9]/g, ''); if (d !== f('swnum').value) f('swnum').value = d; });
     }
     TI.upper(f('feeder')); TI.digits(f('region')); TI.digits(f('reason'));
     TI.coord(f('lat')); TI.coord(f('lng')); TI.coordPair(f('paste'));
@@ -271,11 +281,23 @@
       return { action: 'addNewStation', station: { id: id, type: type, feeder: feeder, region: region, lat: at.lat, lng: at.lng },
         payload: { stationId: id, type: type, lat: at.lat, lng: at.lng, feeder: dist ? feeder : undefined, region: dist ? region : undefined, reason: reason } };
     }
-    if (!at) return MSG.BAD_COORDS;
     const s = form.station;
+    // السكينة: الرمز والرقم من النموذج؛ تغيّرهما ← newStationId — a switch: prefix and number from the form; changed ← newStationId
+    const isSw = Q.isSwitch(s);
+    let newId = '';
+    if (isSw) {
+      const num = TI.normalizeDigits(form.f('swnum').value).replace(/[^0-9]/g, '');
+      if (!num) return MSG.SWITCH_ID_REQUIRED;
+      const want = Q.switchId(form.prefix, num);
+      if (want !== Q.canonicalId(s.id)) newId = want;
+      if (!region && !s.region) return MSG.REGION_REQUIRED;
+    }
+    if (!at) return MSG.BAD_COORDS;
     // الخادم يُبقي المغذي/المنطقة إن أُرسلا فارغين، فالبطاقة تعرض الحقيقة نفسها / the server keeps an empty feeder/region, so does the card
-    return { action: 'updateCoordinates', station: Object.assign({}, s, { lat: at.lat, lng: at.lng, feeder: dist ? (feeder || s.feeder || '') : s.feeder, region: dist ? (region || s.region || '') : s.region }),
+    const v = { action: 'updateCoordinates', station: Object.assign({}, s, { id: newId || s.id, lat: at.lat, lng: at.lng, feeder: dist ? (feeder || s.feeder || '') : s.feeder, region: dist ? (region || s.region || '') : s.region }),
       payload: { stationId: s.id, type: s.type, lat: at.lat, lng: at.lng, method: 'يدوي/GPS', feeder: dist ? feeder : undefined, region: dist ? region : undefined, reason: reason } };
+    if (newId) { v.payload.newStationId = newId; v.oldId = s.id; }
+    return v;
   }
 
   function onBeforeUnload_(e) { e.preventDefault(); e.returnValue = MSG.LEAVE; return MSG.LEAVE; }
@@ -317,7 +339,7 @@
       const res = await global.SecApi.call(v.action, v.payload, { phone: true, onRetry: bar.retry });
       if (!res || !res.success) throw new Error((res && res.error) || MSG.FAILED);
       bar.done();
-      try { if (deps.onSaved) deps.onSaved(v.station, form.mode); } catch (e) { /* الحفظ تم؛ خطأ الصفحة لا يُظهره فاشلًا / saved; a page error doesn't make it look failed */ }
+      try { if (deps.onSaved) deps.onSaved(v.station, form.mode, v.oldId ? { oldId: v.oldId } : undefined); } catch (e) { /* الحفظ تم؛ خطأ الصفحة لا يُظهره فاشلًا / saved; a page error doesn't make it look failed */ }
       // (الإصدار 3) يظهر في «حسابي» فورًا من ذاكرة الجهاز / shows in «My account» at once from the device
       try { if (global.SecProfileCache) global.SecProfileCache.recordSave(v.station, form.mode); } catch (e) { /* لا يمس الحفظ / never touches the save */ }
       await new Promise(function (r) { global.setTimeout(r, 300); });
@@ -336,7 +358,7 @@
   }
 
   function clearFields_(form) {
-    ['id', 'feeder', 'region', 'lat', 'lng', 'paste', 'reason'].forEach(function (n) { const i = form.f(n); if (i) i.value = ''; });
+    ['id', 'swnum', 'feeder', 'region', 'lat', 'lng', 'paste', 'reason'].forEach(function (n) { const i = form.f(n); if (i) i.value = ''; });
     error_(form, '');
     form.r('form').hidden = false; form.r('success').hidden = true;
   }
@@ -374,8 +396,11 @@
     close();
     clearFields_(edit);
     edit.station = Object.assign({}, station);
-    edit.r('title').textContent = 'تعديل: ' + station.id;
+    edit.r('title').textContent = (Q.isSwitch(station) ? 'تعديل السكينة: ' : 'تعديل: ') + station.id;
     edit.r('dist').hidden = station.type !== 'توزيع';
+    const sp = Q.switchParts(station.id); // السكينة: الرمز والرقم معبّآن — a switch: prefix and number filled
+    edit.r('sw').hidden = !(sp && station.type !== 'تحويل');
+    if (sp) { setPrefix_(edit, sp.prefix); edit.f('swnum').value = sp.num; }
     edit.f('feeder').value = station.feeder || '';
     edit.f('region').value = station.region || '';
     if (Q.hasCoordinates(station)) { edit.f('lat').value = Number(station.lat).toFixed(6); edit.f('lng').value = Number(station.lng).toFixed(6); }

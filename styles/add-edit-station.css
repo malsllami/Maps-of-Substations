@@ -107,6 +107,8 @@
 .sf-col{flex:1;min-width:0;}
 .sf-coords{margin-bottom:14px;}
 .sf-dist-edit{display:flex;flex-direction:column;gap:18px;}
+.sf-sw-edit{display:flex;flex-direction:column;gap:18px;} /* (11 نوفمبر) رمز السكينة ورقمها في التعديل / the switch prefix and number on edit */
+.sf-sw-edit[hidden]{display:none;}
 .sf-progress-label{text-align:center;font-size:11px;color:var(--text-secondary);margin-top:4px;font-family:'JetBrains Mono',monospace;}
 .sf-success{text-align:center;padding:10px 0;}
 .sf-success-text{color:var(--teal);font-weight:700;font-size:14px;margin-bottom:10px;}

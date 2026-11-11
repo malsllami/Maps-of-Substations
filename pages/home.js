@@ -361,9 +361,15 @@
   // ===== الإضافة والتعديل — Add and edit =====
   SecStationForm.init({
     isLoggedIn: loggedIn,
-    onSaved: function (s, mode) {
+    onSaved: function (s, mode, info) {
+      // (11 نوفمبر) تغيير رقم سكينة: يُحذف القديم من نسخة الجهاز قبل إضافة الجديد، والبطاقة المفتوحة بالقديم تنتقل للجديد
+      // a switch id change: the old id leaves the device copy before the new one is added; a card open on the old id moves on
+      const oldId = info && info.oldId;
+      // كلاهما يغيّر النسخة فورًا، والحفظ بالترتيب (serial) — both change the copy at once; saving runs in order
+      if (oldId) SYNC.remove({ id: oldId, type: s.type }).catch(function () { /* تتزامن لاحقًا / syncs later */ });
       SYNC.upsert(s).catch(function () { /* تتزامن لاحقًا / syncs later */ });
-      if (mode === 'edit' && current && String(current.id).toUpperCase() === String(s.id).toUpperCase() && current.type === s.type) {
+      const openId = oldId || s.id;
+      if (mode === 'edit' && current && String(current.id).toUpperCase() === String(openId).toUpperCase() && current.type === s.type) {
         current = Object.assign({}, current, s); // يحدّث المغذي والمنطقة والإحداثيات في البطاقة المفتوحة (إصلاح بند V1 رقم 3)
         showCard_(current); if (view) view.showStation(current);
         if (SecNavView.isActive()) SecNavView.updateTarget(current);

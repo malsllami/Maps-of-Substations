@@ -10,8 +10,10 @@
  * - غير موجودة ← البطاقة: «المحطة غير موجودة» (أو الصياغة غير القاطعة عند تعذّر التأكد)، رقم المحطة، «هل تريد إضافتها؟»،
  *   «+ إضافة محطة» (onAdd بالرقم) و«🔍 بحث آخر» (يمسح الحقل ويركّز عليه).
  * - التحقق بالخلفية غيّر الإحداثيات ← onUpdated (الصفحة تنقل العلامة/الوجهة).
- * - (11 نوفمبر) شرائح فوق المربع: «محطة» (افتراضي) أو رمز سكينة (DB / LBS) — مع الرمز يكتب العضو الرقم فقط ويُبحث عن
- *   «DB-150» بصيغته الموحّدة، فلا تختلف النتيجة باختلاف طريقة الكتابة. تظهر الشرائح أثناء البحث فقط.
+ * - (11 نوفمبر، تصميم محمد) لوحة بصفّين فوق المربع بأوزان متساوية — العناوين «محطات توزيع | سكينة هوائية | محطات تحويل»
+ *   تشرح الصف الثاني «محطة | DB | LBS | ABC» ويتلوّن عنوان الاختيار:
+ *   محطة = لوحة الأرقام (الافتراضي دائمًا، بلا حفظ)، DB/LBS = الرقم فقط ← «DB-150»، ABC = لوحة الحروف لرموز التحويل.
+ *   زر الحروف خرج من المربع فبقي للإدخال فقط. تظهر اللوحة أثناء البحث فقط، و× يعيدها لـ«محطة».
  * لا منطق تحميل ولا مزامنة هنا: البحث كله في services/station-search.js.
  * V2: كل نص من الاستعلام أو الخادم يُكتب نصًا؛ بحث واحد في أي لحظة لكل مربع؛ مستمعات تُزال بـ destroy.
  *
@@ -32,6 +34,14 @@
   const NOFILL = ' type="text" inputmode="text" autocomplete="new-password" data-lpignore="true" data-form-type="other" autocorrect="off" autocapitalize="off" spellcheck="false"';
   // أيقونة الضبط في طرف الشريط تفتح أدوات الخريطة (opts.onTools) — the sliders icon at the bar's end opens the map tools
   const TOOLS_SVG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="15" cy="7" r="2.5" fill="currentColor"/><circle cx="9" cy="17" r="2.5" fill="currentColor"/></svg>';
+  // أيقونات لوحة النوع (11 نوفمبر) — the kind panel icons
+  const KIND_SVG = {
+    dist: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M12 7.5v4M12 11.5l-5.5 5.2M12 11.5l5.5 5.2"/></svg>',
+    sw: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 17h3M19 17h3"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/><path d="M8.5 15.5 17 7"/></svg>',
+    sub: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"/></svg>',
+    pin: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+    kb: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2.5"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg>'
+  };
   const CLOSE_SVG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>';
   const PROGRESS = '<div class="search-progress-track"><div class="search-progress-fill" data-role="fill"></div></div><div class="search-progress-label"><span>جاري البحث عن المحطة...</span><span data-role="pct">0%</span></div>';
 
@@ -45,17 +55,19 @@
   function mount(container, opts) {
     const o = Object.assign({ variant: 'lens' }, opts || {});
     const lens = o.variant === 'lens';
-    let busy = false, progressTimer = null, prefix = ''; // '' = محطة، أو رمز السكينة / '' = a station, or the switch prefix
-    const CHIPS = '<div class="ssb-kinds" data-role="kinds" role="radiogroup" aria-label="نوع البحث">' +
-      [''].concat(Q.SWITCH_PREFIXES).map(function (p) {
-        return '<button type="button" class="ssb-kind' + (p ? '' : ' active') + '" data-kind="' + p + '" role="radio" aria-checked="' + (p ? 'false' : 'true') + '">' + (p || 'محطة') + '</button>';
-      }).join('') + '</div>';
-    container.innerHTML = CHIPS + (lens
+    let busy = false, progressTimer = null, mode = 'station'; // station | DB | LBS | abc
+    const PANEL = '<div class="ssb-panel" data-role="kinds" role="radiogroup" aria-label="نوع البحث">' +
+      '<span class="ssb-head" data-head="station">' + KIND_SVG.dist + '<span>محطات توزيع</span></span>' +
+      '<span class="ssb-head ssb-head-sw" data-head="sw">' + KIND_SVG.sw + '<span>سكينة هوائية</span></span>' +
+      '<span class="ssb-head" data-head="abc">' + KIND_SVG.sub + '<span>محطات تحويل</span></span>' +
+      '<button type="button" class="ssb-mode" data-mode="station" role="radio">' + KIND_SVG.pin + '<span>محطة</span></button>' +
+      Q.SWITCH_PREFIXES.map(function (x) { return '<button type="button" class="ssb-mode ssb-sw" data-mode="' + x + '" role="radio" dir="ltr">' + x + '</button>'; }).join('') +
+      '<button type="button" class="ssb-mode" data-mode="abc" role="radio" dir="ltr">' + KIND_SVG.kb + '<span>ABC</span></button></div>';
+    container.innerHTML = PANEL + (lens
       ? '<div class="search-lens" data-role="box">' + LENS_SVG + '<input data-role="input" placeholder="مثال: 39070 أو ABN" aria-label="رقم المحطة"' + NOFILL + '></div>' +
         '<div class="search-hint" data-role="hint" role="status"></div><div class="search-progress" data-role="progress">' + PROGRESS + '</div>'
       : '<div class="search-and-back-row show"><div class="station-search-bar" data-role="box"><span class="ssb-icon" data-act="search" role="button" aria-label="بحث">' + BAR_SVG + '</span>' +
         '<input data-role="input" placeholder="ابحث عن محطة أخرى..." aria-label="رقم المحطة"' + NOFILL + '>' +
-        '<button type="button" class="ssb-kb" data-act="kb" aria-label="تبديل لوحة المفاتيح بين الأرقام والحروف"></button>' +
         (o.onClose ? '<button type="button" class="ssb-close" data-act="close" title="إغلاق البحث والرجوع للوضع العادي" aria-label="إغلاق البحث">' + CLOSE_SVG + '</button>' : '') +
         (o.onTools ? '<button type="button" class="ssb-tools" data-act="tools" title="أدوات الخريطة: قريب، مغذي، أعطال، القياس" aria-label="أدوات الخريطة" aria-expanded="false">' + TOOLS_SVG + '</button>' : '') +
         '</div></div>' +
@@ -66,36 +78,21 @@
     TI.code(input, MAX_LEN);
     const hintCls = lens ? 'search-hint' : 'station-search-hint';
 
-    // ===== لوحة مفاتيح البحث: أرقام افتراضيًا، وزر «ABC / 123» يبدّل للحروف (طلب محمد 22 أكتوبر) =====
-    // صفحة الويب لا تفتح لوحة الأرقام التي فيها زر الحروف (مثل قوقل شيت)، فالتبديل بزر بجانب الحقل، ويُحفظ آخر اختيار.
-    // The search keyboard: numbers by default, an «ABC / 123» button switches to letters; a web page can't open the native
-    // numbers-with-letters pad, so a button beside the field switches, and the last choice is kept.
-    const KB_KEY = global.SEC2_CONFIG.STORAGE_KEYS.SEARCH_KEYBOARD, kbBtn = r('box').querySelector('[data-act="kb"]');
-    function kbLetters_() { try { return global.localStorage.getItem(KB_KEY) === 'abc'; } catch (e) { return false; } }
-    function applyKb_(letters) {
-      if (!kbBtn) return;
-      input.inputMode = letters ? 'text' : 'numeric';
-      kbBtn.textContent = letters ? '123' : 'ABC'; // الزر يعرض اللوحة الأخرى / the button names the other keyboard
-    }
-    function toggleKb_() {
-      const letters = !kbLetters_();
-      try { global.localStorage.setItem(KB_KEY, letters ? 'abc' : '123'); } catch (e) { /* تخزين محظور: التبديل لهذه المرة / storage blocked: this time only */ }
-      applyKb_(letters);
-      // الآيفون لا يبدّل اللوحة المفتوحة إلا بإعادة التركيز (داخل اللمسة نفسها) — the iPhone swaps an open keyboard only on refocus
-      if (doc.activeElement === input) { input.blur(); input.focus(); }
-    }
-    applyKb_(kbLetters_());
+    // ===== نوع البحث ولوحة المفاتيح (11 نوفمبر): «محطة» بالأرقام افتراضيًا دائمًا (قرار محمد — لا يُحفظ اختيار) =====
+    // The search kind and keyboard: «station» on the number pad by default, always (no choice is kept)
     const kinds = r('kinds'), basePlaceholder = input.placeholder;
-
-    /* الشرائح تظهر أثناء البحث فقط (التركيز، أو نص مكتوب، أو رمز مختار) — the chips show while searching only */
-    function showKinds_() { kinds.classList.toggle('show', doc.activeElement === input || input.value !== '' || prefix !== ''); }
-    function setKind_(p) {
-      prefix = p;
-      kinds.querySelectorAll('.ssb-kind').forEach(function (b) { const on = b.dataset.kind === p; b.classList.toggle('active', on); b.setAttribute('aria-checked', on ? 'true' : 'false'); });
-      // مع الرمز: الرقم فقط بلوحة الأرقام، وزر الحروف يختفي — with a prefix: digits only on the number pad, no letters button
-      input.placeholder = p ? 'رقم السكينة فقط — مثال: 150' : basePlaceholder;
-      if (p) { input.value = input.value.replace(/[^0-9]/g, ''); input.inputMode = 'numeric'; } else applyKb_(kbLetters_());
-      if (kbBtn) kbBtn.hidden = !!p;
+    const PLACEHOLDER = { abc: 'رمز محطة التحويل — مثال: ABN', sw: 'رقم السكينة فقط — مثال: 150' };
+    function prefix_() { return mode === 'station' || mode === 'abc' ? '' : mode; }
+    /* اللوحة تظهر أثناء البحث فقط (التركيز، أو نص مكتوب، أو اختيار غير الافتراضي) — the panel shows while searching only */
+    function showKinds_() { kinds.classList.toggle('show', doc.activeElement === input || input.value !== '' || mode !== 'station'); }
+    function setKind_(m) {
+      mode = m || 'station';
+      const head = prefix_() ? 'sw' : mode;
+      kinds.querySelectorAll('.ssb-mode').forEach(function (b) { const on = b.dataset.mode === mode; b.classList.toggle('active', on); b.setAttribute('aria-checked', on ? 'true' : 'false'); });
+      kinds.querySelectorAll('.ssb-head').forEach(function (h) { h.classList.toggle('active', h.dataset.head === head); });
+      input.placeholder = prefix_() ? PLACEHOLDER.sw : mode === 'abc' ? PLACEHOLDER.abc : basePlaceholder;
+      input.inputMode = mode === 'abc' ? 'text' : 'numeric';
+      if (prefix_()) input.value = input.value.replace(/[^0-9]/g, ''); // السكينة: الرقم فقط / a switch: the number only
       setHint_('');
       if (doc.activeElement === input) { input.blur(); input.focus(); } // الآيفون يبدّل اللوحة بإعادة التركيز / the iPhone swaps the pad on refocus
       showKinds_();
@@ -103,11 +100,10 @@
     kinds.addEventListener('pointerdown', function (e) { e.preventDefault(); }); // لا يُغلق لوحة المفاتيح / keeps the keyboard open
     input.addEventListener('focus', showKinds_);
     input.addEventListener('blur', function () { global.setTimeout(showKinds_, 0); });
-    input.addEventListener('input', function () { if (prefix) { const d = input.value.replace(/[^0-9]/g, ''); if (d !== input.value) input.value = d; } });
-    // الضغط على الزر لا يُخرج المؤشر من الحقل (فلا تُغلق لوحة المفاتيح) — pressing the button keeps the caret in the field
-    if (kbBtn) kbBtn.addEventListener('pointerdown', function (e) { e.preventDefault(); });
+    input.addEventListener('input', function () { if (prefix_()) { const d = input.value.replace(/[^0-9]/g, ''); if (d !== input.value) input.value = d; } });
 
     function setHint_(text, err) { hint.className = hintCls + (err ? ' err' : ''); hint.textContent = text || ''; }
+    setKind_('station');
 
     // ===== شريط التقدّم (V1) — The progress bar (V1) =====
     function progress_(on) {
@@ -138,8 +134,9 @@
       if (busy) return null;
       const typed = TI.normalizeCode(TI.stripInvisible(text !== undefined ? String(text) : input.value).trim());
       // رمز مختار ← «الرمز-الرقم» بالأرقام فقط؛ وإلا ما كُتب (والسكينة المكتوبة يدويًا تُوحَّد) — a chosen prefix ← «prefix-number»
-      const digits = prefix && text === undefined ? typed.replace(/[^0-9]/g, '') : '';
-      const raw = prefix && text === undefined ? (digits ? Q.switchId(prefix, digits) : '') : Q.canonicalId(typed);
+      const prefix = text === undefined ? prefix_() : '';
+      const digits = prefix ? typed.replace(/[^0-9]/g, '') : '';
+      const raw = prefix ? (digits ? Q.switchId(prefix, digits) : '') : Q.canonicalId(typed);
       if (!raw) return null;
       const loggedIn = o.isLoggedIn ? o.isLoggedIn() : !!(global.SecSession && global.SecSession.isLoggedIn());
       if (!loggedIn) {
@@ -177,16 +174,15 @@
     function closeLens_() { box.classList.remove('open', 'blur-ready'); }
 
     function onClick_(e) {
-      const t = e.target.closest('[data-act], [data-role="box"], .ssb-kind');
+      const t = e.target.closest('[data-act], [data-role="box"], .ssb-mode');
       if (!t || !container.contains(t)) return;
       const act = t.dataset.act;
       if (act === 'add') { if (o.onAdd) o.onAdd(hint.dataset.query || ''); return; }
       if (act === 'retry') { clear(); input.focus(); return; }
       if (act === 'tools') { t.setAttribute('aria-expanded', o.onTools() ? 'true' : 'false'); return; }
-      if (act === 'close') { input.blur(); setKind_(''); o.onClose(); return; }
-      if (act === 'kb') { toggleKb_(); return; }
-      const kind = e.target.closest('.ssb-kind');
-      if (kind && kinds.contains(kind)) { setKind_(kind.dataset.kind); input.focus(); return; }
+      if (act === 'close') { input.blur(); setKind_('station'); o.onClose(); return; }
+      const kind = e.target.closest('.ssb-mode');
+      if (kind && kinds.contains(kind)) { setKind_(kind.dataset.mode); input.focus(); return; }
       if (lens && !box.classList.contains('open')) { open_(); input.focus(); return; }
       if (act === 'search') search();
     }
