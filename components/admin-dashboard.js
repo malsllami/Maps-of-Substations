@@ -77,7 +77,9 @@
     const daysLeft = u.forceAt ? Math.max(0, Math.ceil((u.forceAt - Date.now()) / 86400000)) : null;
     const force = u.forced ? 'تم الإجبار' : daysLeft === null ? '—' : daysLeft === 0 ? 'اليوم' : 'بعد ' + daysLeft + (daysLeft === 1 ? ' يوم' : ' أيام');
     const m = /^(\d{4})(\d{2})(\d{2})/.exec(u.build), built = m ? m[1] + '-' + m[2] + '-' + m[3] : '';
-    return '<div class="ops-card upd-card' + (reached || u.forced ? ' is-done' : '') + '" data-role="update-progress"><div class="ops-card-title">🔄 تقدّم التحديث — ' +
+    // (13 نوفمبر، طلب محمد) لون الشريط بالنسبة: أحمر ≤ 5%، برتقالي حتى 89%، أصفر 90–99%، أخضر 100% — the bar color by share
+    const level = pct >= 100 ? 'full' : pct >= 90 ? 'high' : pct > 5 ? 'mid' : 'low';
+    return '<div class="ops-card upd-card upd-' + level + (reached || u.forced ? ' is-done' : '') + '" data-role="update-progress"><div class="ops-card-title">🔄 تقدّم التحديث — ' +
         (u.release ? 'الإصدار ' + esc(String(u.release)) : 'آخر نسخة') + (built ? ' <small>(' + esc(built) + ')</small>' : '') + '</div>' +
       '<div class="upd-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '"><div class="upd-fill" style="width:' + pct + '%"></div>' +
         '<div class="upd-target" style="inset-inline-start:' + target + '%"><span>' + target + '%</span></div><b class="upd-pct">' + pct + '%</b></div>' +
