@@ -23,7 +23,7 @@
   const doc = global.document;
   const PAGE = 50, KM_MIN = 0.5, KM_MAX = 10, KM_STEP = 0.5;
   const GEO_OPTS = { enableHighAccuracy: true, timeout: 20000, maximumAge: 30000 };
-  // (11 نوفمبر) «سكاكين»: صفوف التوزيع برقم سكينة (DB-150)؛ و«توزيع» بلا السكاكين — «switches»: distribution rows with a switch id
+  // (11 نوفمبر) «سكاكين»: صفوف التوزيع برقم سكينة (BS-150)؛ و«توزيع» بلا السكاكين — «switches»: distribution rows with a switch id
   const TYPES = [{ v: '', t: 'الكل' }, { v: 'توزيع', t: 'توزيع' }, { v: 'تحويل', t: 'تحويل' }, { v: 'سكينة', t: 'سكاكين' }];
   const TYPE_ICON = { // الرمزان المعتمدان — the approved symbols
     'توزيع': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M12 7.5v4M12 11.5l-5.5 5.2M12 11.5l5.5 5.2"/></svg>',

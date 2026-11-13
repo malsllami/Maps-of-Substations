@@ -5,9 +5,9 @@
  * - الإضافة: النوع (توزيع/تحويل — المغذي والمنطقة للتوزيع فقط)، رقم المحطة، المغذي (اختياري)، المنطقة (إلزامية للتوزيع)،
  *   الإحداثيتان، «📍 استخدام موقعي الحالي»، لصق «عرض,طول» + «تطبيق»، معاينة بدبوس قابل للسحب وزر الأقمار، سبب الإضافة،
  *   «حفظ المحطة» بشريط تقدّم، ثم «✓ تمت إضافة المحطة بنجاح» + «حسنًا».
- * - (11 نوفمبر) نوع ثالث «سكينة هوائية»: زرّا الرمز (DB / LBS) والرقم أرقام فقط ← «DB-150»، ثم المغذي (اختياري) والمنطقة
+ * - (11 نوفمبر) نوع ثالث «سكينة هوائية»: زرّا الرمز (BS / LBS) والرقم أرقام فقط ← «BS-150»، ثم المغذي (اختياري) والمنطقة
  *   (إلزامية) والموقع؛ تُحفظ صفًا في جدول التوزيع (النوع «توزيع») فتُعدَّل وتُحذف وتُزامَن مثل المحطات.
- * - (11 نوفمبر، قرار محمد) تعديل السكينة كامل للجميع: الرمز (DB / LBS) والرقم والمنطقة والمغذي والموقع؛ تغيّر الرقم يُرسل
+ * - (11 نوفمبر، قرار محمد) تعديل السكينة كامل للجميع: الرمز (BS / LBS) والرقم والمنطقة والمغذي والموقع؛ تغيّر الرقم يُرسل
  *   newStationId ويبلغ الصفحة بالرقم القديم (onSaved(station, 'edit', { oldId })). المحطات لا يتغير رقمها.
  * - التعديل: المغذي والمنطقة (للتوزيع)، الإحداثيتان، الموقع الحالي، اللصق، المعاينة، السبب، «حفظ التعديل» و«إلغاء».
  * - الحقول تقبل الأرقام العربية والإنجليزية (text-input). لا كتابة والجهاز بلا إنترنت — النموذج يبقى بما فيه.
@@ -269,7 +269,7 @@
     const reason = TI.stripInvisible(form.f('reason').value.trim());
     const at = readCoords_(form);
     if (form.mode === 'add') {
-      // السكينة: الرمز المختار + الأرقام فقط ← «DB-150»، وتُحفظ صفًا في جدول التوزيع — the switch: prefix + digits ← «DB-150», a distribution row
+      // السكينة: الرمز المختار + الأرقام فقط ← «BS-150»، وتُحفظ صفًا في جدول التوزيع — the switch: prefix + digits ← «BS-150», a distribution row
       const typed = TI.normalizeCode(form.f('id').value.trim());
       const num = sw ? typed.replace(/[^0-9]/g, '') : '';
       if (sw && !num) return MSG.SWITCH_ID_REQUIRED;
@@ -289,7 +289,9 @@
       const num = TI.normalizeDigits(form.f('swnum').value).replace(/[^0-9]/g, '');
       if (!num) return MSG.SWITCH_ID_REQUIRED;
       const want = Q.switchId(form.prefix, num);
-      if (want !== Q.canonicalId(s.id)) newId = want;
+      // يُقارن بالرقم كما هو محفوظ: سكينة بالرمز القديم «BS-150» أو بصيغة أخرى «LBS77» تُوحَّد عند أي تعديل
+      // compared with the id as saved: a switch with the old «DB» prefix or another form is unified on any edit
+      if (want !== String(s.id).trim().toUpperCase()) newId = want;
       if (!region && !s.region) return MSG.REGION_REQUIRED;
     }
     if (!at) return MSG.BAD_COORDS;
@@ -381,7 +383,7 @@
     close();
     if (add.r('success').hidden === false) { clearFields_(add); setType_(add, 'توزيع'); resetPreview_(add, null); }
     if (prefillId !== undefined && prefillId !== null) {
-      // «+ إضافة سكينة» من بحث «DB-150» ← النوع والرمز والرقم جاهزة — from a «DB-150» search ← type, prefix and number ready
+      // «+ إضافة سكينة» من بحث «BS-150» ← النوع والرمز والرقم جاهزة — from a «BS-150» search ← type, prefix and number ready
       const p = Q.switchParts(prefillId);
       if (p) { setType_(add, SWITCH); setPrefix_(add, p.prefix); add.f('id').value = p.num; }
       else { if (add.type === SWITCH) setType_(add, 'توزيع'); add.f('id').value = TI.normalizeCode(prefillId); }

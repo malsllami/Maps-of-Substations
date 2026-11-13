@@ -27,7 +27,10 @@
      * وتُحفظ في جدول محطات التوزيع؛ الرمز نفسه يميّزها عن المحطات (صيغة بيانات، لا قائمة أعمال متغيرة).
      * The air-break switch prefixes (two fixed prefixes, the member types the number only); the unified id is «DB-150»,
      * kept in the distribution sheet; the prefix itself tells it from a station (a data format, not a changing list). */
-    SWITCH_PREFIXES: ['DB', 'LBS'],
+    // (13 نوفمبر، تصحيح محمد) BS = السكينة العادية (Disconnector Switch)، وLBS = السمارت (Load Break Switch). الرمز القديم DB
+    // (الإصدار 4) يبقى مقبولًا ويُقرأ BS، فلا تضيع سكينة سُجّلت به / the old DB prefix (release 4) is still read as BS
+    SWITCH_PREFIXES: ['BS', 'LBS'],
+    SWITCH_ALIASES: { DB: 'BS' },
 
     /* مفاتيح localStorage — localStorage keys */
     STORAGE_KEYS: {

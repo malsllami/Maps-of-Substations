@@ -73,11 +73,12 @@
   }
 
   // ===== السكاكين الهوائية (11 نوفمبر) — Air-break switches =====
-  // سكينة = صف في جدول التوزيع رقمه «رمز-رقم» (DB-150 / LBS-45). الصيغ المكتوبة يدويًا («db150»، «DB 150»، «DB - 150»،
-  // بأرقام عربية) تُوحَّد إلى «DB-150» في الإضافة والبحث، فلا تتعدد صيغ السكينة الواحدة.
-  // A switch = a distribution row whose id is «prefix-number»; hand-typed forms are unified to «DB-150» on add and search.
+  // سكينة = صف في جدول التوزيع رقمه «رمز-رقم» (BS-150 / LBS-45). الصيغ المكتوبة يدويًا («db150»، «BS 150»، «DB - 150»،
+  // بأرقام عربية) تُوحَّد إلى «BS-150» في الإضافة والبحث، فلا تتعدد صيغ السكينة الواحدة.
+  // A switch = a distribution row whose id is «prefix-number»; hand-typed forms are unified to «BS-150» on add and search.
   const SWITCH_PREFIXES = (global.SEC2_CONFIG && global.SEC2_CONFIG.SWITCH_PREFIXES) || [];
-  const SWITCH_RE = new RegExp('^(' + SWITCH_PREFIXES.join('|') + ')\\s*[-‐-―−]?\\s*([0-9]+)$');
+  const SWITCH_ALIASES = (global.SEC2_CONFIG && global.SEC2_CONFIG.SWITCH_ALIASES) || {}; // رمز قديم ← الصحيح (DB ← BS) / an old prefix ← the right one
+  const SWITCH_RE = new RegExp('^(' + SWITCH_PREFIXES.concat(Object.keys(SWITCH_ALIASES)).join('|') + ')\\s*[-‐-―−]?\\s*([0-9]+)$');
   function latinUpper_(v) {
     return String(v == null ? '' : v).trim().toUpperCase()
       .replace(/[٠-٩]/g, function (d) { return String(d.charCodeAt(0) - 1632); })
@@ -87,7 +88,7 @@
   function switchParts(id) {
     if (!SWITCH_PREFIXES.length) return null;
     const m = SWITCH_RE.exec(latinUpper_(id));
-    return m ? { prefix: m[1], num: m[2] } : null;
+    return m ? { prefix: SWITCH_ALIASES[m[1]] || m[1], num: m[2] } : null;
   }
   /* الرقم الموحّد من رمز ورقم — The unified id from a prefix and a number */
   function switchId(prefix, num) { return prefix + '-' + latinUpper_(num).replace(/[^0-9]/g, ''); }

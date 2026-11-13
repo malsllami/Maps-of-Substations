@@ -36,7 +36,7 @@
    */
   async function find(query, opts) {
     const o = opts || {};
-    // السكينة بصيغتها الموحّدة «DB-150» محليًا وفي الخادم (11 نوفمبر) — a switch in its unified form, locally and on the server
+    // السكينة بصيغتها الموحّدة «BS-150» محليًا وفي الخادم (11 نوفمبر) — a switch in its unified form, locally and on the server
     if (global.SecStationQuery) query = global.SecStationQuery.canonicalId(query);
     if (!SYNC.state().loaded) {
       const res = await global.SecApi.call('searchStation', { query: query }, { phone: true });

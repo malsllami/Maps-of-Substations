@@ -11,8 +11,8 @@
  *   «+ إضافة محطة» (onAdd بالرقم) و«🔍 بحث آخر» (يمسح الحقل ويركّز عليه).
  * - التحقق بالخلفية غيّر الإحداثيات ← onUpdated (الصفحة تنقل العلامة/الوجهة).
  * - (11 نوفمبر، تصميم محمد) لوحة بصفّين فوق المربع بأوزان متساوية — العناوين «محطات توزيع | سكينة هوائية | محطات تحويل»
- *   تشرح الصف الثاني «محطة | DB | LBS | ABC» ويتلوّن عنوان الاختيار:
- *   محطة = لوحة الأرقام (الافتراضي دائمًا، بلا حفظ)، DB/LBS = الرقم فقط ← «DB-150»، ABC = لوحة الحروف لرموز التحويل.
+ *   تشرح الصف الثاني «محطة | BS | LBS | ABC» ويتلوّن عنوان الاختيار:
+ *   محطة = لوحة الأرقام (الافتراضي دائمًا، بلا حفظ)، BS/LBS = الرقم فقط ← «BS-150»، ABC = لوحة الحروف لرموز التحويل.
  *   زر الحروف خرج من المربع فبقي للإدخال فقط. تظهر اللوحة أثناء البحث فقط، و× يعيدها لـ«محطة».
  * لا منطق تحميل ولا مزامنة هنا: البحث كله في services/station-search.js.
  * V2: كل نص من الاستعلام أو الخادم يُكتب نصًا؛ بحث واحد في أي لحظة لكل مربع؛ مستمعات تُزال بـ destroy.
@@ -55,7 +55,7 @@
   function mount(container, opts) {
     const o = Object.assign({ variant: 'lens' }, opts || {});
     const lens = o.variant === 'lens';
-    let busy = false, progressTimer = null, mode = 'station'; // station | DB | LBS | abc
+    let busy = false, progressTimer = null, mode = 'station'; // station | BS | LBS | abc
     const PANEL = '<div class="ssb-panel" data-role="kinds" role="radiogroup" aria-label="نوع البحث">' +
       '<span class="ssb-head" data-head="station">' + KIND_SVG.dist + '<span>محطات توزيع</span></span>' +
       '<span class="ssb-head ssb-head-sw" data-head="sw">' + KIND_SVG.sw + '<span>سكينة هوائية</span></span>' +
