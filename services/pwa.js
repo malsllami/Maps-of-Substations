@@ -167,7 +167,9 @@
     }, function () { return { release: release, build: page, since: null }; });
   }
   // يُسجَّل عند كل فتح بعد اكتمال الصفحة (أي صفحة) — recorded on every open once the page loads (any page)
-  if (sw && typeof global.addEventListener === 'function') global.addEventListener('load', function () { global.setTimeout(function () { versionInfo(); }, 1500); });
+  if (sw && typeof global.addEventListener === 'function' && typeof global.setTimeout === 'function') {
+    global.addEventListener('load', function () { global.setTimeout(function () { versionInfo(); }, 1500); });
+  }
 
   // تسجيل تلقائي بعد اكتمال الصفحة حتى لا ينافس تحميلها (V1) — auto-register after the page loads so it never competes with it (V1)
   if (sw && global.document && typeof global.addEventListener === 'function') {
